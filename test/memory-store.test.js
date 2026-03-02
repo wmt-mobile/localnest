@@ -13,7 +13,9 @@ async function hasSupportedBackend() {
   try {
     const mod = await import('node:sqlite');
     if (mod?.DatabaseSync) return true;
-  } catch {}
+  } catch {
+    // Ignore and fall through to sqlite3 check.
+  }
 
   try {
     const mod = await import('sqlite3');
