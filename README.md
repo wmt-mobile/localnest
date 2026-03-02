@@ -4,7 +4,6 @@
 [![Node.js](https://img.shields.io/node/v/localnest-mcp)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Quality](https://github.com/wm-jenildgohel/localnest/actions/workflows/quality.yml/badge.svg?branch=beta)](https://github.com/wm-jenildgohel/localnest/actions/workflows/quality.yml)
-[![OpenSSF Scorecard](https://github.com/wm-jenildgohel/localnest/actions/workflows/scorecards.yml/badge.svg?branch=beta)](https://scorecard.dev/viewer/?uri=github.com/wm-jenildgohel/localnest)
 [![CodeQL](https://github.com/wm-jenildgohel/localnest/actions/workflows/codeql.yml/badge.svg?branch=beta)](https://github.com/wm-jenildgohel/localnest/actions/workflows/codeql.yml)
 
 A local-first MCP server that gives AI agents safe, read-only access to your codebase — with optional semantic indexing for high-quality retrieval.
