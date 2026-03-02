@@ -51,6 +51,12 @@ npx -y localnest-mcp-doctor
 
 > Global install is preferred — it gives more deterministic dependency resolution and avoids transient npx cache issues.
 
+Check the installed CLI version:
+
+```bash
+localnest-mcp --version
+```
+
 ## MCP Client Configuration
 
 After running setup, copy `~/.localnest/mcp.localnest.json` into your MCP client config, or use this template:
@@ -204,6 +210,8 @@ localnest-mcp-install-skill
 # Force reinstall:
 localnest-mcp-install-skill --force
 ```
+
+`localnest-mcp-install-skill` now checks the installed skill version first. If the target skill is already current, it reports that instead of replacing files unnecessarily. Use `--force` to resync anyway.
 
 **Install from GitHub via skills.sh:**
 ```bash

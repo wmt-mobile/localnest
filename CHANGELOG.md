@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- `localnest-mcp --version` CLI output for quick runtime/package verification.
 - Automatic npm update checks with local cache/backoff via new `UpdateService`.
 - New MCP tools:
   - `localnest_memory_status` (memory consent, backend compatibility, and database/store status)
@@ -44,6 +45,8 @@ All notable changes to this project will be documented in this file.
   - install failure and skill-sync failure branches
 
 ### Changed
+- Package/runtime version bumped to `0.0.4-beta`.
+- Bundled skill install now checks installed skill metadata and only resyncs when the installed skill is missing, outdated, or `--force` is used.
 - `localnest-mcp-setup` now asks for one-time user consent before enabling local memory and persists memory config into `localnest.config.json` and generated MCP snippets.
 - README, bundled `SKILL.md`, and OpenAI agent manifest now document retrieval + memory flow, including pre-task recall and post-task capture guidance.
 - `localnest_server_status` now includes structured `updates` metadata so agents can prompt users proactively when a newer version is available.
