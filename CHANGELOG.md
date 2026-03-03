@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - `localnest-mcp --version` CLI output for quick runtime/package verification.
 - Automatic npm update checks with local cache/backoff via new `UpdateService`.
 - New MCP tools:
+  - `localnest_task_context` (runtime + memory status + recall bundle for substantive tasks)
   - `localnest_memory_status` (memory consent, backend compatibility, and database/store status)
   - `localnest_memory_list` (list stored memories with pagination/filtering)
   - `localnest_memory_get` (fetch one memory with revision history)
@@ -15,10 +16,14 @@ All notable changes to this project will be documented in this file.
   - `localnest_memory_update` (update memory and append a revision)
   - `localnest_memory_delete` (delete a memory and its revisions)
   - `localnest_memory_recall` (recall relevant memories for a task/query)
+  - `localnest_capture_outcome` (simple outcome capture into the memory event pipeline)
   - `localnest_memory_capture_event` (background event ingest with automatic promotion for high-signal events)
   - `localnest_memory_events` (inspect recent capture events and promotion outcomes)
   - `localnest_update_status` (cached npm version check with optional force refresh)
   - `localnest_update_self` (approved self-update + bundled skill sync, with dry-run support)
+- New CLI wrappers for deterministic hook usage:
+  - `localnest-mcp-task-context`
+  - `localnest-mcp-capture-outcome`
 - Local memory subsystem:
   - SQLite-backed canonical memory store with revisions, scoped metadata, recall counters, and dedupe fingerprinting
   - background capture event log with promotion/ignore decisions
@@ -40,15 +45,22 @@ All notable changes to this project will be documented in this file.
   - memory dedupe behavior
   - memory event promotion vs ignored-event behavior
   - config/runtime memory settings and migration coverage
+  - hybrid search ranking mode metadata
+  - sqlite backend status reporting when no native extension is configured
   - update interval clamping in runtime config
   - self-update dry-run behavior
   - install failure and skill-sync failure branches
+- `npm run stress:localnest` synthetic stress runner for search + memory behavior checks.
 
 ### Changed
-- Package/runtime version bumped to `0.0.4-beta`.
+- Package/runtime version bumped to `0.0.4-beta.3`.
 - Bundled skill install now checks installed skill metadata and only resyncs when the installed skill is missing, outdated, or `--force` is used.
 - `localnest-mcp-setup` now asks for one-time user consent before enabling local memory and persists memory config into `localnest.config.json` and generated MCP snippets.
 - README, bundled `SKILL.md`, and OpenAI agent manifest now document retrieval + memory flow, including pre-task recall and post-task capture guidance.
+- Memory guidance now prefers the higher-level task-context and capture-outcome flow over hand-orchestrating low-level recall/capture tools.
+- `localnest_search_hybrid` now reports `ranking_mode` so callers can tell whether results are hybrid, semantic-only, lexical-only, or empty.
+- Memory recall responses now expose normalized `score` plus `raw_score` for easier interpretation.
+- sqlite backend status now reports extension state precisely (`not-configured`, `not-attempted`, `loaded`, `load-failed`) instead of implying failure when no extension path is set.
 - `localnest_server_status` now includes structured `updates` metadata so agents can prompt users proactively when a newer version is available.
 - `localnest_usage_guide` and bundled `SKILL.md` expanded with explicit update flow, memory workflow guidance, and stronger evidence-first retrieval guidance.
 

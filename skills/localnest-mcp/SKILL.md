@@ -1,6 +1,6 @@
 ---
 name: localnest-mcp
-description: "Install, configure, and use LocalNest MCP for local code retrieval and memory workflows. Trigger this skill when user requests are about project files, code, repository data, or durable local agent memory under configured roots (for example: find symbol, read file, summarize project, search codebase, compare files, inspect folder tree, index/search local docs, recall prior project decisions, store agent memory). Use for setup, MCP config guidance, daily localnest_* tool usage flow, memory recall/capture flow, and troubleshooting for doctor/import/file-size/search/index issues."
+description: "Install, configure, and use LocalNest MCP for local code retrieval, with optional local memory workflows when the task actually benefits from them. Trigger this skill when user requests are about project files, code, repository data, or durable local agent memory under configured roots (for example: find symbol, read file, summarize project, search codebase, compare files, inspect folder tree, index/search local docs, recall prior project decisions, store agent memory). Use for setup, MCP config guidance, intent-based localnest_* tool routing, memory recall/capture flow, and troubleshooting for doctor/import/file-size/search/index issues."
 ---
 
 # LocalNest MCP
@@ -57,19 +57,31 @@ npx -y localnest-mcp-doctor
 
 ## Use LocalNest Tools
 
-Default retrieval + memory workflow:
+Default retrieval workflow:
 1. `localnest_server_status`
-2. `localnest_memory_status`
-3. `localnest_update_status` ← check for urgent fixes/new features first
-4. `localnest_list_roots`
-5. `localnest_list_projects`
-6. `localnest_memory_recall` ← before starting substantive work when memory is enabled
-7. **`localnest_search_files`** ← start here for module/feature discovery
-8. `localnest_index_status`
-9. `localnest_index_project`
-10. `localnest_search_hybrid` ← for concept/content retrieval
-11. `localnest_read_file`
-12. `localnest_memory_capture_event` ← after meaningful work when memory auto-capture is enabled
+2. `localnest_list_roots`
+3. `localnest_list_projects`
+4. **`localnest_search_files`** ← start here for module/feature discovery
+5. `localnest_search_code` ← use for exact symbols, identifiers, and error strings
+6. `localnest_index_status`
+7. `localnest_index_project`
+8. `localnest_search_hybrid` ← for concept/content retrieval
+9. `localnest_read_file`
+
+Optional memory workflow:
+1. `localnest_task_context` ← preferred one-call runtime + memory context for substantive tasks
+2. `localnest_capture_outcome` ← preferred one-call outcome capture after meaningful work
+3. `localnest_memory_status` / `localnest_memory_recall` / `localnest_memory_capture_event` ← use only when lower-level control is needed
+
+Automatic memory triggers:
+- Run `localnest_task_context` before deeper analysis when the task involves debugging, implementation, code review, repeated repo work, or user/project preferences.
+- Run `localnest_capture_outcome` after:
+  - a confirmed bug fix
+  - a design or implementation decision
+  - a review finding or regression risk the user should remember
+  - a reusable workflow or project-specific constraint
+  - a user preference that should affect later behavior
+- Do **not** capture memory for simple browsing, dead-end investigation, or one-off factual lookups with no durable value.
 
 Call `localnest_usage_guide` at any time to get embedded best-practice guidance from the server itself.
 
@@ -81,8 +93,9 @@ Do not run the full sequence blindly on every request. Adapt by intent:
 - If user asks concept/"how it works": run `localnest_search_hybrid` (after index check).
 - If user already gave a file path + line concern: go directly to `localnest_read_file`.
 - If index is stale/empty: run `localnest_index_project` only for the needed `project_path`.
-- If memory is enabled and the task is non-trivial: run `localnest_memory_recall` before analysis.
-- After a bug fix, design decision, review outcome, or user preference discovery: emit `localnest_memory_capture_event`.
+- If memory is enabled and the task is non-trivial: run `localnest_task_context` before analysis.
+- Do not front-load memory tools on simple file lookups, exact symbol searches, or one-shot reads.
+- After a bug fix, design decision, review outcome, reusable workflow discovery, or user preference discovery: emit `localnest_capture_outcome`.
 
 Answer strategy:
 - Prefer shortest path to evidence.
@@ -94,12 +107,14 @@ Answer strategy:
 
 - Do not answer from memory when a LocalNest tool can verify it.
 - Use memory as guidance, not as final evidence. Verify with code/file tools before concluding.
+- Prefer explicit retrieval tools over memory whenever the user is asking for a direct file/code answer.
+- If memory is enabled and the task changed code, resolved an issue, or uncovered a reusable repo rule, you should usually emit `localnest_capture_outcome` before finishing.
 - Cite concrete files/lines after `localnest_read_file` before giving conclusions.
 - If search is empty, show what was searched (`query`, `project_path`, `glob`) and immediately try a fallback strategy (synonyms, regex, broader scope).
 - For bug triage, run both:
   - `localnest_search_code` for exact error/symbol
   - `localnest_search_hybrid` for architecture/context
-- If memory is enabled, also run `localnest_memory_recall` for prior fixes/preferences in the same scope.
+- If memory is enabled, also run `localnest_task_context` for prior fixes/preferences in the same scope.
 - If `updates.is_outdated=true`, ask the user:
   - "LocalNest has a newer version. Do you want to update now?"
   - If user approves, call `localnest_update_self(approved_by_user=true)`.
@@ -134,6 +149,9 @@ Returns runtime config: active roots, ripgrep status, index backend (`sqlite-vec
 ### `localnest_memory_status`
 Returns memory consent state, backend compatibility, active database path, and store status. Call before using memory tools. If memory is disabled, do not use recall/capture tools until the user opts in during setup.
 
+### `localnest_task_context`
+Returns runtime status, memory state, and relevant recall in one call. Prefer this over manually chaining `localnest_memory_status` + `localnest_memory_recall` for non-trivial tasks.
+
 ### `localnest_memory_recall`
 Recalls the most relevant local memories for a task/query. Params:
 - `query` (required)
@@ -143,6 +161,9 @@ Recalls the most relevant local memories for a task/query. Params:
 - `limit`
 
 Use at the start of substantive tasks when memory is enabled. Treat results as hints that must be verified against current files.
+
+### `localnest_capture_outcome`
+Captures a meaningful task outcome with a simpler payload (`task`, `summary`, `details`, scope, file/test metadata) and forwards it into the memory event pipeline. Prefer this over `localnest_memory_capture_event` when you do not need low-level event control.
 
 ### `localnest_memory_capture_event`
 Background event ingest tool for automatic memory flow. Params:
@@ -158,7 +179,7 @@ Background event ingest tool for automatic memory flow. Params:
 - `scope`
 - `source_ref`
 
-Use this after meaningful work. High-signal events are auto-promoted into durable memory; weak exploratory events are recorded and ignored.
+Use this after meaningful work. High-signal events are auto-promoted into durable memory; weak exploratory events are recorded and ignored. Explicit use of this tool is allowed even when automatic background capture is turned off.
 
 ### `localnest_memory_events`
 Lists recent memory capture events and whether they were promoted into durable memory. Use to inspect background capture behavior.
@@ -254,12 +275,20 @@ High-level summary: language breakdown, extension stats, file counts. Params: `p
 ## Evidence-First Pattern
 
 1. Discover scope (`localnest_list_roots`, `localnest_list_projects`).
-2. Check memory state (`localnest_memory_status`) and recall prior context (`localnest_memory_recall`) when enabled.
-3. **Find module/feature** (`localnest_search_files`) — search by path/name first.
-4. Retrieve content (`localnest_search_hybrid` or `localnest_search_code`) scoped to the found path.
-5. Validate with exact lines (`localnest_read_file`).
+2. **Find module/feature** (`localnest_search_files`) — search by path/name first.
+3. Retrieve content (`localnest_search_hybrid` or `localnest_search_code`) scoped to the found path.
+4. Validate with exact lines (`localnest_read_file`).
+5. If the task is substantive and memory is enabled, run `localnest_task_context`.
 6. Answer with file-grounded results.
-7. After meaningful work, emit `localnest_memory_capture_event`.
+7. After meaningful work, emit `localnest_capture_outcome`.
+
+## Hook-Friendly CLI
+
+For deterministic client hooks or shell automation, use:
+- `localnest-mcp-task-context`
+- `localnest-mcp-capture-outcome`
+
+Both commands accept either flags or a JSON payload on stdin.
 
 ## Troubleshooting
 
