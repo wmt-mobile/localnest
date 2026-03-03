@@ -178,3 +178,88 @@ test('searchHybrid reports lexical-only ranking mode when semantic results are a
   assert.equal(out.ranking_mode, 'lexical-only');
   assert.equal(out.results[0].type, 'lexical');
 });
+
+test('searchHybrid downranks lexical-only noise for generic short queries', () => {
+  const service = new SearchService({
+    workspace: {},
+    ignoreDirs: new Set(),
+    hasRipgrep: false,
+    rgTimeoutMs: 1000,
+    maxFileBytes: 1024,
+    vectorIndex: {
+      semanticSearch: () => ([
+        {
+          file: '/tmp/docs/search.md',
+          start_line: 1,
+          end_line: 5,
+          snippet: 'Search overview',
+          semantic_score: 0.25
+        }
+      ])
+    }
+  });
+
+  service.searchCode = () => ([
+    { file: '/tmp/SECURITY.md', line: 8, text: 'Install ripgrep for search' }
+  ]);
+
+  const out = service.searchHybrid({
+    query: 'search',
+    projectPath: '/tmp',
+    allRoots: false,
+    glob: '*',
+    maxResults: 10,
+    caseSensitive: false,
+    minSemanticScore: 0,
+    autoIndex: false
+  });
+
+  assert.equal(out.ranking_mode, 'hybrid');
+  assert.equal(out.results[0].file, '/tmp/docs/search.md');
+  assert.equal(out.results[0].type, 'semantic');
+});
+
+test('searchHybrid adds path affinity bias in allRoots mode', () => {
+  const service = new SearchService({
+    workspace: {},
+    ignoreDirs: new Set(),
+    hasRipgrep: false,
+    rgTimeoutMs: 1000,
+    maxFileBytes: 1024,
+    vectorIndex: {
+      semanticSearch: () => ([
+        {
+          file: '/tmp/other/android/HybridClassBase.java',
+          start_line: 1,
+          end_line: 8,
+          snippet: 'hybrid base',
+          semantic_score: 0.42
+        },
+        {
+          file: '/tmp/localnest/src/search-service.js',
+          start_line: 10,
+          end_line: 20,
+          snippet: 'RRF scoring in LocalNest',
+          semantic_score: 0.4
+        }
+      ])
+    }
+  });
+
+  service.searchCode = () => [];
+
+  const out = service.searchHybrid({
+    query: 'localnest hybrid search RRF scoring',
+    projectPath: undefined,
+    allRoots: true,
+    glob: '*',
+    maxResults: 10,
+    caseSensitive: false,
+    minSemanticScore: 0,
+    autoIndex: false
+  });
+
+  assert.equal(out.ranking_mode, 'semantic-only');
+  assert.equal(out.results[0].file, '/tmp/localnest/src/search-service.js');
+  assert.ok(out.results[0].path_affinity > out.results[1].path_affinity);
+});

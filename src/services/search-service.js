@@ -1,5 +1,13 @@
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
+import { tokenize } from './tokenizer.js';
+
+const GENERIC_QUERY_TOKENS = new Set([
+  'search', 'config', 'configuration', 'memory', 'index', 'indexing', 'tool',
+  'tools', 'server', 'client', 'setup', 'docs', 'documentation', 'query',
+  'result', 'results', 'hybrid', 'semantic', 'lexical', 'code', 'file', 'files',
+  'project', 'root', 'storage', 'pattern', 'architecture'
+]);
 
 function escapeRegex(text) {
   return text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -21,6 +29,22 @@ function validateRegex(pattern) {
   } catch (e) {
     return { valid: false, reason: e.message };
   }
+}
+
+function scorePathAffinity(filePath, queryTerms) {
+  if (!filePath || queryTerms.length === 0) return 0;
+  const pathTerms = new Set(tokenize(String(filePath || '')));
+  let hits = 0;
+  for (const term of queryTerms) {
+    if (pathTerms.has(term)) hits += 1;
+  }
+  return hits / Math.max(1, queryTerms.length);
+}
+
+function isGenericShortQuery(queryTerms) {
+  return queryTerms.length > 0 &&
+    queryTerms.length <= 2 &&
+    queryTerms.every((term) => GENERIC_QUERY_TOKENS.has(term));
 }
 
 export class SearchService {
@@ -292,6 +316,8 @@ export class SearchService {
     minSemanticScore,
     autoIndex = true
   }) {
+    const queryTerms = tokenize(query).slice(0, 12);
+    const genericShortQuery = isGenericShortQuery(queryTerms);
     const lexical = this.searchCode({
       query,
       projectPath,
@@ -415,8 +441,33 @@ export class SearchService {
     const fused = Array.from(scored.values())
       .map((item) => ({
         ...item,
-        rrf_score: item.lexical_score + item.semantic_score
+        path_affinity: scorePathAffinity(item.file, queryTerms)
       }))
+      .map((item) => {
+        let rrfScore = item.lexical_score + item.semantic_score;
+
+        if (allRoots) {
+          // In cross-root mode, bias toward files whose path/root tokens overlap
+          // the query. This helps avoid unrelated large codebases dominating
+          // conceptual searches with generic technical words.
+          rrfScore += item.path_affinity * 0.03;
+        }
+
+        if (genericShortQuery && item.type === 'lexical' && item.semantic_score === 0) {
+          // Single generic words like "search" or "config" often create noisy
+          // exact matches. Keep them visible, but make them compete harder.
+          rrfScore *= 0.35;
+        }
+
+        if (genericShortQuery && item.type === 'hybrid') {
+          rrfScore += 0.004;
+        }
+
+        return {
+          ...item,
+          rrf_score: rrfScore
+        };
+      })
       .sort((a, b) => b.rrf_score - a.rrf_score)
       .slice(0, maxResults);
 
