@@ -158,6 +158,12 @@ Setup writes two files:
 - `~/.localnest/cache/update-status.json` — cached npm update status
 - `~/.localnest/backups/` — migration and config backups
 
+This keeps the LocalNest home directory readable:
+- `config/` for editable config and generated MCP snippets
+- `data/` for SQLite/JSON runtime data
+- `cache/` for refreshable metadata
+- `backups/` for migration history
+
 **Config priority:**
 1. `PROJECT_ROOTS` environment variable
 2. `LOCALNEST_CONFIG` file
@@ -206,7 +212,9 @@ Use the lower-level `localnest_memory_status`, `localnest_memory_recall`, and `l
 
 ## Auto-Migration
 
-On startup, LocalNest auto-migrates older config schemas and the local home layout. Non-destructive config backups are written under `~/.localnest/backups/`. No manual setup rerun is needed for normal upgrades.
+On startup, LocalNest auto-migrates older config schemas and the older flat `~/.localnest` home layout into `config/`, `data/`, `cache/`, and `backups/`. Non-destructive config backups are written under `~/.localnest/backups/`. No manual setup rerun is needed for normal upgrades.
+
+If an older MCP client config still points `LOCALNEST_CONFIG` at `~/.localnest/localnest.config.json`, LocalNest falls forward to the new `~/.localnest/config/localnest.config.json` path automatically.
 
 ## Skill Distribution
 
