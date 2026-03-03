@@ -7,11 +7,7 @@ export default [
       'node_modules/**',
       '.npm-cache/**',
       '.localnest/**',
-      'coverage/**',
-      'build/**',
-      '.docusaurus/**',
-      'localnest-docs/build/**',
-      'localnest-docs/.docusaurus/**'
+      'coverage/**'
     ]
   },
   js.configs.recommended,

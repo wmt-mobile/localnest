@@ -6,7 +6,6 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const argv = process.argv.slice(2);
-const SKILL_METADATA_FILE = '.localnest-skill.json';
 
 function hasFlag(flag) {
   return argv.includes(flag);
@@ -21,68 +20,6 @@ function envTrue(name, fallback = false) {
 function copyDir(source, destination) {
   fs.mkdirSync(path.dirname(destination), { recursive: true });
   fs.cpSync(source, destination, { recursive: true });
-}
-
-function readSkillMetadata(skillDir) {
-  try {
-    const raw = fs.readFileSync(path.join(skillDir, SKILL_METADATA_FILE), 'utf8');
-    const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object') return null;
-    return {
-      name: typeof parsed.name === 'string' ? parsed.name : 'localnest-mcp',
-      version: typeof parsed.version === 'string' ? parsed.version : ''
-    };
-  } catch {
-    return null;
-  }
-}
-
-function compareVersions(a, b) {
-  const partsA = String(a || '').replace(/^v/i, '').split(/[-.]/);
-  const partsB = String(b || '').replace(/^v/i, '').split(/[-.]/);
-  const max = Math.max(partsA.length, partsB.length);
-  for (let i = 0; i < max; i += 1) {
-    const rawA = partsA[i];
-    const rawB = partsB[i];
-    if (rawA === undefined) return -1;
-    if (rawB === undefined) return 1;
-    const numA = Number.parseInt(rawA, 10);
-    const numB = Number.parseInt(rawB, 10);
-    const bothNumeric = Number.isFinite(numA) && Number.isFinite(numB);
-    if (bothNumeric) {
-      if (numA > numB) return 1;
-      if (numA < numB) return -1;
-      continue;
-    }
-    const aText = String(rawA);
-    const bText = String(rawB);
-    if (aText > bText) return 1;
-    if (aText < bText) return -1;
-  }
-  return 0;
-}
-
-function determineSyncState(sourceSkillDir, targetSkillDir) {
-  const sourceMeta = readSkillMetadata(sourceSkillDir);
-  const targetMeta = readSkillMetadata(targetSkillDir);
-  const exists = fs.existsSync(targetSkillDir);
-
-  if (!exists) {
-    return { exists: false, action: 'install', sourceMeta, targetMeta };
-  }
-
-  if (!sourceMeta || !targetMeta || !targetMeta.version) {
-    return { exists: true, action: 'sync', sourceMeta, targetMeta };
-  }
-
-  const cmp = compareVersions(sourceMeta.version, targetMeta.version);
-  if (cmp > 0) {
-    return { exists: true, action: 'upgrade', sourceMeta, targetMeta };
-  }
-  if (cmp === 0) {
-    return { exists: true, action: 'noop', sourceMeta, targetMeta };
-  }
-  return { exists: true, action: 'sync', sourceMeta, targetMeta };
 }
 
 function main() {
@@ -114,18 +51,8 @@ function main() {
   const targetSkillsDir = path.resolve(process.env.LOCALNEST_SKILLS_DIR || path.join(agentsHome, 'skills'));
   const targetSkillDir = path.join(targetSkillsDir, 'localnest-mcp');
 
-  const state = determineSyncState(sourceSkillDir, targetSkillDir);
-  if (state.action === 'noop' && !force) {
-    syncKnownToolLocations(sourceSkillDir, quiet, force);
-    if (!quiet) {
-      console.log('[localnest-skill] already up to date');
-      console.log(`[localnest-skill] version: ${state.sourceMeta?.version || 'unknown'}`);
-      console.log(`[localnest-skill] target: ${targetSkillDir}`);
-    }
-    return;
-  }
-
-  if (state.exists) {
+  const existed = fs.existsSync(targetSkillDir);
+  if (existed) {
     fs.rmSync(targetSkillDir, { recursive: true, force: true });
   }
 
@@ -133,19 +60,9 @@ function main() {
   syncKnownToolLocations(sourceSkillDir, quiet, force);
 
   if (!quiet) {
-    const verb = force
-      ? 'synced'
-      : state.action === 'upgrade'
-        ? 'updated'
-        : state.exists
-          ? 'synced'
-          : 'installed';
-    console.log(`[localnest-skill] ${verb} successfully`);
+    console.log(`[localnest-skill] ${existed ? 'synced' : 'installed'} successfully`);
     console.log(`[localnest-skill] source: ${sourceSkillDir}`);
     console.log(`[localnest-skill] target: ${targetSkillDir}`);
-    if (state.sourceMeta?.version) {
-      console.log(`[localnest-skill] version: ${state.sourceMeta.version}`);
-    }
     console.log('[localnest-skill] restart your AI tool to load the updated skill');
   }
 }
@@ -161,11 +78,6 @@ function syncKnownToolLocations(sourceSkillDir, quiet, force) {
   for (const toolSkillsDir of KNOWN_TOOL_SKILL_DIRS) {
     const dest = path.join(toolSkillsDir, 'localnest-mcp');
     try {
-      const state = determineSyncState(sourceSkillDir, dest);
-      if (state.action === 'noop' && !force) {
-        if (!quiet) console.log(`[localnest-skill] already current → ${dest}`);
-        continue;
-      }
       if (fs.existsSync(dest)) {
         fs.rmSync(dest, { recursive: true, force: true });
       }

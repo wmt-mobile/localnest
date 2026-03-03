@@ -1,7 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { buildLocalnestPaths } from '../home-layout.js';
 
 function parseIsoTime(value) {
   if (!value) return 0;
@@ -112,7 +111,7 @@ export class UpdateService {
     this.checkIntervalMinutes = checkIntervalMinutes;
     this.failureBackoffMinutes = failureBackoffMinutes;
     this.commandRunner = commandRunner;
-    this.cachePath = buildLocalnestPaths(localnestHome).updateStatusPath;
+    this.cachePath = path.join(localnestHome, 'update-status.json');
   }
 
   readCache() {
@@ -292,3 +291,4 @@ export class UpdateService {
     };
   }
 }
+

@@ -52,7 +52,7 @@ const config: Config = {
           sidebarPath: './sidebars.ts',
           routeBasePath: '/docs',
           showLastUpdateAuthor: false,
-          showLastUpdateTime: false,
+          showLastUpdateTime: true,
           sidebarCollapsible: true,
           sidebarCollapsed: false
         },
