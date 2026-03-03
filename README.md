@@ -4,10 +4,12 @@
 [![Node.js](https://img.shields.io/node/v/localnest-mcp)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Quality](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml)
-[![OpenSSF Scorecard](https://github.com/wmt-mobile/localnest/actions/workflows/scorecards.yml/badge.svg?branch=beta)](https://scorecard.dev/viewer/?uri=github.com/wmt-mobile/localnest)
 [![CodeQL](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml)
+[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.3)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.3)
 
 A local-first MCP server that gives AI agents safe, read-only access to your codebase — with optional semantic indexing for high-quality retrieval.
+
+Documentation: https://wmt-mobile.github.io/localnest/
 
 ## What It Does
 
