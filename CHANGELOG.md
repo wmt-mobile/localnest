@@ -53,7 +53,7 @@ All notable changes to this project will be documented in this file.
 - `npm run stress:localnest` synthetic stress runner for search + memory behavior checks.
 
 ### Changed
-- Package/runtime version bumped to `0.0.4-beta.3`.
+- Package/runtime version bumped to `0.0.4-beta.4`.
 - Bundled skill install now checks installed skill metadata and only resyncs when the installed skill is missing, outdated, or `--force` is used.
 - `localnest-mcp-setup` now asks for one-time user consent before enabling local memory and persists memory config into `localnest.config.json` and generated MCP snippets.
 - README, bundled `SKILL.md`, and OpenAI agent manifest now document retrieval + memory flow, including pre-task recall and post-task capture guidance.

@@ -5,17 +5,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Quality](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml)
 [![CodeQL](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml)
-<<<<<<< HEAD
-[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.3)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.3)
-=======
-[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.3)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.3)
->>>>>>> 3b0a051875a049ed5d853127d330c6761ec299ba
+[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.4)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.4)
 
 A local-first MCP server that gives AI agents safe access to your codebase, plus optional local memory and semantic indexing for high-quality retrieval.
 
 Documentation: https://wmt-mobile.github.io/localnest/
 
-Current branch package: `0.0.4-beta.3`
+Current branch package: `0.0.4-beta.4`
 
 ## What It Does
 
