@@ -1,22 +1,22 @@
-# Current Branch
+# Current Beta Release
 
-Current branch package: `0.0.4-beta.4`
+Current beta package: `0.0.4-beta.4`
 
 <div className="docGrid docGrid--3">
   <div className="docPanel">
     <span className="docEyebrow">Channel</span>
-    <h3>Beta branch</h3>
-    <p>Use this page when you need docs that match the current `feature/memory-efficiency` source behavior.</p>
+    <h3>Beta release line</h3>
+    <p>Use this page when you need docs that match the currently published beta package behavior.</p>
   </div>
   <div className="docPanel">
     <span className="docEyebrow">Package</span>
     <h3>`localnest-mcp@0.0.4-beta.4`</h3>
-    <p>The branch package/runtime version defined in repository source.</p>
+    <p>The beta package/runtime version defined in repository source.</p>
   </div>
   <div className="docPanel">
     <span className="docEyebrow">Docs contract</span>
     <h3>Retrieval + memory workflow</h3>
-    <p>Current branch docs include the full memory tool surface and setup/config changes.</p>
+    <p>The current beta docs include the full memory tool surface and setup/config changes.</p>
   </div>
 </div>
 
@@ -31,13 +31,13 @@ Current branch package: `0.0.4-beta.4`
 
 ## How to use this page
 
-- Treat this page as the source of truth for the current branch behavior.
+- Treat this page as the source of truth for the current beta release behavior.
 - Use the archived `0.0.3` pages when you need the last stable release contract.
 
 ## Version Source
 
-This page is based on the current branch package version and maintained changelog in the repository.
+This page is based on the current beta package version and maintained changelog in the repository.
 
 - package version: `0.0.4-beta.4`
-- changelog `Unreleased` section documents the memory and setup changes present on this branch
+- changelog `0.0.4-beta.4` section documents the memory and setup changes present in this beta release
 - stable published release docs remain archived under `0.0.3`

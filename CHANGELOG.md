@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.0.4-beta.4] - 2026-03-03
+
 ### Added
 - `localnest-mcp --version` CLI output for quick runtime/package verification.
 - Automatic npm update checks with local cache/backoff via new `UpdateService`.

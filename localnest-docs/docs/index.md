@@ -19,7 +19,7 @@ LocalNest MCP is a local-first MCP server that gives AI agents scoped access to 
   </div>
   <div className="docPanel docPanel--compact">
     <div className="docStat">
-      <span className="docStat__label">Current branch package</span>
+      <span className="docStat__label">Current beta package</span>
       <strong>0.0.4-beta.4</strong>
     </div>
     <div className="docStat">
@@ -88,8 +88,8 @@ npx -y localnest-mcp-doctor
     <span>See the full tool surface and the intended retrieval workflow.</span>
   </a>
   <a className="docLinkCard" href="./releases/current">
-    <strong>Current branch</strong>
-    <span>See the `0.0.4-beta.4` branch behavior, including local memory and setup changes.</span>
+    <strong>Current beta release</strong>
+    <span>See the `0.0.4-beta.4` beta behavior, including local memory and setup changes.</span>
   </a>
   <a className="docLinkCard" href="./releases/history">
     <strong>Release matrix</strong>
