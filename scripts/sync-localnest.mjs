@@ -101,7 +101,30 @@ async function requestDeviceCode({ clientId, scope }) {
     body
   });
   if (!response.ok) {
-    throw new Error(`Device auth start failed (${response.status}): ${await response.text()}`);
+    let payload = null;
+    let text = '';
+    try {
+      text = await response.text();
+      payload = JSON.parse(text);
+    } catch {
+      // Keep text fallback.
+    }
+
+    const errorCode = payload?.error || '';
+    const description = payload?.error_description || text || `HTTP ${response.status}`;
+    if (errorCode === 'invalid_client' && description.toLowerCase().includes('limited input')) {
+      throw new Error(
+        [
+          'Google OAuth client type is not compatible with device login.',
+          'Required client type: "TVs and Limited Input devices".',
+          'Create a new OAuth client in Google Cloud Console with that type, then run:',
+          `localnest sync init --client-id="${clientId}"`,
+          'Guide: https://developers.google.com/identity/protocols/oauth2/limited-input-device#creatingcred'
+        ].join('\n')
+      );
+    }
+
+    throw new Error(`Device auth start failed (${response.status}): ${description}`);
   }
   return response.json();
 }
