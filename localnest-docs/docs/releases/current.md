@@ -1,6 +1,10 @@
+---
+description: Current beta release notes for localnest-mcp v0.0.4-beta.4, including memory workflows, setup changes, and canonical tool behavior.
+---
+
 # Current Beta Release
 
-Current beta package: `0.0.4-beta.4`
+Current beta release documentation for `localnest-mcp@0.0.4-beta.4`, covering memory workflow tools, setup migration behavior, and the active canonical `localnest_*` tool contract.
 
 <div className="docGrid docGrid--3">
   <div className="docPanel">

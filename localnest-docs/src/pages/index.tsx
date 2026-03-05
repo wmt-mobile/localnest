@@ -60,7 +60,7 @@ const sections = [
   {
     title: 'Current Release',
     href: '/docs/releases/current',
-    description: 'Use stable release notes when you need docs aligned to the published npm package.',
+    description: 'Use current beta release notes when you need docs aligned to the active package behavior.',
     icon: ReleaseIcon
   }
 ]

@@ -1,3 +1,7 @@
+---
+description: Version matrix for LocalNest docs mapping current beta, stable release, and archived changelog pages for compatibility and debugging.
+---
+
 # Release Matrix
 
 <div className="docPanel docPanel--compact">
