@@ -124,9 +124,23 @@ async function requestDeviceCode({ clientId, scope }) {
       );
     }
 
+    if (errorCode === 'invalid_scope' && scope === 'https://www.googleapis.com/auth/drive.appdata') {
+      process.stdout.write(
+        '[localnest-sync] Google rejected drive.appdata for this client. Retrying with drive.appfolder alias...\n'
+      );
+      return requestDeviceCode({
+        clientId,
+        scope: 'https://www.googleapis.com/auth/drive.appfolder'
+      });
+    }
+
     throw new Error(`Device auth start failed (${response.status}): ${description}`);
   }
-  return response.json();
+  const payload = await response.json();
+  return {
+    ...payload,
+    requested_scope: scope
+  };
 }
 
 function sleep(ms) {
@@ -242,6 +256,9 @@ async function runInit() {
     clientSecret: clientSecret || null,
     refreshToken: token.refresh_token
   });
+  if (device.requested_scope) {
+    config.google.scope = device.requested_scope;
+  }
   syncService.writeSyncConfig(config);
   syncService.writeSyncStatus({
     initializedAt: new Date().toISOString(),
