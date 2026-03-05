@@ -2,6 +2,12 @@
 
 LocalNest is a local-first MCP server that gives AI agents safe, read-only visibility into your codebase plus optional local semantic indexing for better retrieval quality.
 
+## This Branch Is For
+
+- Users pinned to transitional beta `0.0.2-beta.2`
+- First release line introducing bundled skill install
+- Mixed canonical + legacy alias tool naming
+
 ## What This Tool Does
 
 LocalNest is built for agent workflows on large repositories:
@@ -32,7 +38,7 @@ Install `ripgrep`:
 
 Recommended (stable): global install
 ```bash
-npm install -g localnest-mcp
+npm install -g localnest-mcp@0.0.2-beta.2
 localnest-mcp-setup
 localnest-mcp-doctor
 ```
