@@ -24,6 +24,10 @@ function hasFlag(name) {
   return argv.includes(`--${name}`);
 }
 
+function hasShortFlag(name) {
+  return argv.includes(`-${name}`);
+}
+
 function commandName() {
   for (const arg of argv) {
     if (!arg.startsWith('-')) return arg;
@@ -152,10 +156,16 @@ function printHelp() {
   process.stdout.write('  localnest sync push [--passphrase=...]\n');
   process.stdout.write('  localnest sync pull [--passphrase=...]\n');
   process.stdout.write('  localnest sync status\n\n');
+  process.stdout.write('Examples:\n');
+  process.stdout.write('  localnest sync init --client-id="123...apps.googleusercontent.com"\n');
+  process.stdout.write('  localnest sync push\n');
+  process.stdout.write('  localnest sync pull\n');
+  process.stdout.write('  localnest sync status\n\n');
   process.stdout.write('Options:\n');
   process.stdout.write('  --client-id=<oauth-client-id>      for sync init\n');
   process.stdout.write('  --client-secret=<oauth-secret>     optional for sync init\n');
-  process.stdout.write('  --passphrase=<value>               optional fallback for legacy passphrase configs\n');
+  process.stdout.write('  --passphrase=<value>               optional for legacy passphrase configs\n');
+  process.stdout.write('  --ask-passphrase                   prompt for passphrase (legacy configs)\n');
   process.stdout.write('  --yes                              non-interactive where possible\n');
   process.stdout.write('\n');
   process.stdout.write('Notes:\n');
@@ -164,13 +174,22 @@ function printHelp() {
   process.stdout.write('  - New setups generate and store a local encryption key automatically.\n');
 }
 
-async function resolvePassphrase() {
+function resolvePassphraseFromArgsOrEnv() {
   const fromArg = parseArg('passphrase');
   if (fromArg) return fromArg;
   if (process.env.LOCALNEST_SYNC_PASSPHRASE) {
     return process.env.LOCALNEST_SYNC_PASSPHRASE;
   }
-  return ask('Encryption passphrase: ');
+  return null;
+}
+
+async function resolveOptionalPassphrase() {
+  const value = resolvePassphraseFromArgsOrEnv();
+  if (value) return value;
+  if (hasFlag('ask-passphrase')) {
+    return ask('Encryption passphrase: ');
+  }
+  return null;
 }
 
 async function runInit() {
@@ -211,10 +230,10 @@ async function runInit() {
 }
 
 async function runPush() {
-  const passphrase = await resolvePassphrase();
-  if (!passphrase) {
-    throw new Error('passphrase is required.');
+  if (!syncService.isInitialized()) {
+    throw new Error('Sync is not initialized. Run: localnest sync init');
   }
+  const passphrase = await resolveOptionalPassphrase();
   const result = await syncService.pushToGoogleDrive({ passphrase });
   process.stdout.write(`Push complete: ${result.bundleName}\n`);
   process.stdout.write(`Remote file id: ${result.remoteFileId}\n`);
@@ -222,10 +241,10 @@ async function runPush() {
 }
 
 async function runPull() {
-  const passphrase = await resolvePassphrase();
-  if (!passphrase) {
-    throw new Error('passphrase is required.');
+  if (!syncService.isInitialized()) {
+    throw new Error('Sync is not initialized. Run: localnest sync init');
   }
+  const passphrase = await resolveOptionalPassphrase();
   const result = await syncService.pullFromGoogleDrive({ passphrase });
   process.stdout.write(`Pull complete: ${result.name}\n`);
   process.stdout.write(`Remote file id: ${result.fileId}\n`);
@@ -245,7 +264,7 @@ async function runStatus() {
 
 async function main() {
   const cmd = commandName();
-  if (cmd === 'help' || hasFlag('help') || hasFlag('h')) {
+  if (cmd === 'help' || hasFlag('help') || hasShortFlag('h')) {
     printHelp();
     return;
   }

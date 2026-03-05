@@ -126,6 +126,11 @@ export class SyncService {
     return parsed && typeof parsed === 'object' ? parsed : null;
   }
 
+  isInitialized() {
+    const config = this.readSyncConfig();
+    return Boolean(config && config.provider === 'google-drive');
+  }
+
   writeSyncConfig(config) {
     ensureDir(this.paths.dirs.config);
     fs.writeFileSync(this.syncConfigPath, `${JSON.stringify(config, null, 2)}\n`, 'utf8');
