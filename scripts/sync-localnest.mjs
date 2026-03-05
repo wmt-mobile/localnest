@@ -314,7 +314,7 @@ function printHelp() {
   process.stdout.write('  localnest sync status\n\n');
   process.stdout.write('Options:\n');
   process.stdout.write('  --client-id=<oauth-client-id>      for sync init\n');
-  process.stdout.write('  --client-secret=<oauth-secret>     optional for sync init\n');
+  process.stdout.write('  --client-secret=<oauth-secret>     required for sync init\n');
   process.stdout.write('  --no-browser                       print auth URL instead of auto-opening browser\n');
   process.stdout.write('  --passphrase=<value>               optional for legacy passphrase configs\n');
   process.stdout.write('  --ask-passphrase                   prompt for passphrase (legacy configs)\n');
@@ -350,7 +350,15 @@ async function runInit() {
   const clientSecretArg = parseArg('client-secret');
   const clientSecret = clientSecretArg !== null
     ? clientSecretArg
-    : (hasFlag('yes') ? '' : await ask('Google OAuth client secret (optional): '));
+    : await ask('Google OAuth client secret (required): ');
+  if (!clientSecret || !clientSecret.trim()) {
+    throw new Error(
+      [
+        'Google OAuth client secret is required for sync init.',
+        'Run again with --client-secret="YOUR_CLIENT_SECRET".'
+      ].join('\n')
+    );
+  }
   const token = await runPkceAuthorization({
     clientId,
     clientSecret,
