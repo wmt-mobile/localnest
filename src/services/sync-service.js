@@ -319,7 +319,8 @@ export class SyncService {
     return `localnest-sync-${isoStamp()}.lnsync`;
   }
 
-  async pushToGoogleDrive({ passphrase } = {}) {
+  async pushToGoogleDrive({ passphrase, onProgress } = {}) {
+    const progress = typeof onProgress === 'function' ? onProgress : () => {};
     const config = this.readSyncConfig();
     if (!config || config.provider !== 'google-drive') {
       throw new Error('Sync is not initialized. Run: localnest sync init');
@@ -328,10 +329,13 @@ export class SyncService {
       throw new Error('Passphrase is required for sync push.');
     }
 
+    progress('Refreshing Google access token');
     const accessToken = await this.getAccessToken(config);
+    progress('Creating local snapshot archive');
     const { tmpRoot, tarPath } = this.createSnapshotTarGz();
     const bundleName = this.buildBundleName();
     const encryptedPath = path.join(this.syncBackupsDir, bundleName);
+    progress('Encrypting snapshot');
     const encrypted = await encryptFile({
       inputPath: tarPath,
       outputPath: encryptedPath,
@@ -341,6 +345,7 @@ export class SyncService {
       iterations: config.crypto.iterations
     });
 
+    progress(`Uploading encrypted backup (${encrypted.sizeBytes} bytes)`);
     const upload = await this.uploadDriveFile({
       accessToken,
       name: bundleName,
@@ -368,6 +373,7 @@ export class SyncService {
         }
       }
     };
+    progress('Updating remote manifest');
     await this.upsertDriveJsonFile({
       accessToken,
       name: manifestName,
@@ -384,6 +390,7 @@ export class SyncService {
       localBundlePath: encryptedPath
     });
 
+    progress('Finalizing local status');
     fs.rmSync(tmpRoot, { recursive: true, force: true });
     return {
       ok: true,
@@ -395,7 +402,8 @@ export class SyncService {
     };
   }
 
-  async pullFromGoogleDrive({ passphrase } = {}) {
+  async pullFromGoogleDrive({ passphrase, onProgress } = {}) {
+    const progress = typeof onProgress === 'function' ? onProgress : () => {};
     const config = this.readSyncConfig();
     if (!config || config.provider !== 'google-drive') {
       throw new Error('Sync is not initialized. Run: localnest sync init');
@@ -404,13 +412,16 @@ export class SyncService {
       throw new Error('Passphrase is required for sync pull.');
     }
 
+    progress('Refreshing Google access token');
     const accessToken = await this.getAccessToken(config);
     const manifestName = config.remote?.manifestName || 'localnest-sync-manifest.json';
+    progress('Resolving remote manifest');
     const manifestMeta = await this.findDriveFileByName(accessToken, manifestName);
     if (!manifestMeta) {
       throw new Error('No remote manifest found. Run: localnest sync push');
     }
 
+    progress('Downloading remote manifest');
     const manifestBuf = await this.downloadDriveFile(accessToken, manifestMeta.id);
     const manifest = JSON.parse(manifestBuf.toString('utf8'));
     const latest = manifest?.latest;
@@ -418,6 +429,7 @@ export class SyncService {
       throw new Error('Remote manifest has no latest backup entry.');
     }
 
+    progress('Downloading encrypted backup');
     const encryptedBuffer = await this.downloadDriveFile(accessToken, latest.fileId);
     const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-pull-'));
     const encryptedPath = path.join(tmpRoot, latest.name || 'latest.lnsync');
@@ -429,6 +441,7 @@ export class SyncService {
       throw new Error(`Checksum mismatch for remote backup (${latest.sha256} != ${actualSha})`);
     }
 
+    progress('Decrypting backup');
     await decryptFile({
       inputPath: encryptedPath,
       outputPath: tarPath,
@@ -440,6 +453,7 @@ export class SyncService {
       tagB64: latest.crypto?.tag
     });
 
+    progress('Restoring local snapshot');
     this.restoreFromTarGz(tarPath);
     this.writeSyncStatus({
       lastPullAt: new Date().toISOString(),
@@ -449,6 +463,7 @@ export class SyncService {
       remoteBytes: latest.sizeBytes || encryptedBuffer.length,
       remoteSha256: latest.sha256 || actualSha
     });
+    progress('Finalizing local status');
     fs.rmSync(tmpRoot, { recursive: true, force: true });
 
     return {

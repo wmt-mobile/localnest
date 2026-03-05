@@ -386,7 +386,13 @@ async function runPush() {
     throw new Error('Sync is not initialized. Run: localnest sync init');
   }
   const passphrase = await resolveOptionalPassphrase();
-  const result = await syncService.pushToGoogleDrive({ passphrase });
+  process.stdout.write('Starting sync push...\n');
+  const result = await syncService.pushToGoogleDrive({
+    passphrase,
+    onProgress: (step) => {
+      process.stdout.write(`• ${step}\n`);
+    }
+  });
   process.stdout.write(`Push complete: ${result.bundleName}\n`);
   process.stdout.write(`Remote file id: ${result.remoteFileId}\n`);
   process.stdout.write(`Size: ${result.sizeBytes} bytes\n`);
@@ -397,7 +403,13 @@ async function runPull() {
     throw new Error('Sync is not initialized. Run: localnest sync init');
   }
   const passphrase = await resolveOptionalPassphrase();
-  const result = await syncService.pullFromGoogleDrive({ passphrase });
+  process.stdout.write('Starting sync pull...\n');
+  const result = await syncService.pullFromGoogleDrive({
+    passphrase,
+    onProgress: (step) => {
+      process.stdout.write(`• ${step}\n`);
+    }
+  });
   process.stdout.write(`Pull complete: ${result.name}\n`);
   process.stdout.write(`Remote file id: ${result.fileId}\n`);
   process.stdout.write(`Size: ${result.sizeBytes} bytes\n`);
