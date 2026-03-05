@@ -2,6 +2,12 @@
 
 LocalNest is a local, read-only MCP server that lets AI tools inspect code in your selected project roots.
 
+## This Branch Is For
+
+- Users pinned to the earliest beta line: `0.0.1-beta.1`
+- `npx`-first setup workflow (global-install-first guidance was not established yet)
+- Pre-canonical tool naming (`server_status`, `search_code`, etc.)
+
 ## Requirements
 
 - Node.js `>=18`
@@ -31,6 +37,12 @@ npx -y localnest-mcp-setup
 2. Run doctor:
 ```bash
 npx -y localnest-mcp-doctor
+```
+
+Optional explicit global pin for this branch version:
+
+```bash
+npm install -g localnest-mcp@0.0.1-beta.1
 ```
 
 3. Copy `mcpServers.localnest` from `~/.localnest/mcp.localnest.json` into your MCP client config.
