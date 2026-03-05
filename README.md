@@ -11,7 +11,7 @@ A local-first MCP server that gives AI agents safe access to your codebase, plus
 
 Documentation: https://wmt-mobile.github.io/localnest/
 
-Current beta package: `0.0.4-beta.4`
+Current beta package: `0.0.4-beta.5`
 
 Engineering docs for contributors:
 - [`guides/README.md`](./guides/README.md)

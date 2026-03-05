@@ -33,6 +33,7 @@ Those do **not** match the package/changelog release line currently documented h
 | Version | Basis | Page |
 | --- | --- | --- |
 | `0.0.4-beta.4` | current beta package + changelog `0.0.4-beta.4` | [Current Beta Release](./current) |
+| `0.0.4-beta.4` (archive) | frozen docs snapshot | [Version Archive: 0.0.4-beta.4](/docs/versions/0.0.4-beta.4/overview) |
 | `0.0.3` | package version + changelog | [0.0.3](./0.0.3) |
 | `0.0.2-beta.3` | changelog | [0.0.2-beta.3](./0.0.2-beta.3) |
 | `0.0.2-beta.2` | changelog | [0.0.2-beta.2](./0.0.2-beta.2) |
@@ -42,5 +43,6 @@ Use the per-version pages below for release-specific summaries.
 
 ## Reading guidance
 
+- Start with [Version Selection](./version-selection) when you need exact install commands for a specific version.
 - Use `current` if you want documentation aligned to the active beta package and behavior.
 - Use archived version pages when you are debugging or supporting older installs.

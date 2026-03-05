@@ -66,11 +66,26 @@ const sections = [
 ]
 
 const workflows = [
-  'Install `localnest-mcp`, then run setup and doctor.',
-  'Copy the generated `mcpServers.localnest` block into your MCP client.',
-  'Find modules with `localnest_search_files` before searching inside code.',
-  'Use `localnest_search_code` for exact symbols and `localnest_search_hybrid` for concept lookup.',
-  'Validate results with `localnest_read_file` before editing or concluding.'
+  {
+    title: 'Install and verify',
+    detail: 'Install `localnest-mcp`, then run setup and doctor.'
+  },
+  {
+    title: 'Configure client',
+    detail: 'Copy the generated `mcpServers.localnest` block into your MCP client.'
+  },
+  {
+    title: 'Discover by file path',
+    detail: 'Find modules with `localnest_search_files` before searching inside code.'
+  },
+  {
+    title: 'Search by intent',
+    detail: 'Use `localnest_search_code` for exact symbols and `localnest_search_hybrid` for concept lookup.'
+  },
+  {
+    title: 'Verify with file reads',
+    detail: 'Validate results with `localnest_read_file` before editing or concluding.'
+  }
 ]
 
 export default function Home(): React.JSX.Element {
@@ -122,11 +137,11 @@ export default function Home(): React.JSX.Element {
           </div>
           <div className="docSteps">
             {workflows.map((step, index) => (
-              <div key={step} className="docStep">
+              <div key={step.title} className="docStep">
                 <span>{index + 1}</span>
                 <div>
-                  <strong>{step.split(' ')[0]} {step.split(' ')[1]}...</strong>
-                  <p>{step}</p>
+                  <strong>{step.title}</strong>
+                  <p>{step.detail}</p>
                 </div>
               </div>
             ))}

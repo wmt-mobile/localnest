@@ -63,6 +63,16 @@
   </div>
 </div>
 
+## Choose by goal
+
+| Goal | Start with | Then use |
+| --- | --- | --- |
+| Find feature/module location | `localnest_search_files` | `localnest_project_tree`, `localnest_read_file` |
+| Match exact code/symbol | `localnest_search_code` | `localnest_read_file` |
+| Retrieve by concept/intent | `localnest_index_status`, `localnest_index_project` | `localnest_search_hybrid`, `localnest_read_file` |
+| Rehydrate prior context | `localnest_task_context` | `localnest_memory_recall` (if needed) |
+| Capture outcome for future tasks | `localnest_capture_outcome` | `localnest_memory_events` |
+
 ## Response format
 
 Tools support `response_format: "json"` or `"markdown"`.

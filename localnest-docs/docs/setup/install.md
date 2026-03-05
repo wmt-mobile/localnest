@@ -19,8 +19,9 @@
 ```bash
 npm install -g localnest-mcp
 localnest-mcp-install-skill
-localnest-mcp-setup
-localnest-mcp-doctor
+localnest setup
+localnest doctor
+localnest upgrade
 ```
 
 ## Fallback
@@ -51,14 +52,21 @@ npx -y localnest-mcp-doctor
     <span>3</span>
     <div>
       <strong>Generate configuration</strong>
-      <p>`localnest-mcp-setup` writes both the LocalNest config and the MCP client block, and prompts once for memory consent.</p>
+      <p>`localnest setup` writes both the LocalNest config and the MCP client block, and prompts once for memory consent.</p>
     </div>
   </div>
   <div className="docStep">
     <span>4</span>
     <div>
       <strong>Verify the environment</strong>
-      <p>`localnest-mcp-doctor` confirms runtime dependencies and flags configuration problems early.</p>
+      <p>`localnest doctor` confirms runtime dependencies and flags configuration problems early.</p>
+    </div>
+  </div>
+  <div className="docStep">
+    <span>5</span>
+    <div>
+      <strong>Initialize encrypted backup sync (optional)</strong>
+      <p>Run `localnest sync init` once to connect Google Drive app storage and then use `localnest sync push` for backups.</p>
     </div>
   </div>
 </div>
@@ -96,3 +104,4 @@ After setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client 
 - If `sqlite-vec` is unavailable, LocalNest can still run with the JSON backend.
 - Memory is opt-in. On Node 18/20, the rest of LocalNest still works, but memory remains unavailable.
 - `localnest-mcp-install-skill` is version-aware on this branch and skips reinstalling when the bundled skill is already current.
+- `localnest sync` stores encrypted snapshots in Google Drive `appDataFolder` and does not create visible files in the user's Drive root.

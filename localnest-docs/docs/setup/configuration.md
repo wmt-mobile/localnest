@@ -23,6 +23,10 @@
     <h3>`~/.localnest/data/*`</h3>
     <p>Holds the SQLite index, JSON fallback index, and local memory database.</p>
   </div>
+  <div className="docPanel">
+    <h3>`~/.localnest/config/sync.localnest.json`</h3>
+    <p>Optional sync settings for Google Drive backup (`appDataFolder`) including OAuth refresh token and local encryption metadata.</p>
+  </div>
 </div>
 
 ## Config priority
@@ -30,6 +34,14 @@
 1. `PROJECT_ROOTS`
 2. `LOCALNEST_CONFIG`
 3. current working directory fallback
+
+## Most common changes
+
+Most teams only adjust these values:
+
+- `PROJECT_ROOTS`: set one or more explicit root paths.
+- `LOCALNEST_INDEX_BACKEND`: keep `sqlite-vec` on Node 22+, otherwise use `json`.
+- `LOCALNEST_MEMORY_ENABLED`: set `true` only when you explicitly want local memory features.
 
 ## Practical guidance
 
@@ -57,6 +69,8 @@
 | `LOCALNEST_UPDATE_PACKAGE` | `localnest-mcp` | package checked for updates |
 | `LOCALNEST_UPDATE_CHECK_INTERVAL_MINUTES` | `120` | update check cache interval |
 | `LOCALNEST_UPDATE_FAILURE_BACKOFF_MINUTES` | `15` | retry backoff after failures |
+| `LOCALNEST_SYNC_GOOGLE_CLIENT_ID` | — | optional default OAuth client id for `localnest sync init` |
+| `LOCALNEST_SYNC_PASSPHRASE` | — | optional fallback passphrase for legacy sync configs |
 
 ## Config schema notes
 
