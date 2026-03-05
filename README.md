@@ -49,9 +49,8 @@ Install ripgrep:
 **Global install (recommended):**
 ```bash
 npm install -g localnest-mcp
-localnest-mcp-install-skill
-localnest-mcp-setup
-localnest-mcp-doctor
+localnest setup
+localnest doctor
 ```
 
 **npx fallback** (if global install is unavailable):
@@ -65,7 +64,15 @@ npx -y localnest-mcp-doctor
 Check the installed CLI version:
 
 ```bash
-localnest-mcp --version
+localnest version
+```
+
+Upgrade command:
+
+```bash
+localnest upgrade
+# alias:
+localnest update
 ```
 
 ## MCP Client Configuration
@@ -200,7 +207,7 @@ This keeps the LocalNest home directory readable:
 
 ## Local Memory
 
-Memory is opt-in during `localnest-mcp-setup`. When enabled, LocalNest stores durable project knowledge and preferences in a local SQLite database.
+Memory is opt-in during `localnest setup`. When enabled, LocalNest stores durable project knowledge and preferences in a local SQLite database.
 
 - Memory currently requires Node 22.13+ for built-in `node:sqlite`
 - Node 18/20 continue to support the rest of LocalNest, but memory stays unavailable on those runtimes

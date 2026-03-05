@@ -149,6 +149,25 @@ function parseArg(name) {
   return item.slice(long.length).trim();
 }
 
+function parseBooleanArg(name) {
+  const raw = parseArg(name);
+  if (raw === null) return null;
+  const normalized = raw.trim().toLowerCase();
+  if (normalized === 'true' || normalized === '1' || normalized === 'yes' || normalized === 'y') return true;
+  if (normalized === 'false' || normalized === '0' || normalized === 'no' || normalized === 'n') return false;
+  throw new Error(`Invalid boolean for --${name}: ${raw}`);
+}
+
+function parseIntegerArg(name, fallback) {
+  const raw = parseArg(name);
+  if (raw === null || raw === '') return fallback;
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isFinite(parsed)) {
+    throw new Error(`Invalid integer for --${name}: ${raw}`);
+  }
+  return parsed;
+}
+
 function parseRootsFromPathsArg(pathsArg) {
   if (!pathsArg) return [];
 
@@ -161,6 +180,33 @@ function parseRootsFromPathsArg(pathsArg) {
       path: resolved
     });
   }
+  return roots;
+}
+
+function parseRootsFromJsonArg(rootsJsonArg) {
+  if (!rootsJsonArg) return [];
+  let parsed;
+  try {
+    parsed = JSON.parse(rootsJsonArg);
+  } catch {
+    throw new Error('Invalid JSON provided in --roots-json');
+  }
+  if (!Array.isArray(parsed)) {
+    throw new Error('--roots-json must be a JSON array');
+  }
+
+  const roots = [];
+  for (const item of parsed) {
+    if (!item || typeof item !== 'object') continue;
+    if (typeof item.path !== 'string' || item.path.trim() === '') continue;
+    const resolved = path.resolve(expandHome(item.path.trim()));
+    if (!isDir(resolved)) continue;
+    const label = typeof item.label === 'string' && item.label.trim()
+      ? item.label.trim()
+      : toLabel(resolved, `root${roots.length + 1}`);
+    roots.push({ label, path: resolved });
+  }
+
   return roots;
 }
 
@@ -227,36 +273,51 @@ async function main() {
     process.exit(1);
   }
 
+  const rootsJsonArg = parseArg('roots-json');
   const pathsArg = parseArg('paths');
-  if (pathsArg) {
-    const roots = parseRootsFromPathsArg(pathsArg);
+  if (pathsArg || rootsJsonArg) {
+    const roots = rootsJsonArg ? parseRootsFromJsonArg(rootsJsonArg) : parseRootsFromPathsArg(pathsArg);
     if (roots.length === 0) {
-      throw new Error('No valid directories provided in --paths');
+      throw new Error('No valid directories provided in --paths/--roots-json');
     }
+
+    const backend = parseArg('index-backend') || 'sqlite-vec';
+    const dbPath = path.resolve(expandHome(parseArg('db-path') || defaultDbPath));
+    const indexPath = path.resolve(expandHome(parseArg('index-path') || defaultJsonIndexPath));
+    const chunkLines = parseIntegerArg('chunk-lines', 60);
+    const chunkOverlap = parseIntegerArg('chunk-overlap', 15);
+    const maxTermsPerChunk = parseIntegerArg('max-terms-per-chunk', 80);
+    const maxIndexedFiles = parseIntegerArg('max-indexed-files', 20000);
+    const memoryEnabled = parseBooleanArg('memory-enabled') ?? false;
+    const memoryBackend = parseArg('memory-backend') || 'auto';
+    const memoryDbPath = path.resolve(expandHome(parseArg('memory-db-path') || defaultMemoryDbPath));
+    const memoryAutoCapture = parseBooleanArg('memory-auto-capture') ?? memoryEnabled;
+    const memoryConsentDone = parseBooleanArg('memory-consent-done') ?? false;
+
     saveOutputs(roots, packageRef, {
-      backend: 'sqlite-vec',
-      dbPath: defaultDbPath,
-      indexPath: defaultJsonIndexPath,
-      chunkLines: 60,
-      chunkOverlap: 15,
-      maxTermsPerChunk: 80,
-      maxIndexedFiles: 20000,
+      backend,
+      dbPath,
+      indexPath,
+      chunkLines,
+      chunkOverlap,
+      maxTermsPerChunk,
+      maxIndexedFiles,
       memory: {
-        enabled: false,
-        backend: 'auto',
-        dbPath: defaultMemoryDbPath,
-        autoCapture: false,
-        askForConsentDone: false
+        enabled: memoryEnabled,
+        backend: memoryBackend,
+        dbPath: memoryDbPath,
+        autoCapture: memoryAutoCapture,
+        askForConsentDone: memoryConsentDone
       }
     });
     printSuccess(packageRef, {
-      backend: 'sqlite-vec',
-      dbPath: defaultDbPath,
-      indexPath: defaultJsonIndexPath,
+      backend,
+      dbPath,
+      indexPath,
       memory: {
-        enabled: false,
-        backend: 'auto',
-        dbPath: defaultMemoryDbPath
+        enabled: memoryEnabled,
+        backend: memoryBackend,
+        dbPath: memoryDbPath
       }
     });
     return;
@@ -268,6 +329,7 @@ async function main() {
     console.log('Usage:');
     console.log('  npm run setup');
     console.log('  npm run setup -- --paths="/abs/path1,/abs/path2"');
+    console.log('  npm run setup -- --roots-json=\'[{"label":"repo","path":"/abs/repo"}]\'');
     console.log('  npm run setup -- --package="localnest-mcp"');
     return;
   }
