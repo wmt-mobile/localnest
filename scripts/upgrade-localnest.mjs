@@ -36,6 +36,24 @@ function hasShortFlag(flag) {
   return argv.includes(`-${flag}`);
 }
 
+function getPositionalArgs() {
+  return argv.filter((item) => !item.startsWith('-'));
+}
+
+function resolveTargetVersion() {
+  const fromFlag = parseArg('version');
+  if (fromFlag) return fromFlag;
+
+  const positional = getPositionalArgs();
+  if (positional.length === 0) return 'latest';
+
+  if (positional[0] === 'install') {
+    return positional[1] || 'latest';
+  }
+
+  return positional[0];
+}
+
 function parseBoolean(raw, fallback) {
   if (raw === null || raw === undefined || raw === '') return fallback;
   const value = String(raw).trim().toLowerCase();
@@ -63,6 +81,89 @@ function runCommand(command, args, label) {
   if (run.status !== 0) {
     throw new Error(`${label} failed with exit code ${run.status}`);
   }
+}
+
+function runCommandCapture(command, args, label) {
+  const run = spawnSync(command, args, { encoding: 'utf8' });
+  return {
+    ok: run.status === 0 && !run.error,
+    status: run.status,
+    stdout: String(run.stdout || '').trim(),
+    stderr: run.error
+      ? `${label} failed: ${run.error.message || run.error}`
+      : String(run.stderr || '').trim()
+  };
+}
+
+function parseVersionsJson(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) {
+      return parsed.map((entry) => String(entry || '').trim()).filter(Boolean);
+    }
+    if (typeof parsed === 'string') return [parsed.trim()].filter(Boolean);
+    return [];
+  } catch {
+    return raw.split('\n').map((entry) => entry.trim()).filter(Boolean);
+  }
+}
+
+function printUpgradeError({ title, detailLines = [], suggestionLines = [] }) {
+  process.stderr.write('\n[localnest-upgrade] ERROR\n');
+  process.stderr.write(`${title}\n`);
+  if (detailLines.length > 0) {
+    process.stderr.write('\nDetails:\n');
+    for (const line of detailLines) {
+      process.stderr.write(`- ${line}\n`);
+    }
+  }
+  if (suggestionLines.length > 0) {
+    process.stderr.write('\nTry:\n');
+    for (const line of suggestionLines) {
+      process.stderr.write(`- ${line}\n`);
+    }
+  }
+  process.stderr.write('\n');
+}
+
+function ensureVersionExists({ npmCmd, packageName, targetVersion }) {
+  if (!targetVersion || targetVersion === 'latest') return;
+
+  const query = runCommandCapture(npmCmd, ['view', packageName, 'versions', '--json'], 'fetch published versions');
+  if (!query.ok) {
+    printUpgradeError({
+      title: `Unable to verify published versions for ${packageName}.`,
+      detailLines: [query.stderr || `npm exited with code ${query.status}`],
+      suggestionLines: [
+        'Check internet/npm access and retry.',
+        'Run localnest upgrade latest',
+        `Run npm view ${packageName} versions --json`
+      ]
+    });
+    process.exit(1);
+  }
+
+  const versions = parseVersionsJson(query.stdout);
+  if (versions.includes(targetVersion)) return;
+
+  const latest = versions.length > 0 ? versions[versions.length - 1] : null;
+  const betaCandidates = versions.filter((entry) => entry.includes('beta')).slice(-5);
+  printUpgradeError({
+    title: `Requested version "${targetVersion}" is not published for ${packageName}.`,
+    detailLines: [
+      latest ? `Latest published version: ${latest}` : 'Unable to determine latest published version.',
+      betaCandidates.length > 0
+        ? `Recent beta versions: ${betaCandidates.join(', ')}`
+        : 'No beta versions found in published list.'
+    ],
+    suggestionLines: [
+      `localnest upgrade ${latest || 'latest'}`,
+      `localnest upgrade --dry-run`,
+      `npm view ${packageName} versions --json`
+    ]
+  });
+  process.exit(1);
 }
 
 function toRootList(rawPaths) {
@@ -142,7 +243,9 @@ async function main() {
     process.stdout.write('LocalNest upgrade helper\n\n');
     process.stdout.write('Usage:\n');
     process.stdout.write('  localnest upgrade\n');
-    process.stdout.write('  localnest update --version=0.0.4-beta.5\n');
+    process.stdout.write('  localnest upgrade 0.0.4-beta.5\n');
+    process.stdout.write('  localnest upgrade install 0.0.4-beta.5\n');
+    process.stdout.write('  localnest upgrade --version=0.0.4-beta.5\n');
     process.stdout.write('  localnest upgrade --dry-run\n');
     process.stdout.write('Options:\n');
     process.stdout.write('  --version=<semver|latest>  target package version\n');
@@ -154,7 +257,7 @@ async function main() {
   }
 
   const packageName = parseArg('package') || 'localnest-mcp';
-  const targetVersion = parseArg('version') || 'latest';
+  const targetVersion = resolveTargetVersion();
   const skipSkill = hasFlag('skip-skill');
   const dryRun = hasFlag('dry-run');
   const assumeYes = hasFlag('yes');
@@ -219,6 +322,7 @@ async function main() {
     return;
   }
 
+  ensureVersionExists({ npmCmd, packageName, targetVersion });
   runCommand(npmCmd, ['install', '-g', `${packageName}@${targetVersion}`], 'upgrade package');
   if (!skipSkill) {
     runCommand(skillCmd, ['--force'], 'sync skill');

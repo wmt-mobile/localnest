@@ -5,6 +5,8 @@ node_modules/
 .mcp.localnest.*.json
 localnest.config.json
 /docs/
+*AUDIT-REPORT*.md
+*ACTION-PLAN*.md
 
 # Secrets and credentials (OSPS-BR-07.01)
 .env

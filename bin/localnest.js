@@ -14,7 +14,8 @@ function printHelp() {
   process.stdout.write('  start                     start MCP server (stdio)\n');
   process.stdout.write('  setup                     run setup wizard\n');
   process.stdout.write('  doctor                    run diagnostics\n');
-  process.stdout.write('  upgrade|update            upgrade package and migrate setup\n');
+  process.stdout.write('  upgrade                   upgrade package and migrate setup\n');
+  process.stdout.write('  sync                      encrypted Google Drive sync (init/push/pull/status)\n');
   process.stdout.write('  version                   print version\n');
   process.stdout.write('  help                      show this help\n');
 }
@@ -49,8 +50,13 @@ if (command === 'doctor') {
   process.exit(0);
 }
 
-if (command === 'upgrade' || command === 'update') {
+if (command === 'upgrade') {
   await forwardTo('../scripts/upgrade-localnest.mjs');
+  process.exit(0);
+}
+
+if (command === 'sync') {
+  await forwardTo('../scripts/sync-localnest.mjs');
   process.exit(0);
 }
 

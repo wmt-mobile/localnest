@@ -71,8 +71,8 @@ Upgrade command:
 
 ```bash
 localnest upgrade
-# alias:
-localnest update
+localnest upgrade 0.0.4-beta.5
+localnest upgrade install 0.0.4-beta.5
 ```
 
 ## MCP Client Configuration
