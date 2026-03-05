@@ -9,6 +9,12 @@
 
 A local-first MCP server that gives AI agents safe access to your codebase, plus optional local memory and semantic indexing for high-quality retrieval.
 
+## This Branch Is For
+
+- Users pinned to current beta: `0.0.4-beta.4`
+- Full memory workflow tools and update-aware tooling
+- New LocalNest home layout (`~/.localnest/config`, `data`, `cache`, `backups`)
+
 Documentation: https://wmt-mobile.github.io/localnest/
 
 Current branch package: `0.0.4-beta.4`
@@ -42,7 +48,7 @@ Install ripgrep:
 
 **Global install (recommended):**
 ```bash
-npm install -g localnest-mcp
+npm install -g localnest-mcp@0.0.4-beta.4
 localnest-mcp-install-skill
 localnest-mcp-setup
 localnest-mcp-doctor
