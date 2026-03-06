@@ -6,50 +6,30 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.4-beta.5] - 2026-03-06
 
-### Added
-- New top-level `localnest` CLI upgrade workflow:
-  - `localnest upgrade`
-  - `localnest upgrade <version>`
-  - `localnest upgrade install <version>`
-  - `localnest upgrade --version=<semver|latest>`
-- Domain-split service modules for maintainability:
-  - `src/services/search/*`
-  - `src/services/sqlite-vec/*`
-  - `src/services/vector-index/*`
-  - `src/services/workspace/*`
-  - `src/services/memory/*`
-  - `src/services/update/*`
-  - `src/services/chunker/*`, `src/services/embedding/service.js`, `src/services/reranker/service.js`
-- Dedicated server module grouping:
-  - `src/server/common/*`
-  - `src/server/tools/*`
-- Expanded stress harness coverage for retrieval + memory behavior.
+### Upgrade Notes
+- Use `localnest upgrade` as the canonical upgrade command.
+- `localnest update` is removed in this version.
+- If this is the first run on a machine/user account, run:
+  - `localnest setup`
+  - `localnest doctor --verbose`
 
-### Changed
-- Package/runtime version bumped to `0.0.4-beta.5`.
-- Large internal refactor to domain-oriented code layout for server/services with equivalent external MCP behavior.
-- Search pipeline performance improvements:
-  - faster ripgrep JSON context parsing
-  - faster fallback line matching
-- Setup and docs now prefer the top-level `localnest` command path.
-- Upgrade flow validates requested versions and returns cleaner user-facing errors.
-- Docusaurus docs refreshed for beta-5 launch:
-  - current release/version selection/history pages aligned to `0.0.4-beta.5`
-  - docs UI polish (updated typography, palette, layout clarity)
-- `localnest doctor` now checks model-cache writeability so model downloads are user-account ready.
-- Final release-prep sweep completed:
-  - launch validation run (`quality`, `doctor`, stress pass, docs build, npm audit)
-  - release metadata/docs alignment across README + Docusaurus release pages
-  - repo ignore rules tightened for local assistant/config artifacts (`.codex`, `.claude*`, `.mcp.json`, `CLAUDE.md`)
+### Model Download and Cache
+- Setup now warms embedding and reranker models on first run.
+- `doctor` now checks whether model cache is writable for the current user.
+- If cache path is not writable, set:
+  - `LOCALNEST_EMBED_CACHE_DIR`
+  - `LOCALNEST_RERANKER_CACHE_DIR`
+- For offline or restricted environments:
+  - `localnest setup --skip-model-download=true`
 
-### Removed
-- Deprecated `localnest update` alias (keep `localnest upgrade` only).
-- Experimental backup sync CLI and related Google Drive integration.
-- Legacy audit/plan report artifacts removed from repository root.
+### User-Visible Changes
+- Cleaner upgrade validation and clearer upgrade error messages.
+- Faster search behavior (ripgrep context parsing and fallback line matching).
+- Docs updated and aligned to `0.0.4-beta.5` across release pages and install guidance.
 
-### Fixed
-- README/package badges and release references aligned with `0.0.4-beta.5`.
-- Model download guidance clarified for first-run warmup and offline/locked-down environments.
+### Breaking/Removed
+- Removed deprecated `localnest update` alias.
+- Removed experimental backup sync CLI and Google Drive integration.
 
 ## [0.0.4-beta.4] - 2026-03-03
 
