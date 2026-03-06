@@ -4,7 +4,7 @@ description: Overview of LocalNest v0.0.4-beta.4 beta docs, including memory wor
 
 # 0.0.4-beta.4 Overview
 
-`0.0.4-beta.4` is the current beta package line.
+`0.0.4-beta.4` is an archived beta package line.
 
 <div className="docPanel docPanel--compact">
   <p>
@@ -24,4 +24,3 @@ description: Overview of LocalNest v0.0.4-beta.4 beta docs, including memory wor
 ## Best use
 
 Use this version archive when your MCP client is pinned to `localnest-mcp@0.0.4-beta.4` and you want docs aligned exactly to that runtime behavior.
-

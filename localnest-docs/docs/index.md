@@ -102,7 +102,7 @@ npx -y localnest-mcp-doctor
   </a>
   <a className="docLinkCard" href="./releases/current">
     <strong>Current beta release</strong>
-    <span>See the `0.0.4-beta.5` beta behavior, including local memory, setup changes, and sync updates.</span>
+    <span>See the `0.0.4-beta.5` beta behavior, including `localnest upgrade`, setup updates, and memory workflow.</span>
   </a>
   <a className="docLinkCard" href="./releases/history">
     <strong>Release matrix</strong>

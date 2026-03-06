@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Quality](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml)
 [![CodeQL](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml)
-[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.4)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.4)
+[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.5)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.5)
 
 A local-first MCP server that gives AI agents safe access to your codebase, plus optional local memory and semantic indexing for high-quality retrieval.
 
@@ -73,6 +73,28 @@ Upgrade command:
 localnest upgrade
 localnest upgrade 0.0.4-beta.5
 localnest upgrade install 0.0.4-beta.5
+```
+
+Model download readiness (recommended per user account):
+
+```bash
+localnest doctor --verbose
+localnest setup
+```
+
+- Setup warms embedding/reranker models on first run (downloads into `~/.localnest/cache` by default).
+- If your environment is offline/restricted, skip warmup and run it later:
+
+```bash
+localnest setup --skip-model-download=true
+```
+
+- If default cache path is not writable, set a user-writable cache path before setup:
+
+```bash
+export LOCALNEST_EMBED_CACHE_DIR="$HOME/.cache/localnest-models"
+export LOCALNEST_RERANKER_CACHE_DIR="$HOME/.cache/localnest-models"
+localnest setup
 ```
 
 ## MCP Client Configuration

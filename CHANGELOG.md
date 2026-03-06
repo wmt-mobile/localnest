@@ -4,21 +4,48 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
-## [0.0.4-beta.5] - 2026-03-05
+## [0.0.4-beta.5] - 2026-03-06
 
 ### Added
-- New top-level `localnest` CLI subcommands:
-  - `localnest upgrade` (single canonical upgrade command with version argument support)
+- New top-level `localnest` CLI upgrade workflow:
+  - `localnest upgrade`
+  - `localnest upgrade <version>`
+  - `localnest upgrade install <version>`
+  - `localnest upgrade --version=<semver|latest>`
+- Domain-split service modules for maintainability:
+  - `src/services/search/*`
+  - `src/services/sqlite-vec/*`
+  - `src/services/vector-index/*`
+  - `src/services/workspace/*`
+  - `src/services/memory/*`
+  - `src/services/update/*`
+  - `src/services/chunker/*`, `src/services/embedding/service.js`, `src/services/reranker/service.js`
+- Dedicated server module grouping:
+  - `src/server/common/*`
+  - `src/server/tools/*`
+- Expanded stress harness coverage for retrieval + memory behavior.
 
 ### Changed
 - Package/runtime version bumped to `0.0.4-beta.5`.
+- Large internal refactor to domain-oriented code layout for server/services with equivalent external MCP behavior.
+- Search pipeline performance improvements:
+  - faster ripgrep JSON context parsing
+  - faster fallback line matching
 - Setup and docs now prefer the top-level `localnest` command path.
-- Upgrade flow now validates requested versions and reports cleaner user-facing errors.
+- Upgrade flow validates requested versions and returns cleaner user-facing errors.
+- Docusaurus docs refreshed for beta-5 launch:
+  - current release/version selection/history pages aligned to `0.0.4-beta.5`
+  - docs UI polish (updated typography, palette, layout clarity)
+- `localnest doctor` now checks model-cache writeability so model downloads are user-account ready.
 
 ### Removed
 - Deprecated `localnest update` alias (keep `localnest upgrade` only).
-- Legacy audit/plan report artifacts removed from repository root.
 - Experimental backup sync CLI and related Google Drive integration.
+- Legacy audit/plan report artifacts removed from repository root.
+
+### Fixed
+- README/package badges and release references aligned with `0.0.4-beta.5`.
+- Model download guidance clarified for first-run warmup and offline/locked-down environments.
 
 ## [0.0.4-beta.4] - 2026-03-03
 

@@ -32,7 +32,15 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
 - bundled install skill command
 - version-aware skill sync behavior
 - setup-time memory consent and config migration
-- `localnest` top-level CLI command (`setup`, `doctor`, `upgrade`)
+- `localnest` top-level CLI command path (`setup`, `doctor`, `upgrade`)
+
+## What changed in `0.0.4-beta.5`
+
+- Added top-level `localnest upgrade` subcommand as the canonical upgrade path.
+- Updated setup/docs guidance to prefer top-level `localnest` command usage.
+- Improved upgrade validation with clearer user-facing error reporting.
+- Removed deprecated `localnest update` alias.
+- Removed experimental backup sync CLI + Google Drive integration from the package.
 
 ## How to use this page
 
@@ -45,5 +53,6 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
 This page is based on the current beta package version and maintained changelog in the repository.
 
 - package version: `0.0.4-beta.5`
+- release date: `2026-03-05`
 - changelog sections document beta changes merged into this branch
 - stable published release docs remain archived under `0.0.3`

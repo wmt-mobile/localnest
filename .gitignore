@@ -8,6 +8,7 @@ localnest.config.json
 /CLAUDE.md
 /.claude/
 /.claude-flow/
+/.codex/
 /docs/
 *AUDIT-REPORT*.md
 *ACTION-PLAN*.md

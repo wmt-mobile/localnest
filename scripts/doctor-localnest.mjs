@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { resolveConfigPath as resolveDefaultConfigPath, resolveLocalnestHome } from '../src/home-layout.js';
+import { buildLocalnestPaths, resolveConfigPath as resolveDefaultConfigPath, resolveLocalnestHome } from '../src/home-layout.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';
@@ -35,6 +35,25 @@ function resolveConfigPath() {
     env: process.env,
     localnestHome: resolveLocalnestHome(process.env)
   });
+}
+
+function resolveModelCacheDir() {
+  const byEnv = (process.env.LOCALNEST_EMBED_CACHE_DIR || '').trim();
+  if (byEnv) return path.resolve(byEnv);
+
+  const cfgPath = resolveConfigPath();
+  try {
+    if (!fs.existsSync(cfgPath)) {
+      return buildLocalnestPaths(resolveLocalnestHome(process.env)).dirs.cache;
+    }
+    const parsed = JSON.parse(fs.readFileSync(cfgPath, 'utf8'));
+    const byConfig = parsed?.index?.embeddingCacheDir;
+    if (typeof byConfig === 'string' && byConfig.trim()) return path.resolve(byConfig);
+  } catch {
+    // Fall through to default cache dir.
+  }
+
+  return buildLocalnestPaths(resolveLocalnestHome(process.env)).dirs.cache;
 }
 
 function resolveIndexBackend() {
@@ -192,6 +211,31 @@ function checkConfigFile() {
   };
 }
 
+function checkModelCacheWritable() {
+  const cacheDir = resolveModelCacheDir();
+  const probePath = path.join(
+    cacheDir,
+    `.localnest-cache-probe-${process.pid}-${Date.now()}.tmp`
+  );
+  try {
+    fs.mkdirSync(cacheDir, { recursive: true });
+    fs.writeFileSync(probePath, 'ok', 'utf8');
+    fs.rmSync(probePath, { force: true });
+    return {
+      id: 'model_cache',
+      ok: true,
+      detail: `Model cache writable (${cacheDir})`
+    };
+  } catch (error) {
+    return {
+      id: 'model_cache',
+      ok: false,
+      detail: `Model cache not writable (${cacheDir}): ${error?.message || error}`,
+      fix: 'Set LOCALNEST_EMBED_CACHE_DIR/LOCALNEST_RERANKER_CACHE_DIR to a writable path, then re-run localnest setup.'
+    };
+  }
+}
+
 function printText(results) {
   console.log('LocalNest Doctor');
   console.log('');
@@ -220,7 +264,8 @@ async function main() {
     checkRipgrep(),
     await checkSdkImport(),
     await checkSqliteBackend(),
-    checkConfigFile()
+    checkConfigFile(),
+    checkModelCacheWritable()
   ];
 
   if (asJson) {
