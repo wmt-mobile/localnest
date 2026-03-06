@@ -47,7 +47,16 @@ export function normalizeUpgradeConfig({ existingConfig, defaults }) {
       : defaults.index.maxTermsPerChunk,
     maxIndexedFiles: Number.isFinite(existing.index?.maxIndexedFiles)
       ? existing.index.maxIndexedFiles
-      : defaults.index.maxIndexedFiles
+      : defaults.index.maxIndexedFiles,
+    embeddingProvider: existing.index?.embeddingProvider || defaults.index.embeddingProvider,
+    embeddingModel: existing.index?.embeddingModel || defaults.index.embeddingModel,
+    embeddingCacheDir: existing.index?.embeddingCacheDir || defaults.index.embeddingCacheDir,
+    embeddingDimensions: Number.isFinite(existing.index?.embeddingDimensions)
+      ? existing.index.embeddingDimensions
+      : defaults.index.embeddingDimensions,
+    rerankerProvider: existing.index?.rerankerProvider || defaults.index.rerankerProvider,
+    rerankerModel: existing.index?.rerankerModel || defaults.index.rerankerModel,
+    rerankerCacheDir: existing.index?.rerankerCacheDir || defaults.index.rerankerCacheDir
   };
 
   const memoryEnabled = typeof existing.memory?.enabled === 'boolean'
@@ -71,4 +80,3 @@ export function normalizeUpgradeConfig({ existingConfig, defaults }) {
     memory
   };
 }
-

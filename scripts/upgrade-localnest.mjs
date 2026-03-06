@@ -10,7 +10,7 @@ import { migrateLocalnestHomeLayout, resolveLocalnestHome } from '../src/home-la
 import {
   findMissingRequiredSetupFields,
   normalizeUpgradeConfig
-} from '../src/services/upgrade-assistant.js';
+} from '../src/services/update/upgrade-assistant.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';
@@ -271,7 +271,14 @@ async function main() {
       chunkLines: 60,
       chunkOverlap: 15,
       maxTermsPerChunk: 80,
-      maxIndexedFiles: 20000
+      maxIndexedFiles: 20000,
+      embeddingProvider: 'xenova',
+      embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+      embeddingCacheDir: layout.dirs.cache,
+      embeddingDimensions: 384,
+      rerankerProvider: 'xenova',
+      rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2',
+      rerankerCacheDir: layout.dirs.cache
     },
     memory: {
       enabled: false,
@@ -301,6 +308,13 @@ async function main() {
     `--chunk-overlap=${String(finalConfig.index.chunkOverlap)}`,
     `--max-terms-per-chunk=${String(finalConfig.index.maxTermsPerChunk)}`,
     `--max-indexed-files=${String(finalConfig.index.maxIndexedFiles)}`,
+    `--embed-provider=${finalConfig.index.embeddingProvider || 'xenova'}`,
+    `--embed-model=${finalConfig.index.embeddingModel || 'Xenova/all-MiniLM-L6-v2'}`,
+    `--embed-cache-dir=${finalConfig.index.embeddingCacheDir || layout.dirs.cache}`,
+    `--embed-dims=${String(finalConfig.index.embeddingDimensions || 384)}`,
+    `--reranker-provider=${finalConfig.index.rerankerProvider || 'xenova'}`,
+    `--reranker-model=${finalConfig.index.rerankerModel || 'Xenova/ms-marco-MiniLM-L-6-v2'}`,
+    `--reranker-cache-dir=${finalConfig.index.rerankerCacheDir || layout.dirs.cache}`,
     `--memory-enabled=${String(finalConfig.memory.enabled)}`,
     `--memory-backend=${finalConfig.memory.backend}`,
     `--memory-db-path=${finalConfig.memory.dbPath}`,

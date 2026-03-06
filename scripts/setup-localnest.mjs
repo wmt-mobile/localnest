@@ -7,6 +7,8 @@ import { spawnSync } from 'node:child_process';
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { migrateLocalnestHomeLayout, resolveLocalnestHome } from '../src/home-layout.js';
+import { EmbeddingService } from '../src/services/embedding/service.js';
+import { RerankerService } from '../src/services/reranker/service.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';
@@ -112,6 +114,13 @@ function buildClientSnippet(packageRef, indexConfig) {
           LOCALNEST_INDEX_BACKEND: indexConfig.backend,
           LOCALNEST_DB_PATH: indexConfig.dbPath,
           LOCALNEST_INDEX_PATH: indexConfig.indexPath,
+          LOCALNEST_EMBED_PROVIDER: indexConfig.embedding.provider,
+          LOCALNEST_EMBED_MODEL: indexConfig.embedding.model,
+          LOCALNEST_EMBED_CACHE_DIR: indexConfig.embedding.cacheDir,
+          LOCALNEST_EMBED_DIMS: String(indexConfig.embedding.dimensions),
+          LOCALNEST_RERANKER_PROVIDER: indexConfig.reranker.provider,
+          LOCALNEST_RERANKER_MODEL: indexConfig.reranker.model,
+          LOCALNEST_RERANKER_CACHE_DIR: indexConfig.reranker.cacheDir,
           LOCALNEST_MEMORY_ENABLED: String(indexConfig.memory.enabled),
           LOCALNEST_MEMORY_BACKEND: indexConfig.memory.backend,
           LOCALNEST_MEMORY_DB_PATH: indexConfig.memory.dbPath
@@ -133,6 +142,13 @@ function buildGlobalClientSnippet(indexConfig) {
           LOCALNEST_INDEX_BACKEND: indexConfig.backend,
           LOCALNEST_DB_PATH: indexConfig.dbPath,
           LOCALNEST_INDEX_PATH: indexConfig.indexPath,
+          LOCALNEST_EMBED_PROVIDER: indexConfig.embedding.provider,
+          LOCALNEST_EMBED_MODEL: indexConfig.embedding.model,
+          LOCALNEST_EMBED_CACHE_DIR: indexConfig.embedding.cacheDir,
+          LOCALNEST_EMBED_DIMS: String(indexConfig.embedding.dimensions),
+          LOCALNEST_RERANKER_PROVIDER: indexConfig.reranker.provider,
+          LOCALNEST_RERANKER_MODEL: indexConfig.reranker.model,
+          LOCALNEST_RERANKER_CACHE_DIR: indexConfig.reranker.cacheDir,
           LOCALNEST_MEMORY_ENABLED: String(indexConfig.memory.enabled),
           LOCALNEST_MEMORY_BACKEND: indexConfig.memory.backend,
           LOCALNEST_MEMORY_DB_PATH: indexConfig.memory.dbPath
@@ -217,7 +233,7 @@ function saveOutputs(roots, packageRef, indexConfig) {
   fs.mkdirSync(layout.dirs.backups, { recursive: true });
   const config = {
     name: 'localnest',
-    version: 3,
+    version: 4,
     updatedAt: new Date().toISOString(),
     roots,
     index: {
@@ -227,7 +243,14 @@ function saveOutputs(roots, packageRef, indexConfig) {
       chunkLines: indexConfig.chunkLines,
       chunkOverlap: indexConfig.chunkOverlap,
       maxTermsPerChunk: indexConfig.maxTermsPerChunk,
-      maxIndexedFiles: indexConfig.maxIndexedFiles
+      maxIndexedFiles: indexConfig.maxIndexedFiles,
+      embeddingProvider: indexConfig.embedding.provider,
+      embeddingModel: indexConfig.embedding.model,
+      embeddingCacheDir: indexConfig.embedding.cacheDir,
+      embeddingDimensions: indexConfig.embedding.dimensions,
+      rerankerProvider: indexConfig.reranker.provider,
+      rerankerModel: indexConfig.reranker.model,
+      rerankerCacheDir: indexConfig.reranker.cacheDir
     },
     memory: {
       enabled: indexConfig.memory.enabled,
@@ -240,6 +263,36 @@ function saveOutputs(roots, packageRef, indexConfig) {
 
   fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`, 'utf8');
   fs.writeFileSync(snippetPath, `${JSON.stringify(buildClientSnippet(packageRef, indexConfig), null, 2)}\n`, 'utf8');
+}
+
+async function warmupModels(indexConfig) {
+  if (indexConfig?.embedding?.provider && indexConfig.embedding.provider !== 'none') {
+    process.stdout.write('[setup] warming up embedding model (first run downloads model files)...\n');
+    try {
+      const embedding = new EmbeddingService({
+        provider: indexConfig.embedding.provider,
+        model: indexConfig.embedding.model,
+        cacheDir: indexConfig.embedding.cacheDir
+      });
+      await embedding.embed('localnest embedding warmup');
+    } catch (error) {
+      process.stderr.write(`[setup] warning: embedding warmup failed: ${error?.message || error}\n`);
+    }
+  }
+
+  if (indexConfig?.reranker?.provider && indexConfig.reranker.provider !== 'none') {
+    process.stdout.write('[setup] warming up reranker model (first run downloads model files)...\n');
+    try {
+      const reranker = new RerankerService({
+        provider: indexConfig.reranker.provider,
+        model: indexConfig.reranker.model,
+        cacheDir: indexConfig.reranker.cacheDir
+      });
+      await reranker.score('warmup query', 'warmup candidate');
+    } catch (error) {
+      process.stderr.write(`[setup] warning: reranker warmup failed: ${error?.message || error}\n`);
+    }
+  }
 }
 
 function printSuccess(packageRef, indexConfig) {
@@ -288,6 +341,14 @@ async function main() {
     const chunkOverlap = parseIntegerArg('chunk-overlap', 15);
     const maxTermsPerChunk = parseIntegerArg('max-terms-per-chunk', 80);
     const maxIndexedFiles = parseIntegerArg('max-indexed-files', 20000);
+    const embeddingProvider = parseArg('embed-provider') || 'xenova';
+    const embeddingModel = parseArg('embed-model') || 'Xenova/all-MiniLM-L6-v2';
+    const embeddingCacheDir = path.resolve(expandHome(parseArg('embed-cache-dir') || layout.dirs.cache));
+    const embeddingDimensions = parseIntegerArg('embed-dims', 384);
+    const rerankerProvider = parseArg('reranker-provider') || 'xenova';
+    const rerankerModel = parseArg('reranker-model') || 'Xenova/ms-marco-MiniLM-L-6-v2';
+    const rerankerCacheDir = path.resolve(expandHome(parseArg('reranker-cache-dir') || layout.dirs.cache));
+    const skipModelDownload = parseBooleanArg('skip-model-download') ?? false;
     const memoryEnabled = parseBooleanArg('memory-enabled') ?? false;
     const memoryBackend = parseArg('memory-backend') || 'auto';
     const memoryDbPath = path.resolve(expandHome(parseArg('memory-db-path') || defaultMemoryDbPath));
@@ -302,6 +363,17 @@ async function main() {
       chunkOverlap,
       maxTermsPerChunk,
       maxIndexedFiles,
+      embedding: {
+        provider: embeddingProvider,
+        model: embeddingModel,
+        cacheDir: embeddingCacheDir,
+        dimensions: embeddingDimensions
+      },
+      reranker: {
+        provider: rerankerProvider,
+        model: rerankerModel,
+        cacheDir: rerankerCacheDir
+      },
       memory: {
         enabled: memoryEnabled,
         backend: memoryBackend,
@@ -314,12 +386,38 @@ async function main() {
       backend,
       dbPath,
       indexPath,
+      embedding: {
+        provider: embeddingProvider,
+        model: embeddingModel,
+        cacheDir: embeddingCacheDir,
+        dimensions: embeddingDimensions
+      },
+      reranker: {
+        provider: rerankerProvider,
+        model: rerankerModel,
+        cacheDir: rerankerCacheDir
+      },
       memory: {
         enabled: memoryEnabled,
         backend: memoryBackend,
         dbPath: memoryDbPath
       }
     });
+    if (!skipModelDownload) {
+      await warmupModels({
+        embedding: {
+          provider: embeddingProvider,
+          model: embeddingModel,
+          cacheDir: embeddingCacheDir,
+          dimensions: embeddingDimensions
+        },
+        reranker: {
+          provider: rerankerProvider,
+          model: rerankerModel,
+          cacheDir: rerankerCacheDir
+        }
+      });
+    }
     return;
   }
 
@@ -331,6 +429,7 @@ async function main() {
     console.log('  npm run setup -- --paths="/abs/path1,/abs/path2"');
     console.log('  npm run setup -- --roots-json=\'[{"label":"repo","path":"/abs/repo"}]\'');
     console.log('  npm run setup -- --package="localnest-mcp"');
+    console.log('  npm run setup -- --skip-model-download=true');
     return;
   }
 
@@ -416,6 +515,13 @@ async function main() {
     const chunkOverlap = Number.parseInt(chunkOverlapInput || '15', 10) || 15;
     const maxTermsPerChunk = Number.parseInt(maxTermsInput || '80', 10) || 80;
     const maxIndexedFiles = Number.parseInt(maxFilesInput || '20000', 10) || 20000;
+    const embeddingProvider = 'xenova';
+    const embeddingModel = 'Xenova/all-MiniLM-L6-v2';
+    const embeddingCacheDir = layout.dirs.cache;
+    const embeddingDimensions = 384;
+    const rerankerProvider = 'xenova';
+    const rerankerModel = 'Xenova/ms-marco-MiniLM-L-6-v2';
+    const rerankerCacheDir = layout.dirs.cache;
 
     console.log('');
     console.log('Local memory setup:');
@@ -435,6 +541,17 @@ async function main() {
       chunkOverlap,
       maxTermsPerChunk,
       maxIndexedFiles,
+      embedding: {
+        provider: embeddingProvider,
+        model: embeddingModel,
+        cacheDir: embeddingCacheDir,
+        dimensions: embeddingDimensions
+      },
+      reranker: {
+        provider: rerankerProvider,
+        model: rerankerModel,
+        cacheDir: rerankerCacheDir
+      },
       memory: {
         enabled: memoryEnabled,
         backend: 'auto',
@@ -447,10 +564,34 @@ async function main() {
       backend,
       dbPath,
       indexPath,
+      embedding: {
+        provider: embeddingProvider,
+        model: embeddingModel,
+        cacheDir: embeddingCacheDir,
+        dimensions: embeddingDimensions
+      },
+      reranker: {
+        provider: rerankerProvider,
+        model: rerankerModel,
+        cacheDir: rerankerCacheDir
+      },
       memory: {
         enabled: memoryEnabled,
         backend: 'auto',
         dbPath: memoryDbPath
+      }
+    });
+    await warmupModels({
+      embedding: {
+        provider: embeddingProvider,
+        model: embeddingModel,
+        cacheDir: embeddingCacheDir,
+        dimensions: embeddingDimensions
+      },
+      reranker: {
+        provider: rerankerProvider,
+        model: rerankerModel,
+        cacheDir: rerankerCacheDir
       }
     });
   } finally {

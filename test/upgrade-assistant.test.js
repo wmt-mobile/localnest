@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   findMissingRequiredSetupFields,
   normalizeUpgradeConfig
-} from '../src/services/upgrade-assistant.js';
+} from '../src/services/update/upgrade-assistant.js';
 
 test('findMissingRequiredSetupFields reports required paths', () => {
   const missing = findMissingRequiredSetupFields({});
@@ -23,7 +23,14 @@ test('normalizeUpgradeConfig merges existing values over defaults', () => {
       chunkLines: 60,
       chunkOverlap: 15,
       maxTermsPerChunk: 80,
-      maxIndexedFiles: 20000
+      maxIndexedFiles: 20000,
+      embeddingProvider: 'xenova',
+      embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+      embeddingCacheDir: '/tmp/localnest/cache',
+      embeddingDimensions: 384,
+      rerankerProvider: 'xenova',
+      rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2',
+      rerankerCacheDir: '/tmp/localnest/cache'
     },
     memory: {
       enabled: false,
@@ -39,7 +46,10 @@ test('normalizeUpgradeConfig merges existing values over defaults', () => {
     index: {
       backend: 'json',
       dbPath: '/work/index.db',
-      chunkLines: 120
+      chunkLines: 120,
+      embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+      embeddingDimensions: 384,
+      rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2'
     },
     memory: {
       enabled: true,
@@ -53,6 +63,11 @@ test('normalizeUpgradeConfig merges existing values over defaults', () => {
   assert.equal(merged.index.dbPath, '/work/index.db');
   assert.equal(merged.index.indexPath, defaults.index.indexPath);
   assert.equal(merged.index.chunkLines, 120);
+  assert.equal(merged.index.embeddingProvider, defaults.index.embeddingProvider);
+  assert.equal(merged.index.embeddingModel, 'Xenova/all-MiniLM-L6-v2');
+  assert.equal(merged.index.embeddingDimensions, 384);
+  assert.equal(merged.index.rerankerProvider, defaults.index.rerankerProvider);
+  assert.equal(merged.index.rerankerModel, 'Xenova/ms-marco-MiniLM-L-6-v2');
   assert.equal(merged.memory.enabled, true);
   assert.equal(merged.memory.autoCapture, true);
   assert.equal(merged.memory.dbPath, '/work/memory.db');
