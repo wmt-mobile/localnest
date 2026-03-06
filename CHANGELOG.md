@@ -37,6 +37,10 @@ All notable changes to this project will be documented in this file.
   - current release/version selection/history pages aligned to `0.0.4-beta.5`
   - docs UI polish (updated typography, palette, layout clarity)
 - `localnest doctor` now checks model-cache writeability so model downloads are user-account ready.
+- Final release-prep sweep completed:
+  - launch validation run (`quality`, `doctor`, stress pass, docs build, npm audit)
+  - release metadata/docs alignment across README + Docusaurus release pages
+  - repo ignore rules tightened for local assistant/config artifacts (`.codex`, `.claude*`, `.mcp.json`, `CLAUDE.md`)
 
 ### Removed
 - Deprecated `localnest update` alias (keep `localnest upgrade` only).
