@@ -9,7 +9,7 @@ const skipReason = nodeMajor < 22 ? `node:sqlite requires Node 22+ (current: ${p
 
 const { buildBaseScopeClause, SqliteVecIndexService } = skipReason
   ? { buildBaseScopeClause: null, SqliteVecIndexService: null }
-  : await import('../src/services/sqlite-vec/service.js');
+  : await import('../src/services/retrieval/index.js');
 
 test('buildBaseScopeClause handles slash and backslash descendants', { skip: skipReason }, () => {
   const bases = ['C:\\repo\\project', '/home/u/repo'];

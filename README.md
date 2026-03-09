@@ -5,13 +5,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Quality](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml)
 [![CodeQL](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml)
-[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.5)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.5)
+[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.6)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.6)
 
 A local-first MCP server that gives AI agents safe access to your codebase, plus optional local memory and semantic indexing for high-quality retrieval.
 
 Documentation: https://wmt-mobile.github.io/localnest/
 
-Current beta package: `0.0.4-beta.5`
+Current beta package: `0.0.4-beta.6`
 
 Engineering docs for contributors:
 - [`guides/README.md`](./guides/README.md)
@@ -71,8 +71,8 @@ Upgrade command:
 
 ```bash
 localnest upgrade
-localnest upgrade 0.0.4-beta.5
-localnest upgrade install 0.0.4-beta.5
+localnest upgrade 0.0.4-beta.6
+localnest upgrade install 0.0.4-beta.6
 ```
 
 Model download readiness (recommended per user account):
@@ -84,6 +84,7 @@ localnest setup
 
 - Setup warms embedding/reranker models on first run (downloads into `~/.localnest/cache` by default).
 - If `~/.localnest/cache` is not writable, LocalNest automatically falls back to a per-user temp cache path.
+- Cache fallback is informational when startup still succeeds, but model files will not persist in the preferred cache location until the preferred path is writable again.
 - If your environment is offline/restricted, skip warmup and run it later:
 
 ```bash
@@ -100,14 +101,13 @@ localnest setup
 
 ## MCP Client Configuration
 
-After running setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client config, or use this template:
+After running setup, LocalNest tries to detect supported AI tools on the current machine and writes or updates their LocalNest MCP entry automatically. It also saves `~/.localnest/config/mcp.localnest.json` for manual copy or clients you want to configure yourself:
 
 ```json
 {
   "mcpServers": {
     "localnest": {
-      "command": "npx",
-      "args": ["-y", "localnest-mcp"],
+      "command": "localnest-mcp",
       "startup_timeout_sec": 30,
       "env": {
         "MCP_MODE": "stdio",
@@ -124,7 +124,7 @@ After running setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP
 }
 ```
 
-> **Windows:** Setup auto-generates `npx.cmd` in `mcp.localnest.json` — use that file directly.
+> **Windows:** Setup writes the correct command for the host platform in `mcp.localnest.json` — use the generated file directly.
 
 Restart your MCP client after updating the config.
 
@@ -134,6 +134,45 @@ If your client reports MCP startup timeout (for example 10s default), increase i
 [mcp_servers.localnest]
 startup_timeout_sec = 30
 ```
+
+### Supported Auto-Configured AI Tools
+
+Setup currently auto-detects and updates these tools when their config directories are present:
+
+- Codex
+- Cursor
+- Windsurf
+- Windsurf (Codeium-managed config)
+- Gemini CLI / Antigravity
+- Kiro
+
+Setup writes a backup under `~/.localnest/backups/` before modifying a detected client config.
+
+### Direct Binary vs `npx`
+
+Prefer the direct binary when `localnest-mcp` is installed globally:
+
+```json
+{
+  "command": "localnest-mcp"
+}
+```
+
+Use `npx` only as a fallback when a global install is unavailable:
+
+```json
+{
+  "command": "npx",
+  "args": ["-y", "localnest-mcp"]
+}
+```
+
+If MCP startup fails before `initialize`, check whether:
+
+- the client is still launching through `npx`
+- npm cache permissions are broken for the current user
+- `startup_timeout_sec` is too low for the current machine
+- `localnest-mcp --version` works directly
 
 ## Tools
 
@@ -169,6 +208,7 @@ startup_timeout_sec = 30
 
 All tools support `response_format: "json"` (default) or `"markdown"`.
 Only canonical `localnest_*` tool names are exposed (no short aliases) to keep MCP clients clean and non-duplicative.
+Each MCP response also includes `meta.schema_version` so clients can detect contract revisions explicitly.
 
 **List tools** return pagination fields: `total_count`, `count`, `limit`, `offset`, `has_more`, `next_offset`, `items`.
 
@@ -188,6 +228,21 @@ localnest_server_status → localnest_task_context → localnest_index_status
 → localnest_read_file
 → localnest_capture_outcome
 ```
+
+### Successful Execution vs Meaningful Evidence
+
+A tool can execute successfully and still return weak evidence.
+
+- Successful execution means the MCP call completed without transport or runtime failure.
+- Meaningful evidence means the response contains useful matches, file lines, or actionable diagnostics for the current task.
+
+Examples:
+
+- `localnest_search_code` returning `[]` is a successful execution, but not meaningful evidence.
+- `localnest_read_file` returning actual line content is meaningful evidence.
+- `localnest_update_status` returning cached metadata is meaningful if it still tells the client whether an update is actionable.
+
+For release checks and agent workflows, prefer responses that contain non-empty evidence over treating process success alone as sufficient.
 
 ## Index Backend
 
@@ -257,6 +312,16 @@ Performance tips:
 - Keep `max_results` small first (20-40), then widen only when needed.
 - Keep reranking off by default and enable it only for final answer quality on ambiguous queries.
 - Avoid indexing all roots for one-off tasks; prefer project-scoped indexing.
+
+## Installed Runtime Release Testing
+
+Before publishing a new build, run the installed-runtime release harness against the globally installed binary:
+
+```bash
+node scripts/release/release-test-installed-runtime.mjs --version-label 0.0.4-beta.6
+```
+
+The harness writes both markdown and JSON reports under `reports/` and is intended to verify the installed runtime, not just the repo checkout.
 
 ## Local Memory
 

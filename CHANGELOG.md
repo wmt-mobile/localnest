@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4-beta.6] - 2026-03-09
+
+### Release Hardening
+- Normalized MCP response contracts through shared wrapper-level helpers and tightened regression coverage for tool outputs.
+- Improved retrieval miss guidance, explicit `read_file` path errors, and installed-runtime release harness checks so release sweeps require meaningful evidence.
+- Hardened runtime environment handling around cache diagnostics, MCP background sweep behavior, and update workflow metadata.
+
+### Product and UX
+- Added `localnest_health` and richer `localnest_server_status` diagnostics for faster client-side troubleshooting.
+- Updated end-user docs for current beta setup, release selection, installed-runtime validation, and supported auto-configured MCP clients.
+
+### Internal Structure
+- Reorganized the codebase into clearer `src/app`, `src/runtime`, `src/mcp`, and domain-scoped `src/services/*` modules.
+- Grouped scripts by operational concern (`runtime`, `memory`, `release`, `quality`) and simplified bin entrypoints with shared helpers.
+
 ## [0.0.4-beta.5] - 2026-03-06
 
 ### Upgrade Notes

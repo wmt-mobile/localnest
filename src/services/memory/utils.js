@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { tokenize } from '../core/tokenizer.js';
+import { tokenize } from '../retrieval/core/tokenizer.js';
 
 export function nowIso() {
   return new Date().toISOString();

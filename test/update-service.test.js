@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { UpdateService, compareVersions } from '../src/services/update/service.js';
-import { buildLocalnestPaths } from '../src/home-layout.js';
+import { UpdateService, compareVersions } from '../src/services/update/index.js';
+import { buildLocalnestPaths } from '../src/runtime/home-layout.js';
 
 function makeTempHome() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-update-test-'));
@@ -37,11 +37,16 @@ test('getStatus fetches npm live result and then serves cache while fresh', asyn
   assert.equal(live.latest_version, '0.0.5');
   assert.equal(live.is_outdated, true);
   assert.equal(live.source, 'live');
+  assert.equal(live.recommendation, 'update_available');
+  assert.equal(live.can_attempt_update, true);
+  assert.equal(live.using_cached_data, false);
+  assert.ok(live.next_check_at);
   assert.ok(fs.existsSync(buildLocalnestPaths(home).updateStatusPath));
 
   const cached = await service.getStatus({ force: false });
   assert.equal(calls, 1);
   assert.equal(cached.source, 'cache');
+  assert.equal(cached.using_cached_data, true);
 });
 
 test('getStatus falls back to cache on npm failure', async () => {
@@ -70,7 +75,53 @@ test('getStatus falls back to cache on npm failure', async () => {
   assert.equal(out.source, 'cache-fallback');
   assert.equal(out.is_outdated, true);
   assert.equal(out.last_check_ok, false);
+  assert.equal(out.using_cached_data, true);
+  assert.equal(out.recommendation, 'update_available');
   assert.match(out.error, /network error/);
+});
+
+test('getStatus stays informative when npm fails without cache', async () => {
+  const home = makeTempHome();
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.0.4-beta.6',
+    checkIntervalMinutes: 120,
+    failureBackoffMinutes: 15,
+    commandRunner: () => ({ status: 1, stdout: '', stderr: 'offline' })
+  });
+
+  const out = await service.getStatus({ force: true });
+  assert.equal(out.source, 'error');
+  assert.equal(out.current_version, '0.0.4-beta.6');
+  assert.equal(out.latest_version, '0.0.4-beta.6');
+  assert.equal(out.is_outdated, false);
+  assert.equal(out.can_attempt_update, false);
+  assert.equal(out.recommendation, 'retry_later');
+  assert.equal(out.using_cached_data, false);
+  assert.match(out.error, /offline/);
+});
+
+test('getCachedStatus returns informative fallback without npm access', () => {
+  const home = makeTempHome();
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.0.4-beta.6',
+    checkIntervalMinutes: 120,
+    failureBackoffMinutes: 15,
+    commandRunner: () => {
+      throw new Error('should not run');
+    }
+  });
+
+  const out = service.getCachedStatus();
+  assert.equal(out.source, 'uninitialized');
+  assert.equal(out.current_version, '0.0.4-beta.6');
+  assert.equal(out.latest_version, '0.0.4-beta.6');
+  assert.equal(out.is_outdated, false);
+  assert.equal(out.using_cached_data, false);
+  assert.equal(out.recommendation, 'up_to_date');
 });
 
 test('selfUpdate requires explicit approval', async () => {
@@ -119,15 +170,15 @@ test('selfUpdate runs install and skill sync when approved', async () => {
 
 test('selfUpdate dry-run does not execute commands', async () => {
   const home = makeTempHome();
-  let called = false;
+  const calls = [];
   const service = new UpdateService({
     localnestHome: home,
     packageName: 'localnest-mcp',
     currentVersion: '0.0.3',
     checkIntervalMinutes: 120,
     failureBackoffMinutes: 15,
-    commandRunner: () => {
-      called = true;
+    commandRunner: (command, args) => {
+      calls.push([command, ...args].join(' '));
       return { status: 0, stdout: '', stderr: '' };
     }
   });
@@ -139,9 +190,42 @@ test('selfUpdate dry-run does not execute commands', async () => {
 
   assert.equal(out.ok, true);
   assert.equal(out.dry_run, true);
-  assert.equal(called, false);
+  assert.equal(Array.isArray(out.validation?.checks), true);
+  assert.equal(out.validation.ok, true);
   assert.ok(Array.isArray(out.planned_commands));
   assert.ok(out.planned_commands.length >= 1);
+  assert.ok(calls.some((line) => line.includes('npm --help')));
+  assert.ok(calls.some((line) => line.includes('localnest-mcp-install-skill --help')));
+});
+
+test('selfUpdate dry-run reports validation failures without mutating', async () => {
+  const home = makeTempHome();
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.0.3',
+    checkIntervalMinutes: 120,
+    failureBackoffMinutes: 15,
+    commandRunner: (command) => {
+      if (String(command).includes('localnest-mcp-install-skill')) {
+        return { status: 1, stdout: '', stderr: 'missing' };
+      }
+      return { status: 0, stdout: '', stderr: '' };
+    }
+  });
+
+  const out = await service.selfUpdate({
+    approvedByUser: true,
+    dryRun: true,
+    reinstallSkill: true
+  });
+
+  assert.equal(out.ok, false);
+  assert.equal(out.dry_run, true);
+  assert.equal(out.skipped, true);
+  assert.equal(out.validation.ok, false);
+  assert.equal(out.validation.checks.length, 2);
+  assert.match(out.validation.checks[1].stderr, /missing/);
 });
 
 test('selfUpdate reports npm install failure and stops before skill sync', async () => {

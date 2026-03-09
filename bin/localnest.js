@@ -1,10 +1,16 @@
 #!/usr/bin/env node
 
-import { SERVER_VERSION } from '../src/config.js';
+import { SERVER_VERSION } from '../src/runtime/index.js';
+import { buildForwardArgv, hasVersionFlag, importRelative } from './_shared.js';
 
 const args = process.argv.slice(2);
 const command = args[0] || '';
 const rest = args.slice(1);
+const COMMAND_MODULES = new Map([
+  ['setup', '../scripts/runtime/setup-localnest.mjs'],
+  ['doctor', '../scripts/runtime/doctor-localnest.mjs'],
+  ['upgrade', '../scripts/runtime/upgrade-localnest.mjs']
+]);
 
 function printHelp() {
   process.stdout.write('LocalNest CLI\n\n');
@@ -20,8 +26,8 @@ function printHelp() {
 }
 
 function forwardTo(modulePath) {
-  process.argv = [process.argv[0], process.argv[1], ...rest];
-  return import(modulePath);
+  process.argv = buildForwardArgv(rest, process.argv);
+  return importRelative(modulePath, import.meta.url);
 }
 
 async function main() {
@@ -30,28 +36,20 @@ async function main() {
     process.exit(0);
   }
 
-  if (command === 'version' || command === '--version' || command === '-v') {
+  if (command === 'version' || hasVersionFlag([command])) {
     process.stdout.write(`${SERVER_VERSION}\n`);
     process.exit(0);
   }
 
   if (command === 'start' || command === 'serve') {
-    await import('../src/localnest-mcp.js');
+    const { startMcpServer } = await importRelative('../src/app/index.js', import.meta.url);
+    await startMcpServer();
     return;
   }
 
-  if (command === 'setup') {
-    await forwardTo('../scripts/setup-localnest.mjs');
-    return;
-  }
-
-  if (command === 'doctor') {
-    await forwardTo('../scripts/doctor-localnest.mjs');
-    return;
-  }
-
-  if (command === 'upgrade') {
-    await forwardTo('../scripts/upgrade-localnest.mjs');
+  const commandModule = COMMAND_MODULES.get(command);
+  if (commandModule) {
+    await forwardTo(commandModule);
     return;
   }
 

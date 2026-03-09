@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-import '../scripts/task-context-localnest.mjs';
+import '../scripts/memory/task-context-localnest.mjs';
