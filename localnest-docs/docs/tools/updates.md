@@ -11,11 +11,21 @@
 
 Checks npm for the latest LocalNest version with local cache and backoff.
 
+The response stays useful even when it is cached or when a live npm check fails. Look at:
+
+- `source`
+- `using_cached_data`
+- `recommendation`
+- `can_attempt_update`
+- `next_check_at`
+
 ## `localnest_update_self`
 
 Updates the package globally and syncs bundled skill files.
 
 This tool must only be used after explicit user approval.
+
+`dry_run=true` is a validation mode. It does not install anything; it only checks whether the required commands are available for a real update flow.
 
 ## Related branch behavior
 
@@ -47,3 +57,13 @@ This tool must only be used after explicit user approval.
     </div>
   </div>
 </div>
+
+## Successful execution vs actionable update data
+
+`localnest_update_status` can succeed in multiple ways:
+
+- live npm result
+- cached result
+- cache fallback after a live npm failure
+
+Treat a successful tool call as transport success. Use `recommendation` and `can_attempt_update` to decide whether the result is actionable for the current session.

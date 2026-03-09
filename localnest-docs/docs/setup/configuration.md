@@ -71,3 +71,13 @@ Most teams only adjust these values:
 - Setup now writes config schema `version: 3`.
 - Existing configs and the older flat `.localnest` layout are auto-migrated on startup, with timestamped backups stored under `~/.localnest/backups/`.
 - Memory remains disabled unless the user opted in during setup or explicitly enables it via environment variables.
+
+## Release validation
+
+For release verification, prefer the installed-runtime harness over ad hoc manual checks:
+
+```bash
+node scripts/release-test-installed-runtime.mjs --version-label 0.0.4-beta.5
+```
+
+This validates the installed binary and writes both markdown and JSON reports under `reports/`.

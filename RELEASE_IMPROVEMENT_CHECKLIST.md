@@ -88,12 +88,12 @@ Based on the installed `localnest-mcp 0.0.4-beta.5` release sweep in [reports/lo
 
 ## 8. Documentation Improvements
 
-- [ ] Update docs to describe the difference between “tool executed successfully” and “tool returned meaningful evidence”.
-- [ ] Document expected cache fallback behavior and how to fix it.
-- [ ] Document installed-runtime release testing as a recommended pre-release step.
-- [ ] Document the supported auto-configured AI tools list explicitly.
-- [ ] Document the unsupported-but-detected tool list and the reason each is not auto-configured.
-- [ ] Add troubleshooting guidance for direct binary vs `npx` launch paths.
+- [x] Update docs to describe the difference between “tool executed successfully” and “tool returned meaningful evidence”.
+- [x] Document expected cache fallback behavior and how to fix it.
+- [x] Document installed-runtime release testing as a recommended pre-release step.
+- [x] Document the supported auto-configured AI tools list explicitly.
+- [x] Document the supported auto-configured tools and the manual configuration path for other MCP clients.
+- [x] Add troubleshooting guidance for direct binary vs `npx` launch paths.
 
 ## 9. Nice-To-Have Polish
 
