@@ -121,3 +121,27 @@ test('readFileChunk returns warning and content when file exceeds cap', async ()
 
   fs.rmSync(root, { recursive: true, force: true });
 });
+
+test('readFileChunk reports explicit path and scope errors', async () => {
+  const root = makeTempDir();
+  const proj = path.join(root, 'proj');
+  fs.mkdirSync(path.join(proj, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(proj, 'src', 'main.js'), 'a\nb\n', 'utf8');
+
+  const service = makeWorkspace(root, { maxFileBytes: 1024 });
+
+  await assert.rejects(
+    () => service.readFileChunk(path.join(root, '..', 'outside.js'), 1, 5, 10),
+    /invalid read_file path ".*outside\.js": path is outside configured roots/
+  );
+  await assert.rejects(
+    () => service.readFileChunk(path.join(proj, 'missing.js'), 1, 5, 10),
+    /path not found: .*missing\.js/
+  );
+  await assert.rejects(
+    () => service.readFileChunk(path.join(proj, 'src'), 1, 5, 10),
+    /path is not a file: .*src/
+  );
+
+  fs.rmSync(root, { recursive: true, force: true });
+});

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { createToolResponse } from '../common/tool-utils.js';
 import {
   normalizeEmbedStatus,
   normalizeIndexStatus,
@@ -32,6 +33,35 @@ export function registerRetrievalTools({
         total,
         message
       }
+    });
+  }
+
+  function buildSearchMeta({ tool, query, project_path, all_roots, glob = '*', max_results, case_sensitive, context_lines = 0, use_regex = false }) {
+    const searched_bases = workspace.resolveSearchBases(project_path, all_roots);
+    return {
+      tool,
+      query,
+      count: 0,
+      scope: {
+        project_path: project_path || '',
+        all_roots: Boolean(all_roots),
+        glob,
+        max_results,
+        case_sensitive: Boolean(case_sensitive),
+        context_lines,
+        use_regex: Boolean(use_regex),
+        searched_bases
+      }
+    };
+  }
+
+  function withSearchMissResponse(data, meta, note, guidance) {
+    return createToolResponse(data, {
+      meta: {
+        ...meta,
+        guidance
+      },
+      note: `${note} ${guidance.join(' ')}`
     });
   }
 
@@ -199,13 +229,33 @@ export function registerRetrievalTools({
         openWorldHint: false
       }
     },
-    async ({ query, project_path, all_roots, max_results, case_sensitive }) => search.searchFiles({
-      query,
-      projectPath: project_path,
-      allRoots: all_roots,
-      maxResults: max_results,
-      caseSensitive: case_sensitive
-    })
+    async ({ query, project_path, all_roots, max_results, case_sensitive }) => {
+      const results = search.searchFiles({
+        query,
+        projectPath: project_path,
+        allRoots: all_roots,
+        maxResults: max_results,
+        caseSensitive: case_sensitive
+      });
+      if (results.length > 0) return results;
+
+      return withSearchMissResponse(
+        results,
+        buildSearchMeta({
+          tool: 'localnest_search_files',
+          query,
+          project_path,
+          all_roots,
+          max_results,
+          case_sensitive
+        }),
+        'No file-path matches found.',
+        [
+          'Verify project_path or broaden the query to a path fragment.',
+          'Try synonyms or module names instead of full phrases.'
+        ]
+      );
+    }
   );
 
   registerJsonTool(
@@ -230,16 +280,39 @@ export function registerRetrievalTools({
         openWorldHint: false
       }
     },
-    async ({ query, project_path, all_roots, glob, max_results, case_sensitive, context_lines, use_regex }) => search.searchCode({
-      query,
-      projectPath: project_path,
-      allRoots: all_roots,
-      glob,
-      maxResults: max_results,
-      caseSensitive: case_sensitive,
-      contextLines: context_lines,
-      useRegex: use_regex
-    })
+    async ({ query, project_path, all_roots, glob, max_results, case_sensitive, context_lines, use_regex }) => {
+      const results = search.searchCode({
+        query,
+        projectPath: project_path,
+        allRoots: all_roots,
+        glob,
+        maxResults: max_results,
+        caseSensitive: case_sensitive,
+        contextLines: context_lines,
+        useRegex: use_regex
+      });
+      if (results.length > 0) return results;
+
+      return withSearchMissResponse(
+        results,
+        buildSearchMeta({
+          tool: 'localnest_search_code',
+          query,
+          project_path,
+          all_roots,
+          glob,
+          max_results,
+          case_sensitive,
+          context_lines,
+          use_regex
+        }),
+        'No code matches found in the current scope.',
+        [
+          'Verify the scope and try a broader query or synonyms.',
+          'If you need pattern matching, retry with use_regex=true.'
+        ]
+      );
+    }
   );
 
   registerJsonTool(

@@ -24,16 +24,16 @@ Based on the installed `localnest-mcp 0.0.4-beta.5` release sweep in [reports/lo
 
 ## 2. Retrieval Quality And Result Clarity
 
-- [ ] Investigate why `localnest_search_files` returned zero results for a plausible repo-local query during release sweep.
-- [ ] Investigate why `localnest_search_code` returned zero results for a plausible repo-local query during release sweep.
-- [ ] Investigate why `localnest_read_file` returned zero lines for a known existing file path during release sweep.
-- [ ] Investigate why `localnest_project_tree` returned zero top-level entries for the project under test.
-- [ ] Confirm whether the above are tool bugs, path-shape issues, or weak test inputs.
-- [ ] Improve search miss responses so they include clearer scope/debug metadata.
-- [ ] Add “no results” guidance in tool responses when queries miss but the scope is valid.
-- [ ] Improve read-file responses so invalid path/scope/path-format issues are explicit.
-- [ ] Add a release-sweep dataset of known-good queries/paths that should always return non-empty evidence.
-- [ ] Add assertions for result quality, not only process success, in installed-runtime release tests.
+- [x] Investigate why `localnest_search_files` returned zero results for a plausible repo-local query during release sweep.
+- [x] Investigate why `localnest_search_code` returned zero results for a plausible repo-local query during release sweep.
+- [x] Investigate why `localnest_read_file` returned zero lines for a known existing file path during release sweep.
+- [x] Investigate why `localnest_project_tree` returned zero top-level entries for the project under test.
+- [x] Confirm whether the above are tool bugs, path-shape issues, or weak test inputs.
+- [x] Improve search miss responses so they include clearer scope/debug metadata.
+- [x] Add “no results” guidance in tool responses when queries miss but the scope is valid.
+- [x] Improve read-file responses so invalid path/scope/path-format issues are explicit.
+- [x] Add a release-sweep dataset of known-good queries/paths that should always return non-empty evidence.
+- [x] Add assertions for result quality, not only process success, in installed-runtime release tests.
 
 ## 3. Installed Runtime And Environment Handling
 

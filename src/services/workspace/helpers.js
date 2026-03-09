@@ -4,13 +4,18 @@ import readline from 'node:readline';
 import { expandHome } from '../../config.js';
 
 export function normalizeTarget(workspace, inputPath) {
-  const maybeExpanded = expandHome(inputPath);
+  const rawInput = String(inputPath || '').trim();
+  if (!rawInput) {
+    throw new Error('path is required');
+  }
+
+  const maybeExpanded = expandHome(rawInput);
   const resolved = path.isAbsolute(maybeExpanded)
     ? path.resolve(maybeExpanded)
     : path.resolve(workspace.roots[0].path, maybeExpanded);
 
   if (!isUnderRoots(workspace, resolved)) {
-    throw new Error('Path is outside configured roots');
+    throw new Error(`path is outside configured roots: ${rawInput}`);
   }
 
   return resolved;
@@ -140,10 +145,25 @@ export async function readFileChunk(workspace, requestedPath, startLine, endLine
     to = from + maxSpan - 1;
   }
 
-  const target = normalizeTarget(workspace, requestedPath);
-  const st = fs.statSync(target);
+  let target;
+  try {
+    target = normalizeTarget(workspace, requestedPath);
+  } catch (error) {
+    throw new Error(`invalid read_file path "${requestedPath}": ${error?.message || String(error)}`);
+  }
+
+  let st;
+  try {
+    st = fs.statSync(target);
+  } catch (error) {
+    if (error?.code === 'ENOENT') {
+      throw new Error(`path not found: ${target}`);
+    }
+    throw error;
+  }
+
   if (!st.isFile()) {
-    throw new Error('path is not a file');
+    throw new Error(`path is not a file: ${target}`);
   }
 
   if (st.size > workspace.maxFileBytes) {

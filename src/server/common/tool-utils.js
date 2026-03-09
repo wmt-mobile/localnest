@@ -20,12 +20,38 @@ function renderMarkdown(value, heading = 'Result') {
   return `## ${heading}\n\n${String(value)}`;
 }
 
-function toolResult(data, responseFormat = 'json', markdownTitle = 'Result') {
-  const text = responseFormat === 'markdown'
-    ? renderMarkdown(data, markdownTitle)
-    : JSON.stringify(data, null, 2);
+export function createToolResponse(data, { meta = null, note = '' } = {}) {
   return {
-    structuredContent: { data },
+    __localnest_tool_response: true,
+    data,
+    meta,
+    note
+  };
+}
+
+function normalizeToolResponsePayload(result) {
+  if (result && typeof result === 'object' && result.__localnest_tool_response) {
+    return {
+      data: result.data,
+      meta: result.meta || null,
+      note: result.note || ''
+    };
+  }
+
+  return {
+    data: result,
+    meta: null,
+    note: ''
+  };
+}
+
+function toolResult(result, responseFormat = 'json', markdownTitle = 'Result') {
+  const { data, meta, note } = normalizeToolResponsePayload(result);
+  const text = responseFormat === 'markdown'
+    ? `${note ? `${note}\n\n` : ''}${renderMarkdown(data, markdownTitle)}`
+    : `${note ? `${note}\n\n` : ''}${JSON.stringify(data, null, 2)}`;
+  return {
+    structuredContent: meta ? { data, meta } : { data },
     content: [{ type: 'text', text }]
   };
 }
@@ -80,7 +106,8 @@ export function createJsonToolRegistrar(server, responseFormatSchema) {
         description,
         inputSchema: schema,
         outputSchema: {
-          data: z.any()
+          data: z.any(),
+          meta: z.any().optional()
         },
         annotations
       },

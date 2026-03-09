@@ -32,11 +32,14 @@ function makeFixture() {
   };
 
   const workspace = {
+    roots: [{ label: 'root', path: '/tmp/root' }],
     listRoots: () => [{ label: 'root', path: '/tmp/root' }],
     listProjects: () => [{ path: '/tmp/root/p1' }, { path: '/tmp/root/p2' }],
-    projectTree: (projectPath) => ({ project_path: projectPath, entries: [] }),
-    readFileChunk: (filePath, start, end) => ({ path: filePath, start_line: start, end_line: end, lines: [] }),
-    summarizeProject: (projectPath) => ({ project_path: projectPath, summary: 'ok' })
+    projectTree: (projectPath) => [`${projectPath}/`, '  README.md'],
+    readFileChunk: (filePath, start, end) => ({ path: filePath, start_line: start, end_line: end, content: `${start}: alpha\n${start + 1}: beta` }),
+    summarizeProject: (projectPath) => ({ project_path: projectPath, summary: 'ok' }),
+    resolveSearchBases: (projectPath, allRoots) => (allRoots ? ['/tmp/root'] : [projectPath || '/tmp/root']),
+    normalizeTarget: (inputPath) => inputPath
   };
 
   const vectorIndex = {
@@ -65,10 +68,12 @@ function makeFixture() {
   const search = {
     searchFiles: (args) => {
       mark('searchFiles', args);
+      if (args.query === 'missing') return [];
       return [{ file: '/tmp/root/a.js', relative_path: 'a.js', name: 'a.js' }];
     },
     searchCode: (args) => {
       mark('searchCode', args);
+      if (args.query === 'missing') return [];
       return [{ file: '/tmp/root/a.js', line: 1, text: 'const a = 1;' }];
     },
     searchHybrid: async (args) => {
@@ -341,6 +346,7 @@ test('MCP tools register and execute across all tool groups', async () => {
   const projectTree = (await run('localnest_project_tree', { project_path: '/tmp/root', max_depth: 2, max_entries: 10 })).structuredContent.data;
   assert.equal(projectTree.project_path, '/tmp/root');
   assert.equal(Array.isArray(projectTree.entries), true);
+  assert.equal(projectTree.entries.length, 2);
   const indexStatus = (await run('localnest_index_status')).structuredContent.data;
   assert.equal(indexStatus.backend, 'sqlite-vec');
   assert.equal(indexStatus.total_files, 1);
@@ -366,6 +372,19 @@ test('MCP tools register and execute across all tool groups', async () => {
   const readFile = (await run('localnest_read_file', { path: '/tmp/root/a.js', start_line: 1, end_line: 5 })).structuredContent.data;
   assert.equal(readFile.path, '/tmp/root/a.js');
   assert.equal(Array.isArray(readFile.lines), true);
+  assert.equal(readFile.lines.length, 2);
+  const emptyFileSearch = await run('localnest_search_files', { query: 'missing', project_path: '/tmp/root', all_roots: false, max_results: 5, case_sensitive: false });
+  assert.equal(Array.isArray(emptyFileSearch.structuredContent.data), true);
+  assert.equal(emptyFileSearch.structuredContent.data.length, 0);
+  assert.equal(emptyFileSearch.structuredContent.meta.tool, 'localnest_search_files');
+  assert.equal(emptyFileSearch.structuredContent.meta.count, 0);
+  assert.match(emptyFileSearch.content[0].text, /No file-path matches found/);
+  const emptyCodeSearch = await run('localnest_search_code', { query: 'missing', project_path: '/tmp/root', all_roots: false, glob: '*', max_results: 5, case_sensitive: false, context_lines: 0, use_regex: false });
+  assert.equal(Array.isArray(emptyCodeSearch.structuredContent.data), true);
+  assert.equal(emptyCodeSearch.structuredContent.data.length, 0);
+  assert.equal(emptyCodeSearch.structuredContent.meta.tool, 'localnest_search_code');
+  assert.equal(emptyCodeSearch.structuredContent.meta.count, 0);
+  assert.match(emptyCodeSearch.content[0].text, /No code matches found/);
   const projectSummary = (await run('localnest_summarize_project', { project_path: '/tmp/root', max_files: 100 })).structuredContent.data;
   assert.equal(projectSummary.summary, 'ok');
   assert.equal(projectSummary.project_path, '/tmp/root');

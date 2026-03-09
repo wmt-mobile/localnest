@@ -239,10 +239,14 @@ export function normalizeUpdateSelfResult(result) {
 }
 
 export function normalizeProjectTreeResult(result, projectPath) {
+  const entries = Array.isArray(result)
+    ? result
+    : (Array.isArray(result?.entries) ? result.entries : []);
+
   return {
     ...result,
     project_path: result?.project_path || projectPath,
-    entries: Array.isArray(result?.entries) ? result.entries : []
+    entries
   };
 }
 
@@ -281,12 +285,17 @@ export function normalizeUsageResult(result, symbol) {
 }
 
 export function normalizeReadFileChunkResult(result, requestedPath, startLine, endLine) {
+  const content = typeof result?.content === 'string' ? result.content : '';
+  const lines = Array.isArray(result?.lines)
+    ? result.lines
+    : (content ? content.split(/\r?\n/).filter(Boolean) : []);
+
   return {
     ...result,
     path: result?.path || requestedPath,
     start_line: Number.isFinite(result?.start_line) ? result.start_line : startLine,
     end_line: Number.isFinite(result?.end_line) ? result.end_line : endLine,
-    lines: Array.isArray(result?.lines) ? result.lines : []
+    lines
   };
 }
 

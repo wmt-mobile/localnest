@@ -10,6 +10,8 @@ const REPORT_DIR = path.join(ROOT, 'reports');
 const REPORT_PATH = path.join(REPORT_DIR, 'localnest-installed-beta5-release-test-report.md');
 const PROJECT_PATH = ROOT;
 const FILE_PATH = path.join(ROOT, 'README.md');
+const SEARCH_FILE_QUERY = 'README';
+const SEARCH_CODE_QUERY = 'localnest_list_roots';
 
 class McpStdioClient {
   constructor(command, args, env) {
@@ -134,6 +136,15 @@ function summarize(value) {
   return text.length > 220 ? `${text.slice(0, 220)}...` : text;
 }
 
+function resultCount(value) {
+  if (Array.isArray(value)) return value.length;
+  if (Number.isFinite(value?.count)) return value.count;
+  if (Array.isArray(value?.items)) return value.items.length;
+  if (Array.isArray(value?.entries)) return value.entries.length;
+  if (Array.isArray(value?.lines)) return value.lines.length;
+  return 0;
+}
+
 function nowIso() {
   return new Date().toISOString();
 }
@@ -170,6 +181,9 @@ async function main() {
     const startedAt = Date.now();
     try {
       const value = await fn();
+      if (typeof options.verify === 'function') {
+        options.verify(value);
+      }
       const durationMs = Date.now() - startedAt;
       results.push({
         name,
@@ -217,7 +231,12 @@ async function main() {
       details: (value) => `${value.items?.length || 0} first-level projects`
     });
     await record('localnest_project_tree', async () => safeToolResult(await callTool('localnest_project_tree', { project_path: PROJECT_PATH, max_depth: 2 })), {
-      details: (value) => `${value.entries?.length || 0} top-level entries`
+      details: (value) => `${resultCount(value)} top-level entries`,
+      verify: (value) => {
+        if (resultCount(value) <= 0) {
+          throw new Error('expected non-empty project tree for the target project');
+        }
+      }
     });
     await record('localnest_index_status', async () => safeToolResult(await callTool('localnest_index_status')), {
       details: (value) => `backend=${value.backend}, total_files=${value.total_files}`
@@ -232,18 +251,28 @@ async function main() {
     });
     await record('localnest_search_files', async () => safeToolResult(await callTool('localnest_search_files', {
       project_path: PROJECT_PATH,
-      query: 'localnest-mcp',
+      query: SEARCH_FILE_QUERY,
       max_results: 10
     })), {
-      details: (value) => `${value.items?.length || value.count || 0} matches`
+      details: (value) => `${resultCount(value)} matches`,
+      verify: (value) => {
+        if (resultCount(value) <= 0) {
+          throw new Error(`expected at least one file match for query ${JSON.stringify(SEARCH_FILE_QUERY)}`);
+        }
+      }
     });
     await record('localnest_search_code', async () => safeToolResult(await callTool('localnest_search_code', {
       project_path: PROJECT_PATH,
-      query: 'localnest-mcp',
+      query: SEARCH_CODE_QUERY,
       max_results: 5,
       context_lines: 1
     })), {
-      details: (value) => `${value.items?.length || value.count || 0} matches`
+      details: (value) => `${resultCount(value)} matches`,
+      verify: (value) => {
+        if (resultCount(value) <= 0) {
+          throw new Error(`expected at least one code match for query ${JSON.stringify(SEARCH_CODE_QUERY)}`);
+        }
+      }
     });
     await record('localnest_search_hybrid', async () => safeToolResult(await callTool('localnest_search_hybrid', {
       project_path: PROJECT_PATH,
@@ -272,7 +301,12 @@ async function main() {
       start_line: 1,
       end_line: 20
     })), {
-      details: (value) => `${value.lines?.length || 0} lines returned`
+      details: (value) => `${resultCount(value)} lines returned`,
+      verify: (value) => {
+        if (resultCount(value) <= 0) {
+          throw new Error(`expected non-empty file content for ${FILE_PATH}`);
+        }
+      }
     });
     await record('localnest_summarize_project', async () => safeToolResult(await callTool('localnest_summarize_project', {
       project_path: PROJECT_PATH
