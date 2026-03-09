@@ -70,10 +70,10 @@ Based on the installed `localnest-mcp 0.0.4-beta.5` release sweep in [reports/lo
 
 ## 6. Update Workflow
 
-- [ ] Add a dedicated controlled test for `localnest_update_self`.
-- [ ] Decide whether `localnest_update_self` should support a fully dry-run validation mode for release sweeps.
-- [ ] Ensure `localnest_update_status` remains informative even when network checks are skipped or cached.
-- [ ] Verify update metadata is visible in `localnest_server_status` and easy for clients to act on.
+- [x] Add a dedicated controlled test for `localnest_update_self`.
+- [x] Decide whether `localnest_update_self` should support a fully dry-run validation mode for release sweeps.
+- [x] Ensure `localnest_update_status` remains informative even when network checks are skipped or cached.
+- [x] Verify update metadata is visible in `localnest_server_status` and easy for clients to act on.
 
 ## 7. Release Harness Improvements
 

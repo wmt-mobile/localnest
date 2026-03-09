@@ -217,7 +217,13 @@ export function normalizeUpdateStatus(result) {
     error: result?.error || null,
     recommend_update_prompt: Boolean(result?.recommend_update_prompt),
     next_check_after_minutes: result?.next_check_after_minutes ?? null,
-    cache_path: result?.cache_path || null
+    cache_path: result?.cache_path || null,
+    checked_at_ms: result?.checked_at_ms ?? null,
+    checked_age_minutes: result?.checked_age_minutes ?? null,
+    next_check_at: result?.next_check_at || null,
+    using_cached_data: Boolean(result?.using_cached_data),
+    can_attempt_update: Boolean(result?.can_attempt_update),
+    recommendation: result?.recommendation || 'up_to_date'
   };
 }
 
@@ -232,6 +238,7 @@ export function normalizeUpdateSelfResult(result) {
     message: result?.message || null,
     step: result?.step || null,
     planned_commands: Array.isArray(result?.planned_commands) ? result.planned_commands : [],
+    validation: result?.validation || null,
     install: result?.install || null,
     skill_sync: result?.skill_sync || null,
     update_status: result?.update_status ? normalizeUpdateStatus(result.update_status) : null

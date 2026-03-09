@@ -54,6 +54,37 @@ export class UpdateService {
     return ageMs >= backoffMinutes * 60 * 1000;
   }
 
+  buildStatusMetadata(status, now = Date.now()) {
+    const checkedAtMs = parseIsoTime(status?.last_checked_at);
+    const nextCheckAfterMinutes = Number.isFinite(status?.next_check_after_minutes)
+      ? status.next_check_after_minutes
+      : 0;
+    const nextCheckAtMs = checkedAtMs > 0 && nextCheckAfterMinutes > 0
+      ? checkedAtMs + (nextCheckAfterMinutes * 60 * 1000)
+      : 0;
+    const usingCachedData = status?.source === 'cache' || status?.source === 'cache-fallback';
+    const canAttemptUpdate = Boolean(status?.is_outdated);
+    let recommendation = 'up_to_date';
+    if (status?.is_outdated) recommendation = 'update_available';
+    else if (status?.source === 'cache-fallback' || status?.source === 'error') recommendation = 'retry_later';
+
+    return {
+      checked_at_ms: checkedAtMs || null,
+      checked_age_minutes: checkedAtMs > 0 ? Math.max(0, Math.floor((now - checkedAtMs) / 60000)) : null,
+      next_check_at: nextCheckAtMs > 0 ? new Date(nextCheckAtMs).toISOString() : null,
+      using_cached_data: usingCachedData,
+      can_attempt_update: canAttemptUpdate,
+      recommendation
+    };
+  }
+
+  withStatusMetadata(status, now = Date.now()) {
+    return {
+      ...status,
+      ...this.buildStatusMetadata(status, now)
+    };
+  }
+
   checkLatestFromNpm() {
     const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     const run = this.commandRunner(npmCmd, ['view', this.packageName, 'version', '--json'], {
@@ -78,11 +109,11 @@ export class UpdateService {
     const cache = this.readCache();
 
     if (!this.shouldRefresh(cache, now, force) && cache) {
-      return {
+      return this.withStatusMetadata({
         ...cache,
         stale: false,
         source: 'cache'
-      };
+      }, now);
     }
 
     try {
@@ -103,7 +134,7 @@ export class UpdateService {
         cache_path: this.cachePath
       };
       this.writeCache(refreshed);
-      return refreshed;
+      return this.withStatusMetadata(refreshed, now);
     } catch (error) {
       const fallbackLatest = cache?.latest_version || this.currentVersion;
       const isOutdated = compareVersions(fallbackLatest, this.currentVersion) > 0;
@@ -122,7 +153,7 @@ export class UpdateService {
         cache_path: this.cachePath
       };
       this.writeCache(failed);
-      return failed;
+      return this.withStatusMetadata(failed, now);
     }
   }
 
@@ -139,6 +170,32 @@ export class UpdateService {
       stdout: String(run?.stdout || '').trim(),
       stderr: String(run?.stderr || '').trim(),
       error: run?.error ? String(run.error.message || run.error) : null
+    };
+  }
+
+  validateCommandAvailability(command) {
+    const result = this.commandRunner(command, ['--help'], { timeoutMs: 12000 });
+    return {
+      command,
+      available: Boolean(result && result.status === 0 && !result.error),
+      status: result?.status ?? null,
+      error: result?.error ? String(result.error.message || result.error) : null,
+      stderr: String(result?.stderr || '').trim() || null
+    };
+  }
+
+  buildDryRunValidation({ reinstallSkill }) {
+    const installStep = buildInstallCommand(this.packageName, 'latest');
+    const checks = [
+      this.validateCommandAvailability(installStep.command)
+    ];
+    if (reinstallSkill) {
+      const skillStep = buildSkillSyncCommand();
+      checks.push(this.validateCommandAvailability(skillStep.command));
+    }
+    return {
+      ok: checks.every((item) => item.available),
+      checks
     };
   }
 
@@ -160,10 +217,12 @@ export class UpdateService {
     ].filter(Boolean);
 
     if (dryRun) {
+      const validation = this.buildDryRunValidation({ reinstallSkill });
       return {
-        ok: true,
+        ok: validation.ok,
         skipped: true,
         dry_run: true,
+        validation,
         planned_commands: planned,
         restart_required: true
       };

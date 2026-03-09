@@ -93,11 +93,22 @@ function makeFixture() {
   const updates = {
     getStatus: async ({ force }) => {
       mark('updateStatus', { force });
-      return { current_version: '0.0.0', latest_version: '0.0.1', is_outdated: true };
+      return {
+        current_version: '0.0.0',
+        latest_version: '0.0.1',
+        is_outdated: true,
+        recommendation: 'update_available',
+        can_attempt_update: true
+      };
     },
     selfUpdate: async (args) => {
       mark('selfUpdate', args);
-      return { ok: true, ...args };
+      return {
+        ok: true,
+        dry_run: Boolean(args.dryRun),
+        validation: { ok: true, checks: [{ command: 'npm', available: true }] },
+        ...args
+      };
     }
   };
 
@@ -296,7 +307,13 @@ test('MCP tools register and execute across all tool groups', async () => {
   assert.equal(updateStatus.is_outdated, true);
   assert.equal(updateStatus.current, '0.0.0');
   assert.equal(updateStatus.latest, '0.0.1');
-  assert.equal((await run('localnest_update_self', { approved_by_user: true, dry_run: true, version: 'latest', reinstall_skill: true })).structuredContent.data.ok, true);
+  assert.equal(updateStatus.recommendation, 'update_available');
+  assert.equal(updateStatus.can_attempt_update, true);
+  const updateSelf = (await run('localnest_update_self', { approved_by_user: true, dry_run: true, version: 'latest', reinstall_skill: true })).structuredContent.data;
+  assert.equal(updateSelf.ok, true);
+  assert.equal(updateSelf.dry_run, true);
+  assert.equal(Array.isArray(updateSelf.validation.checks), true);
+  assert.equal(updateSelf.validation.ok, true);
 
   const taskContext = (await run('localnest_task_context', { query: 'q' })).structuredContent.data;
   assert.equal(taskContext.query, 'q');

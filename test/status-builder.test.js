@@ -53,7 +53,14 @@ test('server status exposes cache diagnostics from runtime config', async () => 
       })
     },
     updates: {
-      getStatus: async () => ({ current_version: '0.0.4-beta.5', latest_version: '0.0.4-beta.5', is_outdated: false })
+      getStatus: async () => ({
+        current_version: '0.0.4-beta.5',
+        latest_version: '0.0.4-beta.5',
+        is_outdated: false,
+        recommendation: 'up_to_date',
+        can_attempt_update: false,
+        using_cached_data: true
+      })
     },
     getActiveIndexBackend: () => 'sqlite-vec',
     vectorIndex: {
@@ -66,4 +73,7 @@ test('server status exposes cache diagnostics from runtime config', async () => 
   assert.equal(status.vector_index.embedding_cache_status.fallbackUsed, true);
   assert.equal(status.vector_index.reranker_cache_dir, '/tmp/fallback-cache');
   assert.equal(status.vector_index.reranker_cache_status.preferredPath, '/home/test/.localnest/cache');
+  assert.equal(status.updates.recommendation, 'up_to_date');
+  assert.equal(status.updates.can_attempt_update, false);
+  assert.equal(status.updates.using_cached_data, true);
 });
