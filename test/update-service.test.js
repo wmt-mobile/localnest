@@ -85,7 +85,7 @@ test('getStatus stays informative when npm fails without cache', async () => {
   const service = new UpdateService({
     localnestHome: home,
     packageName: 'localnest-mcp',
-    currentVersion: '0.0.4-beta.5',
+    currentVersion: '0.0.4-beta.6',
     checkIntervalMinutes: 120,
     failureBackoffMinutes: 15,
     commandRunner: () => ({ status: 1, stdout: '', stderr: 'offline' })
@@ -93,8 +93,8 @@ test('getStatus stays informative when npm fails without cache', async () => {
 
   const out = await service.getStatus({ force: true });
   assert.equal(out.source, 'error');
-  assert.equal(out.current_version, '0.0.4-beta.5');
-  assert.equal(out.latest_version, '0.0.4-beta.5');
+  assert.equal(out.current_version, '0.0.4-beta.6');
+  assert.equal(out.latest_version, '0.0.4-beta.6');
   assert.equal(out.is_outdated, false);
   assert.equal(out.can_attempt_update, false);
   assert.equal(out.recommendation, 'retry_later');

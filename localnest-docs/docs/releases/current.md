@@ -34,13 +34,13 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
 - setup-time memory consent and config migration
 - `localnest` top-level CLI command path (`setup`, `doctor`, `upgrade`)
 
-## What changed in `0.0.4-beta.5`
+## What changed in `0.0.4-beta.6`
 
-- Added top-level `localnest upgrade` subcommand as the canonical upgrade path.
-- Updated setup/docs guidance to prefer top-level `localnest` command usage.
-- Improved upgrade validation with clearer user-facing error reporting.
-- Removed deprecated `localnest update` alias.
-- Removed experimental backup sync CLI + Google Drive integration from the package.
+- Hardened MCP response contracts and release verification so installed-runtime sweeps assert meaningful evidence instead of just process success.
+- Improved retrieval miss handling, read-file path errors, update metadata, and runtime cache diagnostics for end users and MCP clients.
+- Reworked the internal project layout into clearer `app`, `runtime`, `mcp`, `services`, and grouped `scripts` surfaces without changing user-facing commands.
+- Added a `localnest_health` MCP tool and richer server status output for faster troubleshooting.
+- Continued to prefer top-level `localnest` command usage for setup, doctor, and upgrade flows.
 
 ## How to use this page
 
@@ -52,7 +52,7 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
 
 This page is based on the current beta package version and maintained changelog in the repository.
 
-- package version: `0.0.4-beta.5`
-- release date: `2026-03-05`
+- package version: `0.0.4-beta.6`
+- release date: `2026-03-09`
 - changelog sections document beta changes merged into this branch
 - stable published release docs remain archived under `0.0.3`

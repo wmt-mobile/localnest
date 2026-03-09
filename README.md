@@ -5,13 +5,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Quality](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml)
 [![CodeQL](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml)
-[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.5)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.5)
+[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.6)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.6)
 
 A local-first MCP server that gives AI agents safe access to your codebase, plus optional local memory and semantic indexing for high-quality retrieval.
 
 Documentation: https://wmt-mobile.github.io/localnest/
 
-Current beta package: `0.0.4-beta.5`
+Current beta package: `0.0.4-beta.6`
 
 Engineering docs for contributors:
 - [`guides/README.md`](./guides/README.md)
@@ -71,8 +71,8 @@ Upgrade command:
 
 ```bash
 localnest upgrade
-localnest upgrade 0.0.4-beta.5
-localnest upgrade install 0.0.4-beta.5
+localnest upgrade 0.0.4-beta.6
+localnest upgrade install 0.0.4-beta.6
 ```
 
 Model download readiness (recommended per user account):
@@ -318,7 +318,7 @@ Performance tips:
 Before publishing a new build, run the installed-runtime release harness against the globally installed binary:
 
 ```bash
-node scripts/release/release-test-installed-runtime.mjs --version-label 0.0.4-beta.5
+node scripts/release/release-test-installed-runtime.mjs --version-label 0.0.4-beta.6
 ```
 
 The harness writes both markdown and JSON reports under `reports/` and is intended to verify the installed runtime, not just the repo checkout.
