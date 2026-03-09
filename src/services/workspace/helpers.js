@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
-import { expandHome } from '../../config.js';
+import { expandHome } from '../../runtime/config.js';
 
 export function normalizeTarget(workspace, inputPath) {
   const rawInput = String(inputPath || '').trim();

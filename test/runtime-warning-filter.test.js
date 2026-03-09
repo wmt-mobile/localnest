@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { shouldSuppressRuntimeWarning } from '../src/runtime-warning-filter.js';
+import { shouldSuppressRuntimeWarning } from '../src/runtime/warning-filter.js';
 
 test('suppresses only sqlite experimental warning', () => {
   assert.equal(

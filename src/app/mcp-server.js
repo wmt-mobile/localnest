@@ -14,17 +14,17 @@ import {
   TEXT_EXTENSIONS,
   applyConsolePolicy,
   buildRuntimeConfig
-} from './config.js';
-import { installRuntimeWarningFilter } from './runtime-warning-filter.js';
-import { WorkspaceService } from './services/workspace/service.js';
-import { SearchService } from './services/search/service.js';
-import { VectorIndexService } from './services/vector-index/service.js';
-import { EmbeddingService } from './services/embedding/service.js';
-import { AstChunker } from './services/chunker/service.js';
-import { RerankerService } from './services/reranker/service.js';
-import { UpdateService } from './services/update/service.js';
-import { MemoryService } from './services/memory/service.js';
-import { MemoryWorkflowService } from './services/memory/workflow.js';
+} from '../runtime/config.js';
+import { installRuntimeWarningFilter } from '../runtime/warning-filter.js';
+import { WorkspaceService } from '../services/workspace/service.js';
+import { SearchService } from '../services/search/service.js';
+import { VectorIndexService } from '../services/vector-index/service.js';
+import { EmbeddingService } from '../services/embedding/service.js';
+import { AstChunker } from '../services/chunker/service.js';
+import { RerankerService } from '../services/reranker/service.js';
+import { UpdateService } from '../services/update/service.js';
+import { MemoryService } from '../services/memory/service.js';
+import { MemoryWorkflowService } from '../services/memory/workflow.js';
 import {
   RESPONSE_FORMAT_SCHEMA,
   MEMORY_KIND_SCHEMA,
@@ -33,18 +33,18 @@ import {
   MEMORY_LINK_SCHEMA,
   MEMORY_EVENT_TYPE_SCHEMA,
   MEMORY_EVENT_STATUS_SCHEMA
-} from './server/common/schemas.js';
+} from '../mcp/common/schemas.js';
 import {
   buildRipgrepHelpMessage,
   createJsonToolRegistrar,
   paginateItems
-} from './server/common/tool-utils.js';
-import { createServerStatusBuilder, buildUsageGuide } from './server/common/status.js';
-import { startStalenessMonitor } from './server/common/staleness-monitor.js';
-import { registerCoreTools } from './server/tools/core.js';
-import { registerMemoryWorkflowTools } from './server/tools/memory-workflow.js';
-import { registerMemoryStoreTools } from './server/tools/memory-store.js';
-import { registerRetrievalTools } from './server/tools/retrieval.js';
+} from '../mcp/common/tool-utils.js';
+import { createServerStatusBuilder, buildUsageGuide } from '../mcp/common/status.js';
+import { startStalenessMonitor } from '../mcp/common/staleness-monitor.js';
+import { registerCoreTools } from '../mcp/tools/core.js';
+import { registerMemoryWorkflowTools } from '../mcp/tools/memory-workflow.js';
+import { registerMemoryStoreTools } from '../mcp/tools/memory-store.js';
+import { registerRetrievalTools } from '../mcp/tools/retrieval.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';
@@ -72,7 +72,7 @@ async function createVectorIndex(runtime, workspace, embeddingService, setActive
 
   if (runtime.indexBackend === 'sqlite-vec') {
     try {
-      const { SqliteVecIndexService } = await import('./services/sqlite-vec/service.js');
+      const { SqliteVecIndexService } = await import('../services/sqlite-vec/service.js');
       return new SqliteVecIndexService({
         workspace,
         dbPath: runtime.sqliteDbPath,

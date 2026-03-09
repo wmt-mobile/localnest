@@ -5,8 +5,8 @@ import {
   SERVER_NAME,
   SERVER_VERSION,
   buildRuntimeConfig
-} from '../src/config.js';
-import { installRuntimeWarningFilter } from '../src/runtime-warning-filter.js';
+} from '../src/runtime/config.js';
+import { installRuntimeWarningFilter } from '../src/runtime/warning-filter.js';
 import { MemoryService } from '../src/services/memory/service.js';
 import { MemoryWorkflowService } from '../src/services/memory/workflow.js';
 

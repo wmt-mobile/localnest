@@ -3,8 +3,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { applyConsolePolicy, buildRuntimeConfig, expandHome } from '../src/config.js';
-import { buildLocalnestPaths } from '../src/home-layout.js';
+import { applyConsolePolicy, buildRuntimeConfig, expandHome } from '../src/runtime/config.js';
+import { buildLocalnestPaths } from '../src/runtime/home-layout.js';
 
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-config-test-'));

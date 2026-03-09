@@ -9,7 +9,7 @@ import {
   resolveLocalnestHome,
   resolveWritableModelCacheDir
 } from '../src/home-layout.js';
-import { installRuntimeWarningFilter } from '../src/runtime-warning-filter.js';
+import { installRuntimeWarningFilter } from '../src/runtime/warning-filter.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';

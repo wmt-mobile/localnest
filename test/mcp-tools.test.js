@@ -1,10 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createJsonToolRegistrar, paginateItems } from '../src/server/common/tool-utils.js';
-import { registerCoreTools } from '../src/server/tools/core.js';
-import { registerMemoryWorkflowTools } from '../src/server/tools/memory-workflow.js';
-import { registerMemoryStoreTools } from '../src/server/tools/memory-store.js';
-import { registerRetrievalTools } from '../src/server/tools/retrieval.js';
+import { createJsonToolRegistrar, paginateItems } from '../src/mcp/common/tool-utils.js';
+import { registerCoreTools } from '../src/mcp/tools/core.js';
+import { registerMemoryWorkflowTools } from '../src/mcp/tools/memory-workflow.js';
+import { registerMemoryStoreTools } from '../src/mcp/tools/memory-store.js';
+import { registerRetrievalTools } from '../src/mcp/tools/retrieval.js';
 import {
   RESPONSE_FORMAT_SCHEMA,
   MEMORY_KIND_SCHEMA,
@@ -13,7 +13,7 @@ import {
   MEMORY_LINK_SCHEMA,
   MEMORY_EVENT_TYPE_SCHEMA,
   MEMORY_EVENT_STATUS_SCHEMA
-} from '../src/server/common/schemas.js';
+} from '../src/mcp/common/schemas.js';
 
 function makeFakeServer() {
   const tools = new Map();

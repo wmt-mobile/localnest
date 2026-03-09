@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { SERVER_VERSION } from '../src/config.js';
+import { SERVER_VERSION } from '../src/runtime/config.js';
 
 const args = process.argv.slice(2);
 const command = args[0] || '';
@@ -36,7 +36,7 @@ async function main() {
   }
 
   if (command === 'start' || command === 'serve') {
-    await import('../src/localnest-mcp.js');
+    await import('../src/app/mcp-server.js');
     return;
   }
 

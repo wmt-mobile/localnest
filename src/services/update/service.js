@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import { buildLocalnestPaths } from '../../home-layout.js';
+import { buildLocalnestPaths } from '../../runtime/home-layout.js';
 import {
   parseIsoTime,
   compareVersions,

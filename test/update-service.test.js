@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { UpdateService, compareVersions } from '../src/services/update/service.js';
-import { buildLocalnestPaths } from '../src/home-layout.js';
+import { buildLocalnestPaths } from '../src/runtime/home-layout.js';
 
 function makeTempHome() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-update-test-'));
