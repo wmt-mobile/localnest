@@ -77,14 +77,14 @@ Based on the installed `localnest-mcp 0.0.4-beta.5` release sweep in [reports/lo
 
 ## 7. Release Harness Improvements
 
-- [ ] Promote `scripts/release-test-installed-beta5.mjs` into a reusable installed-runtime release test harness.
-- [ ] Parameterize the harness so version labels and output paths are not hardcoded to beta.5.
-- [ ] Add stronger assertions for expected non-empty retrieval results on known-good queries.
-- [ ] Add explicit schema assertions for tool outputs in the installed-runtime harness.
-- [ ] Capture tool stderr/stdout per step where useful instead of only at the end.
-- [ ] Add a summary of created temporary artifacts and whether cleanup succeeded.
-- [ ] Add a machine-readable JSON report alongside the markdown report.
-- [ ] Make the release harness fail if critical evidence-based checks return empty or malformed results.
+- [x] Promote `scripts/release-test-installed-beta5.mjs` into a reusable installed-runtime release test harness.
+- [x] Parameterize the harness so version labels and output paths are not hardcoded to beta.5.
+- [x] Add stronger assertions for expected non-empty retrieval results on known-good queries.
+- [x] Add explicit schema assertions for tool outputs in the installed-runtime harness.
+- [x] Capture tool stderr/stdout per step where useful instead of only at the end.
+- [x] Add a summary of created temporary artifacts and whether cleanup succeeded.
+- [x] Add a machine-readable JSON report alongside the markdown report.
+- [x] Make the release harness fail if critical evidence-based checks return empty or malformed results.
 
 ## 8. Documentation Improvements
 

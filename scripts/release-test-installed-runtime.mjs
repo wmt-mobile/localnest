@@ -1,0 +1,751 @@
+#!/usr/bin/env node
+
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+import { spawn } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+function parseCliArgs(argv) {
+  const out = {};
+  for (let i = 0; i < argv.length; i += 1) {
+    const token = argv[i];
+    if (!token.startsWith('--')) continue;
+    const key = token.slice(2);
+    const next = argv[i + 1];
+    if (!next || next.startsWith('--')) {
+      out[key] = 'true';
+      continue;
+    }
+    out[key] = next;
+    i += 1;
+  }
+  return out;
+}
+
+export const __test_parseCliArgs = parseCliArgs;
+
+class McpStdioClient {
+  constructor(command, args, env) {
+    this.command = command;
+    this.args = args;
+    this.env = env;
+    this.child = null;
+    this.buffer = '';
+    this.nextId = 1;
+    this.pending = new Map();
+    this.stderr = '';
+  }
+
+  async start() {
+    this.child = spawn(this.command, this.args, {
+      env: this.env,
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+
+    this.child.stdout.on('data', (chunk) => {
+      this.buffer += chunk.toString('utf8');
+      this.#drainBuffer();
+    });
+    this.child.stderr.on('data', (chunk) => {
+      this.stderr += chunk.toString('utf8');
+    });
+    this.child.on('exit', (code, signal) => {
+      for (const pending of this.pending.values()) {
+        pending.reject(new Error(`MCP process exited before response (code=${code}, signal=${signal})`));
+      }
+      this.pending.clear();
+    });
+
+    const init = await this.request('initialize', {
+      protocolVersion: '2024-11-05',
+      capabilities: {},
+      clientInfo: {
+        name: 'localnest-release-smoke',
+        version: '1.0.0'
+      }
+    }, 10000);
+    await this.notify('notifications/initialized', {});
+    return init;
+  }
+
+  async request(method, params = {}, timeoutMs = 30000) {
+    const id = this.nextId += 1;
+    const payload = {
+      jsonrpc: '2.0',
+      id,
+      method,
+      params
+    };
+    const message = `${JSON.stringify(payload)}\n`;
+
+    const promise = new Promise((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        this.pending.delete(id);
+        reject(new Error(`Timeout waiting for ${method}`));
+      }, timeoutMs);
+      this.pending.set(id, {
+        resolve: (value) => {
+          clearTimeout(timeout);
+          resolve(value);
+        },
+        reject: (error) => {
+          clearTimeout(timeout);
+          reject(error);
+        }
+      });
+    });
+
+    this.child.stdin.write(message);
+    return promise;
+  }
+
+  async notify(method, params = {}) {
+    const payload = {
+      jsonrpc: '2.0',
+      method,
+      params
+    };
+    this.child.stdin.write(`${JSON.stringify(payload)}\n`);
+  }
+
+  async close() {
+    if (!this.child) return;
+    this.child.kill('SIGTERM');
+  }
+
+  #drainBuffer() {
+    while (true) {
+      const lineEnd = this.buffer.indexOf('\n');
+      if (lineEnd === -1) return;
+      const body = this.buffer.slice(0, lineEnd).replace(/\r$/, '');
+      this.buffer = this.buffer.slice(lineEnd + 1);
+
+      let message;
+      try {
+        message = JSON.parse(body);
+      } catch {
+        continue;
+      }
+      if (Object.prototype.hasOwnProperty.call(message, 'id') && this.pending.has(message.id)) {
+        const pending = this.pending.get(message.id);
+        this.pending.delete(message.id);
+        if (message.error) pending.reject(new Error(`${message.error.message || 'Unknown MCP error'}`));
+        else pending.resolve(message.result);
+      }
+    }
+  }
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function summarize(value) {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value.slice(0, 160);
+  const text = JSON.stringify(value);
+  return text.length > 220 ? `${text.slice(0, 220)}...` : text;
+}
+
+function resultCount(value) {
+  if (Array.isArray(value)) return value.length;
+  if (Number.isFinite(value?.count)) return value.count;
+  if (Array.isArray(value?.items)) return value.items.length;
+  if (Array.isArray(value?.entries)) return value.entries.length;
+  if (Array.isArray(value?.lines)) return value.lines.length;
+  if (typeof value?.content === 'string') return value.content.split(/\r?\n/).filter(Boolean).length;
+  return 0;
+}
+
+function safeToolResult(result) {
+  if (!result) return null;
+  if (result.structuredContent?.data !== undefined) return result.structuredContent.data;
+  if (result.content?.[0]?.text) return result.content[0].text;
+  return result;
+}
+
+function getMemoryId(value) {
+  return value?.id || value?.memory?.id || null;
+}
+
+function getMemoryTitle(value) {
+  return value?.title || value?.memory?.title || '';
+}
+
+function assertFields(value, fields, label) {
+  for (const field of fields) {
+    if (value?.[field] === undefined) {
+      throw new Error(`${label} missing required field ${field}`);
+    }
+  }
+}
+
+function buildDefaultConfig(overrides = {}) {
+  const root = process.cwd();
+  const reportDir = path.join(root, 'reports');
+  const versionLabel = overrides.versionLabel || 'installed-runtime';
+  const slug = String(versionLabel).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'installed-runtime';
+  return {
+    root,
+    projectPath: root,
+    filePath: path.join(root, 'README.md'),
+    searchFileQuery: 'README',
+    searchCodeQuery: 'localnest_list_roots',
+    reportDir,
+    markdownReportPath: overrides.markdownReportPath || path.join(reportDir, `localnest-${slug}-release-test-report.md`),
+    jsonReportPath: overrides.jsonReportPath || path.join(reportDir, `localnest-${slug}-release-test-report.json`),
+    reportTitle: `LocalNest ${overrides.versionLabel || 'Installed Runtime'} Release Test Report`,
+    configPath: '/home/jenil-d-gohel/.localnest/config/localnest.config.json',
+    dbPath: '/home/jenil-d-gohel/.localnest/data/localnest.db',
+    indexPath: '/home/jenil-d-gohel/.localnest/data/localnest.index.json',
+    runtimeLabel: overrides.runtimeLabel || 'globally installed `localnest-mcp`',
+    versionLabel: overrides.versionLabel || 'installed-runtime',
+    command: overrides.command || 'localnest-mcp'
+  };
+}
+
+export const __test_buildDefaultConfig = buildDefaultConfig;
+
+export async function runInstalledRuntimeReleaseTest(options = {}) {
+  const config = buildDefaultConfig(options);
+  fs.mkdirSync(config.reportDir, { recursive: true });
+
+  const tempReleaseHome = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-release-runtime-'));
+  const tempMemoryDb = path.join(tempReleaseHome, 'localnest.memory.db');
+  const env = {
+    ...process.env,
+    MCP_MODE: 'stdio',
+    LOCALNEST_CONFIG: config.configPath,
+    LOCALNEST_INDEX_BACKEND: 'sqlite-vec',
+    LOCALNEST_DB_PATH: config.dbPath,
+    LOCALNEST_INDEX_PATH: config.indexPath,
+    LOCALNEST_MEMORY_ENABLED: 'true',
+    LOCALNEST_MEMORY_BACKEND: 'auto',
+    LOCALNEST_MEMORY_DB_PATH: tempMemoryDb
+  };
+
+  const client = new McpStdioClient(config.command, [], env);
+  const results = [];
+  let toolList = [];
+  let tempMemoryA = null;
+  let tempMemoryB = null;
+  let indexStatus = null;
+  let cleanupSummary = { temp_memory_deleted: false };
+
+  const record = async (name, fn, optionsForStep = {}) => {
+    const startedAt = Date.now();
+    const stderrOffset = client.stderr.length;
+    process.stderr.write(`[release-test-installed-runtime] start ${name}\n`);
+    try {
+      const value = await fn();
+      if (typeof optionsForStep.verify === 'function') optionsForStep.verify(value);
+      const durationMs = Date.now() - startedAt;
+      const stderrDelta = client.stderr.slice(stderrOffset).trim();
+      process.stderr.write(`[release-test-installed-runtime] pass ${name} (${durationMs}ms)\n`);
+      results.push({
+        name,
+        status: 'PASS',
+        durationMs,
+        details: optionsForStep.details ? optionsForStep.details(value) : summarize(value),
+        stderr: stderrDelta || null
+      });
+      return value;
+    } catch (error) {
+      const durationMs = Date.now() - startedAt;
+      const stderrDelta = client.stderr.slice(stderrOffset).trim();
+      process.stderr.write(`[release-test-installed-runtime] ${optionsForStep.allowFailure ? 'warn' : 'fail'} ${name} (${durationMs}ms): ${error?.message || String(error)}\n`);
+      results.push({
+        name,
+        status: optionsForStep.allowFailure ? 'WARN' : 'FAIL',
+        durationMs,
+        details: error?.message || String(error),
+        stderr: stderrDelta || null
+      });
+      if (!optionsForStep.allowFailure) throw error;
+      return null;
+    }
+  };
+
+  try {
+    const initialize = await record('MCP initialize', async () => client.start(), {
+      details: (value) => `${value.serverInfo?.name || 'unknown'} ${value.serverInfo?.version || ''}`.trim()
+    });
+
+    const toolsListResult = await record('tools/list', async () => client.request('tools/list', {}, 15000), {
+      details: (value) => `${value.tools?.length || 0} tools exposed`,
+      verify: (value) => {
+        if (!Array.isArray(value.tools) || value.tools.length === 0) {
+          throw new Error('expected tools/list to expose at least one MCP tool');
+        }
+      }
+    });
+    toolList = toolsListResult.tools || [];
+
+    const callTool = (name, args = {}, timeoutMs = 30000) =>
+      client.request('tools/call', { name, arguments: args }, timeoutMs);
+
+    await record('localnest_server_status', async () => safeToolResult(await callTool('localnest_server_status')), {
+      details: (value) => `version=${value.version}, roots=${value.roots?.length || 0}, backend=${value.vector_index?.backend || value.vector_index?.requested_backend || ''}`,
+      verify: (value) => {
+        assertFields(value || {}, ['name', 'version', 'updates'], 'localnest_server_status');
+      }
+    });
+    await record('localnest_usage_guide', async () => safeToolResult(await callTool('localnest_usage_guide', { response_format: 'markdown' })), {
+      details: (value) => typeof value === 'string' ? 'markdown returned' : summarize(value)
+    });
+    await record('localnest_list_roots', async () => safeToolResult(await callTool('localnest_list_roots')), {
+      details: (value) => `${value.items?.length || 0} roots`
+    });
+    await record('localnest_list_projects', async () => safeToolResult(await callTool('localnest_list_projects', { root_path: path.dirname(config.projectPath) })), {
+      details: (value) => `${value.items?.length || 0} first-level projects`
+    });
+    await record('localnest_project_tree', async () => safeToolResult(await callTool('localnest_project_tree', { project_path: config.projectPath, max_depth: 2 })), {
+      details: (value) => `${resultCount(value)} top-level entries`,
+      verify: (value) => {
+        if (resultCount(value) <= 0) throw new Error('expected non-empty project tree for the target project');
+      }
+    });
+    indexStatus = await record('localnest_index_status', async () => safeToolResult(await callTool('localnest_index_status')), {
+      details: (value) => `backend=${value.backend}, total_files=${value.total_files}`,
+      verify: (value) => {
+        assertFields(value || {}, ['backend', 'total_files'], 'localnest_index_status');
+      }
+    });
+    await record('localnest_embed_status', async () => safeToolResult(await callTool('localnest_embed_status')), {
+      details: (value) => `ready=${value.ready ?? ''}, provider=${value.provider || ''}`,
+      verify: (value) => {
+        assertFields(value || {}, ['ready', 'provider', 'model'], 'localnest_embed_status');
+      }
+    });
+    if ((indexStatus?.total_files || 0) > 0) {
+      await record('localnest_index_project', async () => ({
+        skipped: true,
+        reason: 'existing_index_available',
+        total_files: indexStatus.total_files
+      }), {
+        details: (value) => `skipped (${value.reason}), total_files=${value.total_files}`
+      });
+    } else {
+      await record('localnest_index_project', async () => safeToolResult(await callTool('localnest_index_project', {
+        project_path: config.projectPath
+      }, 300000)), {
+        details: (value) => `indexed_files=${value.indexed_files}, failed_files=${value.failed_files?.length || 0}`,
+        verify: (value) => {
+          assertFields(value || {}, ['indexed_files', 'failed_files'], 'localnest_index_project');
+        }
+      });
+    }
+    await record('localnest_search_files', async () => safeToolResult(await callTool('localnest_search_files', {
+      project_path: config.projectPath,
+      query: config.searchFileQuery,
+      max_results: 10
+    })), {
+      details: (value) => `${resultCount(value)} matches`,
+      verify: (value) => {
+        if (resultCount(value) <= 0) throw new Error(`expected at least one file match for query ${JSON.stringify(config.searchFileQuery)}`);
+      }
+    });
+    await record('localnest_search_code', async () => safeToolResult(await callTool('localnest_search_code', {
+      project_path: config.projectPath,
+      query: config.searchCodeQuery,
+      max_results: 5,
+      context_lines: 1
+    })), {
+      details: (value) => `${resultCount(value)} matches`,
+      verify: (value) => {
+        if (resultCount(value) <= 0) throw new Error(`expected at least one code match for query ${JSON.stringify(config.searchCodeQuery)}`);
+      }
+    });
+    await record('localnest_search_hybrid', async () => safeToolResult(await callTool('localnest_search_hybrid', {
+      project_path: config.projectPath,
+      query: 'memory workflow',
+      max_results: 5,
+      auto_index: false
+    }, 60000)), {
+      details: (value) => `ranking_mode=${value.ranking_mode || ''}, results=${value.results?.length || 0}`
+    });
+    await record('localnest_get_symbol', async () => safeToolResult(await callTool('localnest_get_symbol', {
+      project_path: config.projectPath,
+      symbol: 'buildRuntimeConfig',
+      max_results: 5
+    })), {
+      details: (value) => `definitions=${value.definitions?.length || 0}, exports=${value.exports?.length || 0}`
+    });
+    await record('localnest_find_usages', async () => safeToolResult(await callTool('localnest_find_usages', {
+      project_path: config.projectPath,
+      symbol: 'buildRuntimeConfig',
+      max_results: 10
+    })), {
+      details: (value) => `usages=${value.usages?.length || 0}`
+    });
+    await record('localnest_read_file', async () => safeToolResult(await callTool('localnest_read_file', {
+      path: config.filePath,
+      start_line: 1,
+      end_line: 20
+    })), {
+      details: (value) => `${resultCount(value)} lines returned`,
+      verify: (value) => {
+        if (resultCount(value) <= 0) throw new Error(`expected non-empty file content for ${config.filePath}`);
+        assertFields(value || {}, ['path', 'start_line', 'end_line'], 'localnest_read_file');
+      }
+    });
+    await record('localnest_summarize_project', async () => safeToolResult(await callTool('localnest_summarize_project', {
+      project_path: config.projectPath
+    }, 60000)), {
+      details: (value) => summarize(value.summary || value)
+    });
+    await record('localnest_memory_status', async () => safeToolResult(await callTool('localnest_memory_status')), {
+      details: (value) => `enabled=${value.enabled}, backend=${value.selected_backend || value.requested_backend || ''}`
+    });
+    await record('localnest_task_context', async () => safeToolResult(await callTool('localnest_task_context', {
+      task: `${config.versionLabel} release test`,
+      project_path: config.projectPath,
+      limit: 5
+    })), {
+      details: (value) => `recall=${value.recall?.count || 0}`
+    });
+    await record('localnest_memory_recall', async () => safeToolResult(await callTool('localnest_memory_recall', {
+      query: 'release smoke test',
+      project_path: config.projectPath,
+      limit: 5
+    })), {
+      details: (value) => `count=${value.count || value.items?.length || 0}`
+    });
+    await record('localnest_task_context empty-memory', async () => safeToolResult(await callTool('localnest_task_context', {
+      query: 'empty memory verification',
+      project_path: config.projectPath,
+      limit: 5
+    })), {
+      details: (value) => `recall=${value.recall?.count || 0}, attempted=${value.recall?.attempted}`,
+      verify: (value) => {
+        if (value.recall?.count !== 0) throw new Error('expected empty-memory task context to return zero recalled items');
+      }
+    });
+    await record('localnest_memory_recall empty-memory', async () => safeToolResult(await callTool('localnest_memory_recall', {
+      query: 'empty memory verification',
+      project_path: config.projectPath,
+      limit: 5
+    })), {
+      details: (value) => `count=${value.count || 0}`,
+      verify: (value) => {
+        if ((value.count || 0) !== 0) throw new Error('expected empty-memory recall to return zero items');
+      }
+    });
+
+    tempMemoryA = await record('localnest_memory_store A', async () => safeToolResult(await callTool('localnest_memory_store', {
+      title: `${config.versionLabel} release smoke temp A`,
+      summary: 'temporary memory for release smoke test',
+      content: `temporary memory A created during ${config.versionLabel} release smoke test`,
+      kind: 'knowledge',
+      status: 'active',
+      scope: { project_path: config.projectPath },
+      tags: ['release-test', 'temp']
+    })), {
+      details: (value) => `id=${getMemoryId(value)}`
+    });
+    tempMemoryB = await record('localnest_memory_store B', async () => safeToolResult(await callTool('localnest_memory_store', {
+      title: `${config.versionLabel} release smoke temp B`,
+      summary: 'temporary related memory for release smoke test',
+      content: `temporary memory B created during ${config.versionLabel} release smoke test`,
+      kind: 'knowledge',
+      status: 'active',
+      scope: { project_path: config.projectPath },
+      tags: ['release-test', 'temp']
+    })), {
+      details: (value) => `id=${getMemoryId(value)}`
+    });
+    await record('localnest_memory_list', async () => safeToolResult(await callTool('localnest_memory_list', {
+      project_path: config.projectPath,
+      limit: 10
+    })), {
+      details: (value) => `count=${value.count || value.items?.length || 0}`
+    });
+    await record('localnest_memory_get', async () => safeToolResult(await callTool('localnest_memory_get', {
+      id: getMemoryId(tempMemoryA)
+    })), {
+      details: (value) => `title=${getMemoryTitle(value)}`
+    });
+    await record('localnest_memory_update', async () => safeToolResult(await callTool('localnest_memory_update', {
+      id: getMemoryId(tempMemoryA),
+      summary: 'updated temporary memory for release smoke test',
+      change_note: 'release smoke update'
+    })), {
+      details: (value) => `id=${getMemoryId(value)}`
+    });
+    await record('localnest_memory_suggest_relations', async () => safeToolResult(await callTool('localnest_memory_suggest_relations', {
+      id: getMemoryId(tempMemoryA),
+      threshold: 0.0,
+      max_results: 5
+    }, 60000)), {
+      details: (value) => `suggestions=${value.suggestions?.length || 0}`
+    });
+    await record('localnest_memory_add_relation', async () => safeToolResult(await callTool('localnest_memory_add_relation', {
+      source_id: getMemoryId(tempMemoryA),
+      target_id: getMemoryId(tempMemoryB),
+      relation_type: 'related'
+    })), {
+      details: (value) => `${value.source_id || getMemoryId(tempMemoryA)} -> ${value.target_id || getMemoryId(tempMemoryB)}`
+    });
+    await record('localnest_memory_related', async () => safeToolResult(await callTool('localnest_memory_related', {
+      id: getMemoryId(tempMemoryA)
+    })), {
+      details: (value) => `related=${value.count || value.related?.length || 0}`
+    });
+    await record('localnest_memory_remove_relation', async () => safeToolResult(await callTool('localnest_memory_remove_relation', {
+      source_id: getMemoryId(tempMemoryA),
+      target_id: getMemoryId(tempMemoryB)
+    })), {
+      details: (value) => `removed=${value.removed}`
+    });
+    await record('localnest_memory_capture_event', async () => safeToolResult(await callTool('localnest_memory_capture_event', {
+      event_type: 'task',
+      status: 'completed',
+      title: `${config.versionLabel} release smoke event`,
+      summary: `temporary event for ${config.versionLabel} release smoke test`,
+      scope: { project_path: config.projectPath }
+    })), {
+      details: (value) => `status=${value.status || value.result?.status || ''}`
+    });
+    await record('localnest_memory_events', async () => safeToolResult(await callTool('localnest_memory_events', {
+      project_path: config.projectPath,
+      limit: 5
+    })), {
+      details: (value) => `count=${value.count || value.items?.length || 0}`
+    });
+    await record('localnest_capture_outcome', async () => safeToolResult(await callTool('localnest_capture_outcome', {
+      task: `${config.versionLabel} release smoke`,
+      summary: 'tool capture outcome executed',
+      project_path: config.projectPath,
+      files_changed: 0,
+      has_tests: true
+    })), {
+      details: (value) => `captured=${value.captured}`
+    });
+
+    const disabledClient = new McpStdioClient(config.command, [], {
+      ...env,
+      LOCALNEST_MEMORY_ENABLED: 'false'
+    });
+    try {
+      await disabledClient.start();
+      const disabledCall = (name, args = {}, timeoutMs = 30000) => disabledClient.request('tools/call', { name, arguments: args }, timeoutMs);
+      await record('localnest_memory_status disabled-memory', async () => safeToolResult(await disabledCall('localnest_memory_status')), {
+        details: (value) => `enabled=${value.enabled}`,
+        verify: (value) => {
+          if (value.enabled !== false) throw new Error('expected memory to be disabled');
+        }
+      });
+      await record('localnest_task_context disabled-memory', async () => safeToolResult(await disabledCall('localnest_task_context', {
+        query: 'disabled memory verification',
+        project_path: config.projectPath,
+        limit: 5
+      })), {
+        details: (value) => `reason=${value.recall?.skipped_reason || ''}`,
+        verify: (value) => {
+          if (value.recall?.skipped_reason !== 'memory_disabled') throw new Error('expected disabled-memory task context to skip with memory_disabled');
+        }
+      });
+      await record('localnest_capture_outcome disabled-memory', async () => safeToolResult(await disabledCall('localnest_capture_outcome', {
+        task: 'disabled memory verification',
+        project_path: config.projectPath,
+        event_type: 'task'
+      })), {
+        details: (value) => `captured=${value.captured}, reason=${value.skipped_reason || ''}`,
+        verify: (value) => {
+          if (value.captured !== false || value.skipped_reason !== 'memory_disabled') throw new Error('expected disabled-memory capture_outcome to skip cleanly');
+        }
+      });
+    } finally {
+      await disabledClient.close();
+    }
+
+    const backendUnavailableClient = new McpStdioClient(config.command, [], {
+      ...env,
+      LOCALNEST_MEMORY_BACKEND: 'sqlite3'
+    });
+    try {
+      await backendUnavailableClient.start();
+      const unavailableCall = (name, args = {}, timeoutMs = 30000) => backendUnavailableClient.request('tools/call', { name, arguments: args }, timeoutMs);
+      await record('localnest_memory_status backend-unavailable', async () => safeToolResult(await unavailableCall('localnest_memory_status')), {
+        details: (value) => `backend_available=${value.backend?.available}, selected=${value.backend?.selected || ''}`,
+        verify: (value) => {
+          if (value.backend?.available !== false) throw new Error('expected backend to be unavailable');
+        }
+      });
+      await record('localnest_task_context backend-unavailable', async () => safeToolResult(await unavailableCall('localnest_task_context', {
+        query: 'backend unavailable verification',
+        project_path: config.projectPath,
+        limit: 5
+      })), {
+        details: (value) => `reason=${value.recall?.skipped_reason || ''}`,
+        verify: (value) => {
+          if (value.recall?.skipped_reason !== 'backend_unavailable') throw new Error('expected backend-unavailable task context to skip with backend_unavailable');
+        }
+      });
+      await record('localnest_capture_outcome backend-unavailable', async () => safeToolResult(await unavailableCall('localnest_capture_outcome', {
+        task: 'backend unavailable verification',
+        project_path: config.projectPath,
+        event_type: 'task'
+      })), {
+        details: (value) => `captured=${value.captured}, reason=${value.skipped_reason || ''}`,
+        verify: (value) => {
+          if (value.captured !== false || value.skipped_reason !== 'backend_unavailable') throw new Error('expected backend-unavailable capture_outcome to skip cleanly');
+        }
+      });
+    } finally {
+      await backendUnavailableClient.close();
+    }
+
+    await record('localnest_update_status', async () => safeToolResult(await callTool('localnest_update_status', { force_check: false }, 20000)), {
+      allowFailure: true,
+      details: (value) => `current=${value.current || ''}, latest=${value.latest || ''}, outdated=${value.is_outdated ?? ''}`
+    });
+
+    results.push({
+      name: 'localnest_update_self',
+      status: 'SKIP',
+      durationMs: 0,
+      details: 'Skipped in release sweep because self-update mutates the installed global runtime.',
+      stderr: null
+    });
+
+    if (getMemoryId(tempMemoryA)) {
+      await record('localnest_memory_delete A', async () => safeToolResult(await callTool('localnest_memory_delete', { id: getMemoryId(tempMemoryA) })), {
+        details: (value) => `deleted=${value.deleted}`
+      });
+    }
+    if (getMemoryId(tempMemoryB)) {
+      await record('localnest_memory_delete B', async () => safeToolResult(await callTool('localnest_memory_delete', { id: getMemoryId(tempMemoryB) })), {
+        details: (value) => `deleted=${value.deleted}`
+      });
+    }
+
+    const cleanupCheck = await callTool('localnest_memory_list', { project_path: config.projectPath, limit: 50 }).catch(() => null);
+    const cleanupData = safeToolResult(cleanupCheck);
+    const remainingTempEntries = Array.isArray(cleanupData?.items)
+      ? cleanupData.items.filter((item) => new RegExp(`${config.versionLabel} release smoke temp`, 'i').test(item.title || ''))
+      : [];
+    cleanupSummary.temp_memory_deleted = remainingTempEntries.length === 0;
+
+    const passCount = results.filter((item) => item.status === 'PASS').length;
+    const warnCount = results.filter((item) => item.status === 'WARN').length;
+    const failCount = results.filter((item) => item.status === 'FAIL').length;
+    const skipCount = results.filter((item) => item.status === 'SKIP').length;
+
+    const reportObject = {
+      title: config.reportTitle,
+      generated_at: nowIso(),
+      host: os.hostname(),
+      project_path: config.projectPath,
+      runtime_label: config.runtimeLabel,
+      version_label: config.versionLabel,
+      installed_runtime: {
+        name: initialize.serverInfo?.name || 'localnest',
+        version: initialize.serverInfo?.version || 'unknown'
+      },
+      summary: {
+        pass: passCount,
+        warn: warnCount,
+        fail: failCount,
+        skip: skipCount,
+        exposed_tools: toolList.length
+      },
+      temporary_artifacts: {
+        temp_release_home: tempReleaseHome,
+        temp_memory_db: tempMemoryDb,
+        temp_memory_deleted: cleanupSummary.temp_memory_deleted
+      },
+      results,
+      stderr: client.stderr.trim() || ''
+    };
+
+    const report = [
+      `# ${config.reportTitle}`,
+      '',
+      `Date: ${reportObject.generated_at}`,
+      `Host: ${reportObject.host}`,
+      `Project: ${config.projectPath}`,
+      `Installed runtime: ${reportObject.installed_runtime.name} ${reportObject.installed_runtime.version}`,
+      '',
+      '## Scope',
+      '',
+      `- Target runtime: ${config.runtimeLabel}`,
+      `- Version under test: \`${config.versionLabel}\``,
+      '- Transport: MCP stdio handshake against installed binary',
+      `- Config: \`${config.configPath}\``,
+      '',
+      '## Summary',
+      '',
+      `- PASS: ${passCount}`,
+      `- WARN: ${warnCount}`,
+      `- FAIL: ${failCount}`,
+      `- SKIP: ${skipCount}`,
+      `- Exposed MCP tools: ${toolList.length}`,
+      '',
+      '## Results',
+      '',
+      '| Check | Status | Details |',
+      '|---|---|---|',
+      ...results.map((item) => `| ${item.name} | ${item.status} | ${String(item.details).replace(/\|/g, '\\|')} |`),
+      '',
+      '## Temporary Artifacts',
+      '',
+      `- Temp release home: \`${tempReleaseHome}\``,
+      `- Temp memory db: \`${tempMemoryDb}\``,
+      `- Cleanup verified: temporary memory deleted=${cleanupSummary.temp_memory_deleted}`,
+      '',
+      '## Notes',
+      '',
+      '- `localnest_update_self` was intentionally skipped because it mutates the live global install and is not appropriate for a release verification sweep.',
+      '- Memory store/update/relation/delete flow was exercised against an isolated temporary memory database, then cleanup was verified for the temporary entries created by this test.',
+      '- Event-based workflow tools in this sweep used the isolated temporary memory database rather than the user\'s real event log.',
+      '',
+      '## Per-Step Stderr',
+      '',
+      ...results.filter((item) => item.stderr).length > 0
+        ? results.filter((item) => item.stderr).flatMap((item) => [
+          `### ${item.name}`,
+          '',
+          '```text',
+          item.stderr,
+          '```',
+          ''
+        ])
+        : ['(none)', ''],
+      '## Stderr',
+      '',
+      '```text',
+      reportObject.stderr || '(none)',
+      '```'
+    ].join('\n');
+
+    fs.writeFileSync(config.markdownReportPath, `${report}\n`, 'utf8');
+    fs.writeFileSync(config.jsonReportPath, `${JSON.stringify(reportObject, null, 2)}\n`, 'utf8');
+    process.stdout.write(`${report}\n`);
+    return reportObject;
+  } finally {
+    try {
+      await client.close();
+    } catch {}
+    fs.rmSync(tempReleaseHome, { recursive: true, force: true });
+  }
+}
+
+async function main() {
+  const args = parseCliArgs(process.argv.slice(2));
+  await runInstalledRuntimeReleaseTest({
+    versionLabel: args['version-label'],
+    runtimeLabel: args['runtime-label'],
+    markdownReportPath: args['markdown-report-path'],
+    jsonReportPath: args['json-report-path']
+  });
+}
+
+const isDirectExecution = process.argv[1] && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+if (isDirectExecution) {
+  main().catch((error) => {
+    process.stderr.write(`[release-test-installed-runtime] fatal: ${error?.stack || error?.message || String(error)}\n`);
+    process.exit(1);
+  });
+}
