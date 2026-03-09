@@ -27,6 +27,32 @@ export function registerCoreTools({
   );
 
   registerJsonTool(
+    'localnest_health',
+    {
+      title: 'Health',
+      description: 'Return a compact runtime health summary for fast smoke checks.',
+      inputSchema: {},
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async () => {
+      const status = await buildServerStatus();
+      return {
+        name: status.name,
+        version: status.version,
+        mode: status.mode,
+        health: status.health,
+        roots_count: Array.isArray(status.roots) ? status.roots.length : 0,
+        update_recommendation: status.updates?.recommendation || 'up_to_date'
+      };
+    }
+  );
+
+  registerJsonTool(
     'localnest_usage_guide',
     {
       title: 'Usage Guide',

@@ -226,8 +226,13 @@ test('MCP tools register and execute across all tool groups', async () => {
 
   registerCoreTools({
     registerJsonTool,
-    buildServerStatus: async () => ({ name: 'localnest', version: 'test' }),
-    buildUsageGuide: () => ({ for_users: ['a'], for_ai_agents: ['b'] }),
+    buildServerStatus: async () => ({
+      name: 'localnest',
+      version: 'test',
+      health: { overall: 'ok' },
+      updates: { recommendation: 'up_to_date' }
+    }),
+    buildUsageGuide: () => ({ quickstart: ['a'], for_users: ['a'], for_ai_agents: ['b'], recommended_next_action: 'x' }),
     updates: fixture.updates
   });
   registerMemoryWorkflowTools({
@@ -253,6 +258,7 @@ test('MCP tools register and execute across all tool groups', async () => {
 
   const expected = [
     'localnest_server_status',
+    'localnest_health',
     'localnest_usage_guide',
     'localnest_update_status',
     'localnest_update_self',
@@ -301,7 +307,12 @@ test('MCP tools register and execute across all tool groups', async () => {
   });
   const run = async (name, args = {}, extra = makeExtra()) => server.tools.get(name).handler(args, extra);
 
-  assert.equal((await run('localnest_server_status')).structuredContent.data.name, 'localnest');
+  const serverStatus = (await run('localnest_server_status')).structuredContent;
+  assert.equal(serverStatus.data.name, 'localnest');
+  assert.equal(serverStatus.meta.schema_version, '1.0');
+  const health = (await run('localnest_health')).structuredContent.data;
+  assert.equal(health.name, 'localnest');
+  assert.equal(health.health.overall, 'ok');
   assert.ok((await run('localnest_usage_guide', { response_format: 'markdown' })).content[0].text.includes('##'));
   const updateStatus = (await run('localnest_update_status', { force_check: true })).structuredContent.data;
   assert.equal(updateStatus.is_outdated, true);
@@ -395,13 +406,18 @@ test('MCP tools register and execute across all tool groups', async () => {
   assert.equal(emptyFileSearch.structuredContent.data.length, 0);
   assert.equal(emptyFileSearch.structuredContent.meta.tool, 'localnest_search_files');
   assert.equal(emptyFileSearch.structuredContent.meta.count, 0);
+  assert.equal(emptyFileSearch.structuredContent.meta.schema_version, '1.0');
+  assert.ok(emptyFileSearch.structuredContent.meta.recommended_next_action);
   assert.match(emptyFileSearch.content[0].text, /No file-path matches found/);
+  assert.match(emptyFileSearch.content[0].text, /Next:/);
   const emptyCodeSearch = await run('localnest_search_code', { query: 'missing', project_path: '/tmp/root', all_roots: false, glob: '*', max_results: 5, case_sensitive: false, context_lines: 0, use_regex: false });
   assert.equal(Array.isArray(emptyCodeSearch.structuredContent.data), true);
   assert.equal(emptyCodeSearch.structuredContent.data.length, 0);
   assert.equal(emptyCodeSearch.structuredContent.meta.tool, 'localnest_search_code');
   assert.equal(emptyCodeSearch.structuredContent.meta.count, 0);
+  assert.ok(emptyCodeSearch.structuredContent.meta.recommended_next_action);
   assert.match(emptyCodeSearch.content[0].text, /No code matches found/);
+  assert.match(emptyCodeSearch.content[0].text, /Next:/);
   const projectSummary = (await run('localnest_summarize_project', { project_path: '/tmp/root', max_files: 100 })).structuredContent.data;
   assert.equal(projectSummary.summary, 'ok');
   assert.equal(projectSummary.project_path, '/tmp/root');

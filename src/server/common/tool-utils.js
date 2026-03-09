@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+export const RESPONSE_SCHEMA_VERSION = '1.0';
+
 function renderMarkdown(value, heading = 'Result') {
   if (value === null || value === undefined) {
     return `## ${heading}\n\nnull`;
@@ -47,11 +49,15 @@ function normalizeToolResponsePayload(result) {
 
 function toolResult(result, responseFormat = 'json', markdownTitle = 'Result') {
   const { data, meta, note } = normalizeToolResponsePayload(result);
+  const mergedMeta = {
+    schema_version: RESPONSE_SCHEMA_VERSION,
+    ...(meta || {})
+  };
   const text = responseFormat === 'markdown'
     ? `${note ? `${note}\n\n` : ''}${renderMarkdown(data, markdownTitle)}`
     : `${note ? `${note}\n\n` : ''}${JSON.stringify(data, null, 2)}`;
   return {
-    structuredContent: meta ? { data, meta } : { data },
+    structuredContent: { data, meta: mergedMeta },
     content: [{ type: 'text', text }]
   };
 }

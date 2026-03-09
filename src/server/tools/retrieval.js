@@ -55,13 +55,14 @@ export function registerRetrievalTools({
     };
   }
 
-  function withSearchMissResponse(data, meta, note, guidance) {
+  function withSearchMissResponse(data, meta, note, guidance, recommendedNextAction) {
     return createToolResponse(data, {
       meta: {
         ...meta,
-        guidance
+        guidance,
+        recommended_next_action: recommendedNextAction
       },
-      note: `${note} ${guidance.join(' ')}`
+      note: `${note} ${guidance.join(' ')} Next: ${recommendedNextAction}`
     });
   }
 
@@ -253,7 +254,8 @@ export function registerRetrievalTools({
         [
           'Verify project_path or broaden the query to a path fragment.',
           'Try synonyms or module names instead of full phrases.'
-        ]
+        ],
+        'Retry localnest_search_files with a broader path fragment or switch to localnest_search_code for an exact symbol.'
       );
     }
   );
@@ -310,7 +312,8 @@ export function registerRetrievalTools({
         [
           'Verify the scope and try a broader query or synonyms.',
           'If you need pattern matching, retry with use_regex=true.'
-        ]
+        ],
+        'Retry localnest_search_code with a broader query or use_regex=true, or switch to localnest_search_hybrid for concept lookup.'
       );
     }
   );

@@ -97,11 +97,11 @@ Based on the installed `localnest-mcp 0.0.4-beta.5` release sweep in [reports/lo
 
 ## 9. Nice-To-Have Polish
 
-- [ ] Improve human readability of `localnest_usage_guide` output for release/debug sessions.
-- [ ] Consider exposing a dedicated `health` or `smoke_test` tool for fast runtime validation.
-- [ ] Consider exposing richer backend diagnostics in `localnest_server_status`.
-- [ ] Consider adding a “recommended next action” field to retrieval misses.
-- [ ] Consider adding a “response schema version” field for MCP tool outputs.
+- [x] Improve human readability of `localnest_usage_guide` output for release/debug sessions.
+- [x] Consider exposing a dedicated `health` or `smoke_test` tool for fast runtime validation.
+- [x] Consider exposing richer backend diagnostics in `localnest_server_status`.
+- [x] Consider adding a “recommended next action” field to retrieval misses.
+- [x] Consider adding a “response schema version” field for MCP tool outputs.
 
 ## 10. Exit Criteria Before Calling The Next Release Tighter
 

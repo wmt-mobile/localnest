@@ -9,6 +9,7 @@ test('server status exposes cache diagnostics from runtime config', async () => 
     runtime: {
       mcpMode: 'stdio',
       hasRipgrep: true,
+      indexSweepIntervalMinutes: 0,
       autoProjectSplit: true,
       maxAutoProjects: 10,
       forceSplitChildren: false,
@@ -69,10 +70,13 @@ test('server status exposes cache diagnostics from runtime config', async () => 
   });
 
   const status = await buildServerStatus();
+  assert.equal(status.health.overall, 'degraded');
+  assert.ok(Array.isArray(status.health.issues));
   assert.equal(status.vector_index.embedding_cache_dir, '/tmp/fallback-cache');
   assert.equal(status.vector_index.embedding_cache_status.fallbackUsed, true);
   assert.equal(status.vector_index.reranker_cache_dir, '/tmp/fallback-cache');
   assert.equal(status.vector_index.reranker_cache_status.preferredPath, '/home/test/.localnest/cache');
+  assert.equal(status.vector_index.diagnostics.index_sweep_interval_minutes, 0);
   assert.equal(status.updates.recommendation, 'up_to_date');
   assert.equal(status.updates.can_attempt_update, false);
   assert.equal(status.updates.using_cached_data, true);
