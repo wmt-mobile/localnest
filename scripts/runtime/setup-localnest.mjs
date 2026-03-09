@@ -6,7 +6,12 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
-import { migrateLocalnestHomeLayout, resolveLocalnestHome, resolveWritableModelCacheDir } from '../../src/runtime/index.js';
+import {
+  ensureSqliteVecExtension,
+  migrateLocalnestHomeLayout,
+  resolveLocalnestHome,
+  resolveWritableModelCacheDir
+} from '../../src/runtime/index.js';
 import {
   buildLocalnestServerConfig,
   installLocalnestIntoDetectedClients
@@ -107,7 +112,7 @@ function runPreflightChecks() {
 }
 
 function buildLocalnestEnv(indexConfig) {
-  return {
+  const env = {
     MCP_MODE: 'stdio',
     LOCALNEST_CONFIG: configPath,
     LOCALNEST_INDEX_BACKEND: indexConfig.backend,
@@ -124,6 +129,10 @@ function buildLocalnestEnv(indexConfig) {
     LOCALNEST_MEMORY_BACKEND: indexConfig.memory.backend,
     LOCALNEST_MEMORY_DB_PATH: indexConfig.memory.dbPath
   };
+  if (indexConfig.sqliteVecExtensionPath) {
+    env.LOCALNEST_SQLITE_VEC_EXTENSION = indexConfig.sqliteVecExtensionPath;
+  }
+  return env;
 }
 
 function buildClientSnippet(packageRef, indexConfig) {
@@ -266,11 +275,50 @@ function resolveModelCacheDirs(preferredEmbedDir, preferredRerankerDir) {
   };
 }
 
+function resolveSqliteVecPreference(indexConfig) {
+  if (indexConfig.backend !== 'sqlite-vec') {
+    return {
+      sqliteVecExtensionPath: '',
+      sqliteVecInstallStatus: {
+        ok: true,
+        installed: false,
+        source: 'not-required',
+        reason: 'json backend selected'
+      }
+    };
+  }
+
+  const explicitPath = parseArg('sqlite-vec-extension');
+  if (explicitPath) {
+    return {
+      sqliteVecExtensionPath: path.resolve(expandHome(explicitPath)),
+      sqliteVecInstallStatus: {
+        ok: true,
+        installed: false,
+        source: 'configured',
+        reason: 'explicit path provided'
+      }
+    };
+  }
+
+  const skipInstall = parseBooleanArg('skip-sqlite-vec-install') ?? false;
+  const installResult = ensureSqliteVecExtension({
+    localnestHome,
+    env: process.env,
+    installIfMissing: !skipInstall
+  });
+  return {
+    sqliteVecExtensionPath: installResult.ok ? installResult.path : '',
+    sqliteVecInstallStatus: installResult
+  };
+}
+
 function saveOutputs(roots, packageRef, indexConfig) {
   fs.mkdirSync(layout.dirs.config, { recursive: true });
   fs.mkdirSync(layout.dirs.data, { recursive: true });
   fs.mkdirSync(layout.dirs.cache, { recursive: true });
   fs.mkdirSync(layout.dirs.backups, { recursive: true });
+  fs.mkdirSync(layout.dirs.vendor, { recursive: true });
   const config = {
     name: 'localnest',
     version: 4,
@@ -284,6 +332,7 @@ function saveOutputs(roots, packageRef, indexConfig) {
       chunkOverlap: indexConfig.chunkOverlap,
       maxTermsPerChunk: indexConfig.maxTermsPerChunk,
       maxIndexedFiles: indexConfig.maxIndexedFiles,
+      sqliteVecExtensionPath: indexConfig.sqliteVecExtensionPath || '',
       embeddingProvider: indexConfig.embedding.provider,
       embeddingModel: indexConfig.embedding.model,
       embeddingCacheDir: indexConfig.embedding.cacheDir,
@@ -355,6 +404,13 @@ function printSuccess(packageRef, indexConfig) {
   console.log(`Saved root config: ${configPath}`);
   console.log(`Saved client snippet: ${snippetPath}`);
   console.log(`Preferred LocalNest launcher: ${launch.command}${launch.args.length ? ` ${launch.args.join(' ')}` : ''}`);
+  if (indexConfig.backend === 'sqlite-vec') {
+    if (indexConfig.sqliteVecExtensionPath) {
+      console.log(`Configured sqlite-vec native extension: ${indexConfig.sqliteVecExtensionPath}`);
+    } else {
+      console.log('sqlite-vec native extension not configured. LocalNest will not have vec0 acceleration until setup can detect or install it.');
+    }
+  }
   console.log('');
   if (clientInstall.installed.length > 0) {
     console.log('Auto-installed LocalNest into detected AI tools:');
@@ -429,6 +485,7 @@ async function main() {
     const memoryDbPath = path.resolve(expandHome(parseArg('memory-db-path') || defaultMemoryDbPath));
     const memoryAutoCapture = parseBooleanArg('memory-auto-capture') ?? memoryEnabled;
     const memoryConsentDone = parseBooleanArg('memory-consent-done') ?? false;
+    const { sqliteVecExtensionPath, sqliteVecInstallStatus } = resolveSqliteVecPreference({ backend });
 
     saveOutputs(roots, packageRef, {
       backend,
@@ -438,6 +495,7 @@ async function main() {
       chunkOverlap,
       maxTermsPerChunk,
       maxIndexedFiles,
+      sqliteVecExtensionPath,
       embedding: {
         provider: embeddingProvider,
         model: embeddingModel,
@@ -461,6 +519,7 @@ async function main() {
       backend,
       dbPath,
       indexPath,
+      sqliteVecExtensionPath,
       embedding: {
         provider: embeddingProvider,
         model: embeddingModel,
@@ -478,6 +537,9 @@ async function main() {
         dbPath: memoryDbPath
       }
     });
+    if (backend === 'sqlite-vec' && !sqliteVecInstallStatus.ok) {
+      process.stderr.write(`[setup] warning: sqlite-vec native extension missing: ${sqliteVecInstallStatus.reason || 'unknown reason'}\n`);
+    }
     if (!skipModelDownload) {
       await warmupModels({
         embedding: {
@@ -505,6 +567,8 @@ async function main() {
     console.log('  npm run setup -- --roots-json=\'[{"label":"repo","path":"/abs/repo"}]\'');
     console.log('  npm run setup -- --package="localnest-mcp"');
     console.log('  npm run setup -- --skip-model-download=true');
+    console.log('  npm run setup -- --skip-sqlite-vec-install=true');
+    console.log('  npm run setup -- --sqlite-vec-extension="/abs/path/to/vec0.so"');
     return;
   }
 
@@ -601,6 +665,7 @@ async function main() {
       embedCachePreferred,
       rerankerCachePreferred
     );
+    const { sqliteVecExtensionPath, sqliteVecInstallStatus } = resolveSqliteVecPreference({ backend });
 
     console.log('');
     console.log('Local memory setup:');
@@ -620,6 +685,7 @@ async function main() {
       chunkOverlap,
       maxTermsPerChunk,
       maxIndexedFiles,
+      sqliteVecExtensionPath,
       embedding: {
         provider: embeddingProvider,
         model: embeddingModel,
@@ -643,6 +709,7 @@ async function main() {
       backend,
       dbPath,
       indexPath,
+      sqliteVecExtensionPath,
       embedding: {
         provider: embeddingProvider,
         model: embeddingModel,
@@ -660,6 +727,9 @@ async function main() {
         dbPath: memoryDbPath
       }
     });
+    if (backend === 'sqlite-vec' && !sqliteVecInstallStatus.ok) {
+      process.stderr.write(`[setup] warning: sqlite-vec native extension missing: ${sqliteVecInstallStatus.reason || 'unknown reason'}\n`);
+    }
     await warmupModels({
       embedding: {
         provider: embeddingProvider,

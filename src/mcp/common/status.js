@@ -29,16 +29,20 @@ function buildMemorySummary(status) {
 function buildHealthSummary({ runtime, memoryStatus, indexStatus, activeIndexBackend }) {
   const memoryAvailable = Boolean(memoryStatus?.enabled && memoryStatus?.backend?.available);
   const vectorReady = Boolean(activeIndexBackend && indexStatus);
+  const sqliteVecNativeReady = activeIndexBackend !== 'sqlite-vec'
+    || Boolean(indexStatus?.sqlite_vec_extension?.configured && indexStatus?.sqlite_vec_loaded && indexStatus?.sqlite_vec_table_ready);
   const issues = [];
 
   if (!runtime.hasRipgrep) issues.push('ripgrep_unavailable');
   if (!vectorReady) issues.push('vector_index_unavailable');
+  if (!sqliteVecNativeReady) issues.push('sqlite_vec_native_missing');
   if (runtime.embeddingCacheStatus?.fallbackUsed) issues.push('embedding_cache_fallback');
   if (runtime.rerankerCacheStatus?.fallbackUsed) issues.push('reranker_cache_fallback');
 
   return {
     overall: issues.length === 0 ? 'ok' : 'degraded',
     vector_index_ready: vectorReady,
+    sqlite_vec_native_ready: sqliteVecNativeReady,
     memory_ready: memoryAvailable,
     has_ripgrep: runtime.hasRipgrep,
     issues,
@@ -105,6 +109,8 @@ export function createServerStatusBuilder({
         reranker_cache_status: runtime.rerankerCacheStatus || null,
         diagnostics: {
           sqlite_vec_loaded: indexStatus?.sqlite_vec_loaded ?? indexStatus?.sqlite_vec_extension?.loaded ?? null,
+          sqlite_vec_extension_path: indexStatus?.sqlite_vec_extension?.path || runtime.sqliteVecExtensionPath || '',
+          sqlite_vec_extension_configured: Boolean(indexStatus?.sqlite_vec_extension?.configured || runtime.sqliteVecExtensionPath),
           sqlite_vec_table_ready: indexStatus?.sqlite_vec_table_ready ?? null,
           index_sweep_interval_minutes: runtime.indexSweepIntervalMinutes
         },

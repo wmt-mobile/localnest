@@ -87,6 +87,7 @@ After setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client 
         "LOCALNEST_INDEX_BACKEND": "sqlite-vec",
         "LOCALNEST_DB_PATH": "~/.localnest/data/localnest.db",
         "LOCALNEST_INDEX_PATH": "~/.localnest/data/localnest.index.json",
+        "LOCALNEST_SQLITE_VEC_EXTENSION": "~/.localnest/vendor/sqlite-vec/node_modules/sqlite-vec/dist/vec0.so",
         "LOCALNEST_MEMORY_ENABLED": "true",
         "LOCALNEST_MEMORY_BACKEND": "auto",
         "LOCALNEST_MEMORY_DB_PATH": "~/.localnest/data/localnest.memory.db"
@@ -101,7 +102,8 @@ After setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client 
 - Keep `startup_timeout_sec` at `30` or higher if your MCP client is aggressive about startup timeouts.
 - Setup writes the correct command for the host platform; Windows installs should prefer the generated file output directly.
 - Prefer the direct `localnest-mcp` binary when it is installed globally. Use `npx` only as a fallback.
-- If `sqlite-vec` is unavailable, LocalNest can still run with the JSON backend.
+- For the recommended `sqlite-vec` backend, setup now installs or detects the native `vec0` extension and writes its path into config/client env automatically.
+- If setup cannot provision `vec0`, rerun `localnest setup` before relying on sqlite-vec in MCP clients.
 - Memory is opt-in. On Node 18/20, the rest of LocalNest still works, but memory remains unavailable.
 - `localnest-mcp-install-skill` is version-aware on this branch and skips reinstalling when the bundled skill is already current.
 - Setup warms embedding/reranker models on first run (downloads into `~/.localnest/cache` by default).

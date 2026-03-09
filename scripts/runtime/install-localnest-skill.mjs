@@ -23,6 +23,12 @@ function copyDir(source, destination) {
   fs.cpSync(source, destination, { recursive: true });
 }
 
+export function resolveBundledSkillDir(metaUrl = import.meta.url) {
+  const scriptDir = path.dirname(fileURLToPath(metaUrl));
+  const packageRoot = path.resolve(scriptDir, '..', '..');
+  return path.join(packageRoot, 'skills', 'localnest-mcp');
+}
+
 function readSkillMetadata(skillDir) {
   try {
     const raw = fs.readFileSync(path.join(skillDir, SKILL_METADATA_FILE), 'utf8');
@@ -85,7 +91,7 @@ function determineSyncState(sourceSkillDir, targetSkillDir) {
   return { exists: true, action: 'sync', sourceMeta, targetMeta };
 }
 
-function main() {
+export function main() {
   const auto = hasFlag('--auto');
   const force = hasFlag('--force');
   const quiet = hasFlag('--quiet') || auto;
@@ -100,9 +106,7 @@ function main() {
     return;
   }
 
-  const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-  const packageRoot = path.resolve(scriptDir, '..');
-  const sourceSkillDir = path.join(packageRoot, 'skills', 'localnest-mcp');
+  const sourceSkillDir = resolveBundledSkillDir();
 
   if (!fs.existsSync(sourceSkillDir)) {
     if (!quiet) console.error(`[localnest-skill] source not found: ${sourceSkillDir}`);
@@ -182,4 +186,9 @@ function syncKnownToolLocations(sourceSkillDir, quiet, force) {
   }
 }
 
-main();
+const isDirectExecution = process.argv[1]
+  && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+
+if (isDirectExecution) {
+  main();
+}

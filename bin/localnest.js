@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { SERVER_VERSION } from '../src/runtime/index.js';
+import { SERVER_VERSION } from '../src/runtime/version.js';
 import { buildForwardArgv, hasVersionFlag, importRelative } from './_shared.js';
 
 const args = process.argv.slice(2);

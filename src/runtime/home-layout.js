@@ -12,6 +12,7 @@ export function buildLocalnestPaths(localnestHome) {
   const dataDir = path.join(home, 'data');
   const cacheDir = path.join(home, 'cache');
   const backupsDir = path.join(home, 'backups');
+  const vendorDir = path.join(home, 'vendor');
 
   return {
     home,
@@ -19,7 +20,9 @@ export function buildLocalnestPaths(localnestHome) {
       config: configDir,
       data: dataDir,
       cache: cacheDir,
-      backups: backupsDir
+      backups: backupsDir,
+      vendor: vendorDir,
+      sqliteVecVendor: path.join(vendorDir, 'sqlite-vec')
     },
     configPath: path.join(configDir, 'localnest.config.json'),
     legacyConfigPath: path.join(home, 'localnest.config.json'),
@@ -150,6 +153,7 @@ export function migrateLocalnestHomeLayout(localnestHome) {
   fs.mkdirSync(paths.dirs.data, { recursive: true });
   fs.mkdirSync(paths.dirs.cache, { recursive: true });
   fs.mkdirSync(paths.dirs.backups, { recursive: true });
+  fs.mkdirSync(paths.dirs.vendor, { recursive: true });
 
   let moved = false;
 

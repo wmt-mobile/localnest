@@ -5,13 +5,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Quality](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml)
 [![CodeQL](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml)
-[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.6)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.6)
+[![Socket Badge](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.7)](https://badge.socket.dev/npm/package/localnest-mcp/0.0.4-beta.7)
 
 A local-first MCP server that gives AI agents safe access to your codebase, plus optional local memory and semantic indexing for high-quality retrieval.
 
 Documentation: https://wmt-mobile.github.io/localnest/
 
-Current beta package: `0.0.4-beta.6`
+Current beta package: `0.0.4-beta.7`
 
 Engineering docs for contributors:
 - [`guides/README.md`](./guides/README.md)
@@ -71,8 +71,8 @@ Upgrade command:
 
 ```bash
 localnest upgrade
-localnest upgrade 0.0.4-beta.6
-localnest upgrade install 0.0.4-beta.6
+localnest upgrade 0.0.4-beta.7
+localnest upgrade install 0.0.4-beta.7
 ```
 
 Model download readiness (recommended per user account):
@@ -267,12 +267,14 @@ Setup writes two files:
 - `~/.localnest/data/` — sqlite/json index files and memory database
 - `~/.localnest/cache/update-status.json` — cached npm update status
 - `~/.localnest/backups/` — migration and config backups
+- `~/.localnest/vendor/` — LocalNest-managed native dependencies such as `sqlite-vec`
 
 This keeps the LocalNest home directory readable:
 - `config/` for editable config and generated MCP snippets
 - `data/` for SQLite/JSON runtime data
 - `cache/` for refreshable metadata
 - `backups/` for migration history
+- `vendor/` for LocalNest-managed native dependencies
 
 **Config priority:**
 1. `PROJECT_ROOTS` environment variable
@@ -286,7 +288,7 @@ This keeps the LocalNest home directory readable:
 | `LOCALNEST_INDEX_BACKEND` | `sqlite-vec` | `sqlite-vec` or `json` |
 | `LOCALNEST_DB_PATH` | `~/.localnest/data/localnest.db` | SQLite database path |
 | `LOCALNEST_INDEX_PATH` | `~/.localnest/data/localnest.index.json` | JSON index path |
-| `LOCALNEST_SQLITE_VEC_EXTENSION` | — | Optional custom native extension path. If unset, no native extension load is attempted. |
+| `LOCALNEST_SQLITE_VEC_EXTENSION` | auto-detected by setup | Native `vec0` extension path for sqlite-vec acceleration. Setup installs or detects this for the recommended backend. |
 | `LOCALNEST_VECTOR_CHUNK_LINES` | `60` | Lines per index chunk |
 | `LOCALNEST_VECTOR_CHUNK_OVERLAP` | `15` | Overlap between chunks |
 | `LOCALNEST_VECTOR_MAX_TERMS` | `80` | Max terms per chunk |
