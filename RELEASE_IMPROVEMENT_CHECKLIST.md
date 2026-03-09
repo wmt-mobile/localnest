@@ -105,9 +105,13 @@ Based on the installed `localnest-mcp 0.0.4-beta.5` release sweep in [reports/lo
 
 ## 10. Exit Criteria Before Calling The Next Release Tighter
 
-- [ ] All MCP tools return stable, documented response shapes.
+- [x] All MCP tools return stable, documented response shapes.
 - [ ] Installed-runtime release sweep passes with no empty evidence for known-good retrieval checks.
-- [ ] Default cache path behavior is understood and either fixed or clearly documented.
-- [ ] `update_self` has dedicated test coverage or an approved explicit exclusion policy.
+- [x] Default cache path behavior is understood and either fixed or clearly documented.
+- [x] `update_self` has dedicated test coverage or an approved explicit exclusion policy.
 - [ ] Supported client auto-install paths are verified on real configs.
 - [ ] Release report generation is repeatable and trustworthy enough to gate a publish decision.
+
+Current blockers on this machine:
+- no fresh installed-runtime JSON report was produced for `0.0.4-beta.6`
+- only 2 of 6 supported real client configs currently include a LocalNest entry

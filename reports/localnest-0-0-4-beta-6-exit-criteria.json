@@ -1,0 +1,98 @@
+{
+  "version_label": "0.0.4-beta.6",
+  "report_path": "/mnt/da2ae3dd-9788-4b37-88e8-effd7025eb4c/Base Projects/localnest/reports/localnest-0-0-4-beta-6-release-test-report.json",
+  "supported_clients": {
+    "presentCount": 6,
+    "configuredCount": 2,
+    "allConfigured": false,
+    "items": [
+      {
+        "tool": "Codex",
+        "toolId": "codex",
+        "configPath": "/home/jenil-d-gohel/.codex/config.toml",
+        "configured": true,
+        "error": null
+      },
+      {
+        "tool": "Cursor",
+        "toolId": "cursor",
+        "configPath": "/home/jenil-d-gohel/.cursor/mcp.json",
+        "configured": false,
+        "error": null
+      },
+      {
+        "tool": "Windsurf",
+        "toolId": "windsurf",
+        "configPath": "/home/jenil-d-gohel/.windsurf/mcp.json",
+        "configured": false,
+        "error": null
+      },
+      {
+        "tool": "Windsurf (Codeium)",
+        "toolId": "windsurf-codeium",
+        "configPath": "/home/jenil-d-gohel/.codeium/windsurf/mcp_config.json",
+        "configured": false,
+        "error": null
+      },
+      {
+        "tool": "Gemini CLI",
+        "toolId": "gemini",
+        "configPath": "/home/jenil-d-gohel/.gemini/antigravity/mcp_config.json",
+        "configured": true,
+        "error": null
+      },
+      {
+        "tool": "Kiro",
+        "toolId": "kiro",
+        "configPath": "/home/jenil-d-gohel/.kiro/settings/mcp.json",
+        "configured": false,
+        "error": null
+      }
+    ]
+  },
+  "evaluation": {
+    "ok": false,
+    "summary": {
+      "pass": 3,
+      "fail": 3
+    },
+    "criteria": [
+      {
+        "id": "stable_response_shapes",
+        "title": "All MCP tools return stable, documented response shapes.",
+        "passed": true,
+        "details": "Shared response normalizers exist and MCP tool regression coverage asserts canonical response fields."
+      },
+      {
+        "id": "installed_runtime_sweep",
+        "title": "Installed-runtime release sweep passes with no empty evidence for known-good retrieval checks.",
+        "passed": false,
+        "details": "Missing JSON report: /mnt/da2ae3dd-9788-4b37-88e8-effd7025eb4c/Base Projects/localnest/reports/localnest-0-0-4-beta-6-release-test-report.json"
+      },
+      {
+        "id": "cache_behavior",
+        "title": "Default cache path behavior is understood and either fixed or clearly documented.",
+        "passed": true,
+        "details": "README and install docs explain fallback behavior and the supported remediation path."
+      },
+      {
+        "id": "update_self_coverage",
+        "title": "`update_self` has dedicated test coverage or an approved explicit exclusion policy.",
+        "passed": true,
+        "details": "Dedicated update-service tests cover dry-run validation and real failure paths."
+      },
+      {
+        "id": "supported_client_auto_install",
+        "title": "Supported client auto-install paths are verified on real configs.",
+        "passed": false,
+        "details": "2/6 supported real configs currently include LocalNest"
+      },
+      {
+        "id": "trustworthy_release_report",
+        "title": "Release report generation is repeatable and trustworthy enough to gate a publish decision.",
+        "passed": false,
+        "details": "Release JSON report missing or malformed at /mnt/da2ae3dd-9788-4b37-88e8-effd7025eb4c/Base Projects/localnest/reports/localnest-0-0-4-beta-6-release-test-report.json"
+      }
+    ]
+  }
+}
