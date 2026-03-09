@@ -5,7 +5,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 test('release-exit-criteria CLI parser supports flags', async () => {
-  const mod = await import('../scripts/release-exit-criteria.mjs');
+  const mod = await import('../scripts/release/release-exit-criteria.mjs');
   const args = mod.__test_parseCliArgs([
     '--version-label', '0.0.4-beta.6',
     '--report-path', '/tmp/report.json',
@@ -18,7 +18,7 @@ test('release-exit-criteria CLI parser supports flags', async () => {
 });
 
 test('buildOutputPaths parameterizes exit criteria report paths by version label', async () => {
-  const mod = await import('../scripts/release-exit-criteria.mjs');
+  const mod = await import('../scripts/release/release-exit-criteria.mjs');
   const out = mod.__test_buildOutputPaths({ versionLabel: '0.0.4-beta.6' });
 
   assert.match(out.markdownPath, /localnest-0-0-4-beta-6-exit-criteria\.md$/);
@@ -26,7 +26,7 @@ test('buildOutputPaths parameterizes exit criteria report paths by version label
 });
 
 test('verifySupportedClientTargets detects configured and missing real-style client configs', async () => {
-  const mod = await import('../scripts/release-exit-criteria.mjs');
+  const mod = await import('../scripts/release/release-exit-criteria.mjs');
   const home = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-exit-home-'));
   fs.mkdirSync(path.join(home, '.codex'), { recursive: true });
   fs.writeFileSync(path.join(home, '.codex', 'config.toml'), '[mcp_servers.localnest]\ncommand = "localnest-mcp"\n', 'utf8');
@@ -43,7 +43,7 @@ test('verifySupportedClientTargets detects configured and missing real-style cli
 });
 
 test('evaluateExitCriteria reports blockers when report or supported client coverage is missing', async () => {
-  const mod = await import('../scripts/release-exit-criteria.mjs');
+  const mod = await import('../scripts/release/release-exit-criteria.mjs');
   const supportedClients = {
     presentCount: 2,
     configuredCount: 1,

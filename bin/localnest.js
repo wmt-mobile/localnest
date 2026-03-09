@@ -41,17 +41,17 @@ async function main() {
   }
 
   if (command === 'setup') {
-    await forwardTo('../scripts/setup-localnest.mjs');
+    await forwardTo('../scripts/runtime/setup-localnest.mjs');
     return;
   }
 
   if (command === 'doctor') {
-    await forwardTo('../scripts/doctor-localnest.mjs');
+    await forwardTo('../scripts/runtime/doctor-localnest.mjs');
     return;
   }
 
   if (command === 'upgrade') {
-    await forwardTo('../scripts/upgrade-localnest.mjs');
+    await forwardTo('../scripts/runtime/upgrade-localnest.mjs');
     return;
   }
 

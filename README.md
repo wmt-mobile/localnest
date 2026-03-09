@@ -318,7 +318,7 @@ Performance tips:
 Before publishing a new build, run the installed-runtime release harness against the globally installed binary:
 
 ```bash
-node scripts/release-test-installed-runtime.mjs --version-label 0.0.4-beta.5
+node scripts/release/release-test-installed-runtime.mjs --version-label 0.0.4-beta.5
 ```
 
 The harness writes both markdown and JSON reports under `reports/` and is intended to verify the installed runtime, not just the repo checkout.

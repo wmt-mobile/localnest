@@ -6,13 +6,13 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
-import { migrateLocalnestHomeLayout, resolveLocalnestHome, resolveWritableModelCacheDir } from '../src/home-layout.js';
+import { migrateLocalnestHomeLayout, resolveLocalnestHome, resolveWritableModelCacheDir } from '../../src/runtime/home-layout.js';
 import {
   buildLocalnestServerConfig,
   installLocalnestIntoDetectedClients
-} from '../src/setup/client-installer.js';
-import { EmbeddingService } from '../src/services/embedding/service.js';
-import { RerankerService } from '../src/services/reranker/service.js';
+} from '../../src/setup/client-installer.js';
+import { EmbeddingService } from '../../src/services/embedding/service.js';
+import { RerankerService } from '../../src/services/reranker/service.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';

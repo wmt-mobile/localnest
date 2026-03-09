@@ -6,11 +6,11 @@ import readline from 'node:readline/promises';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { stdin as input, stdout as output } from 'node:process';
-import { migrateLocalnestHomeLayout, resolveLocalnestHome } from '../src/home-layout.js';
+import { migrateLocalnestHomeLayout, resolveLocalnestHome } from '../../src/runtime/home-layout.js';
 import {
   findMissingRequiredSetupFields,
   normalizeUpgradeConfig
-} from '../src/services/update/upgrade-assistant.js';
+} from '../../src/services/update/upgrade-assistant.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';

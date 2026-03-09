@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 test('release-test-installed-runtime CLI parser supports dashed flags and boolean switches', async () => {
-  const mod = await import('../scripts/release-test-installed-runtime.mjs');
+  const mod = await import('../scripts/release/release-test-installed-runtime.mjs');
   const args = mod.__test_parseCliArgs([
     '--version-label', '0.0.4-beta.6',
     '--runtime-label', 'installed runtime',
@@ -17,7 +17,7 @@ test('release-test-installed-runtime CLI parser supports dashed flags and boolea
 });
 
 test('release-test-installed-runtime default config parameterizes report paths by version label', async () => {
-  const mod = await import('../scripts/release-test-installed-runtime.mjs');
+  const mod = await import('../scripts/release/release-test-installed-runtime.mjs');
   const config = mod.__test_buildDefaultConfig({ versionLabel: '0.0.4-beta.6' });
 
   assert.match(config.markdownReportPath, /0-0-4-beta-6-release-test-report\.md$/);
