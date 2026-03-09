@@ -239,6 +239,7 @@ function detectRipgrep() {
 
 export function buildRuntimeConfig(env = process.env) {
   const localnestHome = resolveLocalnestHome(env);
+  const mcpMode = (env.MCP_MODE || 'stdio').toLowerCase();
   const layout = migrateLocalnestHomeLayout(localnestHome).paths;
   const configPath = resolveDefaultConfigPath({ env, localnestHome });
   const migration = ensureConfigUpgraded({
@@ -289,7 +290,7 @@ export function buildRuntimeConfig(env = process.env) {
 
   return {
     localnestHome,
-    mcpMode: (env.MCP_MODE || 'stdio').toLowerCase(),
+    mcpMode,
     disableConsoleOutput: parseBoolean(env.DISABLE_CONSOLE_OUTPUT, false),
     rgTimeoutMs: parseIntEnv(env.LOCALNEST_RG_TIMEOUT_MS, 15000),
     autoProjectSplit: parseBoolean(env.LOCALNEST_AUTO_PROJECT_SPLIT, true),
@@ -361,7 +362,7 @@ export function buildRuntimeConfig(env = process.env) {
     ),
     indexSweepIntervalMinutes: parseIntEnvClamped(
       env.LOCALNEST_INDEX_SWEEP_INTERVAL_MINUTES,
-      5,
+      mcpMode === 'stdio' ? 0 : 5,
       0,
       1440
     ),

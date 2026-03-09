@@ -40,6 +40,7 @@ import {
   paginateItems
 } from './server/common/tool-utils.js';
 import { createServerStatusBuilder, buildUsageGuide } from './server/common/status.js';
+import { startStalenessMonitor } from './server/common/staleness-monitor.js';
 import { registerCoreTools } from './server/tools/core.js';
 import { registerMemoryWorkflowTools } from './server/tools/memory-workflow.js';
 import { registerMemoryStoreTools } from './server/tools/memory-store.js';
@@ -210,24 +211,6 @@ function registerTools(server, runtime, services) {
     defaultMaxReadLines: DEFAULT_MAX_READ_LINES,
     defaultMaxResults: DEFAULT_MAX_RESULTS
   });
-}
-
-function startStalenessMonitor(vectorIndex, intervalMinutes) {
-  if (!intervalMinutes || intervalMinutes <= 0) return;
-  const intervalMs = intervalMinutes * 60 * 1000;
-  const timer = setInterval(async () => {
-    try {
-      const staleness = vectorIndex.checkStaleness();
-      if (!staleness.stale) return;
-      process.stderr.write(
-        `[localnest-sweep] index stale (${staleness.stale_count}/${staleness.total_indexed} files changed) — re-indexing\n`
-      );
-      await vectorIndex.indexProject({ allRoots: true, force: false });
-    } catch (err) {
-      process.stderr.write(`[localnest-sweep] error: ${err?.message || err}\n`);
-    }
-  }, intervalMs);
-  timer.unref();
 }
 
 async function main() {

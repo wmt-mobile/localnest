@@ -71,12 +71,34 @@ test('buildRuntimeConfig prioritizes PROJECT_ROOTS and env tuning', () => {
   assert.equal(runtime.vectorChunkOverlap, 20);
   assert.equal(runtime.vectorMaxTermsPerChunk, 90);
   assert.equal(runtime.vectorMaxIndexedFiles, 345);
+  assert.equal(runtime.indexSweepIntervalMinutes, 0);
   assert.equal(runtime.memoryEnabled, false);
   assert.equal(runtime.memoryBackend, 'auto');
   assert.ok(runtime.extraProjectMarkers.has('a.txt'));
 
   fs.rmSync(rootA, { recursive: true, force: true });
   fs.rmSync(rootB, { recursive: true, force: true });
+  fs.rmSync(localnestHome, { recursive: true, force: true });
+});
+
+test('buildRuntimeConfig disables background index sweeps by default in stdio mode', () => {
+  const localnestHome = makeTempDir();
+
+  const runtime = buildRuntimeConfig({
+    LOCALNEST_HOME: localnestHome,
+    MCP_MODE: 'stdio'
+  });
+
+  assert.equal(runtime.indexSweepIntervalMinutes, 0);
+
+  const overridden = buildRuntimeConfig({
+    LOCALNEST_HOME: localnestHome,
+    MCP_MODE: 'stdio',
+    LOCALNEST_INDEX_SWEEP_INTERVAL_MINUTES: '7'
+  });
+
+  assert.equal(overridden.indexSweepIntervalMinutes, 7);
+
   fs.rmSync(localnestHome, { recursive: true, force: true });
 });
 
