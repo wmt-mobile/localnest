@@ -61,12 +61,12 @@ Based on the installed `localnest-mcp 0.0.4-beta.5` release sweep in [reports/lo
 
 ## 5. Memory Workflow Quality
 
-- [ ] Verify `localnest_task_context` returns stable recall metadata across empty and non-empty memory states.
-- [ ] Verify `localnest_capture_outcome` returns stable `captured` and `result` fields.
-- [ ] Verify temporary memory create/update/relation/delete flows leave the store clean after tests.
-- [ ] Decide whether event-based release tests should write to the real event log or an isolated test database.
-- [ ] Add explicit release-test coverage for empty-memory and disabled-memory scenarios.
-- [ ] Add release-test coverage for memory backend unavailable scenarios.
+- [x] Verify `localnest_task_context` returns stable recall metadata across empty and non-empty memory states.
+- [x] Verify `localnest_capture_outcome` returns stable `captured` and `result` fields.
+- [x] Verify temporary memory create/update/relation/delete flows leave the store clean after tests.
+- [x] Decide whether event-based release tests should write to the real event log or an isolated test database.
+- [x] Add explicit release-test coverage for empty-memory and disabled-memory scenarios.
+- [x] Add release-test coverage for memory backend unavailable scenarios.
 
 ## 6. Update Workflow
 

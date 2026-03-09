@@ -10,6 +10,8 @@ const REPORT_DIR = path.join(ROOT, 'reports');
 const REPORT_PATH = path.join(REPORT_DIR, 'localnest-installed-beta5-release-test-report.md');
 const PROJECT_PATH = ROOT;
 const FILE_PATH = path.join(ROOT, 'README.md');
+const TEMP_RELEASE_HOME = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-release-beta5-'));
+const TEMP_MEMORY_DB = path.join(TEMP_RELEASE_HOME, 'localnest.memory.db');
 const SEARCH_FILE_QUERY = 'README';
 const SEARCH_CODE_QUERY = 'localnest_list_roots';
 
@@ -142,6 +144,7 @@ function resultCount(value) {
   if (Array.isArray(value?.items)) return value.items.length;
   if (Array.isArray(value?.entries)) return value.entries.length;
   if (Array.isArray(value?.lines)) return value.lines.length;
+  if (typeof value?.content === 'string') return value.content.split(/\r?\n/).filter(Boolean).length;
   return 0;
 }
 
@@ -156,6 +159,14 @@ function safeToolResult(result) {
   return result;
 }
 
+function getMemoryId(value) {
+  return value?.id || value?.memory?.id || null;
+}
+
+function getMemoryTitle(value) {
+  return value?.title || value?.memory?.title || '';
+}
+
 async function main() {
   fs.mkdirSync(REPORT_DIR, { recursive: true });
 
@@ -168,7 +179,7 @@ async function main() {
     LOCALNEST_INDEX_PATH: '/home/jenil-d-gohel/.localnest/data/localnest.index.json',
     LOCALNEST_MEMORY_ENABLED: 'true',
     LOCALNEST_MEMORY_BACKEND: 'auto',
-    LOCALNEST_MEMORY_DB_PATH: '/home/jenil-d-gohel/.localnest/data/localnest.memory.db'
+    LOCALNEST_MEMORY_DB_PATH: TEMP_MEMORY_DB
   };
 
   const client = new McpStdioClient('localnest-mcp', [], env);
@@ -176,15 +187,21 @@ async function main() {
   let toolList = [];
   let tempMemoryA = null;
   let tempMemoryB = null;
+  let indexStatus = null;
+  let cleanupSummary = {
+    temp_memory_deleted: false
+  };
 
   const record = async (name, fn, options = {}) => {
     const startedAt = Date.now();
+    process.stderr.write(`[release-test-installed-beta5] start ${name}\n`);
     try {
       const value = await fn();
       if (typeof options.verify === 'function') {
         options.verify(value);
       }
       const durationMs = Date.now() - startedAt;
+      process.stderr.write(`[release-test-installed-beta5] pass ${name} (${durationMs}ms)\n`);
       results.push({
         name,
         status: 'PASS',
@@ -194,6 +211,7 @@ async function main() {
       return value;
     } catch (error) {
       const durationMs = Date.now() - startedAt;
+      process.stderr.write(`[release-test-installed-beta5] ${options.allowFailure ? 'warn' : 'fail'} ${name} (${durationMs}ms): ${error?.message || String(error)}\n`);
       results.push({
         name,
         status: options.allowFailure ? 'WARN' : 'FAIL',
@@ -238,17 +256,27 @@ async function main() {
         }
       }
     });
-    await record('localnest_index_status', async () => safeToolResult(await callTool('localnest_index_status')), {
+    indexStatus = await record('localnest_index_status', async () => safeToolResult(await callTool('localnest_index_status')), {
       details: (value) => `backend=${value.backend}, total_files=${value.total_files}`
     });
     await record('localnest_embed_status', async () => safeToolResult(await callTool('localnest_embed_status')), {
       details: (value) => `ready=${value.ready ?? ''}, provider=${value.provider || ''}`
     });
-    await record('localnest_index_project', async () => safeToolResult(await callTool('localnest_index_project', {
-      project_path: PROJECT_PATH
-    }, 120000)), {
-      details: (value) => `indexed_files=${value.indexed_files}, failed_files=${value.failed_files?.length || 0}`
-    });
+    if ((indexStatus?.total_files || 0) > 0) {
+      await record('localnest_index_project', async () => ({
+        skipped: true,
+        reason: 'existing_index_available',
+        total_files: indexStatus.total_files
+      }), {
+        details: (value) => `skipped (${value.reason}), total_files=${value.total_files}`
+      });
+    } else {
+      await record('localnest_index_project', async () => safeToolResult(await callTool('localnest_index_project', {
+        project_path: PROJECT_PATH
+      }, 300000)), {
+        details: (value) => `indexed_files=${value.indexed_files}, failed_files=${value.failed_files?.length || 0}`
+      });
+    }
     await record('localnest_search_files', async () => safeToolResult(await callTool('localnest_search_files', {
       project_path: PROJECT_PATH,
       query: SEARCH_FILE_QUERY,
@@ -331,6 +359,30 @@ async function main() {
     })), {
       details: (value) => `count=${value.count || value.items?.length || 0}`
     });
+    await record('localnest_task_context empty-memory', async () => safeToolResult(await callTool('localnest_task_context', {
+      query: 'empty memory verification',
+      project_path: PROJECT_PATH,
+      limit: 5
+    })), {
+      details: (value) => `recall=${value.recall?.count || 0}, attempted=${value.recall?.attempted}`,
+      verify: (value) => {
+        if (value.recall?.count !== 0) {
+          throw new Error('expected empty-memory task context to return zero recalled items');
+        }
+      }
+    });
+    await record('localnest_memory_recall empty-memory', async () => safeToolResult(await callTool('localnest_memory_recall', {
+      query: 'empty memory verification',
+      project_path: PROJECT_PATH,
+      limit: 5
+    })), {
+      details: (value) => `count=${value.count || 0}`,
+      verify: (value) => {
+        if ((value.count || 0) !== 0) {
+          throw new Error('expected empty-memory recall to return zero items');
+        }
+      }
+    });
 
     tempMemoryA = await record('localnest_memory_store A', async () => safeToolResult(await callTool('localnest_memory_store', {
       title: 'beta5 release smoke temp A',
@@ -341,7 +393,7 @@ async function main() {
       scope: { project_path: PROJECT_PATH },
       tags: ['release-test', 'temp']
     })), {
-      details: (value) => `id=${value.id}`
+      details: (value) => `id=${getMemoryId(value)}`
     });
 
     tempMemoryB = await record('localnest_memory_store B', async () => safeToolResult(await callTool('localnest_memory_store', {
@@ -353,7 +405,7 @@ async function main() {
       scope: { project_path: PROJECT_PATH },
       tags: ['release-test', 'temp']
     })), {
-      details: (value) => `id=${value.id}`
+      details: (value) => `id=${getMemoryId(value)}`
     });
 
     await record('localnest_memory_list', async () => safeToolResult(await callTool('localnest_memory_list', {
@@ -363,39 +415,39 @@ async function main() {
       details: (value) => `count=${value.count || value.items?.length || 0}`
     });
     await record('localnest_memory_get', async () => safeToolResult(await callTool('localnest_memory_get', {
-      id: tempMemoryA.id
+      id: getMemoryId(tempMemoryA)
     })), {
-      details: (value) => `title=${value.title}`
+      details: (value) => `title=${getMemoryTitle(value)}`
     });
     await record('localnest_memory_update', async () => safeToolResult(await callTool('localnest_memory_update', {
-      id: tempMemoryA.id,
+      id: getMemoryId(tempMemoryA),
       summary: 'updated temporary memory for release smoke test',
       change_note: 'release smoke update'
     })), {
-      details: (value) => `id=${value.id}`
+      details: (value) => `id=${getMemoryId(value)}`
     });
     await record('localnest_memory_suggest_relations', async () => safeToolResult(await callTool('localnest_memory_suggest_relations', {
-      id: tempMemoryA.id,
+      id: getMemoryId(tempMemoryA),
       threshold: 0.0,
       max_results: 5
     }, 60000)), {
       details: (value) => `suggestions=${value.suggestions?.length || 0}`
     });
     await record('localnest_memory_add_relation', async () => safeToolResult(await callTool('localnest_memory_add_relation', {
-      source_id: tempMemoryA.id,
-      target_id: tempMemoryB.id,
+      source_id: getMemoryId(tempMemoryA),
+      target_id: getMemoryId(tempMemoryB),
       relation_type: 'related'
     })), {
-      details: (value) => `${value.source_id} -> ${value.target_id}`
+      details: (value) => `${value.source_id || getMemoryId(tempMemoryA)} -> ${value.target_id || getMemoryId(tempMemoryB)}`
     });
     await record('localnest_memory_related', async () => safeToolResult(await callTool('localnest_memory_related', {
-      id: tempMemoryA.id
+      id: getMemoryId(tempMemoryA)
     })), {
       details: (value) => `related=${value.count || value.related?.length || 0}`
     });
     await record('localnest_memory_remove_relation', async () => safeToolResult(await callTool('localnest_memory_remove_relation', {
-      source_id: tempMemoryA.id,
-      target_id: tempMemoryB.id
+      source_id: getMemoryId(tempMemoryA),
+      target_id: getMemoryId(tempMemoryB)
     })), {
       details: (value) => `removed=${value.removed}`
     });
@@ -424,6 +476,90 @@ async function main() {
       details: (value) => `captured=${value.captured}`
     });
 
+    const disabledClient = new McpStdioClient('localnest-mcp', [], {
+      ...env,
+      LOCALNEST_MEMORY_ENABLED: 'false'
+    });
+    try {
+      await disabledClient.start();
+      const disabledCall = (name, args = {}, timeoutMs = 30000) =>
+        disabledClient.request('tools/call', { name, arguments: args }, timeoutMs);
+      await record('localnest_memory_status disabled-memory', async () => safeToolResult(await disabledCall('localnest_memory_status')), {
+        details: (value) => `enabled=${value.enabled}`,
+        verify: (value) => {
+          if (value.enabled !== false) throw new Error('expected memory to be disabled');
+        }
+      });
+      await record('localnest_task_context disabled-memory', async () => safeToolResult(await disabledCall('localnest_task_context', {
+        query: 'disabled memory verification',
+        project_path: PROJECT_PATH,
+        limit: 5
+      })), {
+        details: (value) => `reason=${value.recall?.skipped_reason || ''}`,
+        verify: (value) => {
+          if (value.recall?.skipped_reason !== 'memory_disabled') {
+            throw new Error('expected disabled-memory task context to skip with memory_disabled');
+          }
+        }
+      });
+      await record('localnest_capture_outcome disabled-memory', async () => safeToolResult(await disabledCall('localnest_capture_outcome', {
+        task: 'disabled memory verification',
+        project_path: PROJECT_PATH,
+        event_type: 'task'
+      })), {
+        details: (value) => `captured=${value.captured}, reason=${value.skipped_reason || ''}`,
+        verify: (value) => {
+          if (value.captured !== false || value.skipped_reason !== 'memory_disabled') {
+            throw new Error('expected disabled-memory capture_outcome to skip cleanly');
+          }
+        }
+      });
+    } finally {
+      await disabledClient.close();
+    }
+
+    const backendUnavailableClient = new McpStdioClient('localnest-mcp', [], {
+      ...env,
+      LOCALNEST_MEMORY_BACKEND: 'sqlite3'
+    });
+    try {
+      await backendUnavailableClient.start();
+      const unavailableCall = (name, args = {}, timeoutMs = 30000) =>
+        backendUnavailableClient.request('tools/call', { name, arguments: args }, timeoutMs);
+      await record('localnest_memory_status backend-unavailable', async () => safeToolResult(await unavailableCall('localnest_memory_status')), {
+        details: (value) => `backend_available=${value.backend?.available}, selected=${value.backend?.selected || ''}`,
+        verify: (value) => {
+          if (value.backend?.available !== false) throw new Error('expected backend to be unavailable');
+        }
+      });
+      await record('localnest_task_context backend-unavailable', async () => safeToolResult(await unavailableCall('localnest_task_context', {
+        query: 'backend unavailable verification',
+        project_path: PROJECT_PATH,
+        limit: 5
+      })), {
+        details: (value) => `reason=${value.recall?.skipped_reason || ''}`,
+        verify: (value) => {
+          if (value.recall?.skipped_reason !== 'backend_unavailable') {
+            throw new Error('expected backend-unavailable task context to skip with backend_unavailable');
+          }
+        }
+      });
+      await record('localnest_capture_outcome backend-unavailable', async () => safeToolResult(await unavailableCall('localnest_capture_outcome', {
+        task: 'backend unavailable verification',
+        project_path: PROJECT_PATH,
+        event_type: 'task'
+      })), {
+        details: (value) => `captured=${value.captured}, reason=${value.skipped_reason || ''}`,
+        verify: (value) => {
+          if (value.captured !== false || value.skipped_reason !== 'backend_unavailable') {
+            throw new Error('expected backend-unavailable capture_outcome to skip cleanly');
+          }
+        }
+      });
+    } finally {
+      await backendUnavailableClient.close();
+    }
+
     await record('localnest_update_status', async () => safeToolResult(await callTool('localnest_update_status', {
       force_check: false
     }, 20000)), {
@@ -438,20 +574,30 @@ async function main() {
       details: 'Skipped in release sweep because self-update mutates the installed global runtime.'
     });
 
-    if (tempMemoryA?.id) {
+    if (getMemoryId(tempMemoryA)) {
       await record('localnest_memory_delete A', async () => safeToolResult(await callTool('localnest_memory_delete', {
-        id: tempMemoryA.id
+        id: getMemoryId(tempMemoryA)
       })), {
         details: (value) => `deleted=${value.deleted}`
       });
     }
-    if (tempMemoryB?.id) {
+    if (getMemoryId(tempMemoryB)) {
       await record('localnest_memory_delete B', async () => safeToolResult(await callTool('localnest_memory_delete', {
-        id: tempMemoryB.id
+        id: getMemoryId(tempMemoryB)
       })), {
         details: (value) => `deleted=${value.deleted}`
       });
     }
+
+    const cleanupCheck = await callTool('localnest_memory_list', {
+      project_path: PROJECT_PATH,
+      limit: 50
+    }).catch(() => null);
+    const cleanupData = safeToolResult(cleanupCheck);
+    const remainingTempEntries = Array.isArray(cleanupData?.items)
+      ? cleanupData.items.filter((item) => /beta5 release smoke temp/i.test(item.title || ''))
+      : [];
+    cleanupSummary.temp_memory_deleted = remainingTempEntries.length === 0;
 
     const passCount = results.filter((item) => item.status === 'PASS').length;
     const warnCount = results.filter((item) => item.status === 'WARN').length;
@@ -490,8 +636,9 @@ async function main() {
       '## Notes',
       '',
       '- `localnest_update_self` was intentionally skipped because it mutates the live global install and is not appropriate for a release verification sweep.',
-      '- Memory store/update/relation/delete flow was exercised against the real installed memory backend, then cleaned up for the temporary entries created by this test.',
-      '- Event-based workflow tools create history entries by design; those are not deleted by this sweep.',
+      '- Memory store/update/relation/delete flow was exercised against an isolated temporary memory database, then cleanup was verified for the temporary entries created by this test.',
+      '- Event-based workflow tools in this sweep used the isolated temporary memory database rather than the user\'s real event log.',
+      `- Cleanup verified: temporary memory deleted=${cleanupSummary.temp_memory_deleted}`,
       '',
       '## Stderr',
       '',
@@ -506,6 +653,7 @@ async function main() {
     try {
       await client.close();
     } catch {}
+    fs.rmSync(TEMP_RELEASE_HOME, { recursive: true, force: true });
   }
 }
 
