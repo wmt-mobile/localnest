@@ -9,8 +9,7 @@ import {
   buildRuntimeConfig
 } from '../runtime/config.js';
 import { installRuntimeWarningFilter } from '../runtime/warning-filter.js';
-import { buildRipgrepHelpMessage } from '../mcp/common/tool-utils.js';
-import { startStalenessMonitor } from '../mcp/common/staleness-monitor.js';
+import { buildRipgrepHelpMessage, startStalenessMonitor } from '../mcp/index.js';
 import { createServices } from './create-services.js';
 import { registerAppTools } from './register-tools.js';
 

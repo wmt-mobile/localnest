@@ -12,13 +12,17 @@ import {
   MEMORY_LINK_SCHEMA,
   MEMORY_EVENT_TYPE_SCHEMA,
   MEMORY_EVENT_STATUS_SCHEMA
-} from '../mcp/common/schemas.js';
-import { createJsonToolRegistrar, paginateItems } from '../mcp/common/tool-utils.js';
-import { createServerStatusBuilder, buildUsageGuide } from '../mcp/common/status.js';
-import { registerCoreTools } from '../mcp/tools/core.js';
-import { registerMemoryWorkflowTools } from '../mcp/tools/memory-workflow.js';
-import { registerMemoryStoreTools } from '../mcp/tools/memory-store.js';
-import { registerRetrievalTools } from '../mcp/tools/retrieval.js';
+} from '../mcp/index.js';
+import {
+  createJsonToolRegistrar,
+  paginateItems,
+  createServerStatusBuilder,
+  buildUsageGuide,
+  registerCoreTools,
+  registerMemoryWorkflowTools,
+  registerMemoryStoreTools,
+  registerRetrievalTools
+} from '../mcp/index.js';
 import { MemoryWorkflowService } from '../services/memory/index.js';
 
 export function registerAppTools(server, runtime, services) {

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { startStalenessMonitor } from '../src/mcp/common/staleness-monitor.js';
+import { startStalenessMonitor } from '../src/mcp/index.js';
 
 test('startStalenessMonitor skips overlapping reindex runs', async () => {
   const logs = [];

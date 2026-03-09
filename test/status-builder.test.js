@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createServerStatusBuilder } from '../src/mcp/common/status.js';
+import { createServerStatusBuilder } from '../src/mcp/index.js';
 
 test('server status exposes cache diagnostics from runtime config', async () => {
   const buildServerStatus = createServerStatusBuilder({
