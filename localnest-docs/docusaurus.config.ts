@@ -77,7 +77,6 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           routeBasePath: '/docs',
-          editUrl: 'https://github.com/wmt-mobile/localnest/tree/main/localnest-docs/',
           showLastUpdateAuthor: false,
           showLastUpdateTime: false,
           sidebarCollapsible: true,
@@ -112,7 +111,7 @@ const config: Config = {
         },
         {
           href: 'https://www.npmjs.com/package/localnest-mcp',
-          label: 'v0.0.4-beta.5',
+          label: 'v0.0.4-beta.6',
           position: 'right'
         },
         {
@@ -141,7 +140,7 @@ const config: Config = {
         {
           title: 'Versions',
           items: [
-            { label: 'Current beta (0.0.4-beta.5)', to: '/docs/releases/current' },
+            { label: 'Current beta (0.0.4-beta.6)', to: '/docs/releases/current' },
             { label: 'Release matrix', to: '/docs/releases/history' }
           ]
         },

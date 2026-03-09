@@ -8,7 +8,7 @@ Use this page to choose a LocalNest version line and install it explicitly.
 
 ## Recommended defaults
 
-- Want latest beta features: use `0.0.4-beta.5`
+- Want latest beta features: use `0.0.4-beta.6`
 - Want stable behavior: use `0.0.3`
 - Need older behavior for compatibility: use the archived beta rows below
 
@@ -16,7 +16,8 @@ Use this page to choose a LocalNest version line and install it explicitly.
 
 | Version | Channel | Install command |
 | --- | --- | --- |
-| `0.0.4-beta.5` | current beta | `npm install -g localnest-mcp@0.0.4-beta.5` |
+| `0.0.4-beta.6` | current beta | `npm install -g localnest-mcp@0.0.4-beta.6` |
+| `0.0.4-beta.5` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.5` |
 | `0.0.4-beta.4` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.4` |
 | `0.0.3` | stable | `npm install -g localnest-mcp@0.0.3` |
 | `0.0.2-beta.3` | archived beta | `npm install -g localnest-mcp@0.0.2-beta.3` |
@@ -27,6 +28,7 @@ Use this page to choose a LocalNest version line and install it explicitly.
 
 | Version | `localnest-mcp-install-skill` | Setup style |
 | --- | --- | --- |
+| `0.0.4-beta.6` | yes | global-first + release-hardening + restructured internals |
 | `0.0.4-beta.5` | yes | global-first + `localnest upgrade` command path |
 | `0.0.4-beta.4` | yes | global-first + memory consent |
 | `0.0.3` | yes | global-first |
@@ -37,5 +39,5 @@ Use this page to choose a LocalNest version line and install it explicitly.
 ## Notes
 
 - If you need deterministic behavior across environments, pin exact versions instead of using floating tags.
-- The phrase "beta 5.0.0" in this repo usually maps to `0.0.4-beta.5` package naming.
-- Use [Release Matrix](./history) for context and [Current Beta Release](./current) for active beta behavior.
+- The phrase "beta 6" in this repo maps to `0.0.4-beta.6` package naming.
+- Use [Release Matrix](./history) for context, [Current Beta Release](./current) for active beta behavior, and the archived per-version pages when you need frozen release notes.

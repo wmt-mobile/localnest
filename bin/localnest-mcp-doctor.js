@@ -1,2 +1,2 @@
 #!/usr/bin/env node
-import '../scripts/doctor-localnest.mjs';
+import '../scripts/runtime/doctor-localnest.mjs';

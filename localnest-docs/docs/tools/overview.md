@@ -16,6 +16,7 @@
     <ul>
       <li>`localnest_usage_guide`</li>
       <li>`localnest_server_status`</li>
+      <li>`localnest_health`</li>
       <li>`localnest_list_roots`</li>
       <li>`localnest_list_projects`</li>
       <li>`localnest_project_tree`</li>
@@ -80,6 +81,15 @@
 ## Response format
 
 Tools support `response_format: "json"` or `"markdown"`.
+Responses also include `meta.schema_version` so MCP clients can detect contract revisions explicitly.
+
+## Tool success vs meaningful evidence
+
+A successful MCP call means the tool executed. It does not always mean the response contains useful evidence.
+
+- `localnest_search_code` returning no matches is a successful call, but weak evidence for the current task.
+- `localnest_read_file` returning line content is meaningful evidence.
+- Retrieval misses now include a `recommended_next_action` so the client can pivot immediately instead of stopping at an empty result.
 
 ## Typical workflow
 

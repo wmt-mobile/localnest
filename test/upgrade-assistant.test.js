@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {
   findMissingRequiredSetupFields,
   normalizeUpgradeConfig
-} from '../src/services/update/upgrade-assistant.js';
+} from '../src/services/update/index.js';
 
 test('findMissingRequiredSetupFields reports required paths', () => {
   const missing = findMissingRequiredSetupFields({});

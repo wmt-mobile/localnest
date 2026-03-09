@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { ensureConfigUpgraded } from '../src/migrations/config-migrator.js';
-import { buildLocalnestPaths } from '../src/home-layout.js';
+import { buildLocalnestPaths } from '../src/runtime/home-layout.js';
 
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-migrator-test-'));

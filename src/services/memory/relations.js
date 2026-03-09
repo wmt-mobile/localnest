@@ -1,4 +1,4 @@
-import { cosineSimilarity } from '../core/relevance.js';
+import { cosineSimilarity } from '../retrieval/core/relevance.js';
 import { nowIso, splitTerms, scoreTokenOverlap, deserializeEntry } from './utils.js';
 
 export async function suggestRelations(adapter, memoryId, { threshold = 0.55, maxResults = 10 } = {}) {
