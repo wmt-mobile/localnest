@@ -120,11 +120,11 @@ export async function runInstalledRuntimeReleaseTest(options = {}) {
     LOCALNEST_MEMORY_DB_PATH: tempMemoryDb
   };
 
-  let transport = null;
-  let client = null;
+  let transport;
+  let client;
   let stderrOutput = '';
   const results = [];
-  let toolList = [];
+  let toolList;
   let tempMemoryA = null;
   let tempMemoryB = null;
   let indexStatus = null;
@@ -206,7 +206,9 @@ export async function runInstalledRuntimeReleaseTest(options = {}) {
           lastError = error;
           try {
             await client.close();
-          } catch {}
+          } catch {
+            // Ignore close failures during retry cleanup.
+          }
           client = null;
           transport = null;
           if (attempt < 3) {
@@ -648,7 +650,9 @@ export async function runInstalledRuntimeReleaseTest(options = {}) {
   } finally {
     try {
       await client.close();
-    } catch {}
+    } catch {
+      // Ignore close failures during final cleanup.
+    }
     fs.rmSync(tempReleaseHome, { recursive: true, force: true });
   }
 }

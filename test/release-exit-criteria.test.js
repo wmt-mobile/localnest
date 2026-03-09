@@ -31,7 +31,7 @@ test('verifySupportedClientTargets detects configured and missing real-style cli
   fs.mkdirSync(path.join(home, '.codex'), { recursive: true });
   fs.writeFileSync(path.join(home, '.codex', 'config.toml'), '[mcp_servers.localnest]\ncommand = "localnest-mcp"\n', 'utf8');
   fs.mkdirSync(path.join(home, '.cursor'), { recursive: true });
-  fs.writeFileSync(path.join(home, '.cursor', 'mcp.json'), '{\"mcpServers\":{}}', 'utf8');
+  fs.writeFileSync(path.join(home, '.cursor', 'mcp.json'), '{"mcpServers":{}}', 'utf8');
 
   const result = mod.__test_verifySupportedClientTargets({ homeDir: home });
 

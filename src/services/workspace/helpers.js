@@ -149,7 +149,9 @@ export async function readFileChunk(workspace, requestedPath, startLine, endLine
   try {
     target = normalizeTarget(workspace, requestedPath);
   } catch (error) {
-    throw new Error(`invalid read_file path "${requestedPath}": ${error?.message || String(error)}`);
+    throw new Error(`invalid read_file path "${requestedPath}": ${error?.message || String(error)}`, {
+      cause: error
+    });
   }
 
   let st;
@@ -157,7 +159,9 @@ export async function readFileChunk(workspace, requestedPath, startLine, endLine
     st = fs.statSync(target);
   } catch (error) {
     if (error?.code === 'ENOENT') {
-      throw new Error(`path not found: ${target}`);
+      throw new Error(`path not found: ${target}`, {
+        cause: error
+      });
     }
     throw error;
   }
