@@ -1,4 +1,14 @@
 import { z } from 'zod';
+import {
+  normalizeDeleteResult,
+  normalizeMemoryEventsResult,
+  normalizeMemoryEntryPayload,
+  normalizeMemoryRecallResult,
+  normalizeMemorySuggestionResult,
+  normalizeRelatedMemoriesResult,
+  normalizeRelationRemovalResult,
+  normalizeRelationResult
+} from '../common/response-normalizers.js';
 
 export function registerMemoryStoreTools({
   registerJsonTool,
@@ -34,14 +44,16 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ kind, status, project_path, topic, limit, offset }) => memory.listEntries({
-      kind,
-      status,
-      projectPath: project_path,
-      topic,
-      limit,
-      offset
-    })
+    async ({ kind, status, project_path, topic, limit, offset }) => normalizeMemoryRecallResult(
+      await memory.listEntries({
+        kind,
+        status,
+        projectPath: project_path,
+        topic,
+        limit,
+        offset
+      })
+    )
   );
 
   registerJsonTool(
@@ -64,7 +76,7 @@ export function registerMemoryStoreTools({
       if (!item) {
         throw new Error(`memory not found: ${id}`);
       }
-      return item;
+      return normalizeMemoryEntryPayload(item);
     }
   );
 
@@ -95,7 +107,13 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async (args) => memory.storeEntry(args)
+    async (args) => {
+      const result = await memory.storeEntry(args);
+      return normalizeMemoryEntryPayload(result?.memory || null, {
+        created: Boolean(result?.created),
+        duplicate: Boolean(result?.duplicate)
+      });
+    }
   );
 
   registerJsonTool(
@@ -126,7 +144,12 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ id, ...patch }) => memory.updateEntry(id, patch)
+    async ({ id, ...patch }) => {
+      const result = await memory.updateEntry(id, patch);
+      return normalizeMemoryEntryPayload(result, {
+        updated: true
+      });
+    }
   );
 
   registerJsonTool(
@@ -144,7 +167,7 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ id }) => memory.deleteEntry(id)
+    async ({ id }) => normalizeDeleteResult(await memory.deleteEntry(id), { id })
   );
 
   registerJsonTool(
@@ -195,11 +218,13 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ project_path, limit, offset }) => memory.listEvents({
-      projectPath: project_path,
-      limit,
-      offset
-    })
+    async ({ project_path, limit, offset }) => normalizeMemoryEventsResult(
+      await memory.listEvents({
+        projectPath: project_path,
+        limit,
+        offset
+      })
+    )
   );
 
   registerJsonTool(
@@ -219,7 +244,11 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ id, threshold, max_results }) => memory.suggestRelations(id, { threshold, maxResults: max_results })
+    async ({ id, threshold, max_results }) => normalizeMemorySuggestionResult(
+      await memory.suggestRelations(id, { threshold, maxResults: max_results }),
+      id,
+      threshold
+    )
   );
 
   registerJsonTool(
@@ -239,7 +268,10 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ source_id, target_id, relation_type }) => memory.addRelation(source_id, target_id, relation_type)
+    async ({ source_id, target_id, relation_type }) => {
+      const result = await memory.addRelation(source_id, target_id, relation_type);
+      return normalizeRelationResult(result, { source_id, target_id, relation_type });
+    }
   );
 
   registerJsonTool(
@@ -258,7 +290,10 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ source_id, target_id }) => memory.removeRelation(source_id, target_id)
+    async ({ source_id, target_id }) => {
+      const result = await memory.removeRelation(source_id, target_id);
+      return normalizeRelationRemovalResult(result, { source_id, target_id });
+    }
   );
 
   registerJsonTool(
@@ -276,6 +311,6 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ id }) => memory.getRelated(id)
+    async ({ id }) => normalizeRelatedMemoriesResult(await memory.getRelated(id), id)
   );
 }

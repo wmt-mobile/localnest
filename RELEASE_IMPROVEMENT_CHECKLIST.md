@@ -10,17 +10,17 @@ Based on the installed `localnest-mcp 0.0.4-beta.5` release sweep in [reports/lo
 
 ## 1. Response Contract Consistency
 
-- [ ] Normalize `localnest_index_project` response so `indexed_files` is always present and numeric.
-- [ ] Normalize `localnest_memory_store` response so the created memory `id` is always returned.
-- [ ] Normalize `localnest_memory_get` response so key fields like `title` are always present when the entry exists.
-- [ ] Normalize `localnest_memory_update` response so the updated memory `id` and updated fields are always returned.
-- [ ] Normalize `localnest_memory_add_relation` response so `source_id`, `target_id`, and `relation_type` are always returned.
-- [ ] Normalize `localnest_memory_remove_relation` response so `removed` is always explicit and boolean.
-- [ ] Normalize `localnest_embed_status` response so `ready`, `provider`, `model`, and related readiness fields are never blank.
-- [ ] Normalize `localnest_update_status` response so `current`, `latest`, and `is_outdated` are always explicit.
-- [ ] Audit every MCP tool for stable top-level fields and remove ambiguous `undefined`-style output cases.
+- [x] Normalize `localnest_index_project` response so `indexed_files` is always present and numeric.
+- [x] Normalize `localnest_memory_store` response so the created memory `id` is always returned.
+- [x] Normalize `localnest_memory_get` response so key fields like `title` are always present when the entry exists.
+- [x] Normalize `localnest_memory_update` response so the updated memory `id` and updated fields are always returned.
+- [x] Normalize `localnest_memory_add_relation` response so `source_id`, `target_id`, and `relation_type` are always returned.
+- [x] Normalize `localnest_memory_remove_relation` response so `removed` is always explicit and boolean.
+- [x] Normalize `localnest_embed_status` response so `ready`, `provider`, `model`, and related readiness fields are never blank.
+- [x] Normalize `localnest_update_status` response so `current`, `latest`, and `is_outdated` are always explicit.
+- [x] Audit every MCP tool for stable top-level fields and remove ambiguous `undefined`-style output cases.
 - [ ] Document canonical response fields for every tool in docs and/or schemas.
-- [ ] Add regression tests that assert required output fields, not just successful tool execution.
+- [x] Add regression tests that assert required output fields, not just successful tool execution.
 
 ## 2. Retrieval Quality And Result Clarity
 

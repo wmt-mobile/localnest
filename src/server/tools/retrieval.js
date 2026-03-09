@@ -1,4 +1,16 @@
 import { z } from 'zod';
+import {
+  normalizeEmbedStatus,
+  normalizeIndexStatus,
+  normalizeIndexProjectResult
+  ,
+  normalizeProjectSummaryResult,
+  normalizeProjectTreeResult,
+  normalizeReadFileChunkResult,
+  normalizeSearchHybridResult,
+  normalizeSymbolResult,
+  normalizeUsageResult
+} from '../common/response-normalizers.js';
 
 export function registerRetrievalTools({
   registerJsonTool,
@@ -88,7 +100,10 @@ export function registerRetrievalTools({
         openWorldHint: false
       }
     },
-    async ({ project_path, max_depth, max_entries }) => workspace.projectTree(project_path, max_depth, max_entries)
+    async ({ project_path, max_depth, max_entries }) => normalizeProjectTreeResult(
+      workspace.projectTree(project_path, max_depth, max_entries),
+      project_path
+    )
   );
 
   registerJsonTool(
@@ -104,7 +119,7 @@ export function registerRetrievalTools({
         openWorldHint: false
       }
     },
-    async () => vectorIndex.getStatus()
+    async () => normalizeIndexStatus(vectorIndex.getStatus())
   );
 
   registerJsonTool(
@@ -122,12 +137,7 @@ export function registerRetrievalTools({
     },
     async () => {
       const status = vectorIndex.getStatus();
-      return {
-        backend: status.backend || 'json',
-        embedding: status.embedding || null,
-        sqlite_vec_extension: status.sqlite_vec_extension || null,
-        sqlite_vec_table_ready: status.sqlite_vec_table_ready ?? null
-      };
+      return normalizeEmbedStatus(status);
     }
   );
 
@@ -166,7 +176,7 @@ export function registerRetrievalTools({
         out.scanned_files || out.total_files || max_files,
         'index_project completed'
       );
-      return out;
+      return normalizeIndexProjectResult(out, max_files);
     }
   );
 
@@ -255,17 +265,20 @@ export function registerRetrievalTools({
         openWorldHint: false
       }
     },
-    async ({ query, project_path, all_roots, glob, max_results, case_sensitive, min_semantic_score, auto_index, use_reranker }) => search.searchHybrid({
-      query,
-      projectPath: project_path,
-      allRoots: all_roots,
-      glob,
-      maxResults: max_results,
-      caseSensitive: case_sensitive,
-      minSemanticScore: min_semantic_score,
-      autoIndex: auto_index,
-      useReranker: use_reranker
-    })
+    async ({ query, project_path, all_roots, glob, max_results, case_sensitive, min_semantic_score, auto_index, use_reranker }) => normalizeSearchHybridResult(
+      await search.searchHybrid({
+        query,
+        projectPath: project_path,
+        allRoots: all_roots,
+        glob,
+        maxResults: max_results,
+        caseSensitive: case_sensitive,
+        minSemanticScore: min_semantic_score,
+        autoIndex: auto_index,
+        useReranker: use_reranker
+      }),
+      query
+    )
   );
 
   registerJsonTool(
@@ -288,14 +301,17 @@ export function registerRetrievalTools({
         openWorldHint: false
       }
     },
-    async ({ symbol, project_path, all_roots, glob, max_results, case_sensitive }) => search.getSymbol({
-      symbol,
-      projectPath: project_path,
-      allRoots: all_roots,
-      glob,
-      maxResults: max_results,
-      caseSensitive: case_sensitive
-    })
+    async ({ symbol, project_path, all_roots, glob, max_results, case_sensitive }) => normalizeSymbolResult(
+      search.getSymbol({
+        symbol,
+        projectPath: project_path,
+        allRoots: all_roots,
+        glob,
+        maxResults: max_results,
+        caseSensitive: case_sensitive
+      }),
+      symbol
+    )
   );
 
   registerJsonTool(
@@ -319,15 +335,18 @@ export function registerRetrievalTools({
         openWorldHint: false
       }
     },
-    async ({ symbol, project_path, all_roots, glob, max_results, case_sensitive, context_lines }) => search.findUsages({
-      symbol,
-      projectPath: project_path,
-      allRoots: all_roots,
-      glob,
-      maxResults: max_results,
-      caseSensitive: case_sensitive,
-      contextLines: context_lines
-    })
+    async ({ symbol, project_path, all_roots, glob, max_results, case_sensitive, context_lines }) => normalizeUsageResult(
+      search.findUsages({
+        symbol,
+        projectPath: project_path,
+        allRoots: all_roots,
+        glob,
+        maxResults: max_results,
+        caseSensitive: case_sensitive,
+        contextLines: context_lines
+      }),
+      symbol
+    )
   );
 
   registerJsonTool(
@@ -347,7 +366,12 @@ export function registerRetrievalTools({
         openWorldHint: false
       }
     },
-    async ({ path, start_line, end_line }) => workspace.readFileChunk(path, start_line, end_line, 800)
+    async ({ path, start_line, end_line }) => normalizeReadFileChunkResult(
+      await workspace.readFileChunk(path, start_line, end_line, 800),
+      path,
+      start_line,
+      end_line
+    )
   );
 
   registerJsonTool(
@@ -366,6 +390,9 @@ export function registerRetrievalTools({
         openWorldHint: false
       }
     },
-    async ({ project_path, max_files }) => workspace.summarizeProject(project_path, max_files)
+    async ({ project_path, max_files }) => normalizeProjectSummaryResult(
+      workspace.summarizeProject(project_path, max_files),
+      project_path
+    )
   );
 }

@@ -1,4 +1,10 @@
 import { z } from 'zod';
+import {
+  normalizeCaptureOutcomeResult,
+  normalizeMemoryRecallResult,
+  normalizeMemoryStatus,
+  normalizeTaskContextResult
+} from '../common/response-normalizers.js';
 
 export function registerMemoryWorkflowTools({
   registerJsonTool,
@@ -36,7 +42,7 @@ export function registerMemoryWorkflowTools({
         openWorldHint: false
       }
     },
-    async (args) => memoryWorkflow.getTaskContext(args)
+    async (args) => normalizeTaskContextResult(await memoryWorkflow.getTaskContext(args), args)
   );
 
   registerJsonTool(
@@ -52,7 +58,7 @@ export function registerMemoryWorkflowTools({
         openWorldHint: false
       }
     },
-    async () => memory.getStatus()
+    async () => normalizeMemoryStatus(await memory.getStatus())
   );
 
   registerJsonTool(
@@ -77,16 +83,19 @@ export function registerMemoryWorkflowTools({
         openWorldHint: false
       }
     },
-    async ({ query, root_path, project_path, branch_name, topic, feature, kind, limit }) => memory.recall({
-      query,
-      rootPath: root_path,
-      projectPath: project_path,
-      branchName: branch_name,
-      topic,
-      feature,
-      kind,
-      limit
-    })
+    async ({ query, root_path, project_path, branch_name, topic, feature, kind, limit }) => normalizeMemoryRecallResult(
+      await memory.recall({
+        query,
+        rootPath: root_path,
+        projectPath: project_path,
+        branchName: branch_name,
+        topic,
+        feature,
+        kind,
+        limit
+      }),
+      query
+    )
   );
 
   registerJsonTool(
@@ -123,6 +132,6 @@ export function registerMemoryWorkflowTools({
         openWorldHint: false
       }
     },
-    async (args) => memoryWorkflow.captureOutcome(args)
+    async (args) => normalizeCaptureOutcomeResult(await memoryWorkflow.captureOutcome(args))
   );
 }

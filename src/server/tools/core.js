@@ -1,4 +1,8 @@
 import { z } from 'zod';
+import {
+  normalizeUpdateSelfResult,
+  normalizeUpdateStatus
+} from '../common/response-normalizers.js';
 
 export function registerCoreTools({
   registerJsonTool,
@@ -53,7 +57,7 @@ export function registerCoreTools({
         openWorldHint: true
       }
     },
-    async ({ force_check }) => updates.getStatus({ force: force_check })
+    async ({ force_check }) => normalizeUpdateStatus(await updates.getStatus({ force: force_check }))
   );
 
   registerJsonTool(
@@ -74,11 +78,13 @@ export function registerCoreTools({
         openWorldHint: true
       }
     },
-    async ({ approved_by_user, dry_run, version, reinstall_skill }) => updates.selfUpdate({
-      approvedByUser: approved_by_user,
-      dryRun: dry_run,
-      version,
-      reinstallSkill: reinstall_skill
-    })
+    async ({ approved_by_user, dry_run, version, reinstall_skill }) => normalizeUpdateSelfResult(
+      await updates.selfUpdate({
+        approvedByUser: approved_by_user,
+        dryRun: dry_run,
+        version,
+        reinstallSkill: reinstall_skill
+      })
+    )
   );
 }
