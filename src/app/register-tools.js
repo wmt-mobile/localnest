@@ -19,7 +19,7 @@ import { registerCoreTools } from '../mcp/tools/core.js';
 import { registerMemoryWorkflowTools } from '../mcp/tools/memory-workflow.js';
 import { registerMemoryStoreTools } from '../mcp/tools/memory-store.js';
 import { registerRetrievalTools } from '../mcp/tools/retrieval.js';
-import { MemoryWorkflowService } from '../services/memory/workflow.js';
+import { MemoryWorkflowService } from '../services/memory/index.js';
 
 export function registerAppTools(server, runtime, services) {
   const registerJsonTool = createJsonToolRegistrar(server, RESPONSE_FORMAT_SCHEMA);

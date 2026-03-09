@@ -7,8 +7,7 @@ import {
   buildRuntimeConfig
 } from '../../src/runtime/config.js';
 import { installRuntimeWarningFilter } from '../../src/runtime/warning-filter.js';
-import { MemoryService } from '../../src/services/memory/service.js';
-import { MemoryWorkflowService } from '../../src/services/memory/workflow.js';
+import { MemoryService, MemoryWorkflowService } from '../../src/services/memory/index.js';
 
 installRuntimeWarningFilter();
 

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
-import { VectorIndexService } from '../src/services/retrieval/vector-index/service.js';
+import { VectorIndexService } from '../src/services/retrieval/index.js';
 
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-vector-test-'));

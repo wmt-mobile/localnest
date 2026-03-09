@@ -7,13 +7,15 @@ import {
   TEXT_EXTENSIONS
 } from '../runtime/config.js';
 import { WorkspaceService } from '../services/workspace/service.js';
-import { SearchService } from '../services/retrieval/search/service.js';
-import { VectorIndexService } from '../services/retrieval/vector-index/service.js';
-import { EmbeddingService } from '../services/retrieval/embedding/service.js';
-import { AstChunker } from '../services/retrieval/chunker/service.js';
-import { RerankerService } from '../services/retrieval/reranker/service.js';
-import { UpdateService } from '../services/update/service.js';
-import { MemoryService } from '../services/memory/service.js';
+import {
+  SearchService,
+  VectorIndexService,
+  EmbeddingService,
+  AstChunker,
+  RerankerService
+} from '../services/retrieval/index.js';
+import { UpdateService } from '../services/update/index.js';
+import { MemoryService } from '../services/memory/index.js';
 
 function createWorkspace(runtime) {
   return new WorkspaceService({
@@ -35,7 +37,7 @@ async function createVectorIndex(runtime, workspace, embeddingService, setActive
 
   if (runtime.indexBackend === 'sqlite-vec') {
     try {
-      const { SqliteVecIndexService } = await import('../services/retrieval/sqlite-vec/service.js');
+      const { SqliteVecIndexService } = await import('../services/retrieval/index.js');
       return new SqliteVecIndexService({
         workspace,
         dbPath: runtime.sqliteDbPath,

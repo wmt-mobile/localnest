@@ -11,8 +11,7 @@ import {
   buildLocalnestServerConfig,
   installLocalnestIntoDetectedClients
 } from '../../src/setup/client-installer.js';
-import { EmbeddingService } from '../../src/services/retrieval/embedding/service.js';
-import { RerankerService } from '../../src/services/retrieval/reranker/service.js';
+import { EmbeddingService, RerankerService } from '../../src/services/retrieval/index.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';
