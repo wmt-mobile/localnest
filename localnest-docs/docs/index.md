@@ -64,6 +64,21 @@ npx -y localnest-mcp-doctor
 - Daily coding workflow: jump to [Tools](/docs/tools/overview) and [Search](/docs/tools/search).
 - Version-specific behavior: use [Current beta release](/docs/releases/current) and [Release matrix](/docs/releases/history).
 
+<div className="docGrid docGrid--3">
+  <a className="docLinkCard" href="./setup/install">
+    <strong>New machine</strong>
+    <span>Install the package, skill, and generated MCP config with the current beta defaults.</span>
+  </a>
+  <a className="docLinkCard" href="./releases/current">
+    <strong>Current release</strong>
+    <span>See what changed in `0.0.4-beta.6` before you upgrade or publish.</span>
+  </a>
+  <a className="docLinkCard" href="./releases/0.0.4-beta.5">
+    <strong>Archived beta.5</strong>
+    <span>Open the frozen release notes when you need previous-beta behavior.</span>
+  </a>
+</div>
+
 ## What you get
 
 <div className="docGrid docGrid--3">

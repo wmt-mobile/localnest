@@ -40,4 +40,4 @@ Use this page to choose a LocalNest version line and install it explicitly.
 
 - If you need deterministic behavior across environments, pin exact versions instead of using floating tags.
 - The phrase "beta 6" in this repo maps to `0.0.4-beta.6` package naming.
-- Use [Release Matrix](./history) for context and [Current Beta Release](./current) for active beta behavior.
+- Use [Release Matrix](./history) for context, [Current Beta Release](./current) for active beta behavior, and the archived per-version pages when you need frozen release notes.
