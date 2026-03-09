@@ -6,7 +6,8 @@ import {
   SERVER_VERSION,
   TEXT_EXTENSIONS
 } from '../runtime/config.js';
-import { WorkspaceService } from '../services/workspace/service.js';
+} from '../runtime/index.js';
+import { WorkspaceService } from '../services/workspace/index.js';
 import {
   SearchService,
   VectorIndexService,

@@ -4,9 +4,9 @@ import process from 'node:process';
 import {
   SERVER_NAME,
   SERVER_VERSION,
-  buildRuntimeConfig
-} from '../../src/runtime/config.js';
-import { installRuntimeWarningFilter } from '../../src/runtime/warning-filter.js';
+  buildRuntimeConfig,
+  installRuntimeWarningFilter
+} from '../../src/runtime/index.js';
 import { MemoryService, MemoryWorkflowService } from '../../src/services/memory/index.js';
 
 installRuntimeWarningFilter();

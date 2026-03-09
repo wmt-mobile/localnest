@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { SERVER_VERSION } from '../src/runtime/config.js';
+import { SERVER_VERSION } from '../src/runtime/index.js';
 import { buildForwardArgv, hasVersionFlag, importRelative } from './_shared.js';
 
 const args = process.argv.slice(2);
@@ -42,7 +42,8 @@ async function main() {
   }
 
   if (command === 'start' || command === 'serve') {
-    await importRelative('../src/app/mcp-server.js', import.meta.url);
+    const { startMcpServer } = await importRelative('../src/app/index.js', import.meta.url);
+    await startMcpServer();
     return;
   }
 

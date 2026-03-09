@@ -4,6 +4,7 @@ import {
   SERVER_NAME,
   SERVER_VERSION
 } from '../runtime/config.js';
+} from '../runtime/index.js';
 import {
   RESPONSE_FORMAT_SCHEMA,
   MEMORY_KIND_SCHEMA,

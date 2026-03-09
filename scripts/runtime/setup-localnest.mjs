@@ -6,7 +6,7 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
-import { migrateLocalnestHomeLayout, resolveLocalnestHome, resolveWritableModelCacheDir } from '../../src/runtime/home-layout.js';
+import { migrateLocalnestHomeLayout, resolveLocalnestHome, resolveWritableModelCacheDir } from '../../src/runtime/index.js';
 import {
   buildLocalnestServerConfig,
   installLocalnestIntoDetectedClients

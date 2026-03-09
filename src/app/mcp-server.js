@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
   SERVER_NAME,
   SERVER_VERSION,
   applyConsolePolicy,
-  buildRuntimeConfig
-} from '../runtime/config.js';
-import { installRuntimeWarningFilter } from '../runtime/warning-filter.js';
+  buildRuntimeConfig,
+  installRuntimeWarningFilter
+} from '../runtime/index.js';
 import { buildRipgrepHelpMessage, startStalenessMonitor } from '../mcp/index.js';
 import { createServices } from './create-services.js';
 import { registerAppTools } from './register-tools.js';
@@ -19,7 +21,7 @@ if (!process.env.DART_SUPPRESS_ANALYTICS) {
 
 installRuntimeWarningFilter();
 
-async function main() {
+export async function main() {
   const runtime = buildRuntimeConfig(process.env);
   applyConsolePolicy(runtime.disableConsoleOutput);
 
@@ -52,7 +54,12 @@ async function main() {
   await server.connect(transport);
 }
 
-main().catch((error) => {
-  console.error('[localnest-mcp] fatal:', error);
-  process.exit(1);
-});
+const isDirectExecution = process.argv[1]
+  && path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url));
+
+if (isDirectExecution) {
+  main().catch((error) => {
+    console.error('[localnest-mcp] fatal:', error);
+    process.exit(1);
+  });
+}
