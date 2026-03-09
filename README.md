@@ -100,7 +100,7 @@ localnest setup
 
 ## MCP Client Configuration
 
-After running setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client config, or use this template:
+After running setup, LocalNest now tries to detect supported AI tools on the current machine and writes/updates their LocalNest MCP entry automatically. It still saves `~/.localnest/config/mcp.localnest.json` for manual copy/paste or unsupported tools:
 
 ```json
 {

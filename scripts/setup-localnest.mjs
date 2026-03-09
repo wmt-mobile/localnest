@@ -7,6 +7,10 @@ import { spawnSync } from 'node:child_process';
 import readline from 'node:readline/promises';
 import { stdin as input, stdout as output } from 'node:process';
 import { migrateLocalnestHomeLayout, resolveLocalnestHome, resolveWritableModelCacheDir } from '../src/home-layout.js';
+import {
+  buildLocalnestServerConfig,
+  installLocalnestIntoDetectedClients
+} from '../src/setup/client-installer.js';
 import { EmbeddingService } from '../src/services/embedding/service.js';
 import { RerankerService } from '../src/services/reranker/service.js';
 
@@ -90,8 +94,10 @@ function runPreflightChecks() {
     errors.push(`Node.js 18+ is required. Current: ${process.versions.node}`);
   }
 
-  if (!commandExists(getNpxCommand())) {
-    errors.push('npx is not available. Install Node.js/npm correctly and retry.');
+  const hasGlobal = commandExists(getGlobalCommand());
+  const hasNpx = commandExists(getNpxCommand());
+  if (!hasGlobal && !hasNpx) {
+    errors.push('Neither localnest-mcp nor npx is available. Install LocalNest globally or fix Node.js/npm and retry.');
   }
 
   if (!commandExists('rg')) {
@@ -101,31 +107,47 @@ function runPreflightChecks() {
   return { errors };
 }
 
+function buildLocalnestEnv(indexConfig) {
+  return {
+    MCP_MODE: 'stdio',
+    LOCALNEST_CONFIG: configPath,
+    LOCALNEST_INDEX_BACKEND: indexConfig.backend,
+    LOCALNEST_DB_PATH: indexConfig.dbPath,
+    LOCALNEST_INDEX_PATH: indexConfig.indexPath,
+    LOCALNEST_EMBED_PROVIDER: indexConfig.embedding.provider,
+    LOCALNEST_EMBED_MODEL: indexConfig.embedding.model,
+    LOCALNEST_EMBED_CACHE_DIR: indexConfig.embedding.cacheDir,
+    LOCALNEST_EMBED_DIMS: String(indexConfig.embedding.dimensions),
+    LOCALNEST_RERANKER_PROVIDER: indexConfig.reranker.provider,
+    LOCALNEST_RERANKER_MODEL: indexConfig.reranker.model,
+    LOCALNEST_RERANKER_CACHE_DIR: indexConfig.reranker.cacheDir,
+    LOCALNEST_MEMORY_ENABLED: String(indexConfig.memory.enabled),
+    LOCALNEST_MEMORY_BACKEND: indexConfig.memory.backend,
+    LOCALNEST_MEMORY_DB_PATH: indexConfig.memory.dbPath
+  };
+}
+
 function buildClientSnippet(packageRef, indexConfig) {
+  const launch = resolveLaunchPreference(packageRef);
   return {
     mcpServers: {
-      localnest: {
+      localnest: buildLocalnestServerConfig({
+        command: launch.command,
+        args: launch.args,
+        env: buildLocalnestEnv(indexConfig)
+      })
+    }
+  };
+}
+
+function buildNpxClientSnippet(packageRef, indexConfig) {
+  return {
+    mcpServers: {
+      localnest: buildLocalnestServerConfig({
         command: getNpxCommand(),
         args: ['-y', packageRef],
-        startup_timeout_sec: 30,
-        env: {
-          MCP_MODE: 'stdio',
-          LOCALNEST_CONFIG: configPath,
-          LOCALNEST_INDEX_BACKEND: indexConfig.backend,
-          LOCALNEST_DB_PATH: indexConfig.dbPath,
-          LOCALNEST_INDEX_PATH: indexConfig.indexPath,
-          LOCALNEST_EMBED_PROVIDER: indexConfig.embedding.provider,
-          LOCALNEST_EMBED_MODEL: indexConfig.embedding.model,
-          LOCALNEST_EMBED_CACHE_DIR: indexConfig.embedding.cacheDir,
-          LOCALNEST_EMBED_DIMS: String(indexConfig.embedding.dimensions),
-          LOCALNEST_RERANKER_PROVIDER: indexConfig.reranker.provider,
-          LOCALNEST_RERANKER_MODEL: indexConfig.reranker.model,
-          LOCALNEST_RERANKER_CACHE_DIR: indexConfig.reranker.cacheDir,
-          LOCALNEST_MEMORY_ENABLED: String(indexConfig.memory.enabled),
-          LOCALNEST_MEMORY_BACKEND: indexConfig.memory.backend,
-          LOCALNEST_MEMORY_DB_PATH: indexConfig.memory.dbPath
-        }
-      }
+        env: buildLocalnestEnv(indexConfig)
+      })
     }
   };
 }
@@ -133,29 +155,19 @@ function buildClientSnippet(packageRef, indexConfig) {
 function buildGlobalClientSnippet(indexConfig) {
   return {
     mcpServers: {
-      localnest: {
+      localnest: buildLocalnestServerConfig({
         command: getGlobalCommand(),
-        startup_timeout_sec: 30,
-        env: {
-          MCP_MODE: 'stdio',
-          LOCALNEST_CONFIG: configPath,
-          LOCALNEST_INDEX_BACKEND: indexConfig.backend,
-          LOCALNEST_DB_PATH: indexConfig.dbPath,
-          LOCALNEST_INDEX_PATH: indexConfig.indexPath,
-          LOCALNEST_EMBED_PROVIDER: indexConfig.embedding.provider,
-          LOCALNEST_EMBED_MODEL: indexConfig.embedding.model,
-          LOCALNEST_EMBED_CACHE_DIR: indexConfig.embedding.cacheDir,
-          LOCALNEST_EMBED_DIMS: String(indexConfig.embedding.dimensions),
-          LOCALNEST_RERANKER_PROVIDER: indexConfig.reranker.provider,
-          LOCALNEST_RERANKER_MODEL: indexConfig.reranker.model,
-          LOCALNEST_RERANKER_CACHE_DIR: indexConfig.reranker.cacheDir,
-          LOCALNEST_MEMORY_ENABLED: String(indexConfig.memory.enabled),
-          LOCALNEST_MEMORY_BACKEND: indexConfig.memory.backend,
-          LOCALNEST_MEMORY_DB_PATH: indexConfig.memory.dbPath
-        }
-      }
+        env: buildLocalnestEnv(indexConfig)
+      })
     }
   };
+}
+
+function resolveLaunchPreference(packageRef) {
+  if (commandExists(getGlobalCommand())) {
+    return { command: getGlobalCommand(), args: [] };
+  }
+  return { command: getNpxCommand(), args: ['-y', packageRef] };
 }
 
 function parseArg(name) {
@@ -290,6 +302,15 @@ function saveOutputs(roots, packageRef, indexConfig) {
   fs.writeFileSync(snippetPath, `${JSON.stringify(buildClientSnippet(packageRef, indexConfig), null, 2)}\n`, 'utf8');
 }
 
+function installClientConfigs(packageRef, indexConfig) {
+  const snippet = buildClientSnippet(packageRef, indexConfig);
+  const serverConfig = snippet.mcpServers.localnest;
+  return installLocalnestIntoDetectedClients({
+    serverConfig,
+    backupDir: layout.dirs.backups
+  });
+}
+
 async function warmupModels(indexConfig) {
   if (indexConfig?.embedding?.provider && indexConfig.embedding.provider !== 'none') {
     process.stdout.write('[setup] warming up embedding model (first run downloads model files)...\n');
@@ -321,22 +342,44 @@ async function warmupModels(indexConfig) {
 }
 
 function printSuccess(packageRef, indexConfig) {
+  const launch = resolveLaunchPreference(packageRef);
   const globalSnippet = buildGlobalClientSnippet(indexConfig);
-  const npxSnippet = buildClientSnippet(packageRef, indexConfig);
+  const preferredSnippet = buildClientSnippet(packageRef, indexConfig);
+  const npxSnippet = buildNpxClientSnippet(packageRef, indexConfig);
+  const clientInstall = installClientConfigs(packageRef, indexConfig);
 
   console.log('');
   console.log(`Saved root config: ${configPath}`);
   console.log(`Saved client snippet: ${snippetPath}`);
+  console.log(`Preferred LocalNest launcher: ${launch.command}${launch.args.length ? ` ${launch.args.join(' ')}` : ''}`);
+  console.log('');
+  if (clientInstall.installed.length > 0) {
+    console.log('Auto-installed LocalNest into detected AI tools:');
+    for (const result of clientInstall.installed) {
+      console.log(`- ${result.tool}: ${result.status} (${result.configPath})`);
+    }
+    console.log('');
+  }
+  if (clientInstall.unsupported.length > 0) {
+    console.log('Detected but not auto-configured:');
+    for (const item of clientInstall.unsupported) {
+      console.log(`- ${item.label}: ${item.reason}`);
+    }
+    console.log('');
+  }
   console.log('');
   console.log('Next steps:');
-  console.log('1) Copy-paste this GLOBAL MCP config block into your client config:');
+  console.log('1) Restart the AI tools that were updated above');
+  console.log('2) If your preferred tool was not updated automatically, copy-paste this MCP config block into its config:');
   console.log('');
-  console.log(JSON.stringify(globalSnippet, null, 2));
+  console.log(JSON.stringify(preferredSnippet, null, 2));
   console.log('');
-  console.log('2) Restart your MCP client / AI tool');
   console.log('3) Use tools: localnest_index_status, localnest_index_project, localnest_search_hybrid, localnest_read_file');
   console.log('');
-  console.log('Optional npx fallback snippet (also saved to file):');
+  console.log('Optional GLOBAL-only snippet:');
+  console.log(JSON.stringify(globalSnippet, null, 2));
+  console.log('');
+  console.log('Optional npx fallback snippet:');
   console.log(`- ${snippetPath}`);
   console.log(JSON.stringify(npxSnippet, null, 2));
 }
