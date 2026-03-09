@@ -4,13 +4,13 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
-import { SearchService } from '../../src/services/search/service.js';
-import { SqliteVecIndexService } from '../../src/services/sqlite-vec/service.js';
-import { VectorIndexService } from '../../src/services/vector-index/service.js';
+import { SearchService } from '../../src/services/retrieval/search/service.js';
+import { SqliteVecIndexService } from '../../src/services/retrieval/sqlite-vec/service.js';
+import { VectorIndexService } from '../../src/services/retrieval/vector-index/service.js';
 import { MemoryStore } from '../../src/services/memory/store.js';
-import { EmbeddingService } from '../../src/services/embedding/service.js';
-import { AstChunker } from '../../src/services/chunker/service.js';
-import { RerankerService } from '../../src/services/reranker/service.js';
+import { EmbeddingService } from '../../src/services/retrieval/embedding/service.js';
+import { AstChunker } from '../../src/services/retrieval/chunker/service.js';
+import { RerankerService } from '../../src/services/retrieval/reranker/service.js';
 
 function createWorkspace(project) {
   return {

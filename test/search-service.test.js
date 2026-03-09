@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { SearchService } from '../src/services/search/service.js';
+import { SearchService } from '../src/services/retrieval/search/service.js';
 
 test('searchHybrid merges semantic and lexical overlap into hybrid result', async () => {
   const service = new SearchService({
