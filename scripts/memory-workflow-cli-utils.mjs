@@ -6,8 +6,11 @@ import {
   SERVER_VERSION,
   buildRuntimeConfig
 } from '../src/config.js';
+import { installRuntimeWarningFilter } from '../src/runtime-warning-filter.js';
 import { MemoryService } from '../src/services/memory/service.js';
 import { MemoryWorkflowService } from '../src/services/memory/workflow.js';
+
+installRuntimeWarningFilter();
 
 export function parseArg(argv, name) {
   const direct = `--${name}`;

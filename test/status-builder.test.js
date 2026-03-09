@@ -1,0 +1,69 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { createServerStatusBuilder } from '../src/server/common/status.js';
+
+test('server status exposes cache diagnostics from runtime config', async () => {
+  const buildServerStatus = createServerStatusBuilder({
+    serverName: 'localnest',
+    serverVersion: 'test',
+    runtime: {
+      mcpMode: 'stdio',
+      hasRipgrep: true,
+      autoProjectSplit: true,
+      maxAutoProjects: 10,
+      forceSplitChildren: false,
+      rgTimeoutMs: 15000,
+      indexBackend: 'sqlite-vec',
+      vectorIndexPath: '/tmp/localnest.index.json',
+      sqliteDbPath: '/tmp/localnest.db',
+      vectorChunkLines: 60,
+      vectorChunkOverlap: 15,
+      vectorMaxTermsPerChunk: 80,
+      vectorMaxIndexedFiles: 20000,
+      embeddingProvider: 'xenova',
+      embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+      embeddingCacheDir: '/tmp/fallback-cache',
+      embeddingCacheStatus: {
+        path: '/tmp/fallback-cache',
+        preferredPath: '/home/test/.localnest/cache',
+        writable: true,
+        fallbackUsed: true
+      },
+      embeddingDimensions: 384,
+      rerankerProvider: 'xenova',
+      rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2',
+      rerankerCacheDir: '/tmp/fallback-cache',
+      rerankerCacheStatus: {
+        path: '/tmp/fallback-cache',
+        preferredPath: '/home/test/.localnest/cache',
+        writable: true,
+        fallbackUsed: true
+      }
+    },
+    workspace: {
+      listRoots: () => [{ label: 'root', path: '/tmp/root' }]
+    },
+    memory: {
+      getStatus: async () => ({
+        enabled: true,
+        auto_capture: true,
+        consent_done: true,
+        backend: { available: true, requested: 'auto', selected: 'node-sqlite' },
+        store: { total_entries: 1, total_events: 2 }
+      })
+    },
+    updates: {
+      getStatus: async () => ({ current_version: '0.0.4-beta.5', latest_version: '0.0.4-beta.5', is_outdated: false })
+    },
+    getActiveIndexBackend: () => 'sqlite-vec',
+    vectorIndex: {
+      getStatus: () => ({ upgrade_recommended: false, upgrade_reason: null })
+    }
+  });
+
+  const status = await buildServerStatus();
+  assert.equal(status.vector_index.embedding_cache_dir, '/tmp/fallback-cache');
+  assert.equal(status.vector_index.embedding_cache_status.fallbackUsed, true);
+  assert.equal(status.vector_index.reranker_cache_dir, '/tmp/fallback-cache');
+  assert.equal(status.vector_index.reranker_cache_status.preferredPath, '/home/test/.localnest/cache');
+});

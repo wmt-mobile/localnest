@@ -10,6 +10,24 @@ function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-config-test-'));
 }
 
+function captureStderr(fn) {
+  const originalWrite = process.stderr.write;
+  let output = '';
+  process.stderr.write = ((chunk, encoding, callback) => {
+    output += String(chunk);
+    if (typeof encoding === 'function') encoding();
+    if (typeof callback === 'function') callback();
+    return true;
+  });
+
+  try {
+    const result = fn();
+    return { result, output };
+  } finally {
+    process.stderr.write = originalWrite;
+  }
+}
+
 test('expandHome expands leading ~ only', () => {
   const originalHome = process.env.HOME;
   process.env.HOME = '/tmp/h';
@@ -205,7 +223,52 @@ test('buildRuntimeConfig falls back to writable model cache directory', () => {
   assert.notEqual(runtime.rerankerCacheDir, blocked);
   assert.equal(runtime.embeddingCacheDir, runtime.rerankerCacheDir);
   assert.equal(fs.existsSync(runtime.embeddingCacheDir), true);
+  assert.equal(runtime.embeddingCacheStatus.fallbackUsed, true);
+  assert.equal(runtime.rerankerCacheStatus.fallbackUsed, true);
+  assert.equal(runtime.embeddingCacheStatus.preferredPath, blocked);
+  assert.equal(runtime.rerankerCacheStatus.preferredPath, blocked);
+  assert.ok(runtime.embeddingCacheStatus.preferredFailure);
+  assert.ok(Array.isArray(runtime.embeddingCacheStatus.attemptedPaths));
+  assert.ok(runtime.embeddingCacheStatus.attemptedPaths.length >= 1);
 
   fs.chmodSync(blocked, 0o755);
+  fs.rmSync(localnestHome, { recursive: true, force: true });
+});
+
+test('buildRuntimeConfig uses default cache path cleanly on a fresh writable home', () => {
+  const localnestHome = makeTempDir();
+  const layout = buildLocalnestPaths(localnestHome);
+
+  const { result: runtime, output } = captureStderr(() => buildRuntimeConfig({
+    LOCALNEST_HOME: localnestHome
+  }));
+
+  assert.equal(runtime.embeddingCacheDir, layout.dirs.cache);
+  assert.equal(runtime.rerankerCacheDir, layout.dirs.cache);
+  assert.equal(runtime.embeddingCacheStatus.fallbackUsed, false);
+  assert.equal(runtime.rerankerCacheStatus.fallbackUsed, false);
+  assert.equal(output.includes('fallback path'), false);
+
+  fs.rmSync(localnestHome, { recursive: true, force: true });
+});
+
+test('buildRuntimeConfig migrates legacy flat home cleanly without cache fallback noise', () => {
+  const localnestHome = makeTempDir();
+  const legacyConfig = path.join(localnestHome, 'localnest.config.json');
+  fs.writeFileSync(
+    legacyConfig,
+    JSON.stringify({ version: 3, roots: [{ label: 'cfg-root', path: localnestHome }] }, null, 2),
+    'utf8'
+  );
+
+  const { result: runtime, output } = captureStderr(() => buildRuntimeConfig({
+    LOCALNEST_HOME: localnestHome,
+    LOCALNEST_CONFIG: legacyConfig
+  }));
+
+  assert.equal(runtime.embeddingCacheStatus.fallbackUsed, false);
+  assert.equal(runtime.rerankerCacheStatus.fallbackUsed, false);
+  assert.equal(output.includes('fallback path'), false);
+
   fs.rmSync(localnestHome, { recursive: true, force: true });
 });

@@ -58,32 +58,52 @@ export function resolveWritableModelCacheDir({ preferredDir, localnestHome, env 
   const owner = Number.isInteger(uid) ? `uid-${uid}` : sanitizeOwnerToken(env.USER || env.USERNAME || 'user');
   const fallbackBase = path.join(os.tmpdir(), `localnest-models-${owner}`);
   const fallbackShared = path.join(os.tmpdir(), 'localnest-models');
-  const candidates = Array.from(new Set([
-    preferred,
-    localnestHome ? path.join(path.resolve(localnestHome), 'cache') : null,
-    fallbackBase,
-    fallbackShared
-  ].filter(Boolean).map((candidate) => path.resolve(candidate))));
+  const candidateEntries = [
+    { path: preferred, source: 'preferred' },
+    localnestHome ? { path: path.join(path.resolve(localnestHome), 'cache'), source: 'localnest-home' } : null,
+    { path: fallbackBase, source: 'tmp-user' },
+    { path: fallbackShared, source: 'tmp-shared' }
+  ].filter(Boolean);
+  const seen = new Set();
+  const candidates = [];
+  for (const entry of candidateEntries) {
+    const normalized = path.resolve(entry.path);
+    if (seen.has(normalized)) continue;
+    seen.add(normalized);
+    candidates.push({ path: normalized, source: entry.source });
+  }
 
+  const attempted = [];
   for (const candidate of candidates) {
     try {
-      writeProbeFile(candidate);
+      writeProbeFile(candidate.path);
       return {
-        path: candidate,
+        path: candidate.path,
         preferredPath: preferred,
+        selectedSource: candidate.source,
         writable: true,
-        fallbackUsed: candidate !== preferred
+        fallbackUsed: candidate.path !== preferred,
+        attemptedPaths: attempted,
+        preferredFailure: attempted.find((entry) => entry.path === preferred) || null
       };
-    } catch {
-      // Try next candidate.
+    } catch (error) {
+      attempted.push({
+        path: candidate.path,
+        source: candidate.source,
+        code: error?.code || null,
+        message: error?.message || String(error)
+      });
     }
   }
 
   return {
     path: preferred,
     preferredPath: preferred,
+    selectedSource: 'preferred',
     writable: false,
-    fallbackUsed: false
+    fallbackUsed: false,
+    attemptedPaths: attempted,
+    preferredFailure: attempted.find((entry) => entry.path === preferred) || null
   };
 }
 

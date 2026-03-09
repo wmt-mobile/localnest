@@ -63,9 +63,13 @@ export function createServerStatusBuilder({
         max_indexed_files: runtime.vectorMaxIndexedFiles,
         embedding_provider: runtime.embeddingProvider,
         embedding_model: runtime.embeddingModel,
+        embedding_cache_dir: runtime.embeddingCacheDir,
+        embedding_cache_status: runtime.embeddingCacheStatus || null,
         embedding_dimensions: runtime.embeddingDimensions,
         reranker_provider: runtime.rerankerProvider,
         reranker_model: runtime.rerankerModel,
+        reranker_cache_dir: runtime.rerankerCacheDir,
+        reranker_cache_status: runtime.rerankerCacheStatus || null,
         upgrade_recommended: indexStatus?.upgrade_recommended || false,
         upgrade_reason: indexStatus?.upgrade_reason || null
       },

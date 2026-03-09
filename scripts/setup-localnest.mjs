@@ -251,10 +251,14 @@ function resolveModelCacheDirs(preferredEmbedDir, preferredRerankerDir) {
   });
 
   if (embed.fallbackUsed) {
-    console.log('[setup] embedding cache fallback enabled due to unwritable preferred cache path');
+    console.log('[setup] info: embedding cache using fallback path');
+    console.log(`  preferred: ${embed.preferredPath}`);
+    console.log(`  resolved: ${embed.path}`);
   }
   if (reranker.fallbackUsed) {
-    console.log('[setup] reranker cache fallback enabled due to unwritable preferred cache path');
+    console.log('[setup] info: reranker cache using fallback path');
+    console.log(`  preferred: ${reranker.preferredPath}`);
+    console.log(`  resolved: ${reranker.path}`);
   }
 
   return {

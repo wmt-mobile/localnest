@@ -37,13 +37,13 @@ Based on the installed `localnest-mcp 0.0.4-beta.5` release sweep in [reports/lo
 
 ## 3. Installed Runtime And Environment Handling
 
-- [ ] Fix preferred cache path handling so LocalNest uses `~/.localnest/cache` instead of falling back to `/tmp/localnest-models-uid-1000` when it should be writable.
-- [ ] Confirm whether cache fallback is caused by permission checks, path creation timing, or model-library behavior.
-- [ ] Improve diagnostics around model cache fallback so the exact reason is surfaced.
-- [ ] Decide whether cache fallback should be warning-level or informational when startup still succeeds.
-- [ ] Reduce or suppress the `node:sqlite` experimental warning in normal release flows if feasible.
-- [ ] Verify startup and doctor output remain clean on a fresh machine with the default LocalNest home layout.
-- [ ] Verify startup on a machine with legacy flat `~/.localnest` paths still behaves cleanly.
+- [x] Fix preferred cache path handling so LocalNest uses `~/.localnest/cache` instead of falling back to `/tmp/localnest-models-uid-1000` when it should be writable.
+- [x] Confirm whether cache fallback is caused by permission checks, path creation timing, or model-library behavior.
+- [x] Improve diagnostics around model cache fallback so the exact reason is surfaced.
+- [x] Decide whether cache fallback should be warning-level or informational when startup still succeeds.
+- [x] Reduce or suppress the `node:sqlite` experimental warning in normal release flows if feasible.
+- [x] Verify startup and doctor output remain clean on a fresh machine with the default LocalNest home layout.
+- [x] Verify startup on a machine with legacy flat `~/.localnest` paths still behaves cleanly.
 
 ## 4. Setup And Client Integration
 

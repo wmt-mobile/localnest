@@ -15,6 +15,7 @@ import {
   applyConsolePolicy,
   buildRuntimeConfig
 } from './config.js';
+import { installRuntimeWarningFilter } from './runtime-warning-filter.js';
 import { WorkspaceService } from './services/workspace/service.js';
 import { SearchService } from './services/search/service.js';
 import { VectorIndexService } from './services/vector-index/service.js';
@@ -47,6 +48,8 @@ import { registerRetrievalTools } from './server/tools/retrieval.js';
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';
 }
+
+installRuntimeWarningFilter();
 
 function createWorkspace(runtime) {
   return new WorkspaceService({

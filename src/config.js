@@ -269,13 +269,21 @@ export function buildRuntimeConfig(env = process.env) {
   });
 
   if (embeddingCacheResolved.fallbackUsed) {
+    const reason = embeddingCacheResolved.preferredFailure?.message || 'preferred cache path not writable';
     process.stderr.write(
-      '[localnest-config] embedding cache fallback enabled due to unwritable preferred cache path\n'
+      `[localnest-config] info: embedding cache using fallback path\n` +
+      `  preferred: ${embeddingCacheResolved.preferredPath}\n` +
+      `  resolved: ${embeddingCacheResolved.path}\n` +
+      `  reason: ${reason}\n`
     );
   }
   if (rerankerCacheResolved.fallbackUsed) {
+    const reason = rerankerCacheResolved.preferredFailure?.message || 'preferred cache path not writable';
     process.stderr.write(
-      '[localnest-config] reranker cache fallback enabled due to unwritable preferred cache path\n'
+      `[localnest-config] info: reranker cache using fallback path\n` +
+      `  preferred: ${rerankerCacheResolved.preferredPath}\n` +
+      `  resolved: ${rerankerCacheResolved.path}\n` +
+      `  reason: ${reason}\n`
     );
   }
 
@@ -323,6 +331,7 @@ export function buildRuntimeConfig(env = process.env) {
       fileSettings.embeddingModel || 'Xenova/all-MiniLM-L6-v2'
     ),
     embeddingCacheDir: embeddingCacheResolved.path,
+    embeddingCacheStatus: embeddingCacheResolved,
     embeddingDimensions: parseIntEnv(
       env.LOCALNEST_EMBED_DIMS,
       fileSettings.embeddingDimensions || 384
@@ -336,6 +345,7 @@ export function buildRuntimeConfig(env = process.env) {
       fileSettings.rerankerModel || 'Xenova/ms-marco-MiniLM-L-6-v2'
     ),
     rerankerCacheDir: rerankerCacheResolved.path,
+    rerankerCacheStatus: rerankerCacheResolved,
     updatePackageName: parseStringEnv(env.LOCALNEST_UPDATE_PACKAGE, 'localnest-mcp'),
     updateCheckIntervalMinutes: parseIntEnvClamped(
       env.LOCALNEST_UPDATE_CHECK_INTERVAL_MINUTES,
