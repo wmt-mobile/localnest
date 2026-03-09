@@ -85,6 +85,32 @@ export class UpdateService {
     };
   }
 
+  getCachedStatus(now = Date.now()) {
+    const cache = this.readCache();
+    if (cache) {
+      return this.withStatusMetadata({
+        ...cache,
+        stale: this.shouldRefresh(cache, now, false),
+        source: 'cache'
+      }, now);
+    }
+
+    return this.withStatusMetadata({
+      package_name: this.packageName,
+      current_version: this.currentVersion,
+      latest_version: this.currentVersion,
+      is_outdated: false,
+      checked_via: 'npm view',
+      source: 'uninitialized',
+      last_checked_at: null,
+      last_check_ok: false,
+      error: null,
+      recommend_update_prompt: false,
+      next_check_after_minutes: this.checkIntervalMinutes,
+      cache_path: this.cachePath
+    }, now);
+  }
+
   checkLatestFromNpm() {
     const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
     const run = this.commandRunner(npmCmd, ['view', this.packageName, 'version', '--json'], {

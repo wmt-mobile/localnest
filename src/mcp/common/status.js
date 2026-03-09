@@ -62,7 +62,9 @@ export function createServerStatusBuilder({
     const indexStatus = vectorIndex?.getStatus?.() || null;
     const activeIndexBackend = getActiveIndexBackend();
     const memoryStatus = await memory.getStatus();
-    const updateStatus = await updates.getStatus({ force: false });
+    const updateStatus = updates.getCachedStatus
+      ? updates.getCachedStatus()
+      : await updates.getStatus({ force: false });
 
     return {
       name: serverName,

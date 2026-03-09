@@ -39,6 +39,17 @@ const sidebars: SidebarsConfig = {
       items: [
         {
           type: 'category',
+          label: 'Beta 0.0.4-beta.5',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'versions/0.0.4-beta.5/overview', label: 'Overview' },
+            { type: 'doc', id: 'versions/0.0.4-beta.5/install', label: 'Install' },
+            { type: 'doc', id: 'versions/0.0.4-beta.5/configuration', label: 'Configuration' },
+            { type: 'doc', id: 'versions/0.0.4-beta.5/tools', label: 'Tools' }
+          ]
+        },
+        {
+          type: 'category',
           label: 'Beta 0.0.4-beta.4',
           collapsed: true,
           items: [

@@ -73,9 +73,9 @@ npx -y localnest-mcp-doctor
     <strong>Current release</strong>
     <span>See what changed in `0.0.4-beta.6` before you upgrade or publish.</span>
   </a>
-  <a className="docLinkCard" href="./releases/0.0.4-beta.5">
+  <a className="docLinkCard" href="./versions/0.0.4-beta.5/overview">
     <strong>Archived beta.5</strong>
-    <span>Open the frozen release notes when you need previous-beta behavior.</span>
+    <span>Open the full archived doc set when you need previous-beta behavior.</span>
   </a>
 </div>
 

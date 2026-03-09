@@ -102,6 +102,28 @@ test('getStatus stays informative when npm fails without cache', async () => {
   assert.match(out.error, /offline/);
 });
 
+test('getCachedStatus returns informative fallback without npm access', () => {
+  const home = makeTempHome();
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.0.4-beta.6',
+    checkIntervalMinutes: 120,
+    failureBackoffMinutes: 15,
+    commandRunner: () => {
+      throw new Error('should not run');
+    }
+  });
+
+  const out = service.getCachedStatus();
+  assert.equal(out.source, 'uninitialized');
+  assert.equal(out.current_version, '0.0.4-beta.6');
+  assert.equal(out.latest_version, '0.0.4-beta.6');
+  assert.equal(out.is_outdated, false);
+  assert.equal(out.using_cached_data, false);
+  assert.equal(out.recommendation, 'up_to_date');
+});
+
 test('selfUpdate requires explicit approval', async () => {
   const home = makeTempHome();
   const service = new UpdateService({

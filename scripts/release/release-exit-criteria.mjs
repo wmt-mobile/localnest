@@ -137,7 +137,7 @@ export function evaluateExitCriteria({
   const installDocPath = path.join(root, 'localnest-docs', 'docs', 'setup', 'install.md');
   const updateTestPath = path.join(root, 'test', 'update-service.test.js');
   const mcpToolsTestPath = path.join(root, 'test', 'mcp-tools.test.js');
-  const normalizerPath = path.join(root, 'src', 'server', 'common', 'response-normalizers.js');
+  const normalizerPath = path.join(root, 'src', 'mcp', 'common', 'response-normalizers.js');
 
   const criteria = [];
 

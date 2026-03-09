@@ -3,8 +3,8 @@
   "report_path": "/mnt/da2ae3dd-9788-4b37-88e8-effd7025eb4c/Base Projects/localnest/reports/localnest-0-0-4-beta-6-release-test-report.json",
   "supported_clients": {
     "presentCount": 6,
-    "configuredCount": 2,
-    "allConfigured": false,
+    "configuredCount": 6,
+    "allConfigured": true,
     "items": [
       {
         "tool": "Codex",
@@ -17,21 +17,21 @@
         "tool": "Cursor",
         "toolId": "cursor",
         "configPath": "/home/jenil-d-gohel/.cursor/mcp.json",
-        "configured": false,
+        "configured": true,
         "error": null
       },
       {
         "tool": "Windsurf",
         "toolId": "windsurf",
         "configPath": "/home/jenil-d-gohel/.windsurf/mcp.json",
-        "configured": false,
+        "configured": true,
         "error": null
       },
       {
         "tool": "Windsurf (Codeium)",
         "toolId": "windsurf-codeium",
         "configPath": "/home/jenil-d-gohel/.codeium/windsurf/mcp_config.json",
-        "configured": false,
+        "configured": true,
         "error": null
       },
       {
@@ -45,16 +45,16 @@
         "tool": "Kiro",
         "toolId": "kiro",
         "configPath": "/home/jenil-d-gohel/.kiro/settings/mcp.json",
-        "configured": false,
+        "configured": true,
         "error": null
       }
     ]
   },
   "evaluation": {
-    "ok": false,
+    "ok": true,
     "summary": {
-      "pass": 3,
-      "fail": 3
+      "pass": 6,
+      "fail": 0
     },
     "criteria": [
       {
@@ -66,8 +66,8 @@
       {
         "id": "installed_runtime_sweep",
         "title": "Installed-runtime release sweep passes with no empty evidence for known-good retrieval checks.",
-        "passed": false,
-        "details": "Missing JSON report: /mnt/da2ae3dd-9788-4b37-88e8-effd7025eb4c/Base Projects/localnest/reports/localnest-0-0-4-beta-6-release-test-report.json"
+        "passed": true,
+        "details": "Report: /mnt/da2ae3dd-9788-4b37-88e8-effd7025eb4c/Base Projects/localnest/reports/localnest-0-0-4-beta-6-release-test-report.json; fails=0"
       },
       {
         "id": "cache_behavior",
@@ -84,14 +84,14 @@
       {
         "id": "supported_client_auto_install",
         "title": "Supported client auto-install paths are verified on real configs.",
-        "passed": false,
-        "details": "2/6 supported real configs currently include LocalNest"
+        "passed": true,
+        "details": "6/6 supported real configs currently include LocalNest"
       },
       {
         "id": "trustworthy_release_report",
         "title": "Release report generation is repeatable and trustworthy enough to gate a publish decision.",
-        "passed": false,
-        "details": "Release JSON report missing or malformed at /mnt/da2ae3dd-9788-4b37-88e8-effd7025eb4c/Base Projects/localnest/reports/localnest-0-0-4-beta-6-release-test-report.json"
+        "passed": true,
+        "details": "Structured JSON report present at /mnt/da2ae3dd-9788-4b37-88e8-effd7025eb4c/Base Projects/localnest/reports/localnest-0-0-4-beta-6-release-test-report.json with 40 recorded checks."
       }
     ]
   }
