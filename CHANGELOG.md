@@ -4,6 +4,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4-beta.8] - 2026-03-10
+
+### Runtime Fixes
+
+- Fixed MCP startup regressions introduced after `0.0.4-beta.6` where `create-services` and `register-tools` imported `SERVER_NAME` / `SERVER_VERSION` from the wrong module.
+- Removed the blocking startup update warm-check from the stdio MCP server path so early tool calls no longer stall on synchronous npm version checks.
+- Made sqlite-vec index status degrade safely when the database is locked instead of hanging or crashing MCP status tools.
+- Updated the installed-runtime release sweep to use isolated temporary index storage, avoiding contention with the user's active LocalNest database during validation.
+
+### Quality
+
+- Added import regression coverage for the app startup modules.
+- Added sqlite-vec status regression coverage for locked-database handling.
+
 ## [0.0.4-beta.7] - 2026-03-10
 
 ### Runtime
@@ -28,7 +42,7 @@ All notable changes to this project will be documented in this file.
 ### Install Behavior
 
 - Removed the earlier `prebuild-install@7.1.3` warning path from the default install graph by moving off the older Xenova runtime chain.
-- Current `0.0.4-beta.7` installs may still show a single upstream deprecation warning for `boolean@3.2.0` through `onnxruntime-node -> global-agent`; runtime behavior is unchanged.
+- Current `0.0.4-beta.8` installs may still show a single upstream deprecation warning for `boolean@3.2.0` through `onnxruntime-node -> global-agent`; runtime behavior is unchanged.
 
 ### Quality
 

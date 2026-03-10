@@ -271,7 +271,7 @@ Setup writes everything to `~/.localnest/`:
 
 ## Install Note
 
-`0.0.4-beta.7` removes the earlier `prebuild-install` warning path from installs. Some npm environments may still show a single upstream deprecation warning from the ONNX runtime dependency chain; LocalNest functionality is unaffected.
+`0.0.4-beta.8` removes the earlier `prebuild-install` warning path from installs. Some npm environments may still show a single upstream deprecation warning from the ONNX runtime dependency chain; LocalNest functionality is unaffected.
 
 **Performance tips:**
 - Scope queries with `project_path` + a narrow `glob` whenever possible

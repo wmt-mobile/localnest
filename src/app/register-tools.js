@@ -1,9 +1,8 @@
 import {
   DEFAULT_MAX_READ_LINES,
-  DEFAULT_MAX_RESULTS,
-  SERVER_NAME,
-  SERVER_VERSION
+  DEFAULT_MAX_RESULTS
 } from '../runtime/config.js';
+import { SERVER_NAME, SERVER_VERSION } from '../runtime/version.js';
 import {
   RESPONSE_FORMAT_SCHEMA,
   MEMORY_KIND_SCHEMA,

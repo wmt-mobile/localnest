@@ -243,9 +243,9 @@ async function main() {
     process.stdout.write('LocalNest upgrade helper\n\n');
     process.stdout.write('Usage:\n');
     process.stdout.write('  localnest upgrade\n');
-    process.stdout.write('  localnest upgrade 0.0.4-beta.7\n');
-    process.stdout.write('  localnest upgrade install 0.0.4-beta.7\n');
-    process.stdout.write('  localnest upgrade --version=0.0.4-beta.7\n');
+    process.stdout.write('  localnest upgrade 0.0.4-beta.8\n');
+    process.stdout.write('  localnest upgrade install 0.0.4-beta.8\n');
+    process.stdout.write('  localnest upgrade --version=0.0.4-beta.8\n');
     process.stdout.write('  localnest upgrade --dry-run\n');
     process.stdout.write('Options:\n');
     process.stdout.write('  --version=<semver|latest>  target package version\n');

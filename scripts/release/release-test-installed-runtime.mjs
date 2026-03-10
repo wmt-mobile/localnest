@@ -108,13 +108,15 @@ export async function runInstalledRuntimeReleaseTest(options = {}) {
 
   const tempReleaseHome = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-release-runtime-'));
   const tempMemoryDb = path.join(tempReleaseHome, 'localnest.memory.db');
+  const tempIndexDb = path.join(tempReleaseHome, 'localnest.db');
+  const tempIndexJson = path.join(tempReleaseHome, 'localnest.index.json');
   const env = {
     ...process.env,
     MCP_MODE: 'stdio',
     LOCALNEST_CONFIG: config.configPath,
     LOCALNEST_INDEX_BACKEND: 'sqlite-vec',
-    LOCALNEST_DB_PATH: config.dbPath,
-    LOCALNEST_INDEX_PATH: config.indexPath,
+    LOCALNEST_DB_PATH: tempIndexDb,
+    LOCALNEST_INDEX_PATH: tempIndexJson,
     LOCALNEST_MEMORY_ENABLED: 'true',
     LOCALNEST_MEMORY_BACKEND: 'auto',
     LOCALNEST_MEMORY_DB_PATH: tempMemoryDb

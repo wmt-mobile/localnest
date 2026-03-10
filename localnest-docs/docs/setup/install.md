@@ -108,7 +108,7 @@ After setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client 
 - Memory is opt-in. On Node 18/20, the rest of LocalNest still works, but memory remains unavailable.
 - `localnest-mcp-install-skill` is version-aware on this branch and skips reinstalling when the bundled skill is already current.
 - Setup warms embedding/reranker models on first run (downloads into `~/.localnest/cache` by default).
-- `0.0.4-beta.7` removes the earlier `prebuild-install` warning path from installs. A single upstream ONNX-runtime deprecation warning may still appear during npm install.
+- `0.0.4-beta.8` removes the earlier `prebuild-install` warning path from installs. A single upstream ONNX-runtime deprecation warning may still appear during npm install.
 - If `~/.localnest/cache` is not writable, LocalNest automatically falls back to a per-user temp cache path.
 - Cache fallback is acceptable when startup succeeds, but fixing the preferred cache path is still recommended for persistent model reuse.
 - Run `localnest doctor --verbose` to confirm model cache writeability for the current user.

@@ -26,7 +26,7 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
 
 <div className="docGrid docGrid--3">
   <a className="docLinkCard" href="/docs/setup/install">
-    <strong>Install beta.7</strong>
+    <strong>Install beta.8</strong>
     <span>Use the current beta package and follow the direct `localnest` setup flow.</span>
   </a>
   <a className="docLinkCard" href="/docs/setup/configuration">
@@ -49,7 +49,7 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
 - setup-time memory consent and config migration
 - `localnest` top-level CLI command path (`setup`, `doctor`, `upgrade`)
 
-## What changed in `0.0.4-beta.7`
+## What changed in `0.0.4-beta.8`
 
 - Added sqlite-vec extension auto-detection and explicit `LOCALNEST_SQLITE_VEC_EXTENSION` support for cleaner startup on global installs.
 - Switched the local embedding and reranking runtime from `@xenova/transformers` to `@huggingface/transformers`, and updated new setup defaults to the `huggingface` provider with backward compatibility for older `xenova` configs.
@@ -89,7 +89,7 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
 
 This page is based on the current beta package version and maintained changelog in the repository.
 
-- package version: `0.0.4-beta.7`
+- package version: `0.0.4-beta.8`
 - release date: `2026-03-10`
 - changelog sections document beta changes merged into this branch
 - stable published release docs remain archived under `0.0.3`
