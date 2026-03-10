@@ -1,10 +1,9 @@
----
-description: Current beta branch notes for localnest-mcp, including runtime updates, install behavior, memory workflows, and canonical tool behavior.
+description: Current beta package notes for localnest-mcp, including runtime updates, install behavior, memory workflows, and canonical tool behavior.
 ---
 
 # Current Beta Release
 
-Current beta branch documentation for `localnest-mcp`, covering memory workflow tools, setup migration behavior, and the active canonical `localnest_*` tool contract.
+Current beta package documentation for `localnest-mcp@0.0.4-beta.8`, covering memory workflow tools, setup migration behavior, and the active canonical `localnest_*` tool contract.
 
 <div className="docGrid docGrid--3">
   <div className="docPanel">
@@ -14,8 +13,8 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
   </div>
   <div className="docPanel">
     <span className="docEyebrow">Package</span>
-    <h3>beta branch track</h3>
-    <p>Use versioned pages for published package specifics; this page tracks current branch behavior.</p>
+    <h3>Published beta package</h3>
+    <p>Use this page for the currently shipped beta contract and runtime behavior.</p>
   </div>
   <div className="docPanel">
     <span className="docEyebrow">Docs contract</span>
@@ -91,5 +90,5 @@ This page is based on the current beta package version and maintained changelog 
 
 - package version: `0.0.4-beta.8`
 - release date: `2026-03-10`
-- changelog sections document beta changes merged into this branch
+- changelog sections document the changes shipped in this beta package
 - stable published release docs remain archived under `0.0.3`
