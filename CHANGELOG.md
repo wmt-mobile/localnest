@@ -22,6 +22,13 @@ All notable changes to this project will be documented in this file.
 ### Security & Dependencies
 
 - Updated `express-rate-limit` and `ip-address` to patched versions.
+- Switched the local embedding and reranking runtime from `@xenova/transformers` to `@huggingface/transformers`.
+- Added published `npm-shrinkwrap.json` coverage so npm-distributed installs carry the intended transitive dependency graph.
+
+### Install Behavior
+
+- Removed the earlier `prebuild-install@7.1.3` warning path from the default install graph by moving off the older Xenova runtime chain.
+- Current `0.0.4-beta.7` installs may still show a single upstream deprecation warning for `boolean@3.2.0` through `onnxruntime-node -> global-agent`; runtime behavior is unchanged.
 
 ### Quality
 

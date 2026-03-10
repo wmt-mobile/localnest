@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - beta
     paths:
       - 'localnest-docs/**'
       - '.github/workflows/docs.yml'

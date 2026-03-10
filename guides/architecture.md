@@ -1,4 +1,4 @@
-<!-- cspell:ignore localnest Xenova unref chunker LOCALNEST reranker ripgrep -->
+<!-- cspell:ignore localnest Xenova HuggingFace huggingface unref chunker LOCALNEST reranker ripgrep -->
 
 # LocalNest MCP — Architecture
 
@@ -205,7 +205,7 @@ src/
 
 **Graceful degradation** — sqlite-vec missing → JSON fallback. ripgrep missing → JS fallback. Memory disabled → retrieval unaffected. Every optional subsystem fails independently.
 
-**Local-first** — embeddings run via `@xenova/transformers` (WASM, no GPU needed). Nothing leaves the machine.
+**Local-first** — embeddings and reranking run via `@huggingface/transformers` with local ONNX/WASM runtime support. Nothing leaves the machine.
 
 **Forward-only schema migrations** — `CREATE INDEX IF NOT EXISTS` and `ALTER TABLE ADD COLUMN` only. Existing databases are never dropped or rebuilt.
 

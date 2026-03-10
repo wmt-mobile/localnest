@@ -52,8 +52,8 @@ localnest-mcp-install-skill
 
 3. Run setup + health check.
 ```bash
-localnest-mcp-setup
-localnest-mcp-doctor
+localnest setup
+localnest doctor
 ```
 
 4. Copy the printed `mcpServers.localnest` JSON block into the MCP client config.

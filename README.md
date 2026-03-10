@@ -1,4 +1,4 @@
-<!-- cspell:ignore localnest LOCALNEST winget MSVC choco Xenova xenova reranker RERANKER Kiro duplicative refreshable SARIF reranking ripgrep -->
+<!-- cspell:ignore localnest LOCALNEST winget MSVC choco Xenova xenova HuggingFace huggingface reranker RERANKER Kiro duplicative refreshable SARIF reranking ripgrep -->
 
 # LocalNest MCP
 
@@ -89,6 +89,8 @@ Restart your MCP client. If it times out, set `startup_timeout_sec: 30` in your 
 **Requirements:** Node.js `>=18` · ripgrep recommended but optional
 
 AST-aware chunking ships by default for `JavaScript`, `Python`, `Go`, `Bash`, `Lua`, and `Dart`. Other languages still index cleanly with line-based fallback chunking.
+
+The current beta runtime uses `@huggingface/transformers` for local embeddings and reranking while preserving the existing `xenova` provider/model config surface.
 
 | Platform | Install ripgrep |
 |----------|----------------|
@@ -266,6 +268,10 @@ Setup writes everything to `~/.localnest/`:
 | `LOCALNEST_UPDATE_FAILURE_BACKOFF_MINUTES` | `15` | Retry on failed npm check |
 
 </details>
+
+## Install Note
+
+`0.0.4-beta.7` removes the earlier `prebuild-install` warning path from installs. Some npm environments may still show a single upstream deprecation warning from the ONNX runtime dependency chain; LocalNest functionality is unaffected.
 
 **Performance tips:**
 - Scope queries with `project_path` + a narrow `glob` whenever possible

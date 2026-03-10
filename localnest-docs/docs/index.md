@@ -20,7 +20,7 @@ LocalNest MCP is a local-first MCP server that gives AI agents scoped access to 
   <div className="docPanel docPanel--compact">
     <div className="docStat">
       <span className="docStat__label">Current beta package</span>
-      <strong>0.0.4-beta.6</strong>
+      <strong>0.0.4-beta.7</strong>
     </div>
     <div className="docStat">
       <span className="docStat__label">Preferred backend</span>
@@ -61,6 +61,7 @@ npx -y localnest-mcp-doctor
 ## Choose your path
 
 - New install: start with [Install](/docs/setup/install), then [Configuration](/docs/setup/configuration).
+- Architecture and internal flow: use [Architecture](/docs/architecture).
 - Daily coding workflow: jump to [Tools](/docs/tools/overview) and [Search](/docs/tools/search).
 - Version-specific behavior: use [Current beta release](/docs/releases/current) and [Release matrix](/docs/releases/history).
 
@@ -71,7 +72,7 @@ npx -y localnest-mcp-doctor
   </a>
   <a className="docLinkCard" href="./releases/current">
     <strong>Current release</strong>
-    <span>See what changed in `0.0.4-beta.6` before you upgrade or publish.</span>
+    <span>See what changed in `0.0.4-beta.7` before you upgrade or publish.</span>
   </a>
   <a className="docLinkCard" href="./versions/0.0.4-beta.5/overview">
     <strong>Archived beta.5</strong>
@@ -111,13 +112,17 @@ npx -y localnest-mcp-doctor
     <strong>Configuration</strong>
     <span>Review root resolution, environment variables, and backend settings.</span>
   </a>
+  <a className="docLinkCard" href="./architecture">
+    <strong>Architecture</strong>
+    <span>See boot flow, retrieval diagrams, indexing, and memory graph behavior.</span>
+  </a>
   <a className="docLinkCard" href="./tools/overview">
     <strong>Tools</strong>
     <span>See the full tool surface and the intended retrieval workflow.</span>
   </a>
   <a className="docLinkCard" href="./releases/current">
     <strong>Current beta release</strong>
-    <span>See the `0.0.4-beta.6` beta behavior, including release hardening, improved diagnostics, and the current memory workflow.</span>
+    <span>See the `0.0.4-beta.7` beta behavior, including runtime updates, install behavior, and the current memory workflow.</span>
   </a>
   <a className="docLinkCard" href="./releases/history">
     <strong>Release matrix</strong>
