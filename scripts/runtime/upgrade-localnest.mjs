@@ -243,9 +243,9 @@ async function main() {
     process.stdout.write('LocalNest upgrade helper\n\n');
     process.stdout.write('Usage:\n');
     process.stdout.write('  localnest upgrade\n');
-    process.stdout.write('  localnest upgrade 0.0.4-beta.7\n');
-    process.stdout.write('  localnest upgrade install 0.0.4-beta.7\n');
-    process.stdout.write('  localnest upgrade --version=0.0.4-beta.7\n');
+    process.stdout.write('  localnest upgrade 0.0.4-beta.8\n');
+    process.stdout.write('  localnest upgrade install 0.0.4-beta.8\n');
+    process.stdout.write('  localnest upgrade --version=0.0.4-beta.8\n');
     process.stdout.write('  localnest upgrade --dry-run\n');
     process.stdout.write('Options:\n');
     process.stdout.write('  --version=<semver|latest>  target package version\n');
@@ -272,12 +272,12 @@ async function main() {
       chunkOverlap: 15,
       maxTermsPerChunk: 80,
       maxIndexedFiles: 20000,
-      embeddingProvider: 'xenova',
-      embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+      embeddingProvider: 'huggingface',
+      embeddingModel: 'sentence-transformers/all-MiniLM-L6-v2',
       embeddingCacheDir: layout.dirs.cache,
       embeddingDimensions: 384,
-      rerankerProvider: 'xenova',
-      rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2',
+      rerankerProvider: 'huggingface',
+      rerankerModel: 'cross-encoder/ms-marco-MiniLM-L-6-v2',
       rerankerCacheDir: layout.dirs.cache
     },
     memory: {
@@ -308,12 +308,12 @@ async function main() {
     `--chunk-overlap=${String(finalConfig.index.chunkOverlap)}`,
     `--max-terms-per-chunk=${String(finalConfig.index.maxTermsPerChunk)}`,
     `--max-indexed-files=${String(finalConfig.index.maxIndexedFiles)}`,
-    `--embed-provider=${finalConfig.index.embeddingProvider || 'xenova'}`,
-    `--embed-model=${finalConfig.index.embeddingModel || 'Xenova/all-MiniLM-L6-v2'}`,
+    `--embed-provider=${finalConfig.index.embeddingProvider || 'huggingface'}`,
+    `--embed-model=${finalConfig.index.embeddingModel || 'sentence-transformers/all-MiniLM-L6-v2'}`,
     `--embed-cache-dir=${finalConfig.index.embeddingCacheDir || layout.dirs.cache}`,
     `--embed-dims=${String(finalConfig.index.embeddingDimensions || 384)}`,
-    `--reranker-provider=${finalConfig.index.rerankerProvider || 'xenova'}`,
-    `--reranker-model=${finalConfig.index.rerankerModel || 'Xenova/ms-marco-MiniLM-L-6-v2'}`,
+    `--reranker-provider=${finalConfig.index.rerankerProvider || 'huggingface'}`,
+    `--reranker-model=${finalConfig.index.rerankerModel || 'cross-encoder/ms-marco-MiniLM-L-6-v2'}`,
     `--reranker-cache-dir=${finalConfig.index.rerankerCacheDir || layout.dirs.cache}`,
     `--memory-enabled=${String(finalConfig.memory.enabled)}`,
     `--memory-backend=${finalConfig.memory.backend}`,

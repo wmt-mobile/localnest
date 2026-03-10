@@ -33,13 +33,16 @@ export function normalizeIndexStatus(status) {
 }
 
 export function normalizeIndexProjectResult(result, maxFiles) {
+  const failedFiles = Array.isArray(result?.failed_files) ? result.failed_files : [];
   return {
     ...result,
     scanned_files: Number.isFinite(result?.scanned_files) ? result.scanned_files : 0,
     indexed_files: Number.isFinite(result?.indexed_files) ? result.indexed_files : 0,
     skipped_files: Number.isFinite(result?.skipped_files) ? result.skipped_files : 0,
     removed_files: Number.isFinite(result?.removed_files) ? result.removed_files : 0,
-    failed_files: Array.isArray(result?.failed_files) ? result.failed_files : [],
+    failed_files: failedFiles,
+    failed_file_count: failedFiles.length,
+    failed_file_samples: failedFiles.slice(0, 3),
     total_files: Number.isFinite(result?.total_files) ? result.total_files : 0,
     total_chunks: Number.isFinite(result?.total_chunks) ? result.total_chunks : 0,
     max_files_requested: maxFiles

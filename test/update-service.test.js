@@ -124,6 +124,35 @@ test('getCachedStatus returns informative fallback without npm access', () => {
   assert.equal(out.recommendation, 'up_to_date');
 });
 
+test('getCachedStatus overrides stale cached current_version with installed runtime version', () => {
+  const home = makeTempHome();
+  const cachePath = buildLocalnestPaths(home).updateStatusPath;
+  fs.mkdirSync(path.dirname(cachePath), { recursive: true });
+  fs.writeFileSync(cachePath, `${JSON.stringify({
+    package_name: 'localnest-mcp',
+    current_version: '0.0.4',
+    latest_version: '0.0.3',
+    is_outdated: false,
+    last_checked_at: '2000-01-01T00:00:00.000Z',
+    last_check_ok: true
+  }, null, 2)}\n`, 'utf8');
+
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.0.4-beta.8',
+    checkIntervalMinutes: 120,
+    failureBackoffMinutes: 15,
+    commandRunner: () => {
+      throw new Error('should not run');
+    }
+  });
+
+  const out = service.getCachedStatus();
+  assert.equal(out.current_version, '0.0.4-beta.8');
+  assert.equal(out.latest_version, '0.0.3');
+});
+
 test('selfUpdate requires explicit approval', async () => {
   const home = makeTempHome();
   const service = new UpdateService({

@@ -35,6 +35,7 @@ function buildHealthSummary({ runtime, memoryStatus, indexStatus, activeIndexBac
 
   if (!runtime.hasRipgrep) issues.push('ripgrep_unavailable');
   if (!vectorReady) issues.push('vector_index_unavailable');
+  if (indexStatus?.error) issues.push('vector_index_status_error');
   if (!sqliteVecNativeReady) issues.push('sqlite_vec_native_missing');
   if (runtime.embeddingCacheStatus?.fallbackUsed) issues.push('embedding_cache_fallback');
   if (runtime.rerankerCacheStatus?.fallbackUsed) issues.push('reranker_cache_fallback');

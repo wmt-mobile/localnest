@@ -1,4 +1,9 @@
-const DEFAULT_MODEL = 'Xenova/ms-marco-MiniLM-L-6-v2';
+const DEFAULT_MODEL = 'cross-encoder/ms-marco-MiniLM-L-6-v2';
+
+function normalizeProvider(provider) {
+  if (provider === 'xenova') return 'huggingface';
+  return provider || 'huggingface';
+}
 
 function extractScore(result) {
   if (Array.isArray(result) && result.length > 0) {
@@ -12,8 +17,8 @@ function extractScore(result) {
 }
 
 export class RerankerService {
-  constructor({ provider = 'xenova', model, cacheDir } = {}) {
-    this.provider = provider;
+  constructor({ provider = 'huggingface', model, cacheDir } = {}) {
+    this.provider = normalizeProvider(provider);
     this.model = model || DEFAULT_MODEL;
     this.cacheDir = cacheDir || '';
     this._pipelinePromise = null;

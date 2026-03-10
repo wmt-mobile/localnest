@@ -108,13 +108,15 @@ export async function runInstalledRuntimeReleaseTest(options = {}) {
 
   const tempReleaseHome = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-release-runtime-'));
   const tempMemoryDb = path.join(tempReleaseHome, 'localnest.memory.db');
+  const tempIndexDb = path.join(tempReleaseHome, 'localnest.db');
+  const tempIndexJson = path.join(tempReleaseHome, 'localnest.index.json');
   const env = {
     ...process.env,
     MCP_MODE: 'stdio',
     LOCALNEST_CONFIG: config.configPath,
     LOCALNEST_INDEX_BACKEND: 'sqlite-vec',
-    LOCALNEST_DB_PATH: config.dbPath,
-    LOCALNEST_INDEX_PATH: config.indexPath,
+    LOCALNEST_DB_PATH: tempIndexDb,
+    LOCALNEST_INDEX_PATH: tempIndexJson,
     LOCALNEST_MEMORY_ENABLED: 'true',
     LOCALNEST_MEMORY_BACKEND: 'auto',
     LOCALNEST_MEMORY_DB_PATH: tempMemoryDb
@@ -312,7 +314,15 @@ export async function runInstalledRuntimeReleaseTest(options = {}) {
       await record('localnest_index_project', async () => safeToolResult(await callTool('localnest_index_project', {
         project_path: config.projectPath
       }, 300000)), {
-        details: (value) => `indexed_files=${value.indexed_files}, failed_files=${value.failed_files?.length || 0}`,
+        details: (value) => {
+          const failedCount = value.failed_file_count ?? value.failed_files?.length ?? 0;
+          const failedSample = Array.isArray(value.failed_file_samples) && value.failed_file_samples.length > 0
+            ? value.failed_file_samples.map((item) => item.path || item.file || '').filter(Boolean).join(', ')
+            : '';
+          return failedSample
+            ? `indexed_files=${value.indexed_files}, failed_files=${failedCount}, failed_sample=${failedSample}`
+            : `indexed_files=${value.indexed_files}, failed_files=${failedCount}`;
+        },
         verify: (value) => {
           assertFields(value || {}, ['indexed_files', 'failed_files'], 'localnest_index_project');
         }

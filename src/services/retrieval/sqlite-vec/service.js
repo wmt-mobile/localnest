@@ -55,23 +55,41 @@ export class SqliteVecIndexService {
     this.sqliteVecTableError = '';
   }
 
+  resetDb() {
+    if (!this.db) return;
+    try {
+      this.db.close();
+    } catch {
+      // Ignore close failures while recovering from a broken sqlite handle.
+    }
+    this.db = null;
+    this._stmtGetDf = null;
+    this._stmtSetMeta = null;
+    this._stmtGetMeta = null;
+  }
+
   ensureDb() {
     if (this.db) return;
     fs.mkdirSync(path.dirname(this.dbPath), { recursive: true });
-    this.db = new DatabaseSync(this.dbPath);
-    this.db.exec('PRAGMA journal_mode=WAL;');
-    this.db.exec('PRAGMA synchronous=NORMAL;');
-    this.db.exec('PRAGMA cache_size=-8000;');
-    this.db.exec(INDEX_SCHEMA_SQL);
+    try {
+      this.db = new DatabaseSync(this.dbPath);
+      this.db.exec('PRAGMA journal_mode=WAL;');
+      this.db.exec('PRAGMA synchronous=NORMAL;');
+      this.db.exec('PRAGMA cache_size=-8000;');
+      this.db.exec(INDEX_SCHEMA_SQL);
 
-    this._stmtGetDf = this.db.prepare('SELECT df FROM term_df WHERE term = ?');
-    this._stmtSetMeta = this.db.prepare('INSERT OR REPLACE INTO index_meta(key, value) VALUES (?, ?)');
-    this._stmtGetMeta = this.db.prepare('SELECT value FROM index_meta WHERE key = ?');
+      this._stmtGetDf = this.db.prepare('SELECT df FROM term_df WHERE term = ?');
+      this._stmtSetMeta = this.db.prepare('INSERT OR REPLACE INTO index_meta(key, value) VALUES (?, ?)');
+      this._stmtGetMeta = this.db.prepare('SELECT value FROM index_meta WHERE key = ?');
 
-    this.setMeta('backend', 'sqlite-vec');
-    this._runMigrations();
-    this.tryLoadSqliteVec();
-    this.ensureSqliteVecTable();
+      this.setMeta('backend', 'sqlite-vec');
+      this._runMigrations();
+      this.tryLoadSqliteVec();
+      this.ensureSqliteVecTable();
+    } catch (error) {
+      this.resetDb();
+      throw error;
+    }
   }
 
   _runMigrations() {
@@ -120,26 +138,47 @@ export class SqliteVecIndexService {
   }
 
   getStatus() {
-    this.ensureDb();
-    const row = this.db.prepare('SELECT COUNT(*) AS c FROM files').get();
-    const chunkRow = this.db.prepare('SELECT COUNT(*) AS c FROM chunks').get();
-    const avgTermsRow = this.db.prepare('SELECT AVG(term_count) AS v FROM chunks').get();
-    const extension = this.getSqliteVecExtensionStatus();
-    return {
-      backend: 'sqlite-vec',
-      db_path: this.dbPath,
-      sqlite_vec_loaded: extension.loaded,
-      sqlite_vec_extension: extension,
-      sqlite_vec_table_ready: this.sqliteVecTableReady,
-      updated_at: this.getMeta('updated_at'),
-      total_files: row?.c || 0,
-      total_chunks: chunkRow?.c || 0,
-      avg_chunk_terms: Number(avgTermsRow?.v || 0),
-      upgrade_recommended: false,
-      upgrade_reason: null,
-      embedding: this.embeddingService?.getStatus?.() || { provider: 'none', enabled: false, available: false, model: null, dimensions: null },
-      ast_chunking: this.astChunker?.getStatus?.() || { enabled: false, supported_languages: [], active_languages: [], fallback_languages: [], ast_chunks: 0, fallback_chunks: 0 }
-    };
+    try {
+      this.ensureDb();
+      const row = this.db.prepare('SELECT COUNT(*) AS c FROM files').get();
+      const chunkRow = this.db.prepare('SELECT COUNT(*) AS c FROM chunks').get();
+      const avgTermsRow = this.db.prepare('SELECT AVG(term_count) AS v FROM chunks').get();
+      const extension = this.getSqliteVecExtensionStatus();
+      return {
+        backend: 'sqlite-vec',
+        db_path: this.dbPath,
+        sqlite_vec_loaded: extension.loaded,
+        sqlite_vec_extension: extension,
+        sqlite_vec_table_ready: this.sqliteVecTableReady,
+        updated_at: this.getMeta('updated_at'),
+        total_files: row?.c || 0,
+        total_chunks: chunkRow?.c || 0,
+        avg_chunk_terms: Number(avgTermsRow?.v || 0),
+        upgrade_recommended: false,
+        upgrade_reason: null,
+        error: null,
+        embedding: this.embeddingService?.getStatus?.() || { provider: 'none', enabled: false, available: false, model: null, dimensions: null },
+        ast_chunking: this.astChunker?.getStatus?.() || { enabled: false, supported_languages: [], active_languages: [], fallback_languages: [], ast_chunks: 0, fallback_chunks: 0 }
+      };
+    } catch (error) {
+      this.resetDb();
+      return {
+        backend: 'sqlite-vec',
+        db_path: this.dbPath,
+        sqlite_vec_loaded: null,
+        sqlite_vec_extension: this.getSqliteVecExtensionStatus(),
+        sqlite_vec_table_ready: false,
+        updated_at: null,
+        total_files: 0,
+        total_chunks: 0,
+        avg_chunk_terms: 0,
+        upgrade_recommended: false,
+        upgrade_reason: null,
+        error: String(error?.message || error),
+        embedding: this.embeddingService?.getStatus?.() || { provider: 'none', enabled: false, available: false, model: null, dimensions: null },
+        ast_chunking: this.astChunker?.getStatus?.() || { enabled: false, supported_languages: [], active_languages: [], fallback_languages: [], ast_chunks: 0, fallback_chunks: 0 }
+      };
+    }
   }
 
   checkStaleness() {

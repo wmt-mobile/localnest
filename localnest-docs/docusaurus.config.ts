@@ -113,7 +113,7 @@ const config: Config = {
         },
         {
           href: 'https://www.npmjs.com/package/localnest-mcp',
-          label: 'v0.0.4-beta.7',
+          label: 'v0.0.4-beta.8',
           position: 'right'
         },
         {
@@ -142,7 +142,7 @@ const config: Config = {
         {
           title: 'Versions',
           items: [
-            { label: 'Current beta (0.0.4-beta.7)', to: '/docs/releases/current' },
+            { label: 'Current beta (0.0.4-beta.8)', to: '/docs/releases/current' },
             { label: 'Release matrix', to: '/docs/releases/history' }
           ]
         },

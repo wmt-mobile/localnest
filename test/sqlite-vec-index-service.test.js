@@ -117,6 +117,45 @@ test('sqlite index status reports extension as not configured when no extension 
   fs.rmSync(tempRoot, { recursive: true, force: true });
 });
 
+test('sqlite index status degrades gracefully when status cannot open the database', { skip: skipReason }, () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-sqlite-status-error-test-'));
+  const dbPath = path.join(tempRoot, 'idx.db');
+
+  const workspace = {
+    resolveSearchBases: () => [tempRoot],
+    normalizeTarget: (p) => p,
+    *walkDirectories() {
+      yield { files: [] };
+    },
+    isLikelyTextFile: () => true,
+    safeReadText: () => ''
+  };
+
+  const service = new SqliteVecIndexService({
+    workspace,
+    dbPath,
+    sqliteVecExtensionPath: '',
+    chunkLines: 20,
+    chunkOverlap: 5,
+    maxTermsPerChunk: 40,
+    maxIndexedFiles: 100
+  });
+
+  service.ensureDb = () => {
+    const error = new Error('database is locked');
+    error.code = 'ERR_SQLITE_ERROR';
+    throw error;
+  };
+
+  const status = service.getStatus();
+  assert.equal(status.backend, 'sqlite-vec');
+  assert.equal(status.total_files, 0);
+  assert.equal(status.sqlite_vec_table_ready, false);
+  assert.match(status.error || '', /database is locked/);
+
+  fs.rmSync(tempRoot, { recursive: true, force: true });
+});
+
 test('sqlite index BM25 fallback returns lexical semantic hit without embeddings', { skip: skipReason }, async () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-sqlite-bm25-test-'));
   const dbPath = path.join(tempRoot, 'idx.db');

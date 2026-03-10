@@ -8,7 +8,7 @@ Use this page to choose a LocalNest version line and install it explicitly.
 
 ## Recommended defaults
 
-- Want latest beta features: use `0.0.4-beta.7`
+- Want latest beta features: use `0.0.4-beta.8`
 - Want stable behavior: use `0.0.3`
 - Need older behavior for compatibility: use the archived beta rows below
 
@@ -16,7 +16,8 @@ Use this page to choose a LocalNest version line and install it explicitly.
 
 | Version | Channel | Install command |
 | --- | --- | --- |
-| `0.0.4-beta.7` | current beta | `npm install -g localnest-mcp@0.0.4-beta.7` |
+| `0.0.4-beta.8` | current beta | `npm install -g localnest-mcp@0.0.4-beta.8` |
+| `0.0.4-beta.7` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.7` |
 | `0.0.4-beta.6` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.6` |
 | `0.0.4-beta.5` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.5` |
 | `0.0.4-beta.4` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.4` |
@@ -29,6 +30,7 @@ Use this page to choose a LocalNest version line and install it explicitly.
 
 | Version | `localnest-mcp-install-skill` | Setup style |
 | --- | --- | --- |
+| `0.0.4-beta.8` | yes | startup/runtime regression fixes + sqlite-vec status hardening |
 | `0.0.4-beta.7` | yes | global-first + sqlite-vec auto-detection + Hugging Face runtime |
 | `0.0.4-beta.6` | yes | global-first + release-hardening + restructured internals |
 | `0.0.4-beta.5` | yes | global-first + `localnest upgrade` command path |
@@ -41,5 +43,5 @@ Use this page to choose a LocalNest version line and install it explicitly.
 ## Notes
 
 - If you need deterministic behavior across environments, pin exact versions instead of using floating tags.
-- The phrase "beta 7" in this repo maps to `0.0.4-beta.7` package naming.
+- The phrase "beta 8" in this repo maps to `0.0.4-beta.8` package naming.
 - Use [Release Matrix](./history) for context, [Current Beta Release](./current) for active beta behavior, and the archived per-version pages when you need frozen release notes.

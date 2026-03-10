@@ -333,11 +333,11 @@ export function buildRuntimeConfig(env = process.env) {
     ),
     embeddingProvider: parseStringEnv(
       env.LOCALNEST_EMBED_PROVIDER,
-      fileSettings.embeddingProvider || 'xenova'
+      fileSettings.embeddingProvider || 'huggingface'
     ),
     embeddingModel: parseStringEnv(
       env.LOCALNEST_EMBED_MODEL,
-      fileSettings.embeddingModel || 'Xenova/all-MiniLM-L6-v2'
+      fileSettings.embeddingModel || 'sentence-transformers/all-MiniLM-L6-v2'
     ),
     embeddingCacheDir: embeddingCacheResolved.path,
     embeddingCacheStatus: embeddingCacheResolved,
@@ -347,11 +347,11 @@ export function buildRuntimeConfig(env = process.env) {
     ),
     rerankerProvider: parseStringEnv(
       env.LOCALNEST_RERANKER_PROVIDER,
-      fileSettings.rerankerProvider || 'xenova'
+      fileSettings.rerankerProvider || 'huggingface'
     ),
     rerankerModel: parseStringEnv(
       env.LOCALNEST_RERANKER_MODEL,
-      fileSettings.rerankerModel || 'Xenova/ms-marco-MiniLM-L-6-v2'
+      fileSettings.rerankerModel || 'cross-encoder/ms-marco-MiniLM-L-6-v2'
     ),
     rerankerCacheDir: rerankerCacheResolved.path,
     rerankerCacheStatus: rerankerCacheResolved,

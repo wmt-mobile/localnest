@@ -30,12 +30,23 @@ export class UpdateService {
     this.cachePath = buildLocalnestPaths(localnestHome).updateStatusPath;
   }
 
+  normalizeStatusRecord(status) {
+    const input = status && typeof status === 'object' ? status : {};
+    const latestVersion = input.latest_version || this.currentVersion;
+    return {
+      ...input,
+      package_name: this.packageName,
+      current_version: this.currentVersion,
+      latest_version: latestVersion
+    };
+  }
+
   readCache() {
     try {
       if (!fs.existsSync(this.cachePath)) return null;
       const parsed = JSON.parse(fs.readFileSync(this.cachePath, 'utf8'));
       if (!parsed || typeof parsed !== 'object') return null;
-      return parsed;
+      return this.normalizeStatusRecord(parsed);
     } catch {
       return null;
     }
@@ -43,7 +54,7 @@ export class UpdateService {
 
   writeCache(data) {
     fs.mkdirSync(path.dirname(this.cachePath), { recursive: true });
-    fs.writeFileSync(this.cachePath, `${JSON.stringify(data, null, 2)}\n`, 'utf8');
+    fs.writeFileSync(this.cachePath, `${JSON.stringify(this.normalizeStatusRecord(data), null, 2)}\n`, 'utf8');
   }
 
   shouldRefresh(cache, now, force) {
@@ -79,9 +90,10 @@ export class UpdateService {
   }
 
   withStatusMetadata(status, now = Date.now()) {
+    const normalized = this.normalizeStatusRecord(status);
     return {
-      ...status,
-      ...this.buildStatusMetadata(status, now)
+      ...normalized,
+      ...this.buildStatusMetadata(normalized, now)
     };
   }
 

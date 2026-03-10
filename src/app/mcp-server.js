@@ -44,10 +44,6 @@ export async function main() {
     );
   }
 
-  services.updates.warmCheck().catch((error) => {
-    process.stderr.write(`[localnest-update] warm check failed: ${error?.message || error}\n`);
-  });
-
   startStalenessMonitor(services.vectorIndex, runtime.indexSweepIntervalMinutes);
   const { getLastReport: getLastHealthReport } = startHealthMonitor(
     services.vectorIndex,
