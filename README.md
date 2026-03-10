@@ -88,6 +88,8 @@ Restart your MCP client. If it times out, set `startup_timeout_sec: 30` in your 
 
 **Requirements:** Node.js `>=18` · ripgrep recommended but optional
 
+AST-aware chunking ships by default for `JavaScript`, `Python`, `Go`, `Bash`, `Lua`, and `Dart`. Other languages still index cleanly with line-based fallback chunking.
+
 | Platform | Install ripgrep |
 |----------|----------------|
 | macOS | `brew install ripgrep` |

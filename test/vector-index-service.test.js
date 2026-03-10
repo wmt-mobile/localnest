@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { VectorIndexService } from '../src/services/retrieval/index.js';
+import { AstChunker } from '../src/services/retrieval/chunker/service.js';
 
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-vector-test-'));
@@ -155,4 +156,20 @@ test('vector index status recommends sqlite upgrade for large json index', () =>
   assert.ok(String(status.upgrade_reason).includes('sqlite-vec'));
 
   fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('ast chunker reports only bundled tree-sitter grammars as supported', () => {
+  const chunker = new AstChunker();
+  const status = chunker.getStatus();
+
+  assert.deepEqual(status.supported_languages, [
+    'javascript',
+    'python',
+    'go',
+    'bash',
+    'lua',
+    'dart'
+  ]);
+  assert.equal(chunker.resolveLanguageId('src/example.ts'), 'typescript');
+  assert.equal(chunker.resolveLanguageId('src/example.rs'), 'rust');
 });
