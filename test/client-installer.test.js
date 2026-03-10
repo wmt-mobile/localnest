@@ -49,8 +49,8 @@ test('installLocalnestIntoDetectedClients updates json and toml configs', () => 
       existing: { command: 'foo' }
     }
   });
-  writeJson(path.join(homeDir, '.gemini', 'antigravity', 'mcp_config.json'), {
-    mcpServers: {}
+  writeJson(path.join(homeDir, '.gemini', 'settings.json'), {
+    ui: { theme: 'Dracula' }
   });
   writeJson(path.join(homeDir, '.kiro', 'settings', 'mcp.json'), {
     mcpServers: {
@@ -92,7 +92,8 @@ test('installLocalnestIntoDetectedClients updates json and toml configs', () => 
   assert.equal(cursor.mcpServers.existing.command, 'foo');
   assert.equal(cursor.mcpServers.localnest.command, 'localnest-mcp');
 
-  const gemini = JSON.parse(fs.readFileSync(path.join(homeDir, '.gemini', 'antigravity', 'mcp_config.json'), 'utf8'));
+  const gemini = JSON.parse(fs.readFileSync(path.join(homeDir, '.gemini', 'settings.json'), 'utf8'));
+  assert.equal(gemini.ui.theme, 'Dracula');
   assert.equal(gemini.mcpServers.localnest.env.MCP_MODE, 'stdio');
 
   const kiro = JSON.parse(fs.readFileSync(path.join(homeDir, '.kiro', 'settings', 'mcp.json'), 'utf8'));
@@ -113,6 +114,19 @@ test('installLocalnestIntoDetectedClients updates json and toml configs', () => 
 
   assert.equal(fs.existsSync(backupDir), true);
   assert.ok(fs.readdirSync(backupDir).length >= 4);
+
+  fs.rmSync(homeDir, { recursive: true, force: true });
+});
+
+test('detectAiToolTargets prefers current Gemini settings file', () => {
+  const homeDir = makeTempDir();
+  fs.mkdirSync(path.join(homeDir, '.gemini', 'antigravity'), { recursive: true });
+  writeJson(path.join(homeDir, '.gemini', 'settings.json'), { ui: { theme: 'Dracula' } });
+
+  const detected = detectAiToolTargets({ homeDir });
+  const gemini = detected.supported.find((item) => item.id === 'gemini');
+
+  assert.equal(gemini?.configPath, path.join(homeDir, '.gemini', 'settings.json'));
 
   fs.rmSync(homeDir, { recursive: true, force: true });
 });

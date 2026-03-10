@@ -74,3 +74,50 @@ test('normalizeUpgradeConfig merges existing values over defaults', () => {
   assert.equal(merged.memory.backend, defaults.memory.backend);
   assert.deepEqual(merged.roots, existingConfig.roots);
 });
+
+test('normalizeUpgradeConfig rewrites legacy xenova runtime settings to current defaults', () => {
+  const defaults = {
+    roots: [{ label: 'default', path: '/tmp/default' }],
+    index: {
+      backend: 'sqlite-vec',
+      dbPath: '/tmp/localnest/data/index.sqlite3',
+      indexPath: '/tmp/localnest/data/index.json',
+      chunkLines: 60,
+      chunkOverlap: 15,
+      maxTermsPerChunk: 80,
+      maxIndexedFiles: 20000,
+      embeddingProvider: 'huggingface',
+      embeddingModel: 'sentence-transformers/all-MiniLM-L6-v2',
+      embeddingCacheDir: '/tmp/localnest/cache',
+      embeddingDimensions: 384,
+      rerankerProvider: 'huggingface',
+      rerankerModel: 'cross-encoder/ms-marco-MiniLM-L-6-v2',
+      rerankerCacheDir: '/tmp/localnest/cache'
+    },
+    memory: {
+      enabled: false,
+      backend: 'auto',
+      dbPath: '/tmp/localnest/data/memory.sqlite3',
+      autoCapture: false,
+      askForConsentDone: false
+    }
+  };
+
+  const merged = normalizeUpgradeConfig({
+    defaults,
+    existingConfig: {
+      roots: [{ label: 'repo', path: '/work/repo' }],
+      index: {
+        embeddingProvider: 'xenova',
+        embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+        rerankerProvider: 'xenova',
+        rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2'
+      }
+    }
+  });
+
+  assert.equal(merged.index.embeddingProvider, 'huggingface');
+  assert.equal(merged.index.embeddingModel, 'sentence-transformers/all-MiniLM-L6-v2');
+  assert.equal(merged.index.rerankerProvider, 'huggingface');
+  assert.equal(merged.index.rerankerModel, 'cross-encoder/ms-marco-MiniLM-L-6-v2');
+});
