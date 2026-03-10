@@ -1,4 +1,4 @@
-<!-- cspell:ignore localnest LOCALNEST winget MSVC choco Xenova xenova HuggingFace huggingface reranker RERANKER Kiro duplicative refreshable SARIF reranking ripgrep -->
+<!-- cspell:ignore localnest LOCALNEST winget MSVC choco HuggingFace huggingface reranker RERANKER Kiro duplicative refreshable SARIF reranking ripgrep -->
 
 # LocalNest MCP
 
@@ -66,12 +66,12 @@ Setup auto-writes the config for detected tools. You'll also find a ready-to-pas
         "LOCALNEST_INDEX_BACKEND": "sqlite-vec",
         "LOCALNEST_DB_PATH": "~/.localnest/data/localnest.db",
         "LOCALNEST_INDEX_PATH": "~/.localnest/data/localnest.index.json",
-        "LOCALNEST_EMBED_PROVIDER": "xenova",
-        "LOCALNEST_EMBED_MODEL": "Xenova/all-MiniLM-L6-v2",
+        "LOCALNEST_EMBED_PROVIDER": "huggingface",
+        "LOCALNEST_EMBED_MODEL": "sentence-transformers/all-MiniLM-L6-v2",
         "LOCALNEST_EMBED_CACHE_DIR": "~/.localnest/cache",
         "LOCALNEST_EMBED_DIMS": "384",
-        "LOCALNEST_RERANKER_PROVIDER": "xenova",
-        "LOCALNEST_RERANKER_MODEL": "Xenova/ms-marco-MiniLM-L-6-v2",
+        "LOCALNEST_RERANKER_PROVIDER": "huggingface",
+        "LOCALNEST_RERANKER_MODEL": "cross-encoder/ms-marco-MiniLM-L-6-v2",
         "LOCALNEST_RERANKER_CACHE_DIR": "~/.localnest/cache",
         "LOCALNEST_MEMORY_ENABLED": "false",
         "LOCALNEST_MEMORY_BACKEND": "auto",
@@ -90,7 +90,7 @@ Restart your MCP client. If it times out, set `startup_timeout_sec: 30` in your 
 
 AST-aware chunking ships by default for `JavaScript`, `Python`, `Go`, `Bash`, `Lua`, and `Dart`. Other languages still index cleanly with line-based fallback chunking.
 
-The current beta runtime uses `@huggingface/transformers` for local embeddings and reranking while preserving the existing `xenova` provider/model config surface.
+The current beta runtime uses `@huggingface/transformers` for local embeddings and reranking. New setup defaults use `huggingface`, and older `xenova` configs remain accepted as a compatibility alias.
 
 | Platform | Install ripgrep |
 |----------|----------------|
@@ -242,9 +242,9 @@ Setup writes everything to `~/.localnest/`:
 | `LOCALNEST_VECTOR_CHUNK_LINES` | `60` | Lines per index chunk |
 | `LOCALNEST_VECTOR_CHUNK_OVERLAP` | `15` | Overlap between chunks |
 | `LOCALNEST_VECTOR_MAX_FILES` | `20000` | Max files per index run |
-| `LOCALNEST_EMBED_MODEL` | `Xenova/all-MiniLM-L6-v2` | Embedding model |
+| `LOCALNEST_EMBED_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | Embedding model |
 | `LOCALNEST_EMBED_CACHE_DIR` | `~/.localnest/cache` | Model cache path |
-| `LOCALNEST_RERANKER_MODEL` | `Xenova/ms-marco-MiniLM-L-6-v2` | Cross-encoder reranker model |
+| `LOCALNEST_RERANKER_MODEL` | `cross-encoder/ms-marco-MiniLM-L-6-v2` | Cross-encoder reranker model |
 | `LOCALNEST_MEMORY_ENABLED` | `false` | Enable local memory subsystem |
 | `LOCALNEST_MEMORY_DB_PATH` | `~/.localnest/data/localnest.memory.db` | Memory database path |
 | `LOCALNEST_MEMORY_AUTO_CAPTURE` | `false` | Auto-promote background events |
@@ -258,9 +258,9 @@ Setup writes everything to `~/.localnest/`:
 | `LOCALNEST_INDEX_PATH` | `~/.localnest/data/localnest.index.json` | JSON index path |
 | `LOCALNEST_SQLITE_VEC_EXTENSION` | auto-detected | Native `vec0` extension path |
 | `LOCALNEST_VECTOR_MAX_TERMS` | `80` | Max terms per chunk |
-| `LOCALNEST_EMBED_PROVIDER` | `xenova` | Embedding backend |
+| `LOCALNEST_EMBED_PROVIDER` | `huggingface` | Embedding backend |
 | `LOCALNEST_EMBED_DIMS` | `384` | Embedding vector dimensions |
-| `LOCALNEST_RERANKER_PROVIDER` | `xenova` | Reranker backend |
+| `LOCALNEST_RERANKER_PROVIDER` | `huggingface` | Reranker backend |
 | `LOCALNEST_RERANKER_CACHE_DIR` | `~/.localnest/cache` | Reranker cache path |
 | `LOCALNEST_MEMORY_BACKEND` | `auto` | `auto`, `node-sqlite`, or `sqlite3` |
 | `LOCALNEST_MEMORY_CONSENT_DONE` | `false` | Suppress consent prompt |

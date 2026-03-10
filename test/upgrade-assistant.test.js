@@ -24,12 +24,12 @@ test('normalizeUpgradeConfig merges existing values over defaults', () => {
       chunkOverlap: 15,
       maxTermsPerChunk: 80,
       maxIndexedFiles: 20000,
-      embeddingProvider: 'xenova',
-      embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+      embeddingProvider: 'huggingface',
+      embeddingModel: 'sentence-transformers/all-MiniLM-L6-v2',
       embeddingCacheDir: '/tmp/localnest/cache',
       embeddingDimensions: 384,
-      rerankerProvider: 'xenova',
-      rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2',
+      rerankerProvider: 'huggingface',
+      rerankerModel: 'cross-encoder/ms-marco-MiniLM-L-6-v2',
       rerankerCacheDir: '/tmp/localnest/cache'
     },
     memory: {
@@ -47,9 +47,9 @@ test('normalizeUpgradeConfig merges existing values over defaults', () => {
       backend: 'json',
       dbPath: '/work/index.db',
       chunkLines: 120,
-      embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+      embeddingModel: 'sentence-transformers/all-MiniLM-L6-v2',
       embeddingDimensions: 384,
-      rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2'
+      rerankerModel: 'cross-encoder/ms-marco-MiniLM-L-6-v2'
     },
     memory: {
       enabled: true,
@@ -64,10 +64,10 @@ test('normalizeUpgradeConfig merges existing values over defaults', () => {
   assert.equal(merged.index.indexPath, defaults.index.indexPath);
   assert.equal(merged.index.chunkLines, 120);
   assert.equal(merged.index.embeddingProvider, defaults.index.embeddingProvider);
-  assert.equal(merged.index.embeddingModel, 'Xenova/all-MiniLM-L6-v2');
+  assert.equal(merged.index.embeddingModel, 'sentence-transformers/all-MiniLM-L6-v2');
   assert.equal(merged.index.embeddingDimensions, 384);
   assert.equal(merged.index.rerankerProvider, defaults.index.rerankerProvider);
-  assert.equal(merged.index.rerankerModel, 'Xenova/ms-marco-MiniLM-L-6-v2');
+  assert.equal(merged.index.rerankerModel, 'cross-encoder/ms-marco-MiniLM-L-6-v2');
   assert.equal(merged.memory.enabled, true);
   assert.equal(merged.memory.autoCapture, true);
   assert.equal(merged.memory.dbPath, '/work/memory.db');

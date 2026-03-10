@@ -52,11 +52,11 @@ test('ensureConfigUpgraded migrates old config and creates backup', () => {
   assert.equal(upgraded.index.backend, 'sqlite-vec');
   assert.equal(upgraded.index.maxIndexedFiles, 20000);
   assert.equal(upgraded.index.dbPath, buildLocalnestPaths(root).sqliteDbPath);
-  assert.equal(upgraded.index.embeddingProvider, 'xenova');
-  assert.equal(upgraded.index.embeddingModel, 'Xenova/all-MiniLM-L6-v2');
+  assert.equal(upgraded.index.embeddingProvider, 'huggingface');
+  assert.equal(upgraded.index.embeddingModel, 'sentence-transformers/all-MiniLM-L6-v2');
   assert.equal(upgraded.index.embeddingDimensions, 384);
-  assert.equal(upgraded.index.rerankerProvider, 'xenova');
-  assert.equal(upgraded.index.rerankerModel, 'Xenova/ms-marco-MiniLM-L-6-v2');
+  assert.equal(upgraded.index.rerankerProvider, 'huggingface');
+  assert.equal(upgraded.index.rerankerModel, 'cross-encoder/ms-marco-MiniLM-L-6-v2');
   assert.equal(upgraded.memory.enabled, false);
   assert.equal(upgraded.memory.backend, 'auto');
   assert.equal(upgraded.memory.autoCapture, false);
@@ -79,12 +79,12 @@ test('ensureConfigUpgraded returns up-to-date without rewrite', () => {
       chunkOverlap: 15,
       maxTermsPerChunk: 80,
       maxIndexedFiles: 20000,
-      embeddingProvider: 'xenova',
-      embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+      embeddingProvider: 'huggingface',
+      embeddingModel: 'sentence-transformers/all-MiniLM-L6-v2',
       embeddingCacheDir: path.join(root, '.cache'),
       embeddingDimensions: 384,
-      rerankerProvider: 'xenova',
-      rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2',
+      rerankerProvider: 'huggingface',
+      rerankerModel: 'cross-encoder/ms-marco-MiniLM-L-6-v2',
       rerankerCacheDir: path.join(root, '.cache')
     },
     memory: {

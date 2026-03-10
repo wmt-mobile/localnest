@@ -102,7 +102,7 @@ After setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client 
 - Keep `startup_timeout_sec` at `30` or higher if your MCP client is aggressive about startup timeouts.
 - Setup writes the correct command for the host platform; Windows installs should prefer the generated file output directly.
 - Prefer the direct `localnest-mcp` binary when it is installed globally. Use `npx` only as a fallback.
-- The current beta runtime uses `@huggingface/transformers` for local embedding and reranking execution while preserving the existing LocalNest config surface.
+- The current beta runtime uses `@huggingface/transformers` for local embedding and reranking execution. New setup defaults use the `huggingface` provider, and older `xenova` configs remain accepted as a compatibility alias.
 - For the recommended `sqlite-vec` backend, setup now installs or detects the native `vec0` extension and writes its path into config/client env automatically.
 - If setup cannot provision `vec0`, rerun `localnest setup` before relying on sqlite-vec in MCP clients.
 - Memory is opt-in. On Node 18/20, the rest of LocalNest still works, but memory remains unavailable.

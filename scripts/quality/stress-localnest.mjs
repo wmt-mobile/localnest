@@ -284,14 +284,14 @@ async function main() {
   const useReranker = String(process.env.LOCALNEST_STRESS_RERANKER || '').toLowerCase() === 'true';
   const repeats = Math.max(1, Number.parseInt(process.env.LOCALNEST_STRESS_REPEATS || '3', 10) || 3);
   const embeddingService = new EmbeddingService({
-    provider: useEmbeddings ? 'xenova' : 'none',
-    model: process.env.LOCALNEST_STRESS_EMBED_MODEL || 'Xenova/all-MiniLM-L6-v2',
+    provider: useEmbeddings ? 'huggingface' : 'none',
+    model: process.env.LOCALNEST_STRESS_EMBED_MODEL || 'sentence-transformers/all-MiniLM-L6-v2',
     cacheDir: process.env.LOCALNEST_STRESS_EMBED_CACHE_DIR || path.join(root, '.cache')
   });
   const astChunker = new AstChunker();
   const reranker = new RerankerService({
-    provider: useReranker ? 'xenova' : 'none',
-    model: process.env.LOCALNEST_STRESS_RERANKER_MODEL || 'Xenova/ms-marco-MiniLM-L-6-v2',
+    provider: useReranker ? 'huggingface' : 'none',
+    model: process.env.LOCALNEST_STRESS_RERANKER_MODEL || 'cross-encoder/ms-marco-MiniLM-L-6-v2',
     cacheDir: process.env.LOCALNEST_STRESS_RERANKER_CACHE_DIR || path.join(root, '.cache')
   });
 

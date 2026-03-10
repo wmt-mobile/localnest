@@ -52,8 +52,8 @@ function makeFixture() {
       upgrade_recommended: false,
       upgrade_reason: null,
       embedding: {
-        provider: 'xenova',
-        model: 'Xenova/all-MiniLM-L6-v2',
+        provider: 'huggingface',
+        model: 'sentence-transformers/all-MiniLM-L6-v2',
         enabled: true,
         available: true,
         dimensions: 384
@@ -383,9 +383,9 @@ test('MCP tools register and execute across all tool groups', async () => {
   assert.equal(indexStatus.total_files, 1);
   const embedStatus = (await run('localnest_embed_status')).structuredContent.data;
   assert.equal(embedStatus.backend, 'sqlite-vec');
-  assert.equal(embedStatus.provider, 'xenova');
+  assert.equal(embedStatus.provider, 'huggingface');
   assert.equal(embedStatus.ready, true);
-  assert.equal(embedStatus.model, 'Xenova/all-MiniLM-L6-v2');
+  assert.equal(embedStatus.model, 'sentence-transformers/all-MiniLM-L6-v2');
   const indexProject = (await run('localnest_index_project', { project_path: '/tmp/root', all_roots: false, force: false, max_files: 10 }, makeExtra('token-1'))).structuredContent.data;
   assert.equal(indexProject.indexed_files, 0);
   assert.equal(Array.isArray(indexProject.failed_files), true);

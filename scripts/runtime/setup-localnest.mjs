@@ -488,12 +488,12 @@ async function main() {
     const chunkOverlap = parseIntegerArg('chunk-overlap', 15);
     const maxTermsPerChunk = parseIntegerArg('max-terms-per-chunk', 80);
     const maxIndexedFiles = parseIntegerArg('max-indexed-files', 20000);
-    const embeddingProvider = parseArg('embed-provider') || 'xenova';
-    const embeddingModel = parseArg('embed-model') || 'Xenova/all-MiniLM-L6-v2';
+    const embeddingProvider = parseArg('embed-provider') || 'huggingface';
+    const embeddingModel = parseArg('embed-model') || 'sentence-transformers/all-MiniLM-L6-v2';
     const embedCachePreferred = path.resolve(expandHome(parseArg('embed-cache-dir') || layout.dirs.cache));
     const embeddingDimensions = parseIntegerArg('embed-dims', 384);
-    const rerankerProvider = parseArg('reranker-provider') || 'xenova';
-    const rerankerModel = parseArg('reranker-model') || 'Xenova/ms-marco-MiniLM-L-6-v2';
+    const rerankerProvider = parseArg('reranker-provider') || 'huggingface';
+    const rerankerModel = parseArg('reranker-model') || 'cross-encoder/ms-marco-MiniLM-L-6-v2';
     const rerankerCachePreferred = path.resolve(expandHome(parseArg('reranker-cache-dir') || layout.dirs.cache));
     const skipModelDownload = parseBooleanArg('skip-model-download') ?? false;
     const { embeddingCacheDir, rerankerCacheDir } = resolveModelCacheDirs(
@@ -660,12 +660,12 @@ async function main() {
     const chunkOverlap = Number.parseInt(chunkOverlapInput || '15', 10) || 15;
     const maxTermsPerChunk = Number.parseInt(maxTermsInput || '80', 10) || 80;
     const maxIndexedFiles = Number.parseInt(maxFilesInput || '20000', 10) || 20000;
-    const embeddingProvider = 'xenova';
-    const embeddingModel = 'Xenova/all-MiniLM-L6-v2';
+    const embeddingProvider = 'huggingface';
+    const embeddingModel = 'sentence-transformers/all-MiniLM-L6-v2';
     const embedCachePreferred = layout.dirs.cache;
     const embeddingDimensions = 384;
-    const rerankerProvider = 'xenova';
-    const rerankerModel = 'Xenova/ms-marco-MiniLM-L-6-v2';
+    const rerankerProvider = 'huggingface';
+    const rerankerModel = 'cross-encoder/ms-marco-MiniLM-L-6-v2';
     const rerankerCachePreferred = layout.dirs.cache;
     const { embeddingCacheDir, rerankerCacheDir } = resolveModelCacheDirs(
       embedCachePreferred,

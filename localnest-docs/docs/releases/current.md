@@ -52,7 +52,7 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
 ## What changed in `0.0.4-beta.7`
 
 - Added sqlite-vec extension auto-detection and explicit `LOCALNEST_SQLITE_VEC_EXTENSION` support for cleaner startup on global installs.
-- Switched the local embedding and reranking runtime from `@xenova/transformers` to `@huggingface/transformers` while preserving the existing LocalNest config surface.
+- Switched the local embedding and reranking runtime from `@xenova/transformers` to `@huggingface/transformers`, and updated new setup defaults to the `huggingface` provider with backward compatibility for older `xenova` configs.
 - Removed the earlier `prebuild-install` warning path from the default install graph.
 - Published `npm-shrinkwrap.json` so npm package installs carry the intended transitive dependency graph.
 - Current installs may still show a single upstream deprecation warning from the ONNX runtime chain; LocalNest functionality is unchanged.
