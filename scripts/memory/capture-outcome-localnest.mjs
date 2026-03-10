@@ -2,10 +2,12 @@
 
 import {
   createMemoryWorkflow,
+  hasHelpFlag,
   parseArg,
   parseBooleanArg,
   parseCsvArg,
   parseNumberArg,
+  printCaptureOutcomeHelp,
   readJsonInput,
   printJson
 } from './memory-workflow-cli-utils.mjs';
@@ -18,8 +20,13 @@ function parseLinks(argv, jsonInput) {
 
 async function main() {
   const argv = process.argv.slice(2);
+  if (hasHelpFlag(argv)) {
+    printCaptureOutcomeHelp();
+    return;
+  }
   const jsonInput = await readJsonInput(argv);
-  const { workflow } = createMemoryWorkflow();
+  const { workflow } = await createMemoryWorkflow();
+  const argTags = parseCsvArg(argv, 'tags');
 
   const input = {
     ...jsonInput,
@@ -35,7 +42,7 @@ async function main() {
     confidence: parseNumberArg(argv, 'confidence', jsonInput.confidence),
     files_changed: parseNumberArg(argv, 'files-changed', jsonInput.files_changed ?? jsonInput.filesChanged),
     has_tests: parseBooleanArg(argv, 'has-tests', jsonInput.has_tests ?? jsonInput.hasTests ?? false),
-    tags: parseCsvArg(argv, 'tags').length > 0 ? parseCsvArg(argv, 'tags') : (jsonInput.tags || []),
+    tags: argTags.length > 0 ? argTags : (jsonInput.tags || []),
     links: parseLinks(argv, jsonInput),
     root_path: parseArg(argv, 'root-path') || jsonInput.root_path || jsonInput.rootPath,
     project_path: parseArg(argv, 'project-path') || jsonInput.project_path || jsonInput.projectPath,

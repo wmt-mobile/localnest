@@ -1,4 +1,4 @@
-export const SCHEMA_VERSION = 3;
+export const SCHEMA_VERSION = 4;
 
 export const INDEX_SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS index_meta (
@@ -37,6 +37,7 @@ export const INDEX_SCHEMA_SQL = `
 
   CREATE INDEX IF NOT EXISTS idx_chunks_file ON chunks(file_path);
   CREATE INDEX IF NOT EXISTS idx_term_index_term ON term_index(term);
+  CREATE INDEX IF NOT EXISTS idx_term_index_chunk ON term_index(chunk_id);
 `;
 
 export function runInTransaction(db, work) {
@@ -67,6 +68,9 @@ export function runMigrations(db, runInTransactionFn) {
     db.exec('ALTER TABLE chunks ADD COLUMN embedding_json TEXT');
   }
 
+  // Always ensure the chunk reverse-lookup index exists (safe on any version).
+  db.exec('CREATE INDEX IF NOT EXISTS idx_term_index_chunk ON term_index(chunk_id)');
+
   if (current >= SCHEMA_VERSION) return;
 
   if (current < 2) {
@@ -96,6 +100,11 @@ export function runMigrations(db, runInTransactionFn) {
         update.run(Math.max(1, count), row.id);
       }
     });
+  }
+
+  if (current < 4) {
+    // v3 → v4: chunk_id index on term_index for O(1) reverse lookups on delete.
+    // Already applied above unconditionally but recorded here for version tracking.
   }
 
   db.prepare('INSERT OR REPLACE INTO index_meta(key, value) VALUES (?, ?)').run('schema_version', String(SCHEMA_VERSION));

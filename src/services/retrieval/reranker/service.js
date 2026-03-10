@@ -39,7 +39,7 @@ export class RerankerService {
     if (this._pipelinePromise) return this._pipelinePromise;
 
     this._pipelinePromise = (async () => {
-      const mod = await import('@xenova/transformers');
+      const mod = await import('@huggingface/transformers');
       if (this.cacheDir) {
         mod.env.cacheDir = this.cacheDir;
       }

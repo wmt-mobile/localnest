@@ -87,15 +87,19 @@ export async function recall(adapter, {
     .slice(0, safeLimit);
 
   const recalledAt = nowIso();
-  for (const item of ranked) {
+  if (ranked.length > 0) {
+    const ids = ranked.map((item) => item.entry.id);
+    const placeholders = ids.map(() => '?').join(', ');
     await adapter.run(
       `UPDATE memory_entries
           SET last_recalled_at = ?, recall_count = recall_count + 1
-        WHERE id = ?`,
-      [recalledAt, item.entry.id]
+        WHERE id IN (${placeholders})`,
+      [recalledAt, ...ids]
     );
-    item.entry.last_recalled_at = recalledAt;
-    item.entry.recall_count += 1;
+    for (const item of ranked) {
+      item.entry.last_recalled_at = recalledAt;
+      item.entry.recall_count += 1;
+    }
   }
 
   return {

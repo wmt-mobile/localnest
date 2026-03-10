@@ -9,7 +9,8 @@ const sidebars: SidebarsConfig = {
       items: [
         { type: 'doc', id: 'overview', label: 'Overview' },
         { type: 'doc', id: 'setup/install', label: 'Install' },
-        { type: 'doc', id: 'setup/configuration', label: 'Configuration' }
+        { type: 'doc', id: 'setup/configuration', label: 'Configuration' },
+        { type: 'doc', id: 'architecture', label: 'Architecture' }
       ]
     },
     {
@@ -37,6 +38,17 @@ const sidebars: SidebarsConfig = {
       label: 'Version Archive',
       collapsed: true,
       items: [
+        {
+          type: 'category',
+          label: 'Beta 0.0.4-beta.6',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'versions/0.0.4-beta.6/overview', label: 'Overview' },
+            { type: 'doc', id: 'versions/0.0.4-beta.6/install', label: 'Install' },
+            { type: 'doc', id: 'versions/0.0.4-beta.6/configuration', label: 'Configuration' },
+            { type: 'doc', id: 'versions/0.0.4-beta.6/tools', label: 'Tools' }
+          ]
+        },
         {
           type: 'category',
           label: 'Beta 0.0.4-beta.5',

@@ -1,6 +1,6 @@
 import { buildSearchTerms, stableJson } from './utils.js';
 
-export const SCHEMA_VERSION = 4;
+export const SCHEMA_VERSION = 5;
 
 export async function ensureSchema(adapter) {
   await adapter.exec(`
@@ -89,6 +89,11 @@ export async function ensureSchema(adapter) {
 
     CREATE INDEX IF NOT EXISTS idx_memory_relations_source ON memory_relations(source_id);
     CREATE INDEX IF NOT EXISTS idx_memory_relations_target ON memory_relations(target_id);
+
+    CREATE INDEX IF NOT EXISTS idx_memory_entries_scope_status
+      ON memory_entries(scope_project_path, status, importance DESC);
+    CREATE INDEX IF NOT EXISTS idx_memory_entries_kind_status
+      ON memory_entries(kind, status);
   `);
 }
 
@@ -141,6 +146,17 @@ export async function runMigrations({ adapter, getMeta, setMeta }) {
     } catch {
       // Column already exists on fresh schema.
     }
+  }
+
+  if (currentVersion < 5) {
+    // v4 → v5: compound indexes for faster recall and kind-filtered queries.
+    // CREATE INDEX IF NOT EXISTS is safe on any existing schema — no data loss.
+    await adapter.exec(`
+      CREATE INDEX IF NOT EXISTS idx_memory_entries_scope_status
+        ON memory_entries(scope_project_path, status, importance DESC);
+      CREATE INDEX IF NOT EXISTS idx_memory_entries_kind_status
+        ON memory_entries(kind, status);
+    `);
   }
 
   await setMeta('schema_version', String(SCHEMA_VERSION));

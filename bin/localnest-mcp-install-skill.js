@@ -1,2 +1,4 @@
 #!/usr/bin/env node
-import '../scripts/runtime/install-localnest-skill.mjs';
+import { main } from '../scripts/runtime/install-localnest-skill.mjs';
+
+main();

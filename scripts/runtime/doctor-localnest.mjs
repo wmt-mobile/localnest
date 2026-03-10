@@ -5,6 +5,7 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import {
   buildLocalnestPaths,
+  findSqliteVecExtensionPath,
   resolveConfigPath as resolveDefaultConfigPath,
   resolveLocalnestHome,
   resolveWritableModelCacheDir,
@@ -223,6 +224,39 @@ function checkConfigFile() {
   };
 }
 
+function checkSqliteVecExtension() {
+  if (resolveIndexBackend() !== 'sqlite-vec') {
+    return { id: 'sqlite_vec_extension', ok: true, detail: 'sqlite-vec native extension not required for current backend' };
+  }
+
+  const configured = (process.env.LOCALNEST_SQLITE_VEC_EXTENSION || '').trim();
+  const localnestHome = resolveLocalnestHome(process.env);
+  const configuredPath = configured ? path.resolve(configured) : '';
+  const detected = configuredPath
+    ? (fs.existsSync(configuredPath) ? { path: configuredPath, source: 'configured' } : null)
+    : findSqliteVecExtensionPath({
+      localnestHome,
+      env: process.env
+    });
+
+  if (detected?.path) {
+    return {
+      id: 'sqlite_vec_extension',
+      ok: true,
+      detail: `sqlite-vec native extension ready (${detected.path})`
+    };
+  }
+
+  return {
+    id: 'sqlite_vec_extension',
+    ok: false,
+    detail: configuredPath
+      ? `sqlite-vec backend selected but configured vec0 path is missing: ${configuredPath}`
+      : 'sqlite-vec backend selected but vec0 native extension is not configured',
+    fix: 'Run localnest setup again so LocalNest can install/configure sqlite-vec, or set LOCALNEST_SQLITE_VEC_EXTENSION to the vec0 shared library path.'
+  };
+}
+
 function checkModelCacheWritable() {
   const localnestHome = resolveLocalnestHome(process.env);
   const configCaches = parseConfigForModelCacheDirs();
@@ -294,13 +328,31 @@ function printText(results) {
   }
 }
 
+function printHelp() {
+  process.stdout.write('LocalNest Doctor\n\n');
+  process.stdout.write('Usage:\n');
+  process.stdout.write('  localnest doctor\n');
+  process.stdout.write('  localnest doctor --verbose\n');
+  process.stdout.write('  localnest-mcp-doctor\n');
+  process.stdout.write('  localnest-mcp-doctor --json\n');
+  process.stdout.write('Options:\n');
+  process.stdout.write('  --json      print JSON output\n');
+  process.stdout.write('  --help,-h   show this help\n');
+}
+
 async function main() {
+  if (argv.includes('--help') || argv.includes('-h')) {
+    printHelp();
+    return;
+  }
+
   const checks = [
     checkNodeVersion(),
     checkNpmNpx(),
     checkRipgrep(),
     await checkSdkImport(),
     await checkSqliteBackend(),
+    checkSqliteVecExtension(),
     checkConfigFile(),
     checkModelCacheWritable()
   ];

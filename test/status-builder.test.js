@@ -77,6 +77,9 @@ test('server status exposes cache diagnostics from runtime config', async () => 
   assert.equal(status.vector_index.reranker_cache_dir, '/tmp/fallback-cache');
   assert.equal(status.vector_index.reranker_cache_status.preferredPath, '/home/test/.localnest/cache');
   assert.equal(status.vector_index.diagnostics.index_sweep_interval_minutes, 0);
+  assert.equal(status.health.sqlite_vec_native_ready, false);
+  assert.ok(status.health.issues.includes('sqlite_vec_native_missing'));
+  assert.equal(status.vector_index.diagnostics.sqlite_vec_extension_configured, false);
   assert.equal(status.updates.recommendation, 'up_to_date');
   assert.equal(status.updates.can_attempt_update, false);
   assert.equal(status.updates.using_cached_data, true);

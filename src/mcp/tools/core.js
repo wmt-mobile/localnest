@@ -8,7 +8,8 @@ export function registerCoreTools({
   registerJsonTool,
   buildServerStatus,
   buildUsageGuide,
-  updates
+  updates,
+  getLastHealthReport
 }) {
   registerJsonTool(
     'localnest_server_status',
@@ -47,7 +48,8 @@ export function registerCoreTools({
         mode: status.mode,
         health: status.health,
         roots_count: Array.isArray(status.roots) ? status.roots.length : 0,
-        update_recommendation: status.updates?.recommendation || 'up_to_date'
+        update_recommendation: status.updates?.recommendation || 'up_to_date',
+        background_health: getLastHealthReport?.() ?? null
       };
     }
   );
