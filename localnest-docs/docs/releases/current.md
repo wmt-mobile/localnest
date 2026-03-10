@@ -3,7 +3,7 @@ description: Current beta package notes for localnest-mcp, including runtime upd
 
 # Current Beta Release
 
-Current beta package documentation for `localnest-mcp@0.0.4-beta.8`, covering memory workflow tools, setup migration behavior, and the active canonical `localnest_*` tool contract.
+Current beta package documentation for `localnest-mcp@0.0.4-beta.9`, covering memory workflow tools, setup migration behavior, and the active canonical `localnest_*` tool contract.
 
 <div className="docGrid docGrid--3">
   <div className="docPanel">
@@ -25,7 +25,7 @@ Current beta package documentation for `localnest-mcp@0.0.4-beta.8`, covering me
 
 <div className="docGrid docGrid--3">
   <a className="docLinkCard" href="/docs/setup/install">
-    <strong>Install beta.8</strong>
+    <strong>Install beta.9</strong>
     <span>Use the current beta package and follow the direct `localnest` setup flow.</span>
   </a>
   <a className="docLinkCard" href="/docs/setup/configuration">
@@ -48,12 +48,13 @@ Current beta package documentation for `localnest-mcp@0.0.4-beta.8`, covering me
 - setup-time memory consent and config migration
 - `localnest` top-level CLI command path (`setup`, `doctor`, `upgrade`)
 
-## What changed in `0.0.4-beta.8`
+## What changed in `0.0.4-beta.9`
 
 - Added sqlite-vec extension auto-detection and explicit `LOCALNEST_SQLITE_VEC_EXTENSION` support for cleaner startup on global installs.
 - Switched the local embedding and reranking runtime from `@xenova/transformers` to `@huggingface/transformers`, and updated new setup defaults to the `huggingface` provider with backward compatibility for older `xenova` configs.
 - Removed the earlier `prebuild-install` warning path from the default install graph.
 - Published `npm-shrinkwrap.json` so npm package installs carry the intended transitive dependency graph.
+- Fixed bundled skill version reporting so `localnest-mcp-install-skill` now reports the actual installed package version.
 - Current installs may still show a single upstream deprecation warning from the ONNX runtime chain; LocalNest functionality is unchanged.
 
 ## Upgrade Snapshot
@@ -88,7 +89,7 @@ Current beta package documentation for `localnest-mcp@0.0.4-beta.8`, covering me
 
 This page is based on the current beta package version and maintained changelog in the repository.
 
-- package version: `0.0.4-beta.8`
+- package version: `0.0.4-beta.9`
 - release date: `2026-03-10`
 - changelog sections document the changes shipped in this beta package
 - stable published release docs remain archived under `0.0.3`

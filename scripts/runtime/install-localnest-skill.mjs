@@ -23,6 +23,18 @@ function copyDir(source, destination) {
   fs.cpSync(source, destination, { recursive: true });
 }
 
+function readBundledPackageVersion(metaUrl = import.meta.url) {
+  try {
+    const scriptDir = path.dirname(fileURLToPath(metaUrl));
+    const packageRoot = path.resolve(scriptDir, '..', '..');
+    const raw = fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8');
+    const parsed = JSON.parse(raw);
+    return typeof parsed?.version === 'string' ? parsed.version : '';
+  } catch {
+    return '';
+  }
+}
+
 export function resolveBundledSkillDir(metaUrl = import.meta.url) {
   const scriptDir = path.dirname(fileURLToPath(metaUrl));
   const packageRoot = path.resolve(scriptDir, '..', '..');
@@ -34,9 +46,10 @@ function readSkillMetadata(skillDir) {
     const raw = fs.readFileSync(path.join(skillDir, SKILL_METADATA_FILE), 'utf8');
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== 'object') return null;
+    const bundledVersion = readBundledPackageVersion();
     return {
       name: typeof parsed.name === 'string' ? parsed.name : 'localnest-mcp',
-      version: typeof parsed.version === 'string' ? parsed.version : ''
+      version: bundledVersion || (typeof parsed.version === 'string' ? parsed.version : '')
     };
   } catch {
     return null;
