@@ -38,6 +38,7 @@
     "src",
     "scripts",
     "skills",
+    "npm-shrinkwrap.json",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
