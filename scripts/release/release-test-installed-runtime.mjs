@@ -314,7 +314,15 @@ export async function runInstalledRuntimeReleaseTest(options = {}) {
       await record('localnest_index_project', async () => safeToolResult(await callTool('localnest_index_project', {
         project_path: config.projectPath
       }, 300000)), {
-        details: (value) => `indexed_files=${value.indexed_files}, failed_files=${value.failed_files?.length || 0}`,
+        details: (value) => {
+          const failedCount = value.failed_file_count ?? value.failed_files?.length ?? 0;
+          const failedSample = Array.isArray(value.failed_file_samples) && value.failed_file_samples.length > 0
+            ? value.failed_file_samples.map((item) => item.path || item.file || '').filter(Boolean).join(', ')
+            : '';
+          return failedSample
+            ? `indexed_files=${value.indexed_files}, failed_files=${failedCount}, failed_sample=${failedSample}`
+            : `indexed_files=${value.indexed_files}, failed_files=${failedCount}`;
+        },
         verify: (value) => {
           assertFields(value || {}, ['indexed_files', 'failed_files'], 'localnest_index_project');
         }
