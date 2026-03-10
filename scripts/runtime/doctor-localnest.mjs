@@ -328,7 +328,24 @@ function printText(results) {
   }
 }
 
+function printHelp() {
+  process.stdout.write('LocalNest Doctor\n\n');
+  process.stdout.write('Usage:\n');
+  process.stdout.write('  localnest doctor\n');
+  process.stdout.write('  localnest doctor --verbose\n');
+  process.stdout.write('  localnest-mcp-doctor\n');
+  process.stdout.write('  localnest-mcp-doctor --json\n');
+  process.stdout.write('Options:\n');
+  process.stdout.write('  --json      print JSON output\n');
+  process.stdout.write('  --help,-h   show this help\n');
+}
+
 async function main() {
+  if (argv.includes('--help') || argv.includes('-h')) {
+    printHelp();
+    return;
+  }
+
   const checks = [
     checkNodeVersion(),
     checkNpmNpx(),

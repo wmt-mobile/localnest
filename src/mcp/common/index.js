@@ -16,3 +16,4 @@ export {
 } from './schemas.js';
 export { createServerStatusBuilder, buildUsageGuide } from './status.js';
 export { startStalenessMonitor } from './staleness-monitor.js';
+export { startHealthMonitor } from './health-monitor.js';

@@ -54,7 +54,8 @@ export function registerAppTools(server, runtime, services) {
     registerJsonTool,
     buildServerStatus,
     buildUsageGuide,
-    updates: services.updates
+    updates: services.updates,
+    getLastHealthReport: services.getLastHealthReport ?? (() => null)
   });
 
   registerMemoryWorkflowTools({

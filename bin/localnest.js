@@ -25,6 +25,15 @@ function printHelp() {
   process.stdout.write('  help                      show this help\n');
 }
 
+function printStartHelp() {
+  process.stdout.write('LocalNest MCP server\n\n');
+  process.stdout.write('Usage:\n');
+  process.stdout.write('  localnest start\n');
+  process.stdout.write('  localnest serve\n');
+  process.stdout.write('Options:\n');
+  process.stdout.write('  --help,-h   show this help\n');
+}
+
 function forwardTo(modulePath) {
   process.argv = buildForwardArgv(rest, process.argv);
   return importRelative(modulePath, import.meta.url);
@@ -42,6 +51,10 @@ async function main() {
   }
 
   if (command === 'start' || command === 'serve') {
+    if (rest.includes('--help') || rest.includes('-h')) {
+      printStartHelp();
+      return;
+    }
     const { startMcpServer } = await importRelative('../src/app/index.js', import.meta.url);
     await startMcpServer();
     return;

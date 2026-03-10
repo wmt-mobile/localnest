@@ -374,6 +374,12 @@ export function buildRuntimeConfig(env = process.env) {
       0,
       1440
     ),
+    healthMonitorIntervalMinutes: parseIntEnvClamped(
+      env.LOCALNEST_HEALTH_MONITOR_INTERVAL_MINUTES,
+      30,
+      0,
+      1440
+    ),
     extraProjectMarkers: new Set(
       (env.LOCALNEST_EXTRA_PROJECT_MARKERS || '')
         .split(',')

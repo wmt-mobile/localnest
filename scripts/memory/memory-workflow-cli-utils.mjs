@@ -1,15 +1,54 @@
 #!/usr/bin/env node
 
 import process from 'node:process';
-import {
-  SERVER_NAME,
-  SERVER_VERSION,
-  buildRuntimeConfig,
-  installRuntimeWarningFilter
-} from '../../src/runtime/index.js';
-import { MemoryService, MemoryWorkflowService } from '../../src/services/memory/index.js';
+import { SERVER_NAME, SERVER_VERSION } from '../../src/runtime/version.js';
 
-installRuntimeWarningFilter();
+export function hasHelpFlag(argv = process.argv.slice(2)) {
+  return argv.includes('--help') || argv.includes('-h');
+}
+
+export function printTaskContextHelp() {
+  process.stdout.write('LocalNest task-context helper\n\n');
+  process.stdout.write('Usage:\n');
+  process.stdout.write('  localnest-mcp-task-context --task "investigate issue" --project-path "/abs/project"\n');
+  process.stdout.write('  localnest-mcp-task-context --query "search terms" --root-path "/abs/root"\n');
+  process.stdout.write('  localnest-mcp-task-context --json \'{"task":"investigate issue"}\'\n');
+  process.stdout.write('Options:\n');
+  process.stdout.write('  --task=<text>            task description\n');
+  process.stdout.write('  --query=<text>           recall query\n');
+  process.stdout.write('  --project-path=<path>    project scope\n');
+  process.stdout.write('  --root-path=<path>       root scope\n');
+  process.stdout.write('  --branch-name=<name>     optional branch scope\n');
+  process.stdout.write('  --topic=<text>           optional topic scope\n');
+  process.stdout.write('  --feature=<text>         optional feature scope\n');
+  process.stdout.write('  --kind=<text>            optional memory kind filter\n');
+  process.stdout.write('  --limit=<n>              result limit\n');
+  process.stdout.write('  --json=<json>            JSON input payload\n');
+}
+
+export function printCaptureOutcomeHelp() {
+  process.stdout.write('LocalNest capture-outcome helper\n\n');
+  process.stdout.write('Usage:\n');
+  process.stdout.write('  localnest-mcp-capture-outcome --task "fix issue" --status completed --summary "what changed"\n');
+  process.stdout.write('  localnest-mcp-capture-outcome --json \'{"task":"fix issue","summary":"what changed"}\'\n');
+  process.stdout.write('Options:\n');
+  process.stdout.write('  --task=<text>             task title\n');
+  process.stdout.write('  --title=<text>            explicit event title\n');
+  process.stdout.write('  --summary=<text>          short summary\n');
+  process.stdout.write('  --details=<text>          longer detail text\n');
+  process.stdout.write('  --content=<text>          explicit content body\n');
+  process.stdout.write('  --status=<text>           task status\n');
+  process.stdout.write('  --event-type=<text>       event type override\n');
+  process.stdout.write('  --project-path=<path>     project scope\n');
+  process.stdout.write('  --root-path=<path>        root scope\n');
+  process.stdout.write('  --branch-name=<name>      optional branch scope\n');
+  process.stdout.write('  --topic=<text>            optional topic scope\n');
+  process.stdout.write('  --feature=<text>          optional feature scope\n');
+  process.stdout.write('  --tags=<a,b,c>            tags list\n');
+  process.stdout.write('  --files-changed=<n>       files changed count\n');
+  process.stdout.write('  --has-tests=<true|false>  whether tests were added/run\n');
+  process.stdout.write('  --json=<json>             JSON input payload\n');
+}
 
 export function parseArg(argv, name) {
   const direct = `--${name}`;
@@ -74,7 +113,10 @@ function buildRuntimeSummary(runtime) {
   };
 }
 
-export function createMemoryWorkflow() {
+export async function createMemoryWorkflow() {
+  const { buildRuntimeConfig, installRuntimeWarningFilter } = await import('../../src/runtime/index.js');
+  const { MemoryService, MemoryWorkflowService } = await import('../../src/services/memory/index.js');
+  installRuntimeWarningFilter();
   const runtime = buildRuntimeConfig(process.env);
   const memory = new MemoryService({
     localnestHome: runtime.localnestHome,

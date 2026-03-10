@@ -11,7 +11,7 @@ import {
   buildRuntimeConfig,
   installRuntimeWarningFilter
 } from '../runtime/index.js';
-import { buildRipgrepHelpMessage, startStalenessMonitor } from '../mcp/index.js';
+import { buildRipgrepHelpMessage, startStalenessMonitor, startHealthMonitor } from '../mcp/index.js';
 import { createServices } from './create-services.js';
 import { registerAppTools } from './register-tools.js';
 
@@ -49,6 +49,12 @@ export async function main() {
   });
 
   startStalenessMonitor(services.vectorIndex, runtime.indexSweepIntervalMinutes);
+  const { getLastReport: getLastHealthReport } = startHealthMonitor(
+    services.vectorIndex,
+    services.memory,
+    runtime.healthMonitorIntervalMinutes
+  );
+  services.getLastHealthReport = getLastHealthReport;
 
   const transport = new StdioServerTransport();
   await server.connect(transport);

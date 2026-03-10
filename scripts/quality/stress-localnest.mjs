@@ -4,15 +4,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
-import {
-  SearchService,
-  SqliteVecIndexService,
-  VectorIndexService,
-  EmbeddingService,
-  AstChunker,
-  RerankerService
-} from '../../src/services/retrieval/index.js';
-import { MemoryStore } from '../../src/services/memory/index.js';
+import { installRuntimeWarningFilter } from '../../src/runtime/index.js';
+
+installRuntimeWarningFilter();
 
 function createWorkspace(project) {
   return {
@@ -82,7 +76,16 @@ function buildSearchFixture(project) {
   }
 }
 
-async function runSearchSuite({ label, workspace, project, vectorIndex, reranker, useReranker, repeats }) {
+async function runSearchSuite({
+  SearchService,
+  label,
+  workspace,
+  project,
+  vectorIndex,
+  reranker,
+  useReranker,
+  repeats
+}) {
   const search = new SearchService({
     workspace,
     ignoreDirs: new Set(['node_modules', '.git']),
@@ -163,6 +166,7 @@ async function runSearchSuite({ label, workspace, project, vectorIndex, reranker
 }
 
 async function runMemorySuite(tempRoot) {
+  const { MemoryStore } = await import('../../src/services/memory/index.js');
   const store = new MemoryStore({
     enabled: true,
     backend: 'auto',
@@ -265,6 +269,14 @@ async function runMemorySuite(tempRoot) {
 }
 
 async function main() {
+  const {
+    SearchService,
+    SqliteVecIndexService,
+    VectorIndexService,
+    EmbeddingService,
+    AstChunker,
+    RerankerService
+  } = await import('../../src/services/retrieval/index.js');
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-stress-'));
   const project = path.join(root, 'app');
   fs.mkdirSync(project, { recursive: true });
@@ -316,6 +328,30 @@ async function main() {
     await jsonIndex.indexProject({ projectPath: project, allRoots: false, force: true, maxFiles: 1000 });
     const jsonIndexMs = performance.now() - jsonIndexStart;
 
+    const [sqliteSearch, jsonSearch, memoryResult] = await Promise.all([
+      runSearchSuite({
+        SearchService,
+        label: 'sqlite',
+        workspace,
+        project,
+        vectorIndex: sqliteIndex,
+        reranker,
+        useReranker,
+        repeats
+      }),
+      runSearchSuite({
+        SearchService,
+        label: 'json',
+        workspace,
+        project,
+        vectorIndex: jsonIndex,
+        reranker,
+        useReranker,
+        repeats
+      }),
+      runMemorySuite(root)
+    ]);
+
     const report = {
       benchmark_meta: {
         use_embeddings: useEmbeddings,
@@ -327,30 +363,11 @@ async function main() {
         json_ms: Number(jsonIndexMs.toFixed(2))
       },
       search: {
-        sqlite: runSearchSuite({
-          label: 'sqlite',
-          workspace,
-          project,
-          vectorIndex: sqliteIndex,
-          reranker,
-          useReranker,
-          repeats
-        }),
-        json: runSearchSuite({
-          label: 'json',
-          workspace,
-          project,
-          vectorIndex: jsonIndex,
-          reranker,
-          useReranker,
-          repeats
-        })
+        sqlite: sqliteSearch,
+        json: jsonSearch
       },
-      memory: await runMemorySuite(root)
+      memory: memoryResult
     };
-
-    report.search.sqlite = await report.search.sqlite;
-    report.search.json = await report.search.json;
 
     console.log(JSON.stringify(report, null, 2));
   } finally {

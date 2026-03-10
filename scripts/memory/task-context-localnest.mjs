@@ -2,16 +2,22 @@
 
 import {
   createMemoryWorkflow,
+  hasHelpFlag,
   parseArg,
   parseNumberArg,
+  printTaskContextHelp,
   readJsonInput,
   printJson
 } from './memory-workflow-cli-utils.mjs';
 
 async function main() {
   const argv = process.argv.slice(2);
+  if (hasHelpFlag(argv)) {
+    printTaskContextHelp();
+    return;
+  }
   const jsonInput = await readJsonInput(argv);
-  const { workflow } = createMemoryWorkflow();
+  const { workflow } = await createMemoryWorkflow();
 
   const input = {
     ...jsonInput,

@@ -16,7 +16,6 @@ import {
   buildLocalnestServerConfig,
   installLocalnestIntoDetectedClients
 } from '../../src/setup/client-installer.js';
-import { EmbeddingService, RerankerService } from '../../src/services/retrieval/index.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';
@@ -364,6 +363,8 @@ function installClientConfigs(packageRef, indexConfig) {
 }
 
 async function warmupModels(indexConfig) {
+  const { EmbeddingService, RerankerService } = await import('../../src/services/retrieval/index.js');
+
   if (indexConfig?.embedding?.provider && indexConfig.embedding.provider !== 'none') {
     process.stdout.write('[setup] warming up embedding model (first run downloads model files)...\n');
     try {
@@ -444,6 +445,25 @@ function printSuccess(packageRef, indexConfig) {
 }
 
 async function main() {
+  if (argv.includes('--help') || argv.includes('-h')) {
+    console.log('LocalNest setup wizard');
+    console.log('');
+    console.log('Usage:');
+    console.log('  localnest setup');
+    console.log('  localnest setup --paths="/abs/path1,/abs/path2"');
+    console.log('  localnest setup --roots-json=\'[{"label":"repo","path":"/abs/repo"}]\'');
+    console.log('  localnest setup --package="localnest-mcp"');
+    console.log('  localnest setup --skip-model-download=true');
+    console.log('  localnest setup --skip-sqlite-vec-install=true');
+    console.log('  localnest setup --sqlite-vec-extension="/abs/path/to/vec0.so"');
+    console.log('  localnest setup --memory-enabled=true');
+    console.log('  localnest setup --memory-backend=auto');
+    console.log('  localnest setup --memory-db-path="/abs/path/to/memory.db"');
+    console.log('  localnest setup --memory-auto-capture=true');
+    console.log('  localnest setup --memory-consent-done=true');
+    return;
+  }
+
   const packageRef = parseArg('package') || process.env.LOCALNEST_NPX_PACKAGE || 'localnest-mcp';
   const preflight = runPreflightChecks();
   if (preflight.errors.length > 0) {
@@ -555,20 +575,6 @@ async function main() {
         }
       });
     }
-    return;
-  }
-
-  if (argv.includes('--help') || argv.includes('-h')) {
-    console.log('LocalNest setup wizard');
-    console.log('');
-    console.log('Usage:');
-    console.log('  npm run setup');
-    console.log('  npm run setup -- --paths="/abs/path1,/abs/path2"');
-    console.log('  npm run setup -- --roots-json=\'[{"label":"repo","path":"/abs/repo"}]\'');
-    console.log('  npm run setup -- --package="localnest-mcp"');
-    console.log('  npm run setup -- --skip-model-download=true');
-    console.log('  npm run setup -- --skip-sqlite-vec-install=true');
-    console.log('  npm run setup -- --sqlite-vec-extension="/abs/path/to/vec0.so"');
     return;
   }
 

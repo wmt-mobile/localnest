@@ -1,6 +1,38 @@
+<!-- cspell:ignore localnest LOCALNEST reranker RERANKER SARIF stopword optimised prefiltering -->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [0.0.4-beta.7] - 2026-03-10
+
+### Runtime
+
+- Introduced a dedicated `sqlite-vec` extension resolver (`src/runtime/sqlite-vec-extension.js`) that automatically locates the `vec0` native binary at startup — searches global npm root, the localnest vendor directory, `PATH`, and `node_modules` with cross-platform binary name resolution (`.so` / `.dylib` / `.dll`).
+- Added `LOCALNEST_SQLITE_VEC_EXTENSION` env var for explicit extension path override; auto-detection is skipped when it is set.
+- Extension source is now reported in `localnest_server_status` so operators can confirm how the extension was found.
+- Setup wizard (`localnest setup`) gained `--sqlite-vec-extension` and `--skip-sqlite-vec-install` flags and a comprehensive `--help` / `-h` output covering all options.
+- Doctor (`localnest doctor`) gained an explicit vec0 availability check.
+
+### CLI
+
+- `localnest-mcp-task-context` and `localnest-mcp-capture-outcome` now support `--help` / `-h` with full usage documentation printed to stdout.
+- `localnest-mcp-capture-outcome` now accepts a `--tags` CSV argument for tagging captured events at the CLI level.
+
+### Security & Dependencies
+
+- Updated `express-rate-limit` and `ip-address` to patched versions.
+
+### Quality
+
+- Added test coverage for `sqlite-vec` extension detection, bin shared helpers, config parsing, skill install, and server status builder.
+- Resolved lint regressions in release scripts and workspace helpers.
+
+### Docs & Developer Experience
+
+- Rewrote README with clearer information hierarchy, a new "Why LocalNest?" section, engaging copy, and a correct full MCP JSON config block.
+- Added `guides/architecture.md` — architecture overview with system, search, and memory pipeline diagrams for contributors.
+- Added `.github/workflows/release.yml` — automatic GitHub pre-release on merge to `beta`, full release on merge to `main`, tagged by package version.
 
 ## [0.0.4-beta.6] - 2026-03-09
 
