@@ -4,6 +4,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4-beta.9] - 2026-03-10
+
+### Runtime Fixes
+
+- Fixed bundled skill version reporting so `localnest-mcp-install-skill` now reports the actual package version instead of stale metadata.
+- Made the skill installer treat `package.json` as the version source of truth, preventing future drift between the package version and bundled skill metadata.
+
+### Quality
+
+- Added regression coverage to ensure bundled skill metadata stays aligned with the package version.
+
 ## [0.0.4-beta.8] - 2026-03-10
 
 ### Runtime Fixes

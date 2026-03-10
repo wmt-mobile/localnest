@@ -22,7 +22,8 @@ The local git tags currently available in this repository are:
 
 Those do **not** match the package/changelog release line currently documented here:
 
-- `0.0.4-beta.8` (current beta package)
+- `0.0.4-beta.9` (current beta package)
+- `0.0.4-beta.8`
 - `0.0.4-beta.7`
 - `0.0.4-beta.6`
 - `0.0.4-beta.5`
@@ -36,7 +37,8 @@ Those do **not** match the package/changelog release line currently documented h
 
 | Version | Basis | Page |
 | --- | --- | --- |
-| `0.0.4-beta.8` | current beta package + changelog `0.0.4-beta.8` | [Current Beta Release](./current) |
+| `0.0.4-beta.9` | current beta package + changelog `0.0.4-beta.9` | [Current Beta Release](./current) |
+| `0.0.4-beta.8` | archived beta package + changelog `0.0.4-beta.8` | changelog only |
 | `0.0.4-beta.7` | archived beta package + changelog `0.0.4-beta.7` | [0.0.4-beta.7](./0.0.4-beta.7) |
 | `0.0.4-beta.6` | archived beta package + frozen docs snapshot | [Version Archive: 0.0.4-beta.6](/docs/versions/0.0.4-beta.6/overview) |
 | `0.0.4-beta.5` | archived beta package + frozen docs snapshot | [Version Archive: 0.0.4-beta.5](/docs/versions/0.0.4-beta.5/overview) |
@@ -53,7 +55,7 @@ Use the per-version pages below for release-specific summaries.
 <div className="docGrid docGrid--3">
   <a className="docLinkCard" href="./current">
     <strong>Current beta</strong>
-    <span>Use the current beta page for the upload-ready `0.0.4-beta.8` contract.</span>
+    <span>Use the current beta page for the upload-ready `0.0.4-beta.9` contract.</span>
   </a>
   <a className="docLinkCard" href="/docs/versions/0.0.4-beta.5/overview">
     <strong>Previous beta</strong>

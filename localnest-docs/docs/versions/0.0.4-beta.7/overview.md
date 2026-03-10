@@ -9,7 +9,7 @@ description: Overview of LocalNest v0.0.4-beta.7, the archived beta release cove
 <div className="docPanel docPanel--compact">
   <p>
     This archive page freezes the beta.7 documentation contract so teams can reference the exact
-    release behavior before beta.8 became current.
+    release behavior before beta.9 became current.
   </p>
 </div>
 
