@@ -37,7 +37,7 @@ Those do **not** match the package/changelog release line currently documented h
 | Version | Basis | Page |
 | --- | --- | --- |
 | `0.0.4-beta.8` | current beta package + changelog `0.0.4-beta.8` | [Current Beta Release](./current) |
-| `0.0.4-beta.7` | archived beta package + changelog `0.0.4-beta.7` | changelog only |
+| `0.0.4-beta.7` | archived beta package + changelog `0.0.4-beta.7` | [0.0.4-beta.7](./0.0.4-beta.7) |
 | `0.0.4-beta.6` | archived beta package + frozen docs snapshot | [Version Archive: 0.0.4-beta.6](/docs/versions/0.0.4-beta.6/overview) |
 | `0.0.4-beta.5` | archived beta package + frozen docs snapshot | [Version Archive: 0.0.4-beta.5](/docs/versions/0.0.4-beta.5/overview) |
 | `0.0.4-beta.4` (archive) | frozen docs snapshot | [Version Archive: 0.0.4-beta.4](/docs/versions/0.0.4-beta.4/overview) |
