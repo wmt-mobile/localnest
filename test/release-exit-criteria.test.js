@@ -7,22 +7,22 @@ import path from 'node:path';
 test('release-exit-criteria CLI parser supports flags', async () => {
   const mod = await import('../scripts/release/release-exit-criteria.mjs');
   const args = mod.__test_parseCliArgs([
-    '--version-label', '0.0.4-beta.6',
+    '--version-label', '0.0.4',
     '--report-path', '/tmp/report.json',
     '--json'
   ]);
 
-  assert.equal(args['version-label'], '0.0.4-beta.6');
+  assert.equal(args['version-label'], '0.0.4');
   assert.equal(args['report-path'], '/tmp/report.json');
   assert.equal(args.json, 'true');
 });
 
 test('buildOutputPaths parameterizes exit criteria report paths by version label', async () => {
   const mod = await import('../scripts/release/release-exit-criteria.mjs');
-  const out = mod.__test_buildOutputPaths({ versionLabel: '0.0.4-beta.6' });
+  const out = mod.__test_buildOutputPaths({ versionLabel: '0.0.4' });
 
-  assert.match(out.markdownPath, /localnest-0-0-4-beta-6-exit-criteria\.md$/);
-  assert.match(out.jsonPath, /localnest-0-0-4-beta-6-exit-criteria\.json$/);
+  assert.match(out.markdownPath, /localnest-0-0-4-exit-criteria\.md$/);
+  assert.match(out.jsonPath, /localnest-0-0-4-exit-criteria\.json$/);
 });
 
 test('verifySupportedClientTargets detects configured and missing real-style client configs', async () => {

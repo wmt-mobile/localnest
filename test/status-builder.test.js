@@ -55,8 +55,8 @@ test('server status exposes cache diagnostics from runtime config', async () => 
     },
     updates: {
       getStatus: async () => ({
-        current_version: '0.0.4-beta.6',
-        latest_version: '0.0.4-beta.6',
+        current_version: '0.0.4',
+        latest_version: '0.0.4',
         is_outdated: false,
         recommendation: 'up_to_date',
         can_attempt_update: false,

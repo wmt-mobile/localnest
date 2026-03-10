@@ -1,12 +1,12 @@
 {
   "name": "localnest-mcp",
-  "version": "0.0.4-beta.7",
+  "version": "0.0.4",
   "lockfileVersion": 3,
   "requires": true,
   "packages": {
     "": {
       "name": "localnest-mcp",
-      "version": "0.0.4-beta.7",
+      "version": "0.0.4",
       "license": "MIT",
       "dependencies": {
         "@huggingface/transformers": "^3.8.1",

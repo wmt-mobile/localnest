@@ -19,8 +19,8 @@ LocalNest MCP is a local-first MCP server that gives AI agents scoped access to 
   </div>
   <div className="docPanel docPanel--compact">
     <div className="docStat">
-      <span className="docStat__label">Current beta package</span>
-      <strong>0.0.4-beta.7</strong>
+      <span className="docStat__label">Current stable package</span>
+      <strong>0.0.4</strong>
     </div>
     <div className="docStat">
       <span className="docStat__label">Preferred backend</span>
@@ -63,16 +63,16 @@ npx -y localnest-mcp-doctor
 - New install: start with [Install](/docs/setup/install), then [Configuration](/docs/setup/configuration).
 - Architecture and internal flow: use [Architecture](/docs/architecture).
 - Daily coding workflow: jump to [Tools](/docs/tools/overview) and [Search](/docs/tools/search).
-- Version-specific behavior: use [Current beta release](/docs/releases/current) and [Release matrix](/docs/releases/history).
+- Version-specific behavior: use [Current release](/docs/releases/current) and [Release matrix](/docs/releases/history).
 
 <div className="docGrid docGrid--3">
   <a className="docLinkCard" href="./setup/install">
     <strong>New machine</strong>
-    <span>Install the package, skill, and generated MCP config with the current beta defaults.</span>
+    <span>Install the package, skill, and generated MCP config with the current stable defaults.</span>
   </a>
   <a className="docLinkCard" href="./releases/current">
     <strong>Current release</strong>
-    <span>See what changed in `0.0.4-beta.7` before you upgrade or publish.</span>
+    <span>See what changed in `0.0.4` before you upgrade or publish.</span>
   </a>
   <a className="docLinkCard" href="./versions/0.0.4-beta.5/overview">
     <strong>Archived beta.5</strong>
@@ -121,8 +121,8 @@ npx -y localnest-mcp-doctor
     <span>See the full tool surface and the intended retrieval workflow.</span>
   </a>
   <a className="docLinkCard" href="./releases/current">
-    <strong>Current beta release</strong>
-    <span>See the `0.0.4-beta.7` beta behavior, including runtime updates, install behavior, and the current memory workflow.</span>
+    <strong>Current release</strong>
+    <span>See the `0.0.4` stable behavior, including runtime updates, install behavior, and the current memory workflow.</span>
   </a>
   <a className="docLinkCard" href="./releases/history">
     <strong>Release matrix</strong>

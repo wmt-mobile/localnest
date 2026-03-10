@@ -4,6 +4,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.4] - 2026-03-10
+
+### Stable Release
+
+- Graduated the `0.0.4-beta.*` line into the stable `0.0.4` release.
+- Keeps sqlite-vec extension auto-detection, Hugging Face local embedding/reranking runtime, memory workflows, and the canonical `localnest` CLI setup path.
+- New stable installs may still show a single upstream deprecation warning for `boolean@3.2.0` through `onnxruntime-node -> global-agent`; LocalNest behavior is unchanged.
+
 ## [0.0.4-beta.7] - 2026-03-10
 
 ### Runtime

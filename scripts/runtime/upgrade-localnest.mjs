@@ -197,6 +197,32 @@ function applyFieldValue(config, fieldPath, value) {
   cursor[parts[parts.length - 1]] = value;
 }
 
+function normalizeModelConfig(config) {
+  if (!config?.index || typeof config.index !== 'object') return config;
+
+  const next = {
+    ...config,
+    index: {
+      ...config.index
+    }
+  };
+
+  if (next.index.embeddingProvider === 'xenova') {
+    next.index.embeddingProvider = 'huggingface';
+  }
+  if (next.index.rerankerProvider === 'xenova') {
+    next.index.rerankerProvider = 'huggingface';
+  }
+  if (next.index.embeddingModel === 'Xenova/all-MiniLM-L6-v2') {
+    next.index.embeddingModel = 'sentence-transformers/all-MiniLM-L6-v2';
+  }
+  if (next.index.rerankerModel === 'Xenova/ms-marco-MiniLM-L-6-v2') {
+    next.index.rerankerModel = 'cross-encoder/ms-marco-MiniLM-L-6-v2';
+  }
+
+  return next;
+}
+
 async function fillMissingFields(baseConfig, missingFields) {
   if (missingFields.length === 0) return baseConfig;
 
@@ -243,9 +269,9 @@ async function main() {
     process.stdout.write('LocalNest upgrade helper\n\n');
     process.stdout.write('Usage:\n');
     process.stdout.write('  localnest upgrade\n');
-    process.stdout.write('  localnest upgrade 0.0.4-beta.7\n');
-    process.stdout.write('  localnest upgrade install 0.0.4-beta.7\n');
-    process.stdout.write('  localnest upgrade --version=0.0.4-beta.7\n');
+    process.stdout.write('  localnest upgrade 0.0.4\n');
+    process.stdout.write('  localnest upgrade install 0.0.4\n');
+    process.stdout.write('  localnest upgrade --version=0.0.4\n');
     process.stdout.write('  localnest upgrade --dry-run\n');
     process.stdout.write('Options:\n');
     process.stdout.write('  --version=<semver|latest>  target package version\n');
@@ -292,7 +318,8 @@ async function main() {
   const existingConfig = readExistingConfig();
   const missing = findMissingRequiredSetupFields(existingConfig);
   const mergedConfig = normalizeUpgradeConfig({ existingConfig, defaults });
-  const finalConfig = assumeYes ? mergedConfig : await fillMissingFields(mergedConfig, missing);
+  const finalConfigRaw = assumeYes ? mergedConfig : await fillMissingFields(mergedConfig, missing);
+  const finalConfig = normalizeModelConfig(finalConfigRaw);
 
   const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
   const skillCmd = process.platform === 'win32' ? 'localnest-mcp-install-skill.cmd' : 'localnest-mcp-install-skill';

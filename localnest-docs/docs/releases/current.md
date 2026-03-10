@@ -1,41 +1,41 @@
 ---
-description: Current beta branch notes for localnest-mcp, including runtime updates, install behavior, memory workflows, and canonical tool behavior.
+description: Current stable release notes for localnest-mcp, including runtime updates, install behavior, memory workflows, and canonical tool behavior.
 ---
 
-# Current Beta Release
+# Current Release
 
-Current beta branch documentation for `localnest-mcp`, covering memory workflow tools, setup migration behavior, and the active canonical `localnest_*` tool contract.
+Current stable release documentation for `localnest-mcp`, covering memory workflow tools, setup behavior, and the active canonical `localnest_*` tool contract.
 
 <div className="docGrid docGrid--3">
   <div className="docPanel">
     <span className="docEyebrow">Channel</span>
-    <h3>Beta release line</h3>
-    <p>Use this page when you need docs that match the currently published beta package behavior.</p>
+    <h3>Stable release line</h3>
+    <p>Use this page when you need docs that match the currently published stable package behavior.</p>
   </div>
   <div className="docPanel">
     <span className="docEyebrow">Package</span>
-    <h3>beta branch track</h3>
-    <p>Use versioned pages for published package specifics; this page tracks current branch behavior.</p>
+    <h3>stable package track</h3>
+    <p>Use versioned pages for archived package specifics; this page tracks the current stable behavior.</p>
   </div>
   <div className="docPanel">
     <span className="docEyebrow">Docs contract</span>
     <h3>Retrieval + memory workflow</h3>
-    <p>The current beta docs include the full memory tool surface and setup/config changes.</p>
+    <p>The current release docs include the full memory tool surface and setup/config changes.</p>
   </div>
 </div>
 
 <div className="docGrid docGrid--3">
   <a className="docLinkCard" href="/docs/setup/install">
-    <strong>Install beta.7</strong>
-    <span>Use the current beta package and follow the direct `localnest` setup flow.</span>
+    <strong>Install 0.0.4</strong>
+    <span>Use the current stable package and follow the direct `localnest` setup flow.</span>
   </a>
   <a className="docLinkCard" href="/docs/setup/configuration">
     <strong>Configure MCP</strong>
     <span>Use the generated MCP block, supported client setup, and startup timeout guidance.</span>
   </a>
-  <a className="docLinkCard" href="/docs/versions/0.0.4-beta.6/overview">
-    <strong>Compare with beta.6</strong>
-    <span>Open the archived beta.6 doc set when you need the previous release contract.</span>
+  <a className="docLinkCard" href="/docs/releases/history">
+    <strong>See archived betas</strong>
+    <span>Open the release matrix when you need prior beta release context.</span>
   </a>
 </div>
 
@@ -49,7 +49,7 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
 - setup-time memory consent and config migration
 - `localnest` top-level CLI command path (`setup`, `doctor`, `upgrade`)
 
-## What changed in `0.0.4-beta.7`
+## What changed in `0.0.4`
 
 - Added sqlite-vec extension auto-detection and explicit `LOCALNEST_SQLITE_VEC_EXTENSION` support for cleaner startup on global installs.
 - Switched the local embedding and reranking runtime from `@xenova/transformers` to `@huggingface/transformers`, and updated new setup defaults to the `huggingface` provider with backward compatibility for older `xenova` configs.
@@ -61,9 +61,9 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
 
 <div className="docGrid docGrid--2">
   <div className="docPanel">
-    <span className="docEyebrow">If you are already on beta.5</span>
+    <span className="docEyebrow">If you are upgrading from beta builds</span>
     <h3>Expected user-facing changes</h3>
-    <p>Startup diagnostics are clearer, release validation is stricter, and the docs/release surface is more explicit about current versus archived behavior.</p>
+      <p>Startup diagnostics are clearer, the Hugging Face runtime is the default path, and the docs/release surface now points to a stable `0.0.4` line.</p>
   </div>
   <div className="docPanel">
     <span className="docEyebrow">If you are validating a fresh install</span>
@@ -74,22 +74,22 @@ Current beta branch documentation for `localnest-mcp`, covering memory workflow 
 
 ## How to use this page
 
-- Treat this page as the source of truth for the current beta release behavior.
-- Use the archived `0.0.3` pages when you need the last stable release contract.
-- Use archived beta pages such as [0.0.4-beta.6](/docs/versions/0.0.4-beta.6/overview) when you need the previous beta contract instead of the current one.
+- Treat this page as the source of truth for the current stable release behavior.
+- Use the archived `0.0.3` pages when you need the prior stable release contract.
+- Use archived beta pages such as [0.0.4-beta.6](/docs/versions/0.0.4-beta.6/overview) when you need the previous prerelease contract instead of the current one.
 - If you need explicit install commands per version, use [Version Selection](./version-selection).
 
 ## Need a Different Release View?
 
 - Use [Version Selection](./version-selection) when you need exact install commands.
 - Use [Release Matrix](./history) when you need the full release-to-page mapping.
-- Use [0.0.4-beta.6](/docs/versions/0.0.4-beta.6/overview) if you are debugging the prior beta instead of the current upload target.
+- Use [0.0.4-beta.6](/docs/versions/0.0.4-beta.6/overview) if you are debugging the prior beta instead of the current stable release.
 
 ## Version Source
 
-This page is based on the current beta package version and maintained changelog in the repository.
+This page is based on the current stable package version and maintained changelog in the repository.
 
-- package version: `0.0.4-beta.7`
+- package version: `0.0.4`
 - release date: `2026-03-10`
-- changelog sections document beta changes merged into this branch
-- stable published release docs remain archived under `0.0.3`
+- changelog sections document the beta-to-stable changes merged into this branch
+- prior stable published release docs remain archived under `0.0.3`

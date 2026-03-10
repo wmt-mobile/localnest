@@ -1,5 +1,5 @@
 ---
-description: Version matrix for LocalNest docs mapping current beta, stable release, and archived changelog pages for compatibility and debugging.
+description: Version matrix for LocalNest docs mapping the current stable release and archived beta/stable pages for compatibility and debugging.
 ---
 
 # Release Matrix
@@ -22,7 +22,8 @@ The local git tags currently available in this repository are:
 
 Those do **not** match the package/changelog release line currently documented here:
 
-- `0.0.4-beta.7` (current beta package)
+- `0.0.4` (current stable package)
+- `0.0.4-beta.7`
 - `0.0.4-beta.6`
 - `0.0.4-beta.5`
 - `0.0.4-beta.4` (archived beta package)
@@ -35,7 +36,8 @@ Those do **not** match the package/changelog release line currently documented h
 
 | Version | Basis | Page |
 | --- | --- | --- |
-| `0.0.4-beta.7` | current beta package + changelog `0.0.4-beta.7` | [Current Beta Release](./current) |
+| `0.0.4` | current stable package + changelog `0.0.4` | [Current Release](./current) |
+| `0.0.4-beta.7` | archived beta package + changelog `0.0.4-beta.7` | changelog only |
 | `0.0.4-beta.6` | archived beta package + frozen docs snapshot | [Version Archive: 0.0.4-beta.6](/docs/versions/0.0.4-beta.6/overview) |
 | `0.0.4-beta.5` | archived beta package + frozen docs snapshot | [Version Archive: 0.0.4-beta.5](/docs/versions/0.0.4-beta.5/overview) |
 | `0.0.4-beta.4` (archive) | frozen docs snapshot | [Version Archive: 0.0.4-beta.4](/docs/versions/0.0.4-beta.4/overview) |
@@ -50,8 +52,8 @@ Use the per-version pages below for release-specific summaries.
 
 <div className="docGrid docGrid--3">
   <a className="docLinkCard" href="./current">
-    <strong>Current beta</strong>
-    <span>Use the current beta page for the upload-ready `0.0.4-beta.7` contract.</span>
+    <strong>Current stable</strong>
+    <span>Use the current release page for the stable `0.0.4` contract.</span>
   </a>
   <a className="docLinkCard" href="/docs/versions/0.0.4-beta.5/overview">
     <strong>Previous beta</strong>
@@ -66,6 +68,6 @@ Use the per-version pages below for release-specific summaries.
 ## Reading guidance
 
 - Start with [Version Selection](./version-selection) when you need exact install commands for a specific version.
-- Use `current` if you want documentation aligned to the active beta package and behavior.
+- Use `current` if you want documentation aligned to the active stable package and behavior.
 - Use archived version pages when you are debugging or supporting older installs.
 - For each new published release, keep the previous current-beta page as its own frozen per-version document instead of only updating labels.

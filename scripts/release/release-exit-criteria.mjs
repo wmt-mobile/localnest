@@ -267,7 +267,7 @@ function renderMarkdown({ versionLabel, reportPath, evaluation, supportedClients
 
 async function main() {
   const args = parseCliArgs(process.argv.slice(2));
-  const versionLabel = args['version-label'] || '0.0.4-beta.7';
+  const versionLabel = args['version-label'] || '0.0.4';
   const outputPaths = buildOutputPaths({
     versionLabel,
     markdownPath: args['markdown-report-path'],

@@ -90,7 +90,7 @@ Restart your MCP client. If it times out, set `startup_timeout_sec: 30` in your 
 
 AST-aware chunking ships by default for `JavaScript`, `Python`, `Go`, `Bash`, `Lua`, and `Dart`. Other languages still index cleanly with line-based fallback chunking.
 
-The current beta runtime uses `@huggingface/transformers` for local embeddings and reranking. New setup defaults use `huggingface`, and older `xenova` configs remain accepted as a compatibility alias.
+The current runtime uses `@huggingface/transformers` for local embeddings and reranking. New setup defaults use `huggingface`, and older `xenova` configs remain accepted as a compatibility alias.
 
 | Platform | Install ripgrep |
 |----------|----------------|
@@ -271,7 +271,7 @@ Setup writes everything to `~/.localnest/`:
 
 ## Install Note
 
-`0.0.4-beta.7` removes the earlier `prebuild-install` warning path from installs. Some npm environments may still show a single upstream deprecation warning from the ONNX runtime dependency chain; LocalNest functionality is unaffected.
+`0.0.4` removes the earlier `prebuild-install` warning path from installs. Some npm environments may still show a single upstream deprecation warning from the ONNX runtime dependency chain; LocalNest functionality is unaffected.
 
 **Performance tips:**
 - Scope queries with `project_path` + a narrow `glob` whenever possible
