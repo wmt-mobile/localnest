@@ -52,6 +52,32 @@ localnest doctor
 localnest upgrade
 ```
 
+## Bundled skill targets
+
+`localnest install skills` installs tool-specific skill packages from one canonical LocalNest skill source.
+
+Current user-level targets include:
+
+- generic agents-compatible `~/.agents/skills`
+- `~/.codex/skills`
+- `~/.copilot/skills`
+- `~/.claude/skills`
+- `~/.cursor/skills`
+- `~/.codeium/windsurf/skills`
+- `~/.opencode/skills`
+- `~/.config/opencode/skills`
+- `~/.gemini/skills`
+- `~/.gemini/antigravity/skills`
+- `~/.cline/skills`
+- `~/.continue/skills`
+
+Current project-level targets include:
+
+- `.github/skills`
+- `.claude/skills`
+- `.windsurf/skills`
+- `.opencode/skills`
+
 ## MCP client config
 
 After setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client configuration.

@@ -282,7 +282,7 @@ Setup writes everything to `~/.localnest/`:
 
 ## Skill Distribution
 
-LocalNest ships a bundled AI agent skill for Claude Code, Cursor, Codex, and other supported clients. Install once and your agent knows exactly how to use every tool.
+LocalNest ships bundled AI agent skills from one canonical source and installs tool-specific variants for supported clients. Current user-level targets include generic agents directories plus Codex, Copilot, Claude Code, Cursor, Windsurf, OpenCode, Gemini, Antigravity, Cline, and Continue.
 
 ```bash
 localnest install skills             # install or update bundled skills
