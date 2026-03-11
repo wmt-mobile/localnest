@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { VectorIndexService } from '../src/services/retrieval/index.js';
+import { AstChunker } from '../src/services/retrieval/chunker/service.js';
 
 function makeTempDir() {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-vector-test-'));
@@ -155,4 +156,37 @@ test('vector index status recommends sqlite upgrade for large json index', () =>
   assert.ok(String(status.upgrade_reason).includes('sqlite-vec'));
 
   fs.rmSync(root, { recursive: true, force: true });
+});
+
+test('ast chunker reports only bundled tree-sitter grammars as supported', () => {
+  const chunker = new AstChunker();
+  const status = chunker.getStatus();
+
+  assert.deepEqual(status.supported_languages, [
+    'javascript',
+    'python',
+    'go',
+    'bash',
+    'lua',
+    'dart'
+  ]);
+  assert.equal(chunker.resolveLanguageId('src/example.ts'), 'typescript');
+  assert.equal(chunker.resolveLanguageId('src/example.rs'), 'rust');
+  assert.equal(status.warning, null);
+  assert.deepEqual(status.missing_dependencies, []);
+  assert.ok(status.optional_dependencies.includes('tree-sitter'));
+});
+
+test('ast chunker status reports actionable warning when optional parser packages are missing', () => {
+  const chunker = new AstChunker();
+  chunker.treeSitterUnavailable = true;
+  chunker.treeSitterUnavailableReason = 'Cannot find package tree-sitter';
+  chunker.noteMissingDependency('tree-sitter', new Error('Cannot find package tree-sitter'));
+
+  const status = chunker.getStatus();
+
+  assert.equal(status.enabled, false);
+  assert.deepEqual(status.missing_dependencies, ['tree-sitter']);
+  assert.match(status.warning || '', /AST chunking is disabled/);
+  assert.match(status.missing_dependency_reasons['tree-sitter'] || '', /Cannot find package tree-sitter/);
 });

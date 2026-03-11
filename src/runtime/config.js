@@ -8,6 +8,7 @@ import {
   resolveLocalnestHome,
   resolveWritableModelCacheDir
 } from './home-layout.js';
+import { findSqliteVecExtensionPath } from './sqlite-vec-extension.js';
 
 function parseBoolean(value, fallback) {
   if (value === undefined || value === null || value === '') return fallback;
@@ -28,9 +29,6 @@ function parseStringEnv(value, fallback) {
   if (value === undefined || value === null || value === '') return fallback;
   return String(value).trim();
 }
-
-export const SERVER_NAME = 'localnest';
-export const SERVER_VERSION = '0.0.4-beta.6';
 
 export const DEFAULT_MAX_READ_LINES = 400;
 export const DEFAULT_MAX_RESULTS = 100;
@@ -287,6 +285,16 @@ export function buildRuntimeConfig(env = process.env) {
       `  reason: ${reason}\n`
     );
   }
+  const configuredSqliteVecExtensionPath = parseStringEnv(
+    env.LOCALNEST_SQLITE_VEC_EXTENSION,
+    fileSettings.sqliteVecExtensionPath || ''
+  );
+  const detectedSqliteVecExtension = configuredSqliteVecExtensionPath
+    ? null
+    : findSqliteVecExtensionPath({
+      localnestHome,
+      env
+    });
 
   return {
     localnestHome,
@@ -303,10 +311,10 @@ export function buildRuntimeConfig(env = process.env) {
     sqliteDbPath: path.resolve(
       env.LOCALNEST_DB_PATH || fileSettings.dbPath || layout.sqliteDbPath
     ),
-    sqliteVecExtensionPath: parseStringEnv(
-      env.LOCALNEST_SQLITE_VEC_EXTENSION,
-      fileSettings.sqliteVecExtensionPath || ''
-    ),
+    sqliteVecExtensionPath: configuredSqliteVecExtensionPath || detectedSqliteVecExtension?.path || '',
+    sqliteVecExtensionSource: configuredSqliteVecExtensionPath
+      ? 'configured'
+      : detectedSqliteVecExtension?.source || 'missing',
     vectorChunkLines: parseIntEnv(
       env.LOCALNEST_VECTOR_CHUNK_LINES,
       fileSettings.chunkLines || 60
@@ -325,11 +333,11 @@ export function buildRuntimeConfig(env = process.env) {
     ),
     embeddingProvider: parseStringEnv(
       env.LOCALNEST_EMBED_PROVIDER,
-      fileSettings.embeddingProvider || 'xenova'
+      fileSettings.embeddingProvider || 'huggingface'
     ),
     embeddingModel: parseStringEnv(
       env.LOCALNEST_EMBED_MODEL,
-      fileSettings.embeddingModel || 'Xenova/all-MiniLM-L6-v2'
+      fileSettings.embeddingModel || 'sentence-transformers/all-MiniLM-L6-v2'
     ),
     embeddingCacheDir: embeddingCacheResolved.path,
     embeddingCacheStatus: embeddingCacheResolved,
@@ -339,11 +347,11 @@ export function buildRuntimeConfig(env = process.env) {
     ),
     rerankerProvider: parseStringEnv(
       env.LOCALNEST_RERANKER_PROVIDER,
-      fileSettings.rerankerProvider || 'xenova'
+      fileSettings.rerankerProvider || 'huggingface'
     ),
     rerankerModel: parseStringEnv(
       env.LOCALNEST_RERANKER_MODEL,
-      fileSettings.rerankerModel || 'Xenova/ms-marco-MiniLM-L-6-v2'
+      fileSettings.rerankerModel || 'cross-encoder/ms-marco-MiniLM-L-6-v2'
     ),
     rerankerCacheDir: rerankerCacheResolved.path,
     rerankerCacheStatus: rerankerCacheResolved,
@@ -363,6 +371,12 @@ export function buildRuntimeConfig(env = process.env) {
     indexSweepIntervalMinutes: parseIntEnvClamped(
       env.LOCALNEST_INDEX_SWEEP_INTERVAL_MINUTES,
       mcpMode === 'stdio' ? 0 : 5,
+      0,
+      1440
+    ),
+    healthMonitorIntervalMinutes: parseIntEnvClamped(
+      env.LOCALNEST_HEALTH_MONITOR_INTERVAL_MINUTES,
+      30,
       0,
       1440
     ),

@@ -27,12 +27,12 @@ function defaultIndex(localnestHome) {
     chunkOverlap: 15,
     maxTermsPerChunk: 80,
     maxIndexedFiles: 20000,
-    embeddingProvider: 'xenova',
-    embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+    embeddingProvider: 'huggingface',
+    embeddingModel: 'sentence-transformers/all-MiniLM-L6-v2',
     embeddingCacheDir: layout.dirs.cache,
     embeddingDimensions: 384,
-    rerankerProvider: 'xenova',
-    rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2',
+    rerankerProvider: 'huggingface',
+    rerankerModel: 'cross-encoder/ms-marco-MiniLM-L-6-v2',
     rerankerCacheDir: layout.dirs.cache
   };
 }

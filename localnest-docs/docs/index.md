@@ -19,8 +19,8 @@ LocalNest MCP is a local-first MCP server that gives AI agents scoped access to 
   </div>
   <div className="docPanel docPanel--compact">
     <div className="docStat">
-      <span className="docStat__label">Current beta package</span>
-      <strong>0.0.4-beta.6</strong>
+      <span className="docStat__label">Current stable package</span>
+      <strong>0.0.5</strong>
     </div>
     <div className="docStat">
       <span className="docStat__label">Preferred backend</span>
@@ -46,7 +46,7 @@ Recommended global install:
 
 ```bash
 npm install -g localnest-mcp
-localnest-mcp-install-skill
+localnest install skills
 localnest setup
 localnest doctor
 ```
@@ -58,24 +58,34 @@ npx -y localnest-mcp-setup
 npx -y localnest-mcp-doctor
 ```
 
+Upgrade paths:
+
+```bash
+localnest upgrade
+localnest upgrade stable
+localnest upgrade beta
+localnest upgrade 0.0.5
+```
+
 ## Choose your path
 
 - New install: start with [Install](/docs/setup/install), then [Configuration](/docs/setup/configuration).
+- Architecture and internal flow: use [Architecture](/docs/architecture).
 - Daily coding workflow: jump to [Tools](/docs/tools/overview) and [Search](/docs/tools/search).
-- Version-specific behavior: use [Current beta release](/docs/releases/current) and [Release matrix](/docs/releases/history).
+- Version-specific behavior: use [Current release](/docs/releases/current) and [Release matrix](/docs/releases/history).
 
 <div className="docGrid docGrid--3">
   <a className="docLinkCard" href="./setup/install">
     <strong>New machine</strong>
-    <span>Install the package, skill, and generated MCP config with the current beta defaults.</span>
+    <span>Install the package, skill, and generated MCP config with the current stable defaults.</span>
   </a>
   <a className="docLinkCard" href="./releases/current">
     <strong>Current release</strong>
-    <span>See what changed in `0.0.4-beta.6` before you upgrade or publish.</span>
+    <span>See what changed in `0.0.5` before you upgrade or publish.</span>
   </a>
-  <a className="docLinkCard" href="./versions/0.0.4-beta.5/overview">
-    <strong>Archived beta.5</strong>
-    <span>Open the full archived doc set when you need previous-beta behavior.</span>
+  <a className="docLinkCard" href="./versions/0.0.4-beta.8/overview">
+    <strong>Archived beta.8</strong>
+    <span>Open the full archived doc set when you need the previous-beta behavior.</span>
   </a>
 </div>
 
@@ -111,13 +121,17 @@ npx -y localnest-mcp-doctor
     <strong>Configuration</strong>
     <span>Review root resolution, environment variables, and backend settings.</span>
   </a>
+  <a className="docLinkCard" href="./architecture">
+    <strong>Architecture</strong>
+    <span>See boot flow, retrieval diagrams, indexing, and memory graph behavior.</span>
+  </a>
   <a className="docLinkCard" href="./tools/overview">
     <strong>Tools</strong>
     <span>See the full tool surface and the intended retrieval workflow.</span>
   </a>
   <a className="docLinkCard" href="./releases/current">
-    <strong>Current beta release</strong>
-    <span>See the `0.0.4-beta.6` beta behavior, including release hardening, improved diagnostics, and the current memory workflow.</span>
+    <strong>Current release</strong>
+    <span>See the `0.0.5` stable behavior, including runtime updates, install behavior, and the current memory workflow.</span>
   </a>
   <a className="docLinkCard" href="./releases/history">
     <strong>Release matrix</strong>

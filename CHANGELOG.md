@@ -1,6 +1,79 @@
+<!-- cspell:ignore localnest LOCALNEST reranker RERANKER SARIF stopword optimised prefiltering -->
+
 # Changelog
 
 All notable changes to this project will be documented in this file.
+
+## [0.0.5] - 2026-03-11
+
+### Stable Release
+
+- Promoted the `0.0.4-beta.9` runtime and packaging fixes into the stable `0.0.5` line.
+- Fixed the installed-runtime release harness to derive LocalNest paths from the active user home instead of a machine-specific path.
+- Hardened installed-runtime validation with an MCP stdio handshake regression test and release-sweep coverage.
+- Switched upgrade skill-sync flow to the primary `localnest install skills --force` command while keeping the legacy alias available.
+
+## [0.0.4-beta.9] - 2026-03-10
+
+### Runtime Fixes
+
+- Fixed bundled skill version reporting so `localnest-mcp-install-skill` now reports the actual package version instead of stale metadata.
+- Made the skill installer treat `package.json` as the version source of truth, preventing future drift between the package version and bundled skill metadata.
+
+### Quality
+
+- Added regression coverage to ensure bundled skill metadata stays aligned with the package version.
+
+## [0.0.4-beta.8] - 2026-03-10
+
+### Runtime Fixes
+
+- Fixed MCP startup regressions introduced after `0.0.4-beta.6` where `create-services` and `register-tools` imported `SERVER_NAME` / `SERVER_VERSION` from the wrong module.
+- Removed the blocking startup update warm-check from the stdio MCP server path so early tool calls no longer stall on synchronous npm version checks.
+- Made sqlite-vec index status degrade safely when the database is locked instead of hanging or crashing MCP status tools.
+- Updated the installed-runtime release sweep to use isolated temporary index storage, avoiding contention with the user's active LocalNest database during validation.
+
+### Quality
+
+- Added import regression coverage for the app startup modules.
+- Added sqlite-vec status regression coverage for locked-database handling.
+
+## [0.0.4-beta.7] - 2026-03-10
+
+### Runtime
+
+- Introduced a dedicated `sqlite-vec` extension resolver (`src/runtime/sqlite-vec-extension.js`) that automatically locates the `vec0` native binary at startup — searches global npm root, the localnest vendor directory, `PATH`, and `node_modules` with cross-platform binary name resolution (`.so` / `.dylib` / `.dll`).
+- Added `LOCALNEST_SQLITE_VEC_EXTENSION` env var for explicit extension path override; auto-detection is skipped when it is set.
+- Extension source is now reported in `localnest_server_status` so operators can confirm how the extension was found.
+- Setup wizard (`localnest setup`) gained `--sqlite-vec-extension` and `--skip-sqlite-vec-install` flags and a comprehensive `--help` / `-h` output covering all options.
+- Doctor (`localnest doctor`) gained an explicit vec0 availability check.
+
+### CLI
+
+- `localnest-mcp-task-context` and `localnest-mcp-capture-outcome` now support `--help` / `-h` with full usage documentation printed to stdout.
+- `localnest-mcp-capture-outcome` now accepts a `--tags` CSV argument for tagging captured events at the CLI level.
+
+### Security & Dependencies
+
+- Updated `express-rate-limit` and `ip-address` to patched versions.
+- Switched the local embedding and reranking runtime from `@xenova/transformers` to `@huggingface/transformers`.
+- Added published `npm-shrinkwrap.json` coverage so npm-distributed installs carry the intended transitive dependency graph.
+
+### Install Behavior
+
+- Removed the earlier `prebuild-install@7.1.3` warning path from the default install graph by moving off the older Xenova runtime chain.
+- Current `0.0.4-beta.8` installs may still show a single upstream deprecation warning for `boolean@3.2.0` through `onnxruntime-node -> global-agent`; runtime behavior is unchanged.
+
+### Quality
+
+- Added test coverage for `sqlite-vec` extension detection, bin shared helpers, config parsing, skill install, and server status builder.
+- Resolved lint regressions in release scripts and workspace helpers.
+
+### Docs & Developer Experience
+
+- Rewrote README with clearer information hierarchy, a new "Why LocalNest?" section, engaging copy, and a correct full MCP JSON config block.
+- Added `guides/architecture.md` — architecture overview with system, search, and memory pipeline diagrams for contributors.
+- Added `.github/workflows/release.yml` — automatic GitHub pre-release on merge to `beta`, full release on merge to `main`, tagged by package version.
 
 ## [0.0.4-beta.6] - 2026-03-09
 

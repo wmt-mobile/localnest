@@ -1,6 +1,33 @@
 import fs from 'node:fs';
 import { makeFileSignature } from './helpers.js';
 
+export function getVecTableDefinition(service) {
+  return `vec0(chunk_rowid integer primary key, embedding float[${service.embeddingDimensions}])`;
+}
+
+export function normalizeVecPrimaryKey(value) {
+  const key = Number(value);
+  if (!Number.isSafeInteger(key)) {
+    throw new TypeError(`Invalid vec primary key: ${value}`);
+  }
+  return key;
+}
+
+function getExistingVecTableSql(service) {
+  const row = service.db.prepare(
+    "SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'vec_chunks'"
+  ).get();
+  return typeof row?.sql === 'string' ? row.sql : '';
+}
+
+export function shouldRebuildVecTable(service, existingSql = getExistingVecTableSql(service)) {
+  if (!existingSql) return false;
+  const normalizedSql = existingSql.replace(/\s+/g, ' ').toLowerCase();
+  const expectedDimension = `embedding float[${service.embeddingDimensions}]`;
+  return !normalizedSql.includes('chunk_rowid integer primary key')
+    || !normalizedSql.includes(expectedDimension);
+}
+
 export function tryLoadSqliteVec(service) {
   service.sqliteVecLoadAttempted = false;
   service.sqliteVecLoadError = '';
@@ -32,7 +59,10 @@ export function ensureSqliteVecTable(service) {
     return;
   }
   try {
-    service.db.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS vec_chunks USING vec0(embedding float[${service.embeddingDimensions}])`);
+    if (shouldRebuildVecTable(service)) {
+      service.db.exec('DROP TABLE IF EXISTS vec_chunks');
+    }
+    service.db.exec(`CREATE VIRTUAL TABLE IF NOT EXISTS vec_chunks USING ${getVecTableDefinition(service)}`);
     service.sqliteVecTableReady = true;
     service.sqliteVecTableError = '';
   } catch (error) {
@@ -46,11 +76,13 @@ export function syncSqliteVecRowsFromChunks(service) {
   const rows = service.db.prepare(
     'SELECT rowid, embedding_json FROM chunks WHERE embedding_json IS NOT NULL AND embedding_json != \'\''
   ).all();
-  const insertVec = service.db.prepare('INSERT OR REPLACE INTO vec_chunks(rowid, embedding) VALUES (?, ?)');
   service.runInTransaction(() => {
     service.db.exec('DELETE FROM vec_chunks');
     for (const row of rows) {
-      insertVec.run(row.rowid, row.embedding_json);
+      const key = normalizeVecPrimaryKey(row.rowid);
+      service.db.prepare(
+        `INSERT OR REPLACE INTO vec_chunks(chunk_rowid, embedding) VALUES (${key}, ?)`
+      ).run(row.embedding_json);
     }
   });
 }

@@ -27,6 +27,15 @@ function serializeTomlArray(values) {
   return `[${values.map((value) => serializeTomlString(value)).join(', ')}]`;
 }
 
+function resolveConfigPath(homeDir, candidates) {
+  for (const relativePath of candidates) {
+    const absolutePath = path.join(homeDir, ...relativePath);
+    if (fs.existsSync(absolutePath)) return absolutePath;
+  }
+  const preferred = candidates[0];
+  return path.join(homeDir, ...preferred);
+}
+
 function buildCodexLocalnestBlock(serverConfig) {
   const lines = [
     '[mcp_servers.localnest]',
@@ -175,7 +184,10 @@ export function detectAiToolTargets({ homeDir = os.homedir() } = {}) {
       id: 'gemini',
       label: 'Gemini CLI',
       kind: 'json',
-      configPath: path.join(homeDir, '.gemini', 'antigravity', 'mcp_config.json'),
+      configPath: resolveConfigPath(homeDir, [
+        ['.gemini', 'settings.json'],
+        ['.gemini', 'antigravity', 'mcp_config.json']
+      ]),
       present: fs.existsSync(path.join(homeDir, '.gemini'))
     },
     {

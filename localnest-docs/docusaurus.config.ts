@@ -12,10 +12,12 @@ const config: Config = {
   trailingSlash: false,
   onBrokenLinks: 'throw',
   markdown: {
+    mermaid: true,
     hooks: {
       onBrokenMarkdownLinks: 'warn'
     }
   },
+  themes: ['@docusaurus/theme-mermaid'],
   i18n: {
     defaultLocale: 'en',
     locales: ['en']
@@ -111,7 +113,7 @@ const config: Config = {
         },
         {
           href: 'https://www.npmjs.com/package/localnest-mcp',
-          label: 'v0.0.4-beta.6',
+          label: 'v0.0.5',
           position: 'right'
         },
         {
@@ -140,7 +142,7 @@ const config: Config = {
         {
           title: 'Versions',
           items: [
-            { label: 'Current beta (0.0.4-beta.6)', to: '/docs/releases/current' },
+            { label: 'Current stable (0.0.5)', to: '/docs/releases/current' },
             { label: 'Release matrix', to: '/docs/releases/history' }
           ]
         },

@@ -9,7 +9,14 @@ const skipReason = nodeMajor < 22 ? `node:sqlite requires Node 22+ (current: ${p
 
 const { buildBaseScopeClause, SqliteVecIndexService } = skipReason
   ? { buildBaseScopeClause: null, SqliteVecIndexService: null }
-  : await import('../src/services/retrieval/index.js');
+  : await import('../src/services/retrieval/sqlite-vec/service.js');
+const {
+  getVecTableDefinition,
+  normalizeVecPrimaryKey,
+  shouldRebuildVecTable
+} = skipReason
+  ? { getVecTableDefinition: null, normalizeVecPrimaryKey: null, shouldRebuildVecTable: null }
+  : await import('../src/services/retrieval/sqlite-vec/runtime.js');
 
 test('buildBaseScopeClause handles slash and backslash descendants', { skip: skipReason }, () => {
   const bases = ['C:\\repo\\project', '/home/u/repo'];
@@ -115,6 +122,104 @@ test('sqlite index status reports extension as not configured when no extension 
   assert.equal(status.sqlite_vec_extension.status, 'not-configured');
 
   fs.rmSync(tempRoot, { recursive: true, force: true });
+});
+
+test('sqlite index status degrades gracefully when status cannot open the database', { skip: skipReason }, () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-sqlite-status-error-test-'));
+  const dbPath = path.join(tempRoot, 'idx.db');
+
+  const workspace = {
+    resolveSearchBases: () => [tempRoot],
+    normalizeTarget: (p) => p,
+    *walkDirectories() {
+      yield { files: [] };
+    },
+    isLikelyTextFile: () => true,
+    safeReadText: () => ''
+  };
+
+  const service = new SqliteVecIndexService({
+    workspace,
+    dbPath,
+    sqliteVecExtensionPath: '',
+    chunkLines: 20,
+    chunkOverlap: 5,
+    maxTermsPerChunk: 40,
+    maxIndexedFiles: 100
+  });
+
+  service.ensureDb = () => {
+    const error = new Error('database is locked');
+    error.code = 'ERR_SQLITE_ERROR';
+    throw error;
+  };
+
+  const status = service.getStatus();
+  assert.equal(status.backend, 'sqlite-vec');
+  assert.equal(status.total_files, 0);
+  assert.equal(status.sqlite_vec_table_ready, false);
+  assert.match(status.error || '', /database is locked/);
+
+  fs.rmSync(tempRoot, { recursive: true, force: true });
+});
+
+test('sqlite index enables extension loading when an extension path is configured', { skip: skipReason }, () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-sqlite-extension-test-'));
+  const dbPath = path.join(tempRoot, 'idx.db');
+
+  const workspace = {
+    resolveSearchBases: () => [tempRoot],
+    normalizeTarget: (p) => p,
+    *walkDirectories() {
+      yield { files: [] };
+    },
+    isLikelyTextFile: () => true,
+    safeReadText: () => ''
+  };
+
+  const service = new SqliteVecIndexService({
+    workspace,
+    dbPath,
+    sqliteVecExtensionPath: path.join(tempRoot, 'missing-vec0.so'),
+    chunkLines: 20,
+    chunkOverlap: 5,
+    maxTermsPerChunk: 40,
+    maxIndexedFiles: 100
+  });
+
+  service.ensureDb();
+
+  assert.equal(service.sqliteVecLoadAttempted, true);
+  assert.equal(service.sqliteVecLoadError.includes('disabled at database creation'), false);
+
+  service.resetDb();
+  fs.rmSync(tempRoot, { recursive: true, force: true });
+});
+
+test('sqlite vec table definition uses explicit integer primary key column', { skip: skipReason }, () => {
+  const service = { embeddingDimensions: 384 };
+  assert.equal(
+    getVecTableDefinition(service),
+    'vec0(chunk_rowid integer primary key, embedding float[384])'
+  );
+});
+
+test('sqlite vec table is rebuilt when legacy hidden-rowid schema is detected', { skip: skipReason }, () => {
+  const service = { embeddingDimensions: 384 };
+  assert.equal(
+    shouldRebuildVecTable(service, 'CREATE VIRTUAL TABLE vec_chunks USING vec0(embedding float[384])'),
+    true
+  );
+  assert.equal(
+    shouldRebuildVecTable(service, 'CREATE VIRTUAL TABLE vec_chunks USING vec0(chunk_rowid integer primary key, embedding float[384])'),
+    false
+  );
+});
+
+test('sqlite vec primary key normalization only accepts safe integers', { skip: skipReason }, () => {
+  assert.equal(normalizeVecPrimaryKey(12), 12);
+  assert.equal(normalizeVecPrimaryKey('34'), 34);
+  assert.throws(() => normalizeVecPrimaryKey('1.5'), /Invalid vec primary key/);
 });
 
 test('sqlite index BM25 fallback returns lexical semantic hit without embeddings', { skip: skipReason }, async () => {

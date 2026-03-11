@@ -9,7 +9,8 @@ const sidebars: SidebarsConfig = {
       items: [
         { type: 'doc', id: 'overview', label: 'Overview' },
         { type: 'doc', id: 'setup/install', label: 'Install' },
-        { type: 'doc', id: 'setup/configuration', label: 'Configuration' }
+        { type: 'doc', id: 'setup/configuration', label: 'Configuration' },
+        { type: 'doc', id: 'architecture', label: 'Architecture' }
       ]
     },
     {
@@ -27,7 +28,7 @@ const sidebars: SidebarsConfig = {
       label: 'Release Notes',
       items: [
         { type: 'doc', id: 'releases/version-selection', label: 'Version Selection' },
-        { type: 'doc', id: 'releases/current', label: 'Current Beta Release' },
+        { type: 'doc', id: 'releases/current', label: 'Current Release' },
         { type: 'doc', id: 'releases/history', label: 'Release Matrix' }
       ],
       collapsed: false
@@ -37,6 +38,50 @@ const sidebars: SidebarsConfig = {
       label: 'Version Archive',
       collapsed: true,
       items: [
+        {
+          type: 'category',
+          label: 'Beta 0.0.4-beta.9',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'versions/0.0.4-beta.9/overview', label: 'Overview' },
+            { type: 'doc', id: 'versions/0.0.4-beta.9/install', label: 'Install' },
+            { type: 'doc', id: 'versions/0.0.4-beta.9/configuration', label: 'Configuration' },
+            { type: 'doc', id: 'versions/0.0.4-beta.9/tools', label: 'Tools' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Beta 0.0.4-beta.8',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'versions/0.0.4-beta.8/overview', label: 'Overview' },
+            { type: 'doc', id: 'versions/0.0.4-beta.8/install', label: 'Install' },
+            { type: 'doc', id: 'versions/0.0.4-beta.8/configuration', label: 'Configuration' },
+            { type: 'doc', id: 'versions/0.0.4-beta.8/tools', label: 'Tools' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Beta 0.0.4-beta.7',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'versions/0.0.4-beta.7/overview', label: 'Overview' },
+            { type: 'doc', id: 'versions/0.0.4-beta.7/install', label: 'Install' },
+            { type: 'doc', id: 'versions/0.0.4-beta.7/configuration', label: 'Configuration' },
+            { type: 'doc', id: 'versions/0.0.4-beta.7/tools', label: 'Tools' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Beta 0.0.4-beta.6',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'versions/0.0.4-beta.6/overview', label: 'Overview' },
+            { type: 'doc', id: 'versions/0.0.4-beta.6/install', label: 'Install' },
+            { type: 'doc', id: 'versions/0.0.4-beta.6/configuration', label: 'Configuration' },
+            { type: 'doc', id: 'versions/0.0.4-beta.6/tools', label: 'Tools' }
+          ]
+        },
         {
           type: 'category',
           label: 'Beta 0.0.4-beta.5',

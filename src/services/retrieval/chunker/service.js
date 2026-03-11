@@ -1,4 +1,11 @@
-import { LANG_BY_EXT, DECL_TYPES_BY_LANG, LANGUAGE_LOADERS, getExt } from './languages.js';
+import {
+  LANG_BY_EXT,
+  DECL_TYPES_BY_LANG,
+  LANGUAGE_LOADERS,
+  LANGUAGE_PACKAGES,
+  TREE_SITTER_PACKAGE,
+  getExt
+} from './languages.js';
 import { summarizeImports, buildScopePath, makeLineSlices } from './ast-utils.js';
 
 export class AstChunker {
@@ -7,12 +14,21 @@ export class AstChunker {
     this.languagePromises = new Map();
     this.parserByLanguage = new Map();
     this.treeSitterUnavailable = false;
+    this.treeSitterUnavailableReason = '';
     this.activeLanguages = new Set();
     this.fallbackLanguages = new Set();
+    this.missingDependencies = new Set();
+    this.missingDependencyReasons = new Map();
     this.stats = {
       ast_chunks: 0,
       fallback_chunks: 0
     };
+  }
+
+  noteMissingDependency(packageName, error) {
+    if (!packageName) return;
+    this.missingDependencies.add(packageName);
+    if (error) this.missingDependencyReasons.set(packageName, String(error?.message || error));
   }
 
   resolveLanguageId(filePath) {
@@ -22,8 +38,10 @@ export class AstChunker {
   async getParserModule() {
     if (this.treeSitterUnavailable) return null;
     if (!this.parserModulePromise) {
-      this.parserModulePromise = import('tree-sitter').catch(() => {
+      this.parserModulePromise = import('tree-sitter').catch((error) => {
         this.treeSitterUnavailable = true;
+        this.treeSitterUnavailableReason = String(error?.message || error || '');
+        this.noteMissingDependency(TREE_SITTER_PACKAGE, error);
         return null;
       });
     }
@@ -39,7 +57,10 @@ export class AstChunker {
       return null;
     }
 
-    const promise = loader().catch(() => null);
+    const promise = loader().catch((error) => {
+      this.noteMissingDependency(LANGUAGE_PACKAGES[languageId], error);
+      return null;
+    });
     this.languagePromises.set(languageId, promise);
     return promise;
   }
@@ -194,9 +215,24 @@ export class AstChunker {
   }
 
   getStatus() {
+    const supportedLanguages = Object.keys(LANGUAGE_LOADERS);
+    const missingDependencies = Array.from(this.missingDependencies).sort();
+    const missingDependencyReasons = Object.fromEntries(
+      Array.from(this.missingDependencyReasons.entries()).sort(([a], [b]) => a.localeCompare(b))
+    );
+    const warning = this.treeSitterUnavailable
+      ? `AST chunking is disabled because optional package "${TREE_SITTER_PACKAGE}" is unavailable. Install optional tree-sitter dependencies or use line-based fallback chunking.`
+      : (missingDependencies.length > 0
+        ? `AST chunking is partially degraded because optional parser packages are unavailable: ${missingDependencies.join(', ')}. LocalNest will continue with line-based fallback chunking for affected languages.`
+        : null);
+
     return {
       enabled: !this.treeSitterUnavailable,
-      supported_languages: Object.keys(LANGUAGE_LOADERS),
+      supported_languages: supportedLanguages,
+      optional_dependencies: [TREE_SITTER_PACKAGE, ...Object.values(LANGUAGE_PACKAGES)],
+      missing_dependencies: missingDependencies,
+      missing_dependency_reasons: missingDependencyReasons,
+      warning,
       active_languages: Array.from(this.activeLanguages).sort(),
       fallback_languages: Array.from(this.fallbackLanguages).sort(),
       ast_chunks: this.stats.ast_chunks,

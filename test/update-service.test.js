@@ -49,6 +49,28 @@ test('getStatus fetches npm live result and then serves cache while fresh', asyn
   assert.equal(cached.using_cached_data, true);
 });
 
+test('getStatus can check beta channel via npm dist-tags', async () => {
+  const home = makeTempHome();
+  const calls = [];
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.0.4-beta.8',
+    checkIntervalMinutes: 120,
+    failureBackoffMinutes: 15,
+    commandRunner: (command, args) => {
+      calls.push([command, ...args]);
+      return { status: 0, stdout: '"0.0.4-beta.10"\n', stderr: '' };
+    }
+  });
+
+  const out = await service.getStatus({ force: true, channel: 'beta' });
+  assert.equal(out.update_channel, 'beta');
+  assert.equal(out.latest_version, '0.0.4-beta.10');
+  assert.equal(out.is_outdated, true);
+  assert.ok(calls.some((parts) => parts.includes('dist-tags.beta')));
+});
+
 test('getStatus falls back to cache on npm failure', async () => {
   const home = makeTempHome();
   const cachePath = buildLocalnestPaths(home).updateStatusPath;
@@ -124,6 +146,35 @@ test('getCachedStatus returns informative fallback without npm access', () => {
   assert.equal(out.recommendation, 'up_to_date');
 });
 
+test('getCachedStatus overrides stale cached current_version with installed runtime version', () => {
+  const home = makeTempHome();
+  const cachePath = buildLocalnestPaths(home).updateStatusPath;
+  fs.mkdirSync(path.dirname(cachePath), { recursive: true });
+  fs.writeFileSync(cachePath, `${JSON.stringify({
+    package_name: 'localnest-mcp',
+    current_version: '0.0.4',
+    latest_version: '0.0.3',
+    is_outdated: false,
+    last_checked_at: '2000-01-01T00:00:00.000Z',
+    last_check_ok: true
+  }, null, 2)}\n`, 'utf8');
+
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.0.4-beta.8',
+    checkIntervalMinutes: 120,
+    failureBackoffMinutes: 15,
+    commandRunner: () => {
+      throw new Error('should not run');
+    }
+  });
+
+  const out = service.getCachedStatus();
+  assert.equal(out.current_version, '0.0.4-beta.8');
+  assert.equal(out.latest_version, '0.0.3');
+});
+
 test('selfUpdate requires explicit approval', async () => {
   const home = makeTempHome();
   const service = new UpdateService({
@@ -165,7 +216,36 @@ test('selfUpdate runs install and skill sync when approved', async () => {
   assert.equal(out.ok, true);
   assert.equal(out.restart_required, true);
   assert.ok(calls.some((line) => line.includes('install -g localnest-mcp@latest')));
-  assert.ok(calls.some((line) => line.includes('localnest-mcp-install-skill')));
+  assert.ok(calls.some((line) => line.includes('localnest install skills --force')));
+});
+
+test('selfUpdate beta channel installs npm beta tag and refreshes beta status', async () => {
+  const home = makeTempHome();
+  const calls = [];
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.0.4-beta.8',
+    checkIntervalMinutes: 120,
+    failureBackoffMinutes: 15,
+    commandRunner: (command, args) => {
+      const line = [command, ...args].join(' ');
+      calls.push(line);
+      if (args[0] === 'view' && args.includes('dist-tags.beta')) return { status: 0, stdout: '"0.0.4-beta.10"\n', stderr: '' };
+      return { status: 0, stdout: 'ok', stderr: '' };
+    }
+  });
+
+  const out = await service.selfUpdate({
+    approvedByUser: true,
+    version: 'beta',
+    reinstallSkill: true
+  });
+
+  assert.equal(out.ok, true);
+  assert.equal(out.update_status.update_channel, 'beta');
+  assert.ok(calls.some((line) => line.includes('install -g localnest-mcp@beta')));
+  assert.ok(calls.some((line) => line.includes('view localnest-mcp dist-tags.beta --json')));
 });
 
 test('selfUpdate dry-run does not execute commands', async () => {
@@ -195,7 +275,7 @@ test('selfUpdate dry-run does not execute commands', async () => {
   assert.ok(Array.isArray(out.planned_commands));
   assert.ok(out.planned_commands.length >= 1);
   assert.ok(calls.some((line) => line.includes('npm --help')));
-  assert.ok(calls.some((line) => line.includes('localnest-mcp-install-skill --help')));
+  assert.ok(calls.some((line) => line.includes('localnest install skills --help')));
 });
 
 test('selfUpdate dry-run reports validation failures without mutating', async () => {
@@ -207,7 +287,7 @@ test('selfUpdate dry-run reports validation failures without mutating', async ()
     checkIntervalMinutes: 120,
     failureBackoffMinutes: 15,
     commandRunner: (command) => {
-      if (String(command).includes('localnest-mcp-install-skill')) {
+      if (String(command).includes('localnest')) {
         return { status: 1, stdout: '', stderr: 'missing' };
       }
       return { status: 0, stdout: '', stderr: '' };
@@ -267,10 +347,10 @@ test('selfUpdate reports skill sync failure after successful install', async () 
     commandRunner: (command, args) => {
       const line = [command, ...args].join(' ');
       calls.push(line);
-      if (args[0] === 'install') {
+      if (command === 'npm' && args[0] === 'install') {
         return { status: 0, stdout: 'installed', stderr: '' };
       }
-      if (String(command).includes('localnest-mcp-install-skill')) {
+      if (String(command).includes('localnest')) {
         return { status: 1, stdout: '', stderr: 'sync failed' };
       }
       return { status: 0, stdout: '"0.0.3"\n', stderr: '' };

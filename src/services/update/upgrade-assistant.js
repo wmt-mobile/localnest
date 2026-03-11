@@ -14,6 +14,20 @@ function hasValue(value, type) {
   return value !== undefined && value !== null && value !== '';
 }
 
+function normalizeProvider(provider, fallback) {
+  const value = typeof provider === 'string' ? provider.trim().toLowerCase() : '';
+  if (!value) return fallback;
+  if (value === 'xenova') return fallback;
+  return value;
+}
+
+function normalizeModel(model, fallback) {
+  const value = typeof model === 'string' ? model.trim() : '';
+  if (!value) return fallback;
+  if (/^xenova\//i.test(value)) return fallback;
+  return value;
+}
+
 export const REQUIRED_SETUP_FIELDS = [
   { path: 'roots', label: 'project roots', type: 'array' },
   { path: 'index.backend', label: 'index backend', type: 'string' },
@@ -48,14 +62,26 @@ export function normalizeUpgradeConfig({ existingConfig, defaults }) {
     maxIndexedFiles: Number.isFinite(existing.index?.maxIndexedFiles)
       ? existing.index.maxIndexedFiles
       : defaults.index.maxIndexedFiles,
-    embeddingProvider: existing.index?.embeddingProvider || defaults.index.embeddingProvider,
-    embeddingModel: existing.index?.embeddingModel || defaults.index.embeddingModel,
+    embeddingProvider: normalizeProvider(
+      existing.index?.embeddingProvider,
+      defaults.index.embeddingProvider
+    ),
+    embeddingModel: normalizeModel(
+      existing.index?.embeddingModel,
+      defaults.index.embeddingModel
+    ),
     embeddingCacheDir: existing.index?.embeddingCacheDir || defaults.index.embeddingCacheDir,
     embeddingDimensions: Number.isFinite(existing.index?.embeddingDimensions)
       ? existing.index.embeddingDimensions
       : defaults.index.embeddingDimensions,
-    rerankerProvider: existing.index?.rerankerProvider || defaults.index.rerankerProvider,
-    rerankerModel: existing.index?.rerankerModel || defaults.index.rerankerModel,
+    rerankerProvider: normalizeProvider(
+      existing.index?.rerankerProvider,
+      defaults.index.rerankerProvider
+    ),
+    rerankerModel: normalizeModel(
+      existing.index?.rerankerModel,
+      defaults.index.rerankerModel
+    ),
     rerankerCacheDir: existing.index?.rerankerCacheDir || defaults.index.rerankerCacheDir
   };
 

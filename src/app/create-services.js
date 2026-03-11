@@ -3,9 +3,9 @@ import {
   IGNORE_DIRS,
   PROJECT_HINT_DIRS,
   PROJECT_MARKER_FILES,
-  SERVER_VERSION,
   TEXT_EXTENSIONS
 } from '../runtime/config.js';
+import { SERVER_VERSION } from '../runtime/version.js';
 import { WorkspaceService } from '../services/workspace/index.js';
 import {
   SearchService,
@@ -37,7 +37,7 @@ async function createVectorIndex(runtime, workspace, embeddingService, setActive
 
   if (runtime.indexBackend === 'sqlite-vec') {
     try {
-      const { SqliteVecIndexService } = await import('../services/retrieval/index.js');
+      const { SqliteVecIndexService } = await import('../services/retrieval/sqlite-vec/service.js');
       return new SqliteVecIndexService({
         workspace,
         dbPath: runtime.sqliteDbPath,

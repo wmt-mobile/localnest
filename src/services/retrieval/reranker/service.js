@@ -1,23 +1,27 @@
-const DEFAULT_MODEL = 'Xenova/ms-marco-MiniLM-L-6-v2';
+const DEFAULT_MODEL = 'cross-encoder/ms-marco-MiniLM-L-6-v2';
 
-function extractScore(result) {
-  if (Array.isArray(result) && result.length > 0) {
-    if (Array.isArray(result[0]) && result[0].length > 0) return Number(result[0][0]?.score || 0);
-    return Number(result[0]?.score || 0);
+function normalizeProvider(provider) {
+  if (provider === 'xenova') return 'huggingface';
+  return provider || 'huggingface';
+}
+
+function sigmoid(value) {
+  const n = Number(value) || 0;
+  if (n >= 0) {
+    const z = Math.exp(-n);
+    return 1 / (1 + z);
   }
-  if (result && typeof result === 'object') {
-    return Number(result.score || 0);
-  }
-  return 0;
+  const z = Math.exp(n);
+  return z / (1 + z);
 }
 
 export class RerankerService {
-  constructor({ provider = 'xenova', model, cacheDir } = {}) {
-    this.provider = provider;
+  constructor({ provider = 'huggingface', model, cacheDir } = {}) {
+    this.provider = normalizeProvider(provider);
     this.model = model || DEFAULT_MODEL;
     this.cacheDir = cacheDir || '';
-    this._pipelinePromise = null;
-    this._available = provider !== 'none';
+    this._modelPromise = null;
+    this._available = false;
     this._lastError = '';
   }
 
@@ -35,36 +39,53 @@ export class RerankerService {
     };
   }
 
-  async _getPipeline() {
-    if (this._pipelinePromise) return this._pipelinePromise;
+  async _getModelBundle() {
+    if (this._modelPromise) return this._modelPromise;
 
-    this._pipelinePromise = (async () => {
-      const mod = await import('@xenova/transformers');
+    this._modelPromise = (async () => {
+      const mod = await import('@huggingface/transformers');
+      const { AutoTokenizer, AutoModelForSequenceClassification } = mod;
       if (this.cacheDir) {
         mod.env.cacheDir = this.cacheDir;
       }
-      return mod.pipeline('text-classification', this.model);
+      const [tokenizer, model] = await Promise.all([
+        AutoTokenizer.from_pretrained(this.model),
+        AutoModelForSequenceClassification.from_pretrained(this.model)
+      ]);
+      return { tokenizer, model };
     })();
 
     try {
-      return await this._pipelinePromise;
+      const bundle = await this._modelPromise;
+      this._available = true;
+      return bundle;
     } catch (error) {
       this._available = false;
       this._lastError = String(error?.message || error);
-      this._pipelinePromise = null;
+      this._modelPromise = null;
       throw error;
     }
   }
 
-  async score(query, text) {
+  async rawScore(query, text) {
     if (!this.isEnabled()) return 0;
-    const classifier = await this._getPipeline();
+    const { tokenizer, model } = await this._getModelBundle();
+    const inputs = await tokenizer(String(query), {
+      text_pair: String(text),
+      padding: true,
+      truncation: true
+    });
+    const out = await model(inputs);
+    return Number(out?.logits?.data?.[0] || 0);
+  }
+
+  async score(query, text) {
     try {
-      const paired = await classifier({ text: query, text_pair: text }, { topk: 1 });
-      return Math.max(0, Math.min(1, extractScore(paired)));
-    } catch {
-      const joined = await classifier(`${query} [SEP] ${text}`, { topk: 1 });
-      return Math.max(0, Math.min(1, extractScore(joined)));
+      return sigmoid(await this.rawScore(query, text));
+    } catch (error) {
+      this._available = false;
+      this._lastError = String(error?.message || error);
+      return 0;
     }
   }
 

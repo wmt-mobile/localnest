@@ -6,8 +6,9 @@ LocalNest MCP is a local-first MCP server that gives AI agents scoped access to 
 
 - [Install and configure LocalNest](./setup/install)
 - [Review configuration and env vars](./setup/configuration)
+- [Understand the runtime architecture](./architecture)
 - [Browse tool documentation](./tools/overview)
-- [See the current beta package and behavior](./releases/current)
+- [See the current stable package and behavior](./releases/current)
 - [See the release matrix](./releases/history)
 
 ## Core ideas

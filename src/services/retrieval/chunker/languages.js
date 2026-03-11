@@ -56,23 +56,22 @@ export const DECL_TYPES_BY_LANG = {
 
 export const LANGUAGE_LOADERS = {
   javascript: async () => { const mod = await import('tree-sitter-javascript'); return mod.default || mod; },
-  typescript: async () => { const mod = await import('tree-sitter-typescript'); return mod.typescript; },
-  tsx: async () => { const mod = await import('tree-sitter-typescript'); return mod.tsx; },
   python: async () => { const mod = await import('tree-sitter-python'); return mod.default || mod; },
   go: async () => { const mod = await import('tree-sitter-go'); return mod.default || mod; },
-  rust: async () => { const mod = await import('tree-sitter-rust'); return mod.default || mod; },
-  java: async () => { const mod = await import('tree-sitter-java'); return mod.default || mod; },
-  c: async () => { const mod = await import('tree-sitter-c'); return mod.default || mod; },
-  cpp: async () => { const mod = await import('tree-sitter-cpp'); return mod.default || mod; },
-  csharp: async () => { const mod = await import('tree-sitter-c-sharp'); return mod.default || mod; },
-  ruby: async () => { const mod = await import('tree-sitter-ruby'); return mod.default || mod; },
-  php: async () => { const mod = await import('tree-sitter-php'); return mod.php || mod.default || mod; },
   bash: async () => { const mod = await import('tree-sitter-bash'); return mod.default || mod; },
-  kotlin: async () => { const mod = await import('tree-sitter-kotlin'); return mod.default || mod; },
-  swift: async () => { const mod = await import('tree-sitter-swift'); return mod.default || mod; },
   lua: async () => { const mod = await import('tree-sitter-lua'); return mod.default || mod; },
-  dart: async () => { const mod = await import('tree-sitter-dart'); return mod.default || mod; },
-  scala: async () => { const mod = await import('tree-sitter-scala'); return mod.default || mod; }
+  dart: async () => { const mod = await import('tree-sitter-dart'); return mod.default || mod; }
+};
+
+export const TREE_SITTER_PACKAGE = 'tree-sitter';
+
+export const LANGUAGE_PACKAGES = {
+  javascript: 'tree-sitter-javascript',
+  python: 'tree-sitter-python',
+  go: 'tree-sitter-go',
+  bash: 'tree-sitter-bash',
+  lua: 'tree-sitter-lua',
+  dart: 'tree-sitter-dart'
 };
 
 export function getExt(filePath) {

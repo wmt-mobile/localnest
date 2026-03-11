@@ -52,8 +52,8 @@ function makeFixture() {
       upgrade_recommended: false,
       upgrade_reason: null,
       embedding: {
-        provider: 'xenova',
-        model: 'Xenova/all-MiniLM-L6-v2',
+        provider: 'huggingface',
+        model: 'sentence-transformers/all-MiniLM-L6-v2',
         enabled: true,
         available: true,
         dimensions: 384
@@ -94,11 +94,12 @@ function makeFixture() {
   };
 
   const updates = {
-    getStatus: async ({ force }) => {
-      mark('updateStatus', { force });
+    getStatus: async ({ force, channel }) => {
+      mark('updateStatus', { force, channel });
       return {
         current_version: '0.0.0',
         latest_version: '0.0.1',
+        update_channel: channel || 'stable',
         is_outdated: true,
         recommendation: 'update_available',
         can_attempt_update: true
@@ -323,6 +324,8 @@ test('MCP tools register and execute across all tool groups', async () => {
   assert.equal(updateStatus.latest, '0.0.1');
   assert.equal(updateStatus.recommendation, 'update_available');
   assert.equal(updateStatus.can_attempt_update, true);
+  const updateStatusBeta = (await run('localnest_update_status', { force_check: true, channel: 'beta' })).structuredContent.data;
+  assert.equal(updateStatusBeta.channel, 'beta');
   const updateSelf = (await run('localnest_update_self', { approved_by_user: true, dry_run: true, version: 'latest', reinstall_skill: true })).structuredContent.data;
   assert.equal(updateSelf.ok, true);
   assert.equal(updateSelf.dry_run, true);
@@ -383,12 +386,14 @@ test('MCP tools register and execute across all tool groups', async () => {
   assert.equal(indexStatus.total_files, 1);
   const embedStatus = (await run('localnest_embed_status')).structuredContent.data;
   assert.equal(embedStatus.backend, 'sqlite-vec');
-  assert.equal(embedStatus.provider, 'xenova');
+  assert.equal(embedStatus.provider, 'huggingface');
   assert.equal(embedStatus.ready, true);
-  assert.equal(embedStatus.model, 'Xenova/all-MiniLM-L6-v2');
+  assert.equal(embedStatus.model, 'sentence-transformers/all-MiniLM-L6-v2');
   const indexProject = (await run('localnest_index_project', { project_path: '/tmp/root', all_roots: false, force: false, max_files: 10 }, makeExtra('token-1'))).structuredContent.data;
   assert.equal(indexProject.indexed_files, 0);
   assert.equal(Array.isArray(indexProject.failed_files), true);
+  assert.equal(indexProject.failed_file_count, 0);
+  assert.equal(Array.isArray(indexProject.failed_file_samples), true);
   assert.equal((await run('localnest_search_files', { query: 'a', project_path: '/tmp/root', all_roots: false, max_results: 5, case_sensitive: false })).structuredContent.data[0].name, 'a.js');
   assert.equal((await run('localnest_search_code', { query: 'const', project_path: '/tmp/root', all_roots: false, glob: '*', max_results: 5, case_sensitive: false, context_lines: 0, use_regex: false })).structuredContent.data[0].line, 1);
   const hybridSearch = (await run('localnest_search_hybrid', { query: 'auth', project_path: '/tmp/root', all_roots: false, glob: '*', max_results: 5, case_sensitive: false, min_semantic_score: 0, auto_index: false })).structuredContent.data;

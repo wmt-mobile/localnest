@@ -11,7 +11,7 @@ import {
   buildRuntimeConfig,
   installRuntimeWarningFilter
 } from '../runtime/index.js';
-import { buildRipgrepHelpMessage, startStalenessMonitor } from '../mcp/index.js';
+import { buildRipgrepHelpMessage, startStalenessMonitor, startHealthMonitor } from '../mcp/index.js';
 import { createServices } from './create-services.js';
 import { registerAppTools } from './register-tools.js';
 
@@ -44,14 +44,19 @@ export async function main() {
     );
   }
 
-  services.updates.warmCheck().catch((error) => {
-    process.stderr.write(`[localnest-update] warm check failed: ${error?.message || error}\n`);
-  });
-
   startStalenessMonitor(services.vectorIndex, runtime.indexSweepIntervalMinutes);
+  const { getLastReport: getLastHealthReport } = startHealthMonitor(
+    services.vectorIndex,
+    services.memory,
+    runtime.healthMonitorIntervalMinutes
+  );
+  services.getLastHealthReport = getLastHealthReport;
 
+  // StdioServerTransport adds listeners but does not resume stdin itself.
+  process.stdin.resume();
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  setInterval(() => {}, 60_000);
 }
 
 const isDirectExecution = process.argv[1]

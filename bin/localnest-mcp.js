@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { SERVER_VERSION } from '../src/runtime/index.js';
+import { SERVER_VERSION } from '../src/runtime/version.js';
 import { hasVersionFlag, importRelative } from './_shared.js';
 
 if (hasVersionFlag(process.argv)) {

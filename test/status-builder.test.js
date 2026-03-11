@@ -21,8 +21,8 @@ test('server status exposes cache diagnostics from runtime config', async () => 
       vectorChunkOverlap: 15,
       vectorMaxTermsPerChunk: 80,
       vectorMaxIndexedFiles: 20000,
-      embeddingProvider: 'xenova',
-      embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+      embeddingProvider: 'huggingface',
+      embeddingModel: 'sentence-transformers/all-MiniLM-L6-v2',
       embeddingCacheDir: '/tmp/fallback-cache',
       embeddingCacheStatus: {
         path: '/tmp/fallback-cache',
@@ -31,8 +31,8 @@ test('server status exposes cache diagnostics from runtime config', async () => 
         fallbackUsed: true
       },
       embeddingDimensions: 384,
-      rerankerProvider: 'xenova',
-      rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2',
+      rerankerProvider: 'huggingface',
+      rerankerModel: 'cross-encoder/ms-marco-MiniLM-L-6-v2',
       rerankerCacheDir: '/tmp/fallback-cache',
       rerankerCacheStatus: {
         path: '/tmp/fallback-cache',
@@ -77,6 +77,9 @@ test('server status exposes cache diagnostics from runtime config', async () => 
   assert.equal(status.vector_index.reranker_cache_dir, '/tmp/fallback-cache');
   assert.equal(status.vector_index.reranker_cache_status.preferredPath, '/home/test/.localnest/cache');
   assert.equal(status.vector_index.diagnostics.index_sweep_interval_minutes, 0);
+  assert.equal(status.health.sqlite_vec_native_ready, false);
+  assert.ok(status.health.issues.includes('sqlite_vec_native_missing'));
+  assert.equal(status.vector_index.diagnostics.sqlite_vec_extension_configured, false);
   assert.equal(status.updates.recommendation, 'up_to_date');
   assert.equal(status.updates.can_attempt_update, false);
   assert.equal(status.updates.using_cached_data, true);

@@ -4,15 +4,9 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { performance } from 'node:perf_hooks';
-import {
-  SearchService,
-  SqliteVecIndexService,
-  VectorIndexService,
-  EmbeddingService,
-  AstChunker,
-  RerankerService
-} from '../../src/services/retrieval/index.js';
-import { MemoryStore } from '../../src/services/memory/index.js';
+import { installRuntimeWarningFilter } from '../../src/runtime/index.js';
+
+installRuntimeWarningFilter();
 
 function createWorkspace(project) {
   return {
@@ -82,7 +76,16 @@ function buildSearchFixture(project) {
   }
 }
 
-async function runSearchSuite({ label, workspace, project, vectorIndex, reranker, useReranker, repeats }) {
+async function runSearchSuite({
+  SearchService,
+  label,
+  workspace,
+  project,
+  vectorIndex,
+  reranker,
+  useReranker,
+  repeats
+}) {
   const search = new SearchService({
     workspace,
     ignoreDirs: new Set(['node_modules', '.git']),
@@ -163,6 +166,7 @@ async function runSearchSuite({ label, workspace, project, vectorIndex, reranker
 }
 
 async function runMemorySuite(tempRoot) {
+  const { MemoryStore } = await import('../../src/services/memory/index.js');
   const store = new MemoryStore({
     enabled: true,
     backend: 'auto',
@@ -265,6 +269,14 @@ async function runMemorySuite(tempRoot) {
 }
 
 async function main() {
+  const {
+    SearchService,
+    SqliteVecIndexService,
+    VectorIndexService,
+    EmbeddingService,
+    AstChunker,
+    RerankerService
+  } = await import('../../src/services/retrieval/index.js');
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-stress-'));
   const project = path.join(root, 'app');
   fs.mkdirSync(project, { recursive: true });
@@ -272,14 +284,14 @@ async function main() {
   const useReranker = String(process.env.LOCALNEST_STRESS_RERANKER || '').toLowerCase() === 'true';
   const repeats = Math.max(1, Number.parseInt(process.env.LOCALNEST_STRESS_REPEATS || '3', 10) || 3);
   const embeddingService = new EmbeddingService({
-    provider: useEmbeddings ? 'xenova' : 'none',
-    model: process.env.LOCALNEST_STRESS_EMBED_MODEL || 'Xenova/all-MiniLM-L6-v2',
+    provider: useEmbeddings ? 'huggingface' : 'none',
+    model: process.env.LOCALNEST_STRESS_EMBED_MODEL || 'sentence-transformers/all-MiniLM-L6-v2',
     cacheDir: process.env.LOCALNEST_STRESS_EMBED_CACHE_DIR || path.join(root, '.cache')
   });
   const astChunker = new AstChunker();
   const reranker = new RerankerService({
-    provider: useReranker ? 'xenova' : 'none',
-    model: process.env.LOCALNEST_STRESS_RERANKER_MODEL || 'Xenova/ms-marco-MiniLM-L-6-v2',
+    provider: useReranker ? 'huggingface' : 'none',
+    model: process.env.LOCALNEST_STRESS_RERANKER_MODEL || 'cross-encoder/ms-marco-MiniLM-L-6-v2',
     cacheDir: process.env.LOCALNEST_STRESS_RERANKER_CACHE_DIR || path.join(root, '.cache')
   });
 
@@ -316,6 +328,30 @@ async function main() {
     await jsonIndex.indexProject({ projectPath: project, allRoots: false, force: true, maxFiles: 1000 });
     const jsonIndexMs = performance.now() - jsonIndexStart;
 
+    const [sqliteSearch, jsonSearch, memoryResult] = await Promise.all([
+      runSearchSuite({
+        SearchService,
+        label: 'sqlite',
+        workspace,
+        project,
+        vectorIndex: sqliteIndex,
+        reranker,
+        useReranker,
+        repeats
+      }),
+      runSearchSuite({
+        SearchService,
+        label: 'json',
+        workspace,
+        project,
+        vectorIndex: jsonIndex,
+        reranker,
+        useReranker,
+        repeats
+      }),
+      runMemorySuite(root)
+    ]);
+
     const report = {
       benchmark_meta: {
         use_embeddings: useEmbeddings,
@@ -327,30 +363,11 @@ async function main() {
         json_ms: Number(jsonIndexMs.toFixed(2))
       },
       search: {
-        sqlite: runSearchSuite({
-          label: 'sqlite',
-          workspace,
-          project,
-          vectorIndex: sqliteIndex,
-          reranker,
-          useReranker,
-          repeats
-        }),
-        json: runSearchSuite({
-          label: 'json',
-          workspace,
-          project,
-          vectorIndex: jsonIndex,
-          reranker,
-          useReranker,
-          repeats
-        })
+        sqlite: sqliteSearch,
+        json: jsonSearch
       },
-      memory: await runMemorySuite(root)
+      memory: memoryResult
     };
-
-    report.search.sqlite = await report.search.sqlite;
-    report.search.json = await report.search.json;
 
     console.log(JSON.stringify(report, null, 2));
   } finally {

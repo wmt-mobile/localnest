@@ -1,4 +1,3 @@
-import { escapeLike } from './helpers.js';
 
 export const NORM_FULL_SCAN_THRESHOLD = 500;
 
@@ -67,12 +66,17 @@ export function refreshChunkNorms(db, runInTransactionFn, { changedTerms, totalC
   if (totalChunksChanged && changedTerms.size > NORM_FULL_SCAN_THRESHOLD) {
     rows = db.prepare('SELECT id, terms_json FROM chunks').all();
   } else if (changedTerms.size > 0) {
-    const stmtByTerm = db.prepare("SELECT id, terms_json FROM chunks WHERE terms_json LIKE ? ESCAPE '\\'");
+    // Use term_index (idx_term_index_term) for O(terms) lookup instead of
+    // O(chunks × terms) LIKE full-table scan.
+    const stmtByTerm = db.prepare('SELECT chunk_id FROM term_index WHERE term = ?');
+    const stmtGetChunk = db.prepare('SELECT id, terms_json FROM chunks WHERE id = ?');
     const byId = new Map();
     for (const term of changedTerms) {
-      const pattern = `%"${escapeLike(term)}"%`;
-      for (const row of stmtByTerm.all(pattern)) {
-        if (!byId.has(row.id)) byId.set(row.id, row);
+      for (const { chunk_id } of stmtByTerm.all(term)) {
+        if (!byId.has(chunk_id)) {
+          const chunk = stmtGetChunk.get(chunk_id);
+          if (chunk) byId.set(chunk_id, chunk);
+        }
       }
     }
     rows = Array.from(byId.values());

@@ -294,3 +294,26 @@ test('buildRuntimeConfig migrates legacy flat home cleanly without cache fallbac
 
   fs.rmSync(localnestHome, { recursive: true, force: true });
 });
+
+test('buildRuntimeConfig auto-detects sqlite-vec native extension from localnest vendor path', () => {
+  const localnestHome = makeTempDir();
+  const vendorDir = path.join(localnestHome, 'vendor', 'sqlite-vec', 'node_modules', 'sqlite-vec', 'dist');
+  fs.mkdirSync(vendorDir, { recursive: true });
+  const extensionName = process.platform === 'win32'
+    ? 'vec0.dll'
+    : process.platform === 'darwin'
+      ? 'vec0.dylib'
+      : 'vec0.so';
+  const extensionPath = path.join(vendorDir, extensionName);
+  fs.writeFileSync(extensionPath, 'binary', 'utf8');
+
+  const runtime = buildRuntimeConfig({
+    LOCALNEST_HOME: localnestHome,
+    LOCALNEST_INDEX_BACKEND: 'sqlite-vec'
+  });
+
+  assert.equal(runtime.sqliteVecExtensionPath, extensionPath);
+  assert.equal(runtime.sqliteVecExtensionSource, 'localnest-vendor');
+
+  fs.rmSync(localnestHome, { recursive: true, force: true });
+});

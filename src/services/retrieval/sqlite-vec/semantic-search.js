@@ -40,7 +40,7 @@ export async function semanticSearch(db, embeddingService, workspace, state, { q
       vecRows = db.prepare(
         `SELECT c.file_path, c.start_line, c.end_line, c.preview, v.distance
          FROM vec_chunks v
-         JOIN chunks c ON c.rowid = v.rowid
+         JOIN chunks c ON c.rowid = v.chunk_rowid
          WHERE v.embedding MATCH ? AND k = ${k}
            AND (${baseScope.where})
          ORDER BY v.distance ASC

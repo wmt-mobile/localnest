@@ -15,6 +15,7 @@
   "dependencies": {
     "@docusaurus/core": "latest",
     "@docusaurus/preset-classic": "latest",
+    "@docusaurus/theme-mermaid": "latest",
     "@mdx-js/react": "latest",
     "clsx": "latest",
     "prism-react-renderer": "latest",

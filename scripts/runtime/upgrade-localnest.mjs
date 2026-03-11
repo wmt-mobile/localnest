@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { stdin as input, stdout as output } from 'node:process';
 import { migrateLocalnestHomeLayout, resolveLocalnestHome } from '../../src/runtime/index.js';
+import { normalizeInstallTarget, normalizeUpdateChannel } from '../../src/services/update/helpers.js';
 import {
   findMissingRequiredSetupFields,
   normalizeUpgradeConfig
@@ -128,7 +129,8 @@ function printUpgradeError({ title, detailLines = [], suggestionLines = [] }) {
 }
 
 function ensureVersionExists({ npmCmd, packageName, targetVersion }) {
-  if (!targetVersion || targetVersion === 'latest') return;
+  const channel = normalizeUpdateChannel(targetVersion);
+  if (!targetVersion || targetVersion === 'latest' || channel === 'stable' || channel === 'beta') return;
 
   const query = runCommandCapture(npmCmd, ['view', packageName, 'versions', '--json'], 'fetch published versions');
   if (!query.ok) {
@@ -243,12 +245,14 @@ async function main() {
     process.stdout.write('LocalNest upgrade helper\n\n');
     process.stdout.write('Usage:\n');
     process.stdout.write('  localnest upgrade\n');
-    process.stdout.write('  localnest upgrade 0.0.4-beta.6\n');
-    process.stdout.write('  localnest upgrade install 0.0.4-beta.6\n');
-    process.stdout.write('  localnest upgrade --version=0.0.4-beta.6\n');
+    process.stdout.write('  localnest upgrade stable\n');
+    process.stdout.write('  localnest upgrade beta\n');
+    process.stdout.write('  localnest upgrade 0.0.5\n');
+    process.stdout.write('  localnest upgrade install 0.0.5\n');
+    process.stdout.write('  localnest upgrade --version=0.0.5\n');
     process.stdout.write('  localnest upgrade --dry-run\n');
     process.stdout.write('Options:\n');
-    process.stdout.write('  --version=<semver|latest>  target package version\n');
+    process.stdout.write('  --version=<semver|latest|stable|beta>  target package version or channel\n');
     process.stdout.write('  --package=<npm-package>    package name (default localnest-mcp)\n');
     process.stdout.write('  --skip-skill               skip skill sync step\n');
     process.stdout.write('  --yes                      continue without confirmation prompts\n');
@@ -258,6 +262,7 @@ async function main() {
 
   const packageName = parseArg('package') || 'localnest-mcp';
   const targetVersion = resolveTargetVersion();
+  const installTarget = normalizeInstallTarget(targetVersion);
   const skipSkill = hasFlag('skip-skill');
   const dryRun = hasFlag('dry-run');
   const assumeYes = hasFlag('yes');
@@ -272,12 +277,12 @@ async function main() {
       chunkOverlap: 15,
       maxTermsPerChunk: 80,
       maxIndexedFiles: 20000,
-      embeddingProvider: 'xenova',
-      embeddingModel: 'Xenova/all-MiniLM-L6-v2',
+      embeddingProvider: 'huggingface',
+      embeddingModel: 'sentence-transformers/all-MiniLM-L6-v2',
       embeddingCacheDir: layout.dirs.cache,
       embeddingDimensions: 384,
-      rerankerProvider: 'xenova',
-      rerankerModel: 'Xenova/ms-marco-MiniLM-L-6-v2',
+      rerankerProvider: 'huggingface',
+      rerankerModel: 'cross-encoder/ms-marco-MiniLM-L-6-v2',
       rerankerCacheDir: layout.dirs.cache
     },
     memory: {
@@ -295,7 +300,7 @@ async function main() {
   const finalConfig = assumeYes ? mergedConfig : await fillMissingFields(mergedConfig, missing);
 
   const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const skillCmd = process.platform === 'win32' ? 'localnest-mcp-install-skill.cmd' : 'localnest-mcp-install-skill';
+  const skillCmd = process.platform === 'win32' ? 'localnest.cmd' : 'localnest';
   const setupScript = path.resolve(scriptsDir, 'setup-localnest.mjs');
   const setupArgs = [
     setupScript,
@@ -308,12 +313,12 @@ async function main() {
     `--chunk-overlap=${String(finalConfig.index.chunkOverlap)}`,
     `--max-terms-per-chunk=${String(finalConfig.index.maxTermsPerChunk)}`,
     `--max-indexed-files=${String(finalConfig.index.maxIndexedFiles)}`,
-    `--embed-provider=${finalConfig.index.embeddingProvider || 'xenova'}`,
-    `--embed-model=${finalConfig.index.embeddingModel || 'Xenova/all-MiniLM-L6-v2'}`,
+    `--embed-provider=${finalConfig.index.embeddingProvider || 'huggingface'}`,
+    `--embed-model=${finalConfig.index.embeddingModel || 'sentence-transformers/all-MiniLM-L6-v2'}`,
     `--embed-cache-dir=${finalConfig.index.embeddingCacheDir || layout.dirs.cache}`,
     `--embed-dims=${String(finalConfig.index.embeddingDimensions || 384)}`,
-    `--reranker-provider=${finalConfig.index.rerankerProvider || 'xenova'}`,
-    `--reranker-model=${finalConfig.index.rerankerModel || 'Xenova/ms-marco-MiniLM-L-6-v2'}`,
+    `--reranker-provider=${finalConfig.index.rerankerProvider || 'huggingface'}`,
+    `--reranker-model=${finalConfig.index.rerankerModel || 'cross-encoder/ms-marco-MiniLM-L-6-v2'}`,
     `--reranker-cache-dir=${finalConfig.index.rerankerCacheDir || layout.dirs.cache}`,
     `--memory-enabled=${String(finalConfig.memory.enabled)}`,
     `--memory-backend=${finalConfig.memory.backend}`,
@@ -323,8 +328,8 @@ async function main() {
   ];
 
   const planned = [
-    `${npmCmd} install -g ${packageName}@${targetVersion}`,
-    skipSkill ? null : `${skillCmd} --force`,
+    `${npmCmd} install -g ${packageName}@${installTarget}`,
+    skipSkill ? null : `${skillCmd} install skills --force`,
     `${process.execPath} ${setupArgs.join(' ')}`
   ].filter(Boolean);
 
@@ -337,9 +342,9 @@ async function main() {
   }
 
   ensureVersionExists({ npmCmd, packageName, targetVersion });
-  runCommand(npmCmd, ['install', '-g', `${packageName}@${targetVersion}`], 'upgrade package');
+  runCommand(npmCmd, ['install', '-g', `${packageName}@${installTarget}`], 'upgrade package');
   if (!skipSkill) {
-    runCommand(skillCmd, ['--force'], 'sync skill');
+    runCommand(skillCmd, ['install', 'skills', '--force'], 'sync skill');
   }
   runCommand(process.execPath, setupArgs, 'migrate setup');
 
