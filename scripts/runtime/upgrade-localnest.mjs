@@ -247,9 +247,9 @@ async function main() {
     process.stdout.write('  localnest upgrade\n');
     process.stdout.write('  localnest upgrade stable\n');
     process.stdout.write('  localnest upgrade beta\n');
-    process.stdout.write('  localnest upgrade 0.0.4-beta.9\n');
-    process.stdout.write('  localnest upgrade install 0.0.4-beta.9\n');
-    process.stdout.write('  localnest upgrade --version=0.0.4-beta.9\n');
+    process.stdout.write('  localnest upgrade 0.0.5\n');
+    process.stdout.write('  localnest upgrade install 0.0.5\n');
+    process.stdout.write('  localnest upgrade --version=0.0.5\n');
     process.stdout.write('  localnest upgrade --dry-run\n');
     process.stdout.write('Options:\n');
     process.stdout.write('  --version=<semver|latest|stable|beta>  target package version or channel\n');
@@ -300,7 +300,7 @@ async function main() {
   const finalConfig = assumeYes ? mergedConfig : await fillMissingFields(mergedConfig, missing);
 
   const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-  const skillCmd = process.platform === 'win32' ? 'localnest-mcp-install-skill.cmd' : 'localnest-mcp-install-skill';
+  const skillCmd = process.platform === 'win32' ? 'localnest.cmd' : 'localnest';
   const setupScript = path.resolve(scriptsDir, 'setup-localnest.mjs');
   const setupArgs = [
     setupScript,
@@ -329,7 +329,7 @@ async function main() {
 
   const planned = [
     `${npmCmd} install -g ${packageName}@${installTarget}`,
-    skipSkill ? null : `${skillCmd} --force`,
+    skipSkill ? null : `${skillCmd} install skills --force`,
     `${process.execPath} ${setupArgs.join(' ')}`
   ].filter(Boolean);
 
@@ -344,7 +344,7 @@ async function main() {
   ensureVersionExists({ npmCmd, packageName, targetVersion });
   runCommand(npmCmd, ['install', '-g', `${packageName}@${installTarget}`], 'upgrade package');
   if (!skipSkill) {
-    runCommand(skillCmd, ['--force'], 'sync skill');
+    runCommand(skillCmd, ['install', 'skills', '--force'], 'sync skill');
   }
   runCommand(process.execPath, setupArgs, 'migrate setup');
 

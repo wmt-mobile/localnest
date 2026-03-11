@@ -28,7 +28,7 @@ const sidebars: SidebarsConfig = {
       label: 'Release Notes',
       items: [
         { type: 'doc', id: 'releases/version-selection', label: 'Version Selection' },
-        { type: 'doc', id: 'releases/current', label: 'Current Beta Release' },
+        { type: 'doc', id: 'releases/current', label: 'Current Release' },
         { type: 'doc', id: 'releases/history', label: 'Release Matrix' }
       ],
       collapsed: false

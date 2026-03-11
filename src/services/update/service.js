@@ -220,10 +220,10 @@ export class UpdateService {
     };
   }
 
-  validateCommandAvailability(command) {
-    const result = this.commandRunner(command, ['--help'], { timeoutMs: 12000 });
+  validateCommandAvailability(command, args = ['--help']) {
+    const result = this.commandRunner(command, args, { timeoutMs: 12000 });
     return {
-      command,
+      command: [command, ...args].join(' '),
       available: Boolean(result && result.status === 0 && !result.error),
       status: result?.status ?? null,
       error: result?.error ? String(result.error.message || result.error) : null,
@@ -238,7 +238,8 @@ export class UpdateService {
     ];
     if (reinstallSkill) {
       const skillStep = buildSkillSyncCommand();
-      checks.push(this.validateCommandAvailability(skillStep.command));
+      const helpArgs = [...skillStep.args.filter((arg) => arg !== '--force'), '--help'];
+      checks.push(this.validateCommandAvailability(skillStep.command, helpArgs));
     }
     return {
       ok: checks.every((item) => item.available),

@@ -104,8 +104,8 @@ export function buildInstallCommand(packageName, version) {
 }
 
 export function buildSkillSyncCommand() {
-  const binary = process.platform === 'win32' ? 'localnest-mcp-install-skill.cmd' : 'localnest-mcp-install-skill';
-  return { command: binary, args: ['--force'] };
+  const binary = process.platform === 'win32' ? 'localnest.cmd' : 'localnest';
+  return { command: binary, args: ['install', 'skills', '--force'] };
 }
 
 export { parseIsoTime };

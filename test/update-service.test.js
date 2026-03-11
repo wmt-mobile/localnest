@@ -216,7 +216,7 @@ test('selfUpdate runs install and skill sync when approved', async () => {
   assert.equal(out.ok, true);
   assert.equal(out.restart_required, true);
   assert.ok(calls.some((line) => line.includes('install -g localnest-mcp@latest')));
-  assert.ok(calls.some((line) => line.includes('localnest-mcp-install-skill')));
+  assert.ok(calls.some((line) => line.includes('localnest install skills --force')));
 });
 
 test('selfUpdate beta channel installs npm beta tag and refreshes beta status', async () => {
@@ -275,7 +275,7 @@ test('selfUpdate dry-run does not execute commands', async () => {
   assert.ok(Array.isArray(out.planned_commands));
   assert.ok(out.planned_commands.length >= 1);
   assert.ok(calls.some((line) => line.includes('npm --help')));
-  assert.ok(calls.some((line) => line.includes('localnest-mcp-install-skill --help')));
+  assert.ok(calls.some((line) => line.includes('localnest install skills --help')));
 });
 
 test('selfUpdate dry-run reports validation failures without mutating', async () => {
@@ -287,7 +287,7 @@ test('selfUpdate dry-run reports validation failures without mutating', async ()
     checkIntervalMinutes: 120,
     failureBackoffMinutes: 15,
     commandRunner: (command) => {
-      if (String(command).includes('localnest-mcp-install-skill')) {
+      if (String(command).includes('localnest')) {
         return { status: 1, stdout: '', stderr: 'missing' };
       }
       return { status: 0, stdout: '', stderr: '' };
@@ -347,10 +347,10 @@ test('selfUpdate reports skill sync failure after successful install', async () 
     commandRunner: (command, args) => {
       const line = [command, ...args].join(' ');
       calls.push(line);
-      if (args[0] === 'install') {
+      if (command === 'npm' && args[0] === 'install') {
         return { status: 0, stdout: 'installed', stderr: '' };
       }
-      if (String(command).includes('localnest-mcp-install-skill')) {
+      if (String(command).includes('localnest')) {
         return { status: 1, stdout: '', stderr: 'sync failed' };
       }
       return { status: 0, stdout: '"0.0.3"\n', stderr: '' };

@@ -4,6 +4,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.5] - 2026-03-11
+
+### Stable Release
+
+- Promoted the `0.0.4-beta.9` runtime and packaging fixes into the stable `0.0.5` line.
+- Fixed the installed-runtime release harness to derive LocalNest paths from the active user home instead of a machine-specific path.
+- Hardened installed-runtime validation with an MCP stdio handshake regression test and release-sweep coverage.
+- Switched upgrade skill-sync flow to the primary `localnest install skills --force` command while keeping the legacy alias available.
+
 ## [0.0.4-beta.9] - 2026-03-10
 
 ### Runtime Fixes

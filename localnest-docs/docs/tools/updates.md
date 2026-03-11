@@ -33,13 +33,13 @@ CLI equivalents:
 localnest upgrade
 localnest upgrade stable
 localnest upgrade beta
-localnest upgrade 0.0.4-beta.9
+localnest upgrade 0.0.5
 ```
 
 ## Related branch behavior
 
 - `localnest-mcp --version` now reports the runtime/package version directly.
-- `localnest-mcp-install-skill` now checks bundled skill metadata and skips reinstalling when the installed skill is already current, unless `--force` is used.
+- `localnest install skills` now checks bundled skill metadata and skips reinstalling when the installed skill is already current, unless `--force` is used.
 
 ## Safe usage pattern
 
