@@ -52,8 +52,11 @@ export async function main() {
   );
   services.getLastHealthReport = getLastHealthReport;
 
+  // StdioServerTransport adds listeners but does not resume stdin itself.
+  process.stdin.resume();
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  setInterval(() => {}, 60_000);
 }
 
 const isDirectExecution = process.argv[1]

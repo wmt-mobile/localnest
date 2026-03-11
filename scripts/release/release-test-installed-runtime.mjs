@@ -81,6 +81,7 @@ function buildDefaultConfig(overrides = {}) {
   const reportDir = path.join(root, 'reports');
   const versionLabel = overrides.versionLabel || 'installed-runtime';
   const slug = String(versionLabel).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'installed-runtime';
+  const localnestHome = path.join(os.homedir(), '.localnest');
   return {
     root,
     projectPath: root,
@@ -91,9 +92,9 @@ function buildDefaultConfig(overrides = {}) {
     markdownReportPath: overrides.markdownReportPath || path.join(reportDir, `localnest-${slug}-release-test-report.md`),
     jsonReportPath: overrides.jsonReportPath || path.join(reportDir, `localnest-${slug}-release-test-report.json`),
     reportTitle: `LocalNest ${overrides.versionLabel || 'Installed Runtime'} Release Test Report`,
-    configPath: '/home/jenil-d-gohel/.localnest/config/localnest.config.json',
-    dbPath: '/home/jenil-d-gohel/.localnest/data/localnest.db',
-    indexPath: '/home/jenil-d-gohel/.localnest/data/localnest.index.json',
+    configPath: path.join(localnestHome, 'config', 'localnest.config.json'),
+    dbPath: path.join(localnestHome, 'data', 'localnest.db'),
+    indexPath: path.join(localnestHome, 'data', 'localnest.index.json'),
     runtimeLabel: overrides.runtimeLabel || 'globally installed `localnest-mcp`',
     versionLabel: overrides.versionLabel || 'installed-runtime',
     command: overrides.command || 'localnest-mcp'

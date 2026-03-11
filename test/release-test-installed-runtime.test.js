@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import os from 'node:os';
 
 test('release-test-installed-runtime CLI parser supports dashed flags and boolean switches', async () => {
   const mod = await import('../scripts/release/release-test-installed-runtime.mjs');
@@ -23,4 +24,5 @@ test('release-test-installed-runtime default config parameterizes report paths b
   assert.match(config.markdownReportPath, /0-0-4-beta-6-release-test-report\.md$/);
   assert.match(config.jsonReportPath, /0-0-4-beta-6-release-test-report\.json$/);
   assert.equal(config.versionLabel, '0.0.4-beta.6');
+  assert.equal(config.configPath, `${os.homedir()}/.localnest/config/localnest.config.json`);
 });
