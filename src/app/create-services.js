@@ -37,7 +37,7 @@ async function createVectorIndex(runtime, workspace, embeddingService, setActive
 
   if (runtime.indexBackend === 'sqlite-vec') {
     try {
-      const { SqliteVecIndexService } = await import('../services/retrieval/index.js');
+      const { SqliteVecIndexService } = await import('../services/retrieval/sqlite-vec/service.js');
       return new SqliteVecIndexService({
         workspace,
         dbPath: runtime.sqliteDbPath,

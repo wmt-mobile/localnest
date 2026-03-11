@@ -18,7 +18,7 @@
 
 ```bash
 npm install -g localnest-mcp
-localnest-mcp-install-skill
+localnest install skills
 localnest setup
 localnest doctor
 localnest upgrade
@@ -27,49 +27,30 @@ localnest upgrade
 ## Fallback
 
 ```bash
+npx -y localnest-mcp --help
+npx -y localnest-mcp-install-skill --force
 npx -y localnest-mcp-setup
 npx -y localnest-mcp-doctor
 ```
 
 ## Install sequence
 
-<div className="docSteps">
-  <div className="docStep">
-    <span>1</span>
-    <div>
-      <strong>Install the package</strong>
-      <p>Use `npm install -g localnest-mcp` so setup, doctor, and skill commands are available directly.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>2</span>
-    <div>
-      <strong>Install the bundled skill</strong>
-      <p>Run `localnest-mcp-install-skill` to sync the shipped agent skill into the local skills directory.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>3</span>
-    <div>
-      <strong>Generate configuration</strong>
-      <p>`localnest setup` writes both the LocalNest config and the MCP client block, and prompts once for memory consent.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>4</span>
-    <div>
-      <strong>Verify the environment</strong>
-      <p>`localnest doctor` confirms runtime dependencies and flags configuration problems early.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>5</span>
-    <div>
-      <strong>Upgrade when needed</strong>
-      <p>Run `localnest upgrade` to pull the latest package and apply setup migrations.</p>
-    </div>
-  </div>
-</div>
+```bash
+# 1. Install the package
+npm install -g localnest-mcp
+
+# 2. Install bundled skills
+localnest install skills
+
+# 3. Generate configuration
+localnest setup
+
+# 4. Verify the environment
+localnest doctor
+
+# 5. Upgrade when needed
+localnest upgrade
+```
 
 ## MCP client config
 
@@ -106,7 +87,7 @@ After setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client 
 - For the recommended `sqlite-vec` backend, setup now installs or detects the native `vec0` extension and writes its path into config/client env automatically.
 - If setup cannot provision `vec0`, rerun `localnest setup` before relying on sqlite-vec in MCP clients.
 - Memory is opt-in. On Node 18/20, the rest of LocalNest still works, but memory remains unavailable.
-- `localnest-mcp-install-skill` is version-aware on this branch and skips reinstalling when the bundled skill is already current.
+- `localnest install skills` is version-aware on this branch and skips reinstalling bundled skills when they are already current unless `--force` is used. `localnest-mcp-install-skill` remains as a legacy alias.
 - Setup warms embedding/reranker models on first run (downloads into `~/.localnest/cache` by default).
 - `0.0.4-beta.9` removes the earlier `prebuild-install` warning path from installs and fixes bundled skill version reporting. A single upstream ONNX-runtime deprecation warning may still appear during npm install.
 - If `~/.localnest/cache` is not writable, LocalNest automatically falls back to a per-user temp cache path.

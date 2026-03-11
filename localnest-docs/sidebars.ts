@@ -40,6 +40,28 @@ const sidebars: SidebarsConfig = {
       items: [
         {
           type: 'category',
+          label: 'Beta 0.0.4-beta.9',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'versions/0.0.4-beta.9/overview', label: 'Overview' },
+            { type: 'doc', id: 'versions/0.0.4-beta.9/install', label: 'Install' },
+            { type: 'doc', id: 'versions/0.0.4-beta.9/configuration', label: 'Configuration' },
+            { type: 'doc', id: 'versions/0.0.4-beta.9/tools', label: 'Tools' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Beta 0.0.4-beta.8',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'versions/0.0.4-beta.8/overview', label: 'Overview' },
+            { type: 'doc', id: 'versions/0.0.4-beta.8/install', label: 'Install' },
+            { type: 'doc', id: 'versions/0.0.4-beta.8/configuration', label: 'Configuration' },
+            { type: 'doc', id: 'versions/0.0.4-beta.8/tools', label: 'Tools' }
+          ]
+        },
+        {
+          type: 'category',
           label: 'Beta 0.0.4-beta.7',
           collapsed: true,
           items: [

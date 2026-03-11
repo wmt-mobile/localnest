@@ -18,6 +18,7 @@ function printHelp() {
   process.stdout.write('  localnest <command> [options]\n\n');
   process.stdout.write('Commands:\n');
   process.stdout.write('  start                     start MCP server (stdio)\n');
+  process.stdout.write('  install skills            install or update bundled LocalNest skills\n');
   process.stdout.write('  setup                     run setup wizard\n');
   process.stdout.write('  doctor                    run diagnostics\n');
   process.stdout.write('  upgrade                   upgrade package and migrate setup\n');
@@ -57,6 +58,13 @@ async function main() {
     }
     const { startMcpServer } = await importRelative('../src/app/index.js', import.meta.url);
     await startMcpServer();
+    return;
+  }
+
+  if (command === 'install' && rest[0] === 'skills') {
+    process.argv = buildForwardArgv(rest.slice(1), process.argv);
+    const mod = await importRelative('../scripts/runtime/install-localnest-skill.mjs', import.meta.url);
+    await mod.main();
     return;
   }
 

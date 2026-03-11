@@ -49,6 +49,9 @@ If `backend=json` and `upgrade_recommended=true`, move to `sqlite-vec` for bette
 
 ### `localnest_embed_status`
 Returns active embedding backend/model status and vector-search readiness. Use this when hybrid search quality is weak, embeddings appear unavailable, or you need to confirm the current provider/model before indexing.
+Interpretation note:
+- `enabled=true` means the feature is configured.
+- `available=true` means the model has loaded successfully in the current runtime.
 
 ### `localnest_index_project`
 Builds or refreshes semantic index. Params:

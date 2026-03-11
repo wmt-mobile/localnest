@@ -46,7 +46,7 @@ Recommended global install:
 
 ```bash
 npm install -g localnest-mcp
-localnest-mcp-install-skill
+localnest install skills
 localnest setup
 localnest doctor
 ```
@@ -56,6 +56,15 @@ Fallback:
 ```bash
 npx -y localnest-mcp-setup
 npx -y localnest-mcp-doctor
+```
+
+Upgrade paths:
+
+```bash
+localnest upgrade
+localnest upgrade stable
+localnest upgrade beta
+localnest upgrade 0.0.4-beta.9
 ```
 
 ## Choose your path
@@ -74,9 +83,9 @@ npx -y localnest-mcp-doctor
     <strong>Current release</strong>
     <span>See what changed in `0.0.4-beta.9` before you upgrade or publish.</span>
   </a>
-  <a className="docLinkCard" href="./versions/0.0.4-beta.5/overview">
-    <strong>Archived beta.5</strong>
-    <span>Open the full archived doc set when you need previous-beta behavior.</span>
+  <a className="docLinkCard" href="./versions/0.0.4-beta.8/overview">
+    <strong>Archived beta.8</strong>
+    <span>Open the full archived doc set when you need the previous-beta behavior.</span>
   </a>
 </div>
 

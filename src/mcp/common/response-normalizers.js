@@ -208,6 +208,8 @@ export function normalizeCaptureOutcomeResult(result) {
 export function normalizeUpdateStatus(result) {
   return {
     package_name: result?.package_name || null,
+    update_channel: result?.update_channel || 'stable',
+    channel: result?.update_channel || 'stable',
     current_version: result?.current_version || null,
     latest_version: result?.latest_version || null,
     current: result?.current_version || null,

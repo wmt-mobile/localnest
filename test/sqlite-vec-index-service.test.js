@@ -9,7 +9,7 @@ const skipReason = nodeMajor < 22 ? `node:sqlite requires Node 22+ (current: ${p
 
 const { buildBaseScopeClause, SqliteVecIndexService } = skipReason
   ? { buildBaseScopeClause: null, SqliteVecIndexService: null }
-  : await import('../src/services/retrieval/index.js');
+  : await import('../src/services/retrieval/sqlite-vec/service.js');
 
 test('buildBaseScopeClause handles slash and backslash descendants', { skip: skipReason }, () => {
   const bases = ['C:\\repo\\project', '/home/u/repo'];
@@ -153,6 +153,39 @@ test('sqlite index status degrades gracefully when status cannot open the databa
   assert.equal(status.sqlite_vec_table_ready, false);
   assert.match(status.error || '', /database is locked/);
 
+  fs.rmSync(tempRoot, { recursive: true, force: true });
+});
+
+test('sqlite index enables extension loading when an extension path is configured', { skip: skipReason }, () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-sqlite-extension-test-'));
+  const dbPath = path.join(tempRoot, 'idx.db');
+
+  const workspace = {
+    resolveSearchBases: () => [tempRoot],
+    normalizeTarget: (p) => p,
+    *walkDirectories() {
+      yield { files: [] };
+    },
+    isLikelyTextFile: () => true,
+    safeReadText: () => ''
+  };
+
+  const service = new SqliteVecIndexService({
+    workspace,
+    dbPath,
+    sqliteVecExtensionPath: path.join(tempRoot, 'missing-vec0.so'),
+    chunkLines: 20,
+    chunkOverlap: 5,
+    maxTermsPerChunk: 40,
+    maxIndexedFiles: 100
+  });
+
+  service.ensureDb();
+
+  assert.equal(service.sqliteVecLoadAttempted, true);
+  assert.equal(service.sqliteVecLoadError.includes('disabled at database creation'), false);
+
+  service.resetDb();
   fs.rmSync(tempRoot, { recursive: true, force: true });
 });
 

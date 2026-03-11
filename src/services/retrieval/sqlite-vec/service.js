@@ -72,7 +72,9 @@ export class SqliteVecIndexService {
     if (this.db) return;
     fs.mkdirSync(path.dirname(this.dbPath), { recursive: true });
     try {
-      this.db = new DatabaseSync(this.dbPath);
+      this.db = new DatabaseSync(this.dbPath, {
+        allowExtension: Boolean(this.sqliteVecExtensionPath)
+      });
       this.db.exec('PRAGMA journal_mode=WAL;');
       this.db.exec('PRAGMA synchronous=NORMAL;');
       this.db.exec('PRAGMA cache_size=-8000;');

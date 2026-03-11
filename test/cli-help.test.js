@@ -37,6 +37,7 @@ test('localnest start --help prints usage without starting server', (t) => {
 
   assert.equal(result.status, 0);
   assert.match(result.stdout, /LocalNest CLI|Usage:/);
+  assert.match(result.stdout, /install skills/);
 });
 
 test('localnest start subcommand help prints start usage without runtime noise', (t) => {

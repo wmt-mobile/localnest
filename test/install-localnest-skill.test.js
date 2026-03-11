@@ -5,6 +5,8 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
   getKnownToolSkillDirs,
+  getKnownProjectSkillDirs,
+  listBundledSkillDirs,
   resolveBundledSkillDir,
   resolveInstallTarget
 } from '../scripts/runtime/install-localnest-skill.mjs';
@@ -22,6 +24,19 @@ test('resolveBundledSkillDir points at packaged top-level skills directory', () 
   );
 });
 
+test('listBundledSkillDirs discovers all bundled skills', () => {
+  const fakeMetaUrl = pathToFileURL(
+    path.join(process.cwd(), 'scripts', 'runtime', 'install-localnest-skill.mjs')
+  ).href;
+
+  const resolved = listBundledSkillDirs(fakeMetaUrl).map((entry) => path.basename(entry));
+
+  assert.ok(resolved.includes('localnest-mcp'));
+  assert.ok(resolved.includes('localnest-sql-adapter'));
+  assert.ok(resolved.includes('localnest-mcp-runtime'));
+  assert.ok(resolved.includes('localnest-node-compat'));
+});
+
 test('bundled skill metadata version matches package version', () => {
   const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
   const skill = JSON.parse(
@@ -36,29 +51,41 @@ test('known skill install locations include codex and Claude-style skill directo
 
   assert.deepEqual(dirs, [
     path.join('/tmp/localnest-home', '.codex', 'skills'),
+    path.join('/tmp/localnest-home', '.copilot', 'skills'),
     path.join('/tmp/localnest-home', '.claude', 'skills'),
     path.join('/tmp/localnest-home', '.cline', 'skills'),
     path.join('/tmp/localnest-home', '.continue', 'skills')
   ]);
 });
 
+test('known project skill locations include github and claude layouts', () => {
+  const dirs = getKnownProjectSkillDirs('/tmp/project');
+
+  assert.deepEqual(dirs, [
+    path.join('/tmp/project', '.github', 'skills'),
+    path.join('/tmp/project', '.claude', 'skills')
+  ]);
+});
+
 test('resolveInstallTarget defaults to agents skill dir', () => {
   const target = resolveInstallTarget({
     homeDir: '/tmp/localnest-home',
-    cwd: '/tmp/project'
+    cwd: '/tmp/project',
+    skillName: 'localnest-sql-adapter'
   });
 
-  assert.equal(target, path.join('/tmp/localnest-home', '.agents', 'skills', 'localnest-mcp'));
+  assert.equal(target, path.join('/tmp/localnest-home', '.agents', 'skills', 'localnest-sql-adapter'));
 });
 
 test('resolveInstallTarget supports project-local Claude skill layout', () => {
   const target = resolveInstallTarget({
     homeDir: '/tmp/localnest-home',
     cwd: '/tmp/project',
-    project: true
+    project: true,
+    skillName: 'localnest-node-compat'
   });
 
-  assert.equal(target, path.join('/tmp/project', '.claude', 'skills', 'localnest-mcp'));
+  assert.equal(target, path.join('/tmp/project', '.claude', 'skills', 'localnest-node-compat'));
 });
 
 test('resolveInstallTarget supports explicit destination override', () => {

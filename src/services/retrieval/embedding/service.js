@@ -12,7 +12,7 @@ export class EmbeddingService {
     this.cacheDir = cacheDir || '';
     this._dimensions = null;
     this._pipelinePromise = null;
-    this._available = provider !== 'none';
+    this._available = false;
     this._lastError = '';
   }
 
@@ -54,7 +54,9 @@ export class EmbeddingService {
     })();
 
     try {
-      return await this._pipelinePromise;
+      const pipeline = await this._pipelinePromise;
+      this._available = true;
+      return pipeline;
     } catch (error) {
       this._available = false;
       this._lastError = String(error?.message || error);

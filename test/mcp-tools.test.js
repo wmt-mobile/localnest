@@ -94,11 +94,12 @@ function makeFixture() {
   };
 
   const updates = {
-    getStatus: async ({ force }) => {
-      mark('updateStatus', { force });
+    getStatus: async ({ force, channel }) => {
+      mark('updateStatus', { force, channel });
       return {
         current_version: '0.0.0',
         latest_version: '0.0.1',
+        update_channel: channel || 'stable',
         is_outdated: true,
         recommendation: 'update_available',
         can_attempt_update: true
@@ -323,6 +324,8 @@ test('MCP tools register and execute across all tool groups', async () => {
   assert.equal(updateStatus.latest, '0.0.1');
   assert.equal(updateStatus.recommendation, 'update_available');
   assert.equal(updateStatus.can_attempt_update, true);
+  const updateStatusBeta = (await run('localnest_update_status', { force_check: true, channel: 'beta' })).structuredContent.data;
+  assert.equal(updateStatusBeta.channel, 'beta');
   const updateSelf = (await run('localnest_update_self', { approved_by_user: true, dry_run: true, version: 'latest', reinstall_skill: true })).structuredContent.data;
   assert.equal(updateSelf.ok, true);
   assert.equal(updateSelf.dry_run, true);

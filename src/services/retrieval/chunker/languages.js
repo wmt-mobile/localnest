@@ -63,6 +63,17 @@ export const LANGUAGE_LOADERS = {
   dart: async () => { const mod = await import('tree-sitter-dart'); return mod.default || mod; }
 };
 
+export const TREE_SITTER_PACKAGE = 'tree-sitter';
+
+export const LANGUAGE_PACKAGES = {
+  javascript: 'tree-sitter-javascript',
+  python: 'tree-sitter-python',
+  go: 'tree-sitter-go',
+  bash: 'tree-sitter-bash',
+  lua: 'tree-sitter-lua',
+  dart: 'tree-sitter-dart'
+};
+
 export function getExt(filePath) {
   return path.extname(String(filePath || '')).toLowerCase();
 }

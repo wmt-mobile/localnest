@@ -74,9 +74,10 @@ export function registerCoreTools({
     ['localnest_update_status'],
     {
       title: 'Update Status',
-      description: 'Check npm for the latest localnest-mcp version (cached, default every 120 minutes).',
+      description: 'Check npm for the latest localnest-mcp version on the selected channel (cached, default every 120 minutes).',
       inputSchema: {
-        force_check: z.boolean().default(false)
+        force_check: z.boolean().default(false),
+        channel: z.enum(['stable', 'beta']).default('stable')
       },
       annotations: {
         readOnlyHint: true,
@@ -85,14 +86,14 @@ export function registerCoreTools({
         openWorldHint: true
       }
     },
-    async ({ force_check }) => normalizeUpdateStatus(await updates.getStatus({ force: force_check }))
+    async ({ force_check, channel }) => normalizeUpdateStatus(await updates.getStatus({ force: force_check, channel }))
   );
 
   registerJsonTool(
     ['localnest_update_self'],
     {
       title: 'Update Self',
-      description: 'Update localnest-mcp globally via npm and sync bundled skill. Requires explicit user approval.',
+      description: 'Update localnest-mcp globally via npm and sync bundled skill. Supports stable, beta, or explicit version targets. Requires explicit user approval.',
       inputSchema: {
         approved_by_user: z.boolean().default(false),
         dry_run: z.boolean().default(false),

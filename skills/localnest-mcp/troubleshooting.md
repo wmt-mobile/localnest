@@ -38,6 +38,10 @@ Check:
 - `localnest_index_status`
 - `localnest_embed_status`
 
+Interpretation:
+- `enabled=true` but `available=false` means the embedding model is configured but has not loaded successfully in the current runtime.
+- If `search_hybrid` returns `reranker.applied=false`, inspect the reranker/model path instead of assuming semantic ranking is active.
+
 Then rebuild with:
 
 ```bash

@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { stdin as input, stdout as output } from 'node:process';
 import { migrateLocalnestHomeLayout, resolveLocalnestHome } from '../../src/runtime/index.js';
+import { normalizeInstallTarget, normalizeUpdateChannel } from '../../src/services/update/helpers.js';
 import {
   findMissingRequiredSetupFields,
   normalizeUpgradeConfig
@@ -128,7 +129,8 @@ function printUpgradeError({ title, detailLines = [], suggestionLines = [] }) {
 }
 
 function ensureVersionExists({ npmCmd, packageName, targetVersion }) {
-  if (!targetVersion || targetVersion === 'latest') return;
+  const channel = normalizeUpdateChannel(targetVersion);
+  if (!targetVersion || targetVersion === 'latest' || channel === 'stable' || channel === 'beta') return;
 
   const query = runCommandCapture(npmCmd, ['view', packageName, 'versions', '--json'], 'fetch published versions');
   if (!query.ok) {
@@ -243,12 +245,14 @@ async function main() {
     process.stdout.write('LocalNest upgrade helper\n\n');
     process.stdout.write('Usage:\n');
     process.stdout.write('  localnest upgrade\n');
+    process.stdout.write('  localnest upgrade stable\n');
+    process.stdout.write('  localnest upgrade beta\n');
     process.stdout.write('  localnest upgrade 0.0.4-beta.9\n');
     process.stdout.write('  localnest upgrade install 0.0.4-beta.9\n');
     process.stdout.write('  localnest upgrade --version=0.0.4-beta.9\n');
     process.stdout.write('  localnest upgrade --dry-run\n');
     process.stdout.write('Options:\n');
-    process.stdout.write('  --version=<semver|latest>  target package version\n');
+    process.stdout.write('  --version=<semver|latest|stable|beta>  target package version or channel\n');
     process.stdout.write('  --package=<npm-package>    package name (default localnest-mcp)\n');
     process.stdout.write('  --skip-skill               skip skill sync step\n');
     process.stdout.write('  --yes                      continue without confirmation prompts\n');
@@ -258,6 +262,7 @@ async function main() {
 
   const packageName = parseArg('package') || 'localnest-mcp';
   const targetVersion = resolveTargetVersion();
+  const installTarget = normalizeInstallTarget(targetVersion);
   const skipSkill = hasFlag('skip-skill');
   const dryRun = hasFlag('dry-run');
   const assumeYes = hasFlag('yes');
@@ -323,7 +328,7 @@ async function main() {
   ];
 
   const planned = [
-    `${npmCmd} install -g ${packageName}@${targetVersion}`,
+    `${npmCmd} install -g ${packageName}@${installTarget}`,
     skipSkill ? null : `${skillCmd} --force`,
     `${process.execPath} ${setupArgs.join(' ')}`
   ].filter(Boolean);
@@ -337,7 +342,7 @@ async function main() {
   }
 
   ensureVersionExists({ npmCmd, packageName, targetVersion });
-  runCommand(npmCmd, ['install', '-g', `${packageName}@${targetVersion}`], 'upgrade package');
+  runCommand(npmCmd, ['install', '-g', `${packageName}@${installTarget}`], 'upgrade package');
   if (!skipSkill) {
     runCommand(skillCmd, ['--force'], 'sync skill');
   }

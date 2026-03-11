@@ -6,6 +6,7 @@ import {
   compareVersions,
   defaultRunner,
   parseLatestVersion,
+  normalizeUpdateChannel,
   buildInstallCommand,
   buildSkillSyncCommand
 } from './helpers.js';
@@ -33,11 +34,13 @@ export class UpdateService {
   normalizeStatusRecord(status) {
     const input = status && typeof status === 'object' ? status : {};
     const latestVersion = input.latest_version || this.currentVersion;
+    const updateChannel = normalizeUpdateChannel(input.update_channel) || 'stable';
     return {
       ...input,
       package_name: this.packageName,
       current_version: this.currentVersion,
-      latest_version: latestVersion
+      latest_version: latestVersion,
+      update_channel: updateChannel
     };
   }
 
@@ -123,9 +126,11 @@ export class UpdateService {
     }, now);
   }
 
-  checkLatestFromNpm() {
+  checkLatestFromNpm(channel = 'stable') {
     const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
-    const run = this.commandRunner(npmCmd, ['view', this.packageName, 'version', '--json'], {
+    const normalizedChannel = normalizeUpdateChannel(channel) || 'stable';
+    const field = normalizedChannel === 'beta' ? 'dist-tags.beta' : 'version';
+    const run = this.commandRunner(npmCmd, ['view', this.packageName, field, '--json'], {
       timeoutMs: 12000
     });
     if (run?.error) {
@@ -137,16 +142,17 @@ export class UpdateService {
     }
     const latest = parseLatestVersion(run?.stdout);
     if (!latest) {
-      throw new Error('Unable to parse npm latest version response');
+      throw new Error(`Unable to parse npm ${normalizedChannel} version response`);
     }
     return latest;
   }
 
-  async getStatus({ force = false } = {}) {
+  async getStatus({ force = false, channel = 'stable' } = {}) {
     const now = Date.now();
     const cache = this.readCache();
+    const normalizedChannel = normalizeUpdateChannel(channel) || 'stable';
 
-    if (!this.shouldRefresh(cache, now, force) && cache) {
+    if (!this.shouldRefresh(cache, now, force) && cache && (cache.update_channel || 'stable') === normalizedChannel) {
       return this.withStatusMetadata({
         ...cache,
         stale: false,
@@ -155,12 +161,13 @@ export class UpdateService {
     }
 
     try {
-      const latestVersion = this.checkLatestFromNpm();
+      const latestVersion = this.checkLatestFromNpm(normalizedChannel);
       const isOutdated = compareVersions(latestVersion, this.currentVersion) > 0;
       const refreshed = {
         package_name: this.packageName,
         current_version: this.currentVersion,
         latest_version: latestVersion,
+        update_channel: normalizedChannel,
         is_outdated: isOutdated,
         checked_via: 'npm view',
         source: 'live',
@@ -175,11 +182,13 @@ export class UpdateService {
       return this.withStatusMetadata(refreshed, now);
     } catch (error) {
       const fallbackLatest = cache?.latest_version || this.currentVersion;
+      const fallbackChannel = cache?.update_channel || normalizedChannel;
       const isOutdated = compareVersions(fallbackLatest, this.currentVersion) > 0;
       const failed = {
         package_name: this.packageName,
         current_version: this.currentVersion,
         latest_version: fallbackLatest,
+        update_channel: fallbackChannel,
         is_outdated: isOutdated,
         checked_via: 'npm view',
         source: cache ? 'cache-fallback' : 'error',
@@ -222,8 +231,8 @@ export class UpdateService {
     };
   }
 
-  buildDryRunValidation({ reinstallSkill }) {
-    const installStep = buildInstallCommand(this.packageName, 'latest');
+  buildDryRunValidation({ reinstallSkill, version = 'latest' }) {
+    const installStep = buildInstallCommand(this.packageName, version);
     const checks = [
       this.validateCommandAvailability(installStep.command)
     ];
@@ -255,7 +264,7 @@ export class UpdateService {
     ].filter(Boolean);
 
     if (dryRun) {
-      const validation = this.buildDryRunValidation({ reinstallSkill });
+      const validation = this.buildDryRunValidation({ reinstallSkill, version });
       return {
         ok: validation.ok,
         skipped: true,
@@ -292,7 +301,7 @@ export class UpdateService {
       }
     }
 
-    const status = await this.getStatus({ force: true });
+    const status = await this.getStatus({ force: true, channel: normalizeUpdateChannel(version) || 'stable' });
     return {
       ok: true,
       step: 'completed',

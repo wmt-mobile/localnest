@@ -37,15 +37,8 @@ Everything — file reads, vector embeddings, memory — runs in-process on your
 
 ## Quick Start
 
-**1. Install**
-
 ```bash
 npm install -g localnest-mcp
-```
-
-**2. Set up** — downloads models, detects your AI tools, writes configs
-
-```bash
 localnest setup
 localnest doctor
 ```
@@ -92,11 +85,16 @@ AST-aware chunking ships by default for `JavaScript`, `Python`, `Go`, `Bash`, `L
 
 The current beta runtime uses `@huggingface/transformers` for local embeddings and reranking. New setup defaults use `huggingface`, and older `xenova` configs remain accepted as a compatibility alias.
 
-| Platform | Install ripgrep |
-|----------|----------------|
-| macOS | `brew install ripgrep` |
-| Ubuntu/Debian | `sudo apt-get install ripgrep` |
-| Windows | `winget install BurntSushi.ripgrep.MSVC` |
+```bash
+# macOS
+brew install ripgrep
+
+# Ubuntu/Debian
+sudo apt-get install ripgrep
+
+# Windows
+winget install BurntSushi.ripgrep.MSVC
+```
 
 ---
 
@@ -104,6 +102,8 @@ The current beta runtime uses `@huggingface/transformers` for local embeddings a
 
 ```bash
 localnest upgrade              # latest stable
+localnest upgrade stable       # latest stable
+localnest upgrade beta         # latest beta
 localnest upgrade <version>    # pin to a specific version
 localnest version              # check current
 ```
@@ -285,8 +285,9 @@ Setup writes everything to `~/.localnest/`:
 LocalNest ships a bundled AI agent skill for Claude Code, Cursor, Codex, and other supported clients. Install once and your agent knows exactly how to use every tool.
 
 ```bash
-localnest-mcp-install-skill          # install or update
-localnest-mcp-install-skill --force  # force reinstall
+localnest install skills             # install or update bundled skills
+localnest install skills --force     # force reinstall
+localnest-mcp-install-skill          # legacy alias
 ```
 
 **Shell CLI tools** for automation and hooks:

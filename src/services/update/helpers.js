@@ -81,11 +81,25 @@ export function parseLatestVersion(stdout) {
   return text.replace(/^"|"$/g, '').trim() || null;
 }
 
+export function normalizeUpdateChannel(value) {
+  const raw = String(value || '').trim().toLowerCase();
+  if (!raw || raw === 'latest' || raw === 'stable' || raw === 'release') return 'stable';
+  if (raw === 'beta') return 'beta';
+  return null;
+}
+
+export function normalizeInstallTarget(value) {
+  const channel = normalizeUpdateChannel(value);
+  if (channel === 'stable') return 'latest';
+  if (channel === 'beta') return 'beta';
+  return String(value || 'latest').trim() || 'latest';
+}
+
 export function buildInstallCommand(packageName, version) {
   const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
   return {
     command: npmCmd,
-    args: ['install', '-g', `${packageName}@${version || 'latest'}`]
+    args: ['install', '-g', `${packageName}@${normalizeInstallTarget(version)}`]
   };
 }
 

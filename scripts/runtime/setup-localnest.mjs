@@ -91,10 +91,14 @@ function getGlobalCommand() {
 
 function runPreflightChecks() {
   const errors = [];
+  const warnings = [];
 
   const majorNode = Number.parseInt(process.versions.node.split('.')[0] || '0', 10);
   if (!Number.isFinite(majorNode) || majorNode < 18) {
     errors.push(`Node.js 18+ is required. Current: ${process.versions.node}`);
+  }
+  if (Number.isFinite(majorNode) && majorNode < 22) {
+    warnings.push(`Node.js ${process.versions.node} does not provide built-in node:sqlite. LocalNest setup will use the json index backend and disable local memory unless you upgrade to Node 22+.`);
   }
 
   const hasGlobal = commandExists(getGlobalCommand());
@@ -107,7 +111,35 @@ function runPreflightChecks() {
     errors.push('ripgrep (rg) is required for efficient search. Install it and re-run setup.');
   }
 
-  return { errors };
+  return { errors, warnings, majorNode };
+}
+
+function supportsNodeSqlite() {
+  const majorNode = Number.parseInt(process.versions.node.split('.')[0] || '0', 10);
+  return Number.isFinite(majorNode) && majorNode >= 22;
+}
+
+function resolveCompatibleSetupOptions({ backend, memoryEnabled }) {
+  let resolvedBackend = backend;
+  let resolvedMemoryEnabled = memoryEnabled;
+  const warnings = [];
+
+  if (!supportsNodeSqlite()) {
+    if (resolvedBackend === 'sqlite-vec') {
+      resolvedBackend = 'json';
+      warnings.push(`sqlite-vec requires Node 22+ because it depends on built-in node:sqlite. Falling back to json backend on Node ${process.versions.node}.`);
+    }
+    if (resolvedMemoryEnabled) {
+      resolvedMemoryEnabled = false;
+      warnings.push(`Local memory requires Node 22+ because it depends on built-in node:sqlite. Disabling memory on Node ${process.versions.node}.`);
+    }
+  }
+
+  return {
+    backend: resolvedBackend,
+    memoryEnabled: resolvedMemoryEnabled,
+    warnings
+  };
 }
 
 function buildLocalnestEnv(indexConfig) {
@@ -555,6 +587,9 @@ async function main() {
     }
     process.exit(1);
   }
+  for (const warning of preflight.warnings) {
+    console.error(`[preflight:warning] ${warning}`);
+  }
 
   const rootsJsonArg = parseArg('roots-json');
   const pathsArg = parseArg('paths');
@@ -564,7 +599,7 @@ async function main() {
       throw new Error('No valid directories provided in --paths/--roots-json');
     }
 
-    const backend = parseArg('index-backend') || existingDefaults.backend;
+    const requestedBackend = parseArg('index-backend') || existingDefaults.backend;
     const dbPath = path.resolve(expandHome(parseArg('db-path') || existingDefaults.dbPath));
     const indexPath = path.resolve(expandHome(parseArg('index-path') || existingDefaults.indexPath));
     const chunkLines = parseIntegerArg('chunk-lines', existingDefaults.chunkLines);
@@ -583,11 +618,20 @@ async function main() {
       embedCachePreferred,
       rerankerCachePreferred
     );
-    const memoryEnabled = parseBooleanArg('memory-enabled') ?? existingDefaults.memoryEnabled;
+    const requestedMemoryEnabled = parseBooleanArg('memory-enabled') ?? existingDefaults.memoryEnabled;
     const memoryBackend = parseArg('memory-backend') || existingDefaults.memoryBackend;
     const memoryDbPath = path.resolve(expandHome(parseArg('memory-db-path') || existingDefaults.memoryDbPath));
     const memoryAutoCapture = parseBooleanArg('memory-auto-capture') ?? existingDefaults.memoryAutoCapture;
     const memoryConsentDone = parseBooleanArg('memory-consent-done') ?? existingDefaults.memoryConsentDone;
+    const compatibility = resolveCompatibleSetupOptions({
+      backend: requestedBackend,
+      memoryEnabled: requestedMemoryEnabled
+    });
+    for (const warning of compatibility.warnings) {
+      process.stderr.write(`[setup] warning: ${warning}\n`);
+    }
+    const backend = compatibility.backend;
+    const memoryEnabled = compatibility.memoryEnabled;
     const { sqliteVecExtensionPath, sqliteVecInstallStatus } = resolveSqliteVecPreference({ backend });
 
     saveOutputs(roots, packageRef, {
@@ -744,9 +788,13 @@ async function main() {
     console.log('Index backend options:');
     console.log('1) sqlite-vec (recommended): low-resource SQLite DB, durable, future-upgradable');
     console.log('2) json: simplest file-based index (fallback compatibility mode)');
-    const defaultBackendChoice = existingDefaults.backend === 'json' ? '2' : '1';
+    const defaultBackendChoice = !supportsNodeSqlite() || existingDefaults.backend === 'json' ? '2' : '1';
     const backendAnswer = (await rl.question(`Choose backend [1/2] (default ${defaultBackendChoice}): `)).trim();
-    const backend = backendAnswer === '2' ? 'json' : backendAnswer === '1' ? 'sqlite-vec' : existingDefaults.backend;
+    const requestedBackend = backendAnswer === '2'
+      ? 'json'
+      : backendAnswer === '1'
+        ? 'sqlite-vec'
+        : (!supportsNodeSqlite() ? 'json' : existingDefaults.backend);
 
     const suggestedDbPath = existingDefaults.dbPath;
     const dbPathInput = (await rl.question(`SQLite DB path [${suggestedDbPath}]: `)).trim();
@@ -776,15 +824,16 @@ async function main() {
       embedCachePreferred,
       rerankerCachePreferred
     );
-    const { sqliteVecExtensionPath, sqliteVecInstallStatus } = resolveSqliteVecPreference({ backend });
-
     console.log('');
     console.log('Local memory setup:');
     console.log('LocalNest can keep automatic local memory for future agent sessions.');
     console.log('This is opt-in and stays on your machine.');
-    let memoryEnabled = existingDefaults.memoryEnabled;
+    let memoryEnabled = supportsNodeSqlite() ? existingDefaults.memoryEnabled : false;
     let memoryConsentDone = existingDefaults.memoryConsentDone;
-    if (!existingDefaults.memoryConsentDone) {
+    if (!supportsNodeSqlite()) {
+      console.log(`Node ${process.versions.node} does not support built-in node:sqlite, so LocalNest will use the json backend and disable local memory.`);
+      memoryConsentDone = true;
+    } else if (!existingDefaults.memoryConsentDone) {
       const memoryConsentAnswer = (await rl.question(`Enable automatic local memory capture? [${existingDefaults.memoryEnabled ? 'Y/n' : 'y/N'}]: `)).trim().toLowerCase();
       if (memoryConsentAnswer === 'y' || memoryConsentAnswer === 'yes') {
         memoryEnabled = true;
@@ -806,6 +855,16 @@ async function main() {
     const suggestedMemoryDbPath = existingDefaults.memoryDbPath;
     const memoryDbPathInput = (await rl.question(`Memory SQLite DB path [${suggestedMemoryDbPath}]: `)).trim();
     const memoryDbPath = path.resolve(expandHome(memoryDbPathInput || suggestedMemoryDbPath));
+    const compatibility = resolveCompatibleSetupOptions({
+      backend: requestedBackend,
+      memoryEnabled
+    });
+    for (const warning of compatibility.warnings) {
+      process.stderr.write(`[setup] warning: ${warning}\n`);
+    }
+    const backend = compatibility.backend;
+    memoryEnabled = compatibility.memoryEnabled;
+    const { sqliteVecExtensionPath, sqliteVecInstallStatus } = resolveSqliteVecPreference({ backend });
 
     saveOutputs(roots, packageRef, {
       backend,

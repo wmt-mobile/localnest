@@ -49,6 +49,28 @@ test('getStatus fetches npm live result and then serves cache while fresh', asyn
   assert.equal(cached.using_cached_data, true);
 });
 
+test('getStatus can check beta channel via npm dist-tags', async () => {
+  const home = makeTempHome();
+  const calls = [];
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.0.4-beta.8',
+    checkIntervalMinutes: 120,
+    failureBackoffMinutes: 15,
+    commandRunner: (command, args) => {
+      calls.push([command, ...args]);
+      return { status: 0, stdout: '"0.0.4-beta.10"\n', stderr: '' };
+    }
+  });
+
+  const out = await service.getStatus({ force: true, channel: 'beta' });
+  assert.equal(out.update_channel, 'beta');
+  assert.equal(out.latest_version, '0.0.4-beta.10');
+  assert.equal(out.is_outdated, true);
+  assert.ok(calls.some((parts) => parts.includes('dist-tags.beta')));
+});
+
 test('getStatus falls back to cache on npm failure', async () => {
   const home = makeTempHome();
   const cachePath = buildLocalnestPaths(home).updateStatusPath;
@@ -195,6 +217,35 @@ test('selfUpdate runs install and skill sync when approved', async () => {
   assert.equal(out.restart_required, true);
   assert.ok(calls.some((line) => line.includes('install -g localnest-mcp@latest')));
   assert.ok(calls.some((line) => line.includes('localnest-mcp-install-skill')));
+});
+
+test('selfUpdate beta channel installs npm beta tag and refreshes beta status', async () => {
+  const home = makeTempHome();
+  const calls = [];
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.0.4-beta.8',
+    checkIntervalMinutes: 120,
+    failureBackoffMinutes: 15,
+    commandRunner: (command, args) => {
+      const line = [command, ...args].join(' ');
+      calls.push(line);
+      if (args[0] === 'view' && args.includes('dist-tags.beta')) return { status: 0, stdout: '"0.0.4-beta.10"\n', stderr: '' };
+      return { status: 0, stdout: 'ok', stderr: '' };
+    }
+  });
+
+  const out = await service.selfUpdate({
+    approvedByUser: true,
+    version: 'beta',
+    reinstallSkill: true
+  });
+
+  assert.equal(out.ok, true);
+  assert.equal(out.update_status.update_channel, 'beta');
+  assert.ok(calls.some((line) => line.includes('install -g localnest-mcp@beta')));
+  assert.ok(calls.some((line) => line.includes('view localnest-mcp dist-tags.beta --json')));
 });
 
 test('selfUpdate dry-run does not execute commands', async () => {

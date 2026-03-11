@@ -53,12 +53,35 @@ export function resolveBundledSkillDir(metaUrl = import.meta.url) {
   return path.join(packageRoot, 'skills', 'localnest-mcp');
 }
 
+export function listBundledSkillDirs(metaUrl = import.meta.url) {
+  const scriptDir = path.dirname(fileURLToPath(metaUrl));
+  const packageRoot = path.resolve(scriptDir, '..', '..');
+  const skillsRoot = path.join(packageRoot, 'skills');
+  try {
+    return fs.readdirSync(skillsRoot, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => path.join(skillsRoot, entry.name))
+      .filter((skillDir) => fs.existsSync(path.join(skillDir, 'SKILL.md')) && fs.existsSync(path.join(skillDir, SKILL_METADATA_FILE)))
+      .sort((a, b) => a.localeCompare(b));
+  } catch {
+    return [];
+  }
+}
+
 export function getKnownToolSkillDirs(homeDir = os.homedir()) {
   return [
     path.join(homeDir, '.codex', 'skills'),      // Codex
+    path.join(homeDir, '.copilot', 'skills'),    // GitHub Copilot / VS Code agent skills
     path.join(homeDir, '.claude', 'skills'),     // Claude Code
     path.join(homeDir, '.cline', 'skills'),      // Cline
     path.join(homeDir, '.continue', 'skills')    // Continue
+  ];
+}
+
+export function getKnownProjectSkillDirs(cwd = process.cwd()) {
+  return [
+    path.join(cwd, '.github', 'skills'),
+    path.join(cwd, '.claude', 'skills')
   ];
 }
 
@@ -129,19 +152,68 @@ export function resolveInstallTarget({
   homeDir = os.homedir(),
   cwd = process.cwd(),
   dest = '',
-  project = false
+  project = false,
+  skillName = 'localnest-mcp'
 } = {}) {
   if (dest) {
     return path.resolve(dest);
   }
 
   if (project) {
-    return path.resolve(path.join(cwd, '.claude', 'skills', 'localnest-mcp'));
+    return path.resolve(path.join(cwd, '.claude', 'skills', skillName));
   }
 
   const agentsHome = path.resolve(process.env.LOCALNEST_AGENTS_HOME || path.join(homeDir, '.agents'));
   const targetSkillsDir = path.resolve(process.env.LOCALNEST_SKILLS_DIR || path.join(agentsHome, 'skills'));
-  return path.join(targetSkillsDir, 'localnest-mcp');
+  return path.join(targetSkillsDir, skillName);
+}
+
+function installOrUpdateSkill(sourceSkillDir, targetSkillDir, { quiet, force } = {}) {
+  const state = determineSyncState(sourceSkillDir, targetSkillDir);
+  if (state.action === 'noop' && !force) {
+    return {
+      changed: false,
+      state,
+      targetSkillDir
+    };
+  }
+
+  if (state.exists) {
+    fs.rmSync(targetSkillDir, { recursive: true, force: true });
+  }
+  copyDir(sourceSkillDir, targetSkillDir);
+  if (!quiet) {
+    const verb = force
+      ? 'synced'
+      : state.action === 'upgrade'
+        ? 'updated'
+        : state.exists
+          ? 'synced'
+          : 'installed';
+    console.log(`[localnest-skill] ${verb} → ${targetSkillDir}`);
+  }
+  return {
+    changed: true,
+    state,
+    targetSkillDir
+  };
+}
+
+function syncSkillToDirs(sourceSkillDir, targetDirs, { quiet, force, createMissingParents = false } = {}) {
+  const skillName = readSkillMetadata(sourceSkillDir)?.name || path.basename(sourceSkillDir);
+  for (const skillsDir of targetDirs) {
+    const dest = path.join(skillsDir, skillName);
+    try {
+      if (!fs.existsSync(skillsDir)) {
+        if (!createMissingParents) continue;
+        fs.mkdirSync(skillsDir, { recursive: true });
+      }
+      const result = installOrUpdateSkill(sourceSkillDir, dest, { quiet, force });
+      if (!quiet && !result.changed) console.log(`[localnest-skill] already current → ${dest}`);
+    } catch (err) {
+      if (!quiet) console.warn(`[localnest-skill] skipped ${dest}: ${err.message}`);
+    }
+  }
 }
 
 export function main() {
@@ -149,18 +221,23 @@ export function main() {
   const force = hasFlag('--force');
   const quiet = hasFlag('--quiet') || auto;
   const project = hasFlag('project');
+  const userOnly = hasFlag('user');
   const dest = readOption('dest');
 
   if (hasFlag('help') || hasFlag('h')) {
     process.stdout.write('LocalNest bundled skill installer\n\n');
     process.stdout.write('Usage:\n');
+    process.stdout.write('  localnest install skills\n');
+    process.stdout.write('  localnest install skills --force\n');
     process.stdout.write('  localnest-mcp-install-skill\n');
     process.stdout.write('  localnest-mcp-install-skill --force\n');
     process.stdout.write('  localnest-mcp-install-skill --project\n');
+    process.stdout.write('  localnest-mcp-install-skill --user\n');
     process.stdout.write('  localnest-mcp-install-skill --dest /path/to/skills/localnest-mcp\n');
     process.stdout.write('\nOptions:\n');
     process.stdout.write('  --force       reinstall even when already current\n');
-    process.stdout.write('  --project     install into ./.claude/skills/localnest-mcp\n');
+    process.stdout.write('  --project     sync bundled skills into project skill dirs (.github/skills and .claude/skills)\n');
+    process.stdout.write('  --user        sync bundled skills into detected user skill dirs only\n');
     process.stdout.write('  --dest PATH   install into an explicit skill directory\n');
     process.stdout.write('  --quiet       suppress non-error output\n');
     process.stdout.write('  --help, -h    show this help\n');
@@ -177,87 +254,55 @@ export function main() {
     return;
   }
 
-  const sourceSkillDir = resolveBundledSkillDir();
-
-  if (!fs.existsSync(sourceSkillDir)) {
-    if (!quiet) console.error(`[localnest-skill] source not found: ${sourceSkillDir}`);
+  const sourceSkillDirs = listBundledSkillDirs();
+  if (sourceSkillDirs.length === 0) {
+    if (!quiet) console.error('[localnest-skill] no bundled skills found');
     process.exitCode = 1;
     return;
   }
 
-  const targetSkillDir = resolveInstallTarget({
-    homeDir: os.homedir(),
-    cwd: process.cwd(),
-    dest,
-    project
-  });
-
-  const state = determineSyncState(sourceSkillDir, targetSkillDir);
-  if (state.action === 'noop' && !force) {
-    if (!project && !dest) syncKnownToolLocations(sourceSkillDir, quiet, force);
-    if (!quiet) {
-      console.log('[localnest-skill] already up to date');
-      console.log(`[localnest-skill] version: ${state.sourceMeta?.version || 'unknown'}`);
-      console.log(`[localnest-skill] target: ${targetSkillDir}`);
-    }
+  if (dest && sourceSkillDirs.length > 1) {
+    if (!quiet) console.error('[localnest-skill] --dest only supports single-skill installs; use --tooling sync targets for bundled installs');
+    process.exitCode = 1;
     return;
   }
 
-  if (state.exists) {
-    fs.rmSync(targetSkillDir, { recursive: true, force: true });
-  }
+  const userTargets = getKnownToolSkillDirs(os.homedir());
+  const projectTargets = getKnownProjectSkillDirs(process.cwd());
 
-  copyDir(sourceSkillDir, targetSkillDir);
-  if (!project && !dest) syncKnownToolLocations(sourceSkillDir, quiet, force);
+  for (const sourceSkillDir of sourceSkillDirs) {
+    const skillName = readSkillMetadata(sourceSkillDir)?.name || path.basename(sourceSkillDir);
+
+    if (dest) {
+      installOrUpdateSkill(sourceSkillDir, resolveInstallTarget({
+        homeDir: os.homedir(),
+        cwd: process.cwd(),
+        dest,
+        project: false,
+        skillName
+      }), { quiet, force });
+      continue;
+    }
+
+    const primaryTarget = resolveInstallTarget({
+      homeDir: os.homedir(),
+      cwd: process.cwd(),
+      project: false,
+      skillName
+    });
+    const primaryResult = installOrUpdateSkill(sourceSkillDir, primaryTarget, { quiet, force });
+    if (!quiet && !primaryResult.changed) {
+      console.log(`[localnest-skill] already up to date → ${primaryTarget}`);
+    }
+
+    syncSkillToDirs(sourceSkillDir, userTargets, { quiet, force, createMissingParents: false });
+    if (project || !userOnly) {
+      syncSkillToDirs(sourceSkillDir, projectTargets, { quiet, force, createMissingParents: project });
+    }
+  }
 
   if (!quiet) {
-    const verb = force
-      ? 'synced'
-      : state.action === 'upgrade'
-        ? 'updated'
-        : state.exists
-          ? 'synced'
-          : 'installed';
-    console.log(`[localnest-skill] ${verb} successfully`);
-    console.log(`[localnest-skill] source: ${sourceSkillDir}`);
-    console.log(`[localnest-skill] target: ${targetSkillDir}`);
-    if (state.sourceMeta?.version) {
-      console.log(`[localnest-skill] version: ${state.sourceMeta.version}`);
-    }
-    if (project) {
-      console.log('[localnest-skill] installed as a project-local Claude skill');
-    } else if (dest) {
-      console.log('[localnest-skill] installed to explicit destination');
-    }
     console.log('[localnest-skill] restart your AI tool to load the updated skill');
-  }
-}
-
-// Known AI tool skill locations — extend as new tools adopt the skills spec.
-const KNOWN_TOOL_SKILL_DIRS = getKnownToolSkillDirs();
-
-function syncKnownToolLocations(sourceSkillDir, quiet, force) {
-  for (const toolSkillsDir of KNOWN_TOOL_SKILL_DIRS) {
-    const dest = path.join(toolSkillsDir, 'localnest-mcp');
-    try {
-      const state = determineSyncState(sourceSkillDir, dest);
-      if (state.action === 'noop' && !force) {
-        if (!quiet) console.log(`[localnest-skill] already current → ${dest}`);
-        continue;
-      }
-      if (fs.existsSync(dest)) {
-        fs.rmSync(dest, { recursive: true, force: true });
-      }
-      // Only create if the parent tool directory already exists (tool is installed).
-      if (!fs.existsSync(toolSkillsDir)) {
-        if (!force) continue;
-        fs.mkdirSync(toolSkillsDir, { recursive: true });
-      }
-      copyDir(sourceSkillDir, dest);
-      if (!quiet) console.log(`[localnest-skill] synced → ${dest}`);
-    } catch (err) {
-      if (!quiet) console.warn(`[localnest-skill] skipped ${dest}: ${err.message}`);
-    }
   }
 }
 

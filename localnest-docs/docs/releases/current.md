@@ -32,9 +32,9 @@ Current beta package documentation for `localnest-mcp@0.0.4-beta.9`, covering me
     <strong>Configure MCP</strong>
     <span>Use the generated MCP block, supported client setup, and startup timeout guidance.</span>
   </a>
-  <a className="docLinkCard" href="./0.0.4-beta.7">
-    <strong>Compare with beta.7</strong>
-    <span>Open the archived beta.7 package notes when you need the immediately previous release contract.</span>
+  <a className="docLinkCard" href="./0.0.4-beta.8">
+    <strong>Compare with beta.8</strong>
+    <span>Open the archived beta.8 package notes when you need the immediately previous release contract.</span>
   </a>
 </div>
 
@@ -76,14 +76,15 @@ Current beta package documentation for `localnest-mcp@0.0.4-beta.9`, covering me
 
 - Treat this page as the source of truth for the current beta release behavior.
 - Use the archived `0.0.3` pages when you need the last stable release contract.
-- Use archived beta pages such as [0.0.4-beta.7](./0.0.4-beta.7) when you need the previous beta contract instead of the current one.
+- Use archived beta pages such as [0.0.4-beta.8](./0.0.4-beta.8) or [0.0.4-beta.9](./0.0.4-beta.9) when you need a frozen package-specific contract instead of the maintained current summary.
 - If you need explicit install commands per version, use [Version Selection](./version-selection).
 
 ## Need a Different Release View?
 
 - Use [Version Selection](./version-selection) when you need exact install commands.
 - Use [Release Matrix](./history) when you need the full release-to-page mapping.
-- Use [0.0.4-beta.7](./0.0.4-beta.7) if you are debugging the prior beta instead of the current upload target.
+- Use [0.0.4-beta.8](./0.0.4-beta.8) if you are debugging the prior beta instead of the current upload target.
+- Use [0.0.4-beta.9](./0.0.4-beta.9) if you want a frozen archive page for the same beta version shown here.
 
 ## Version Source
 

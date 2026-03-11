@@ -27,6 +27,15 @@ This tool must only be used after explicit user approval.
 
 `dry_run=true` is a validation mode. It does not install anything; it only checks whether the required commands are available for a real update flow.
 
+CLI equivalents:
+
+```bash
+localnest upgrade
+localnest upgrade stable
+localnest upgrade beta
+localnest upgrade 0.0.4-beta.9
+```
+
 ## Related branch behavior
 
 - `localnest-mcp --version` now reports the runtime/package version directly.
@@ -34,29 +43,11 @@ This tool must only be used after explicit user approval.
 
 ## Safe usage pattern
 
-<div className="docSteps">
-  <div className="docStep">
-    <span>1</span>
-    <div>
-      <strong>Check the installed version</strong>
-      <p>Call `localnest_update_status` to see whether a newer version is available.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>2</span>
-    <div>
-      <strong>Ask for approval</strong>
-      <p>Do not run `localnest_update_self` unless the user explicitly confirms the update.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>3</span>
-    <div>
-      <strong>Re-verify after updating</strong>
-      <p>After an update, re-run status or doctor checks so the new runtime state is visible.</p>
-    </div>
-  </div>
-</div>
+```text
+1. Check the installed version with localnest_update_status.
+2. Ask for approval before calling localnest_update_self.
+3. Re-run status or doctor checks after updating.
+```
 
 ## Successful execution vs actionable update data
 
