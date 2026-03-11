@@ -245,6 +245,87 @@ function parseRootsFromJsonArg(rootsJsonArg) {
   return roots;
 }
 
+function readExistingConfig() {
+  try {
+    if (!fs.existsSync(configPath)) return null;
+    const parsed = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function sanitizeExistingRoots(existingRoots) {
+  if (!Array.isArray(existingRoots)) return [];
+  const roots = [];
+  for (const item of existingRoots) {
+    if (!item || typeof item.path !== 'string' || item.path.trim() === '') continue;
+    const resolved = path.resolve(expandHome(item.path.trim()));
+    if (!isDir(resolved)) continue;
+    const label = typeof item.label === 'string' && item.label.trim()
+      ? item.label.trim()
+      : toLabel(resolved, `root${roots.length + 1}`);
+    roots.push({ label, path: resolved });
+  }
+  return roots;
+}
+
+function buildExistingDefaults(existingConfig) {
+  const roots = sanitizeExistingRoots(existingConfig?.roots);
+  const existingIndex = existingConfig?.index || {};
+  const existingMemory = existingConfig?.memory || {};
+
+  return {
+    roots,
+    backend: typeof existingIndex.backend === 'string' && existingIndex.backend.trim()
+      ? existingIndex.backend.trim()
+      : 'sqlite-vec',
+    dbPath: typeof existingIndex.dbPath === 'string' && existingIndex.dbPath.trim()
+      ? path.resolve(expandHome(existingIndex.dbPath))
+      : defaultDbPath,
+    indexPath: typeof existingIndex.indexPath === 'string' && existingIndex.indexPath.trim()
+      ? path.resolve(expandHome(existingIndex.indexPath))
+      : defaultJsonIndexPath,
+    chunkLines: Number.isFinite(existingIndex.chunkLines) ? existingIndex.chunkLines : 60,
+    chunkOverlap: Number.isFinite(existingIndex.chunkOverlap) ? existingIndex.chunkOverlap : 15,
+    maxTermsPerChunk: Number.isFinite(existingIndex.maxTermsPerChunk) ? existingIndex.maxTermsPerChunk : 80,
+    maxIndexedFiles: Number.isFinite(existingIndex.maxIndexedFiles) ? existingIndex.maxIndexedFiles : 20000,
+    embeddingProvider: typeof existingIndex.embeddingProvider === 'string' && existingIndex.embeddingProvider.trim()
+      ? existingIndex.embeddingProvider.trim()
+      : 'huggingface',
+    embeddingModel: typeof existingIndex.embeddingModel === 'string' && existingIndex.embeddingModel.trim()
+      ? existingIndex.embeddingModel.trim()
+      : 'sentence-transformers/all-MiniLM-L6-v2',
+    embedCachePreferred: typeof existingIndex.embeddingCacheDir === 'string' && existingIndex.embeddingCacheDir.trim()
+      ? path.resolve(expandHome(existingIndex.embeddingCacheDir))
+      : layout.dirs.cache,
+    embeddingDimensions: Number.isFinite(existingIndex.embeddingDimensions) ? existingIndex.embeddingDimensions : 384,
+    rerankerProvider: typeof existingIndex.rerankerProvider === 'string' && existingIndex.rerankerProvider.trim()
+      ? existingIndex.rerankerProvider.trim()
+      : 'huggingface',
+    rerankerModel: typeof existingIndex.rerankerModel === 'string' && existingIndex.rerankerModel.trim()
+      ? existingIndex.rerankerModel.trim()
+      : 'cross-encoder/ms-marco-MiniLM-L-6-v2',
+    rerankerCachePreferred: typeof existingIndex.rerankerCacheDir === 'string' && existingIndex.rerankerCacheDir.trim()
+      ? path.resolve(expandHome(existingIndex.rerankerCacheDir))
+      : layout.dirs.cache,
+    memoryEnabled: typeof existingMemory.enabled === 'boolean' ? existingMemory.enabled : false,
+    memoryBackend: typeof existingMemory.backend === 'string' && existingMemory.backend.trim()
+      ? existingMemory.backend.trim()
+      : 'auto',
+    memoryDbPath: typeof existingMemory.dbPath === 'string' && existingMemory.dbPath.trim()
+      ? path.resolve(expandHome(existingMemory.dbPath))
+      : defaultMemoryDbPath,
+    memoryAutoCapture: typeof existingMemory.autoCapture === 'boolean'
+      ? existingMemory.autoCapture
+      : (typeof existingMemory.enabled === 'boolean' ? existingMemory.enabled : false),
+    memoryConsentDone: typeof existingMemory.askForConsentDone === 'boolean'
+      ? existingMemory.askForConsentDone
+      : false
+  };
+}
+
 function resolveModelCacheDirs(preferredEmbedDir, preferredRerankerDir) {
   const embed = resolveWritableModelCacheDir({
     preferredDir: preferredEmbedDir,
@@ -465,6 +546,8 @@ async function main() {
   }
 
   const packageRef = parseArg('package') || process.env.LOCALNEST_NPX_PACKAGE || 'localnest-mcp';
+  const existingConfig = readExistingConfig();
+  const existingDefaults = buildExistingDefaults(existingConfig);
   const preflight = runPreflightChecks();
   if (preflight.errors.length > 0) {
     for (const err of preflight.errors) {
@@ -481,30 +564,30 @@ async function main() {
       throw new Error('No valid directories provided in --paths/--roots-json');
     }
 
-    const backend = parseArg('index-backend') || 'sqlite-vec';
-    const dbPath = path.resolve(expandHome(parseArg('db-path') || defaultDbPath));
-    const indexPath = path.resolve(expandHome(parseArg('index-path') || defaultJsonIndexPath));
-    const chunkLines = parseIntegerArg('chunk-lines', 60);
-    const chunkOverlap = parseIntegerArg('chunk-overlap', 15);
-    const maxTermsPerChunk = parseIntegerArg('max-terms-per-chunk', 80);
-    const maxIndexedFiles = parseIntegerArg('max-indexed-files', 20000);
-    const embeddingProvider = parseArg('embed-provider') || 'huggingface';
-    const embeddingModel = parseArg('embed-model') || 'sentence-transformers/all-MiniLM-L6-v2';
-    const embedCachePreferred = path.resolve(expandHome(parseArg('embed-cache-dir') || layout.dirs.cache));
-    const embeddingDimensions = parseIntegerArg('embed-dims', 384);
-    const rerankerProvider = parseArg('reranker-provider') || 'huggingface';
-    const rerankerModel = parseArg('reranker-model') || 'cross-encoder/ms-marco-MiniLM-L-6-v2';
-    const rerankerCachePreferred = path.resolve(expandHome(parseArg('reranker-cache-dir') || layout.dirs.cache));
+    const backend = parseArg('index-backend') || existingDefaults.backend;
+    const dbPath = path.resolve(expandHome(parseArg('db-path') || existingDefaults.dbPath));
+    const indexPath = path.resolve(expandHome(parseArg('index-path') || existingDefaults.indexPath));
+    const chunkLines = parseIntegerArg('chunk-lines', existingDefaults.chunkLines);
+    const chunkOverlap = parseIntegerArg('chunk-overlap', existingDefaults.chunkOverlap);
+    const maxTermsPerChunk = parseIntegerArg('max-terms-per-chunk', existingDefaults.maxTermsPerChunk);
+    const maxIndexedFiles = parseIntegerArg('max-indexed-files', existingDefaults.maxIndexedFiles);
+    const embeddingProvider = parseArg('embed-provider') || existingDefaults.embeddingProvider;
+    const embeddingModel = parseArg('embed-model') || existingDefaults.embeddingModel;
+    const embedCachePreferred = path.resolve(expandHome(parseArg('embed-cache-dir') || existingDefaults.embedCachePreferred));
+    const embeddingDimensions = parseIntegerArg('embed-dims', existingDefaults.embeddingDimensions);
+    const rerankerProvider = parseArg('reranker-provider') || existingDefaults.rerankerProvider;
+    const rerankerModel = parseArg('reranker-model') || existingDefaults.rerankerModel;
+    const rerankerCachePreferred = path.resolve(expandHome(parseArg('reranker-cache-dir') || existingDefaults.rerankerCachePreferred));
     const skipModelDownload = parseBooleanArg('skip-model-download') ?? false;
     const { embeddingCacheDir, rerankerCacheDir } = resolveModelCacheDirs(
       embedCachePreferred,
       rerankerCachePreferred
     );
-    const memoryEnabled = parseBooleanArg('memory-enabled') ?? false;
-    const memoryBackend = parseArg('memory-backend') || 'auto';
-    const memoryDbPath = path.resolve(expandHome(parseArg('memory-db-path') || defaultMemoryDbPath));
-    const memoryAutoCapture = parseBooleanArg('memory-auto-capture') ?? memoryEnabled;
-    const memoryConsentDone = parseBooleanArg('memory-consent-done') ?? false;
+    const memoryEnabled = parseBooleanArg('memory-enabled') ?? existingDefaults.memoryEnabled;
+    const memoryBackend = parseArg('memory-backend') || existingDefaults.memoryBackend;
+    const memoryDbPath = path.resolve(expandHome(parseArg('memory-db-path') || existingDefaults.memoryDbPath));
+    const memoryAutoCapture = parseBooleanArg('memory-auto-capture') ?? existingDefaults.memoryAutoCapture;
+    const memoryConsentDone = parseBooleanArg('memory-consent-done') ?? existingDefaults.memoryConsentDone;
     const { sqliteVecExtensionPath, sqliteVecInstallStatus } = resolveSqliteVecPreference({ backend });
 
     saveOutputs(roots, packageRef, {
@@ -584,6 +667,12 @@ async function main() {
     console.log('This will configure project/data folders and indexing backend for LocalNest MCP.');
     console.log('');
 
+    if (existingConfig) {
+      console.log(`Existing config detected: ${configPath}`);
+      console.log('Press Enter to keep current values where shown.');
+      console.log('');
+    }
+
     const suggestions = collectSuggestions();
     if (suggestions.length > 0) {
       console.log('Suggested folders:');
@@ -593,41 +682,56 @@ async function main() {
       console.log('');
     }
 
-    const roots = [];
-
-    for (let i = 0; i < suggestions.length; i += 1) {
-      const answer = (await rl.question(`Add suggested folder ${i + 1} (${suggestions[i]})? [y/N]: `)).trim().toLowerCase();
-      if (answer !== 'y' && answer !== 'yes') continue;
-
-      const defaultLabel = toLabel(suggestions[i], `root${roots.length + 1}`);
-      const labelInput = (await rl.question(`Label for ${suggestions[i]} [${defaultLabel}]: `)).trim();
-      roots.push({
-        label: labelInput || defaultLabel,
-        path: suggestions[i]
+    let roots = [...existingDefaults.roots];
+    let reuseExistingRoots = false;
+    if (roots.length > 0) {
+      console.log('Existing roots:');
+      roots.forEach((root, i) => {
+        console.log(`  ${i + 1}. ${root.label}: ${root.path}`);
       });
+      console.log('');
+      const reuseAnswer = (await rl.question('Keep existing roots? [Y/n]: ')).trim().toLowerCase();
+      reuseExistingRoots = reuseAnswer === '' || reuseAnswer === 'y' || reuseAnswer === 'yes';
+      if (!reuseExistingRoots) {
+        roots = [];
+      }
     }
 
-    while (true) {
-      const rawPath = (await rl.question('Add another folder path (or press Enter to finish): ')).trim();
-      if (!rawPath) break;
+    if (!reuseExistingRoots) {
+      for (let i = 0; i < suggestions.length; i += 1) {
+        const answer = (await rl.question(`Add suggested folder ${i + 1} (${suggestions[i]})? [y/N]: `)).trim().toLowerCase();
+        if (answer !== 'y' && answer !== 'yes') continue;
 
-      const resolved = path.resolve(expandHome(rawPath));
-      if (!isDir(resolved)) {
-        console.log(`Skipping: not a directory -> ${resolved}`);
-        continue;
+        const defaultLabel = toLabel(suggestions[i], `root${roots.length + 1}`);
+        const labelInput = (await rl.question(`Label for ${suggestions[i]} [${defaultLabel}]: `)).trim();
+        roots.push({
+          label: labelInput || defaultLabel,
+          path: suggestions[i]
+        });
       }
 
-      if (roots.some((r) => r.path === resolved)) {
-        console.log(`Skipping: already added -> ${resolved}`);
-        continue;
-      }
+      while (true) {
+        const rawPath = (await rl.question('Add another folder path (or press Enter to finish): ')).trim();
+        if (!rawPath) break;
 
-      const defaultLabel = toLabel(resolved, `root${roots.length + 1}`);
-      const labelInput = (await rl.question(`Label for ${resolved} [${defaultLabel}]: `)).trim();
-      roots.push({
-        label: labelInput || defaultLabel,
-        path: resolved
-      });
+        const resolved = path.resolve(expandHome(rawPath));
+        if (!isDir(resolved)) {
+          console.log(`Skipping: not a directory -> ${resolved}`);
+          continue;
+        }
+
+        if (roots.some((r) => r.path === resolved)) {
+          console.log(`Skipping: already added -> ${resolved}`);
+          continue;
+        }
+
+        const defaultLabel = toLabel(resolved, `root${roots.length + 1}`);
+        const labelInput = (await rl.question(`Label for ${resolved} [${defaultLabel}]: `)).trim();
+        roots.push({
+          label: labelInput || defaultLabel,
+          path: resolved
+        });
+      }
     }
 
     if (roots.length === 0) {
@@ -640,33 +744,34 @@ async function main() {
     console.log('Index backend options:');
     console.log('1) sqlite-vec (recommended): low-resource SQLite DB, durable, future-upgradable');
     console.log('2) json: simplest file-based index (fallback compatibility mode)');
-    const backendAnswer = (await rl.question('Choose backend [1/2] (default 1): ')).trim();
-    const backend = backendAnswer === '2' ? 'json' : 'sqlite-vec';
+    const defaultBackendChoice = existingDefaults.backend === 'json' ? '2' : '1';
+    const backendAnswer = (await rl.question(`Choose backend [1/2] (default ${defaultBackendChoice}): `)).trim();
+    const backend = backendAnswer === '2' ? 'json' : backendAnswer === '1' ? 'sqlite-vec' : existingDefaults.backend;
 
-    const suggestedDbPath = defaultDbPath;
+    const suggestedDbPath = existingDefaults.dbPath;
     const dbPathInput = (await rl.question(`SQLite DB path [${suggestedDbPath}]: `)).trim();
     const dbPath = path.resolve(expandHome(dbPathInput || suggestedDbPath));
 
-    const suggestedIndexPath = defaultJsonIndexPath;
+    const suggestedIndexPath = existingDefaults.indexPath;
     const indexPathInput = (await rl.question(`JSON index path (fallback) [${suggestedIndexPath}]: `)).trim();
     const indexPath = path.resolve(expandHome(indexPathInput || suggestedIndexPath));
 
-    const chunkLinesInput = (await rl.question('Chunk lines [60]: ')).trim();
-    const chunkOverlapInput = (await rl.question('Chunk overlap [15]: ')).trim();
-    const maxTermsInput = (await rl.question('Max terms per chunk [80]: ')).trim();
-    const maxFilesInput = (await rl.question('Max indexed files [20000]: ')).trim();
+    const chunkLinesInput = (await rl.question(`Chunk lines [${existingDefaults.chunkLines}]: `)).trim();
+    const chunkOverlapInput = (await rl.question(`Chunk overlap [${existingDefaults.chunkOverlap}]: `)).trim();
+    const maxTermsInput = (await rl.question(`Max terms per chunk [${existingDefaults.maxTermsPerChunk}]: `)).trim();
+    const maxFilesInput = (await rl.question(`Max indexed files [${existingDefaults.maxIndexedFiles}]: `)).trim();
 
-    const chunkLines = Number.parseInt(chunkLinesInput || '60', 10) || 60;
-    const chunkOverlap = Number.parseInt(chunkOverlapInput || '15', 10) || 15;
-    const maxTermsPerChunk = Number.parseInt(maxTermsInput || '80', 10) || 80;
-    const maxIndexedFiles = Number.parseInt(maxFilesInput || '20000', 10) || 20000;
-    const embeddingProvider = 'huggingface';
-    const embeddingModel = 'sentence-transformers/all-MiniLM-L6-v2';
-    const embedCachePreferred = layout.dirs.cache;
-    const embeddingDimensions = 384;
-    const rerankerProvider = 'huggingface';
-    const rerankerModel = 'cross-encoder/ms-marco-MiniLM-L-6-v2';
-    const rerankerCachePreferred = layout.dirs.cache;
+    const chunkLines = Number.parseInt(chunkLinesInput || String(existingDefaults.chunkLines), 10) || existingDefaults.chunkLines;
+    const chunkOverlap = Number.parseInt(chunkOverlapInput || String(existingDefaults.chunkOverlap), 10) || existingDefaults.chunkOverlap;
+    const maxTermsPerChunk = Number.parseInt(maxTermsInput || String(existingDefaults.maxTermsPerChunk), 10) || existingDefaults.maxTermsPerChunk;
+    const maxIndexedFiles = Number.parseInt(maxFilesInput || String(existingDefaults.maxIndexedFiles), 10) || existingDefaults.maxIndexedFiles;
+    const embeddingProvider = existingDefaults.embeddingProvider;
+    const embeddingModel = existingDefaults.embeddingModel;
+    const embedCachePreferred = existingDefaults.embedCachePreferred;
+    const embeddingDimensions = existingDefaults.embeddingDimensions;
+    const rerankerProvider = existingDefaults.rerankerProvider;
+    const rerankerModel = existingDefaults.rerankerModel;
+    const rerankerCachePreferred = existingDefaults.rerankerCachePreferred;
     const { embeddingCacheDir, rerankerCacheDir } = resolveModelCacheDirs(
       embedCachePreferred,
       rerankerCachePreferred
@@ -677,9 +782,28 @@ async function main() {
     console.log('Local memory setup:');
     console.log('LocalNest can keep automatic local memory for future agent sessions.');
     console.log('This is opt-in and stays on your machine.');
-    const memoryConsentAnswer = (await rl.question('Enable automatic local memory capture? [y/N]: ')).trim().toLowerCase();
-    const memoryEnabled = memoryConsentAnswer === 'y' || memoryConsentAnswer === 'yes';
-    const suggestedMemoryDbPath = defaultMemoryDbPath;
+    let memoryEnabled = existingDefaults.memoryEnabled;
+    let memoryConsentDone = existingDefaults.memoryConsentDone;
+    if (!existingDefaults.memoryConsentDone) {
+      const memoryConsentAnswer = (await rl.question(`Enable automatic local memory capture? [${existingDefaults.memoryEnabled ? 'Y/n' : 'y/N'}]: `)).trim().toLowerCase();
+      if (memoryConsentAnswer === 'y' || memoryConsentAnswer === 'yes') {
+        memoryEnabled = true;
+      } else if (memoryConsentAnswer === 'n' || memoryConsentAnswer === 'no') {
+        memoryEnabled = false;
+      }
+      memoryConsentDone = true;
+    } else {
+      const memoryToggleAnswer = (await rl.question(`Automatic local memory is currently ${existingDefaults.memoryEnabled ? 'enabled' : 'disabled'}. Change it? [y/N]: `)).trim().toLowerCase();
+      if (memoryToggleAnswer === 'y' || memoryToggleAnswer === 'yes') {
+        const enableAnswer = (await rl.question(`Enable automatic local memory capture? [${existingDefaults.memoryEnabled ? 'Y/n' : 'y/N'}]: `)).trim().toLowerCase();
+        if (enableAnswer === 'y' || enableAnswer === 'yes' || (enableAnswer === '' && existingDefaults.memoryEnabled)) {
+          memoryEnabled = true;
+        } else if (enableAnswer === 'n' || enableAnswer === 'no' || (enableAnswer === '' && !existingDefaults.memoryEnabled)) {
+          memoryEnabled = false;
+        }
+      }
+    }
+    const suggestedMemoryDbPath = existingDefaults.memoryDbPath;
     const memoryDbPathInput = (await rl.question(`Memory SQLite DB path [${suggestedMemoryDbPath}]: `)).trim();
     const memoryDbPath = path.resolve(expandHome(memoryDbPathInput || suggestedMemoryDbPath));
 
@@ -705,10 +829,10 @@ async function main() {
       },
       memory: {
         enabled: memoryEnabled,
-        backend: 'auto',
+        backend: existingDefaults.memoryBackend,
         dbPath: memoryDbPath,
         autoCapture: memoryEnabled,
-        askForConsentDone: true
+        askForConsentDone: memoryConsentDone
       }
     });
     printSuccess(packageRef, {
@@ -729,7 +853,7 @@ async function main() {
       },
       memory: {
         enabled: memoryEnabled,
-        backend: 'auto',
+        backend: existingDefaults.memoryBackend,
         dbPath: memoryDbPath
       }
     });

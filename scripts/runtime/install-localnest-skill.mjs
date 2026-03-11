@@ -9,7 +9,19 @@ const argv = process.argv.slice(2);
 const SKILL_METADATA_FILE = '.localnest-skill.json';
 
 function hasFlag(flag) {
-  return argv.includes(flag);
+  return argv.includes(flag) || argv.includes(`--${flag}`);
+}
+
+function readOption(name) {
+  const prefixed = `--${name}=`;
+  const inline = argv.find((arg) => arg.startsWith(prefixed));
+  if (inline) return inline.slice(prefixed.length);
+
+  const index = argv.findIndex((arg) => arg === `--${name}`);
+  if (index >= 0 && index + 1 < argv.length) {
+    return argv[index + 1];
+  }
+  return '';
 }
 
 function envTrue(name, fallback = false) {
@@ -39,6 +51,15 @@ export function resolveBundledSkillDir(metaUrl = import.meta.url) {
   const scriptDir = path.dirname(fileURLToPath(metaUrl));
   const packageRoot = path.resolve(scriptDir, '..', '..');
   return path.join(packageRoot, 'skills', 'localnest-mcp');
+}
+
+export function getKnownToolSkillDirs(homeDir = os.homedir()) {
+  return [
+    path.join(homeDir, '.codex', 'skills'),      // Codex
+    path.join(homeDir, '.claude', 'skills'),     // Claude Code
+    path.join(homeDir, '.cline', 'skills'),      // Cline
+    path.join(homeDir, '.continue', 'skills')    // Continue
+  ];
 }
 
 function readSkillMetadata(skillDir) {
@@ -104,10 +125,47 @@ function determineSyncState(sourceSkillDir, targetSkillDir) {
   return { exists: true, action: 'sync', sourceMeta, targetMeta };
 }
 
+export function resolveInstallTarget({
+  homeDir = os.homedir(),
+  cwd = process.cwd(),
+  dest = '',
+  project = false
+} = {}) {
+  if (dest) {
+    return path.resolve(dest);
+  }
+
+  if (project) {
+    return path.resolve(path.join(cwd, '.claude', 'skills', 'localnest-mcp'));
+  }
+
+  const agentsHome = path.resolve(process.env.LOCALNEST_AGENTS_HOME || path.join(homeDir, '.agents'));
+  const targetSkillsDir = path.resolve(process.env.LOCALNEST_SKILLS_DIR || path.join(agentsHome, 'skills'));
+  return path.join(targetSkillsDir, 'localnest-mcp');
+}
+
 export function main() {
   const auto = hasFlag('--auto');
   const force = hasFlag('--force');
   const quiet = hasFlag('--quiet') || auto;
+  const project = hasFlag('project');
+  const dest = readOption('dest');
+
+  if (hasFlag('help') || hasFlag('h')) {
+    process.stdout.write('LocalNest bundled skill installer\n\n');
+    process.stdout.write('Usage:\n');
+    process.stdout.write('  localnest-mcp-install-skill\n');
+    process.stdout.write('  localnest-mcp-install-skill --force\n');
+    process.stdout.write('  localnest-mcp-install-skill --project\n');
+    process.stdout.write('  localnest-mcp-install-skill --dest /path/to/skills/localnest-mcp\n');
+    process.stdout.write('\nOptions:\n');
+    process.stdout.write('  --force       reinstall even when already current\n');
+    process.stdout.write('  --project     install into ./.claude/skills/localnest-mcp\n');
+    process.stdout.write('  --dest PATH   install into an explicit skill directory\n');
+    process.stdout.write('  --quiet       suppress non-error output\n');
+    process.stdout.write('  --help, -h    show this help\n');
+    return;
+  }
 
   if (auto && envTrue('LOCALNEST_SKIP_SKILL_INSTALL', false)) {
     if (!quiet) console.log('[localnest-skill] skipped by LOCALNEST_SKIP_SKILL_INSTALL=true');
@@ -127,13 +185,16 @@ export function main() {
     return;
   }
 
-  const agentsHome = path.resolve(process.env.LOCALNEST_AGENTS_HOME || path.join(os.homedir(), '.agents'));
-  const targetSkillsDir = path.resolve(process.env.LOCALNEST_SKILLS_DIR || path.join(agentsHome, 'skills'));
-  const targetSkillDir = path.join(targetSkillsDir, 'localnest-mcp');
+  const targetSkillDir = resolveInstallTarget({
+    homeDir: os.homedir(),
+    cwd: process.cwd(),
+    dest,
+    project
+  });
 
   const state = determineSyncState(sourceSkillDir, targetSkillDir);
   if (state.action === 'noop' && !force) {
-    syncKnownToolLocations(sourceSkillDir, quiet, force);
+    if (!project && !dest) syncKnownToolLocations(sourceSkillDir, quiet, force);
     if (!quiet) {
       console.log('[localnest-skill] already up to date');
       console.log(`[localnest-skill] version: ${state.sourceMeta?.version || 'unknown'}`);
@@ -147,7 +208,7 @@ export function main() {
   }
 
   copyDir(sourceSkillDir, targetSkillDir);
-  syncKnownToolLocations(sourceSkillDir, quiet, force);
+  if (!project && !dest) syncKnownToolLocations(sourceSkillDir, quiet, force);
 
   if (!quiet) {
     const verb = force
@@ -163,16 +224,17 @@ export function main() {
     if (state.sourceMeta?.version) {
       console.log(`[localnest-skill] version: ${state.sourceMeta.version}`);
     }
+    if (project) {
+      console.log('[localnest-skill] installed as a project-local Claude skill');
+    } else if (dest) {
+      console.log('[localnest-skill] installed to explicit destination');
+    }
     console.log('[localnest-skill] restart your AI tool to load the updated skill');
   }
 }
 
 // Known AI tool skill locations — extend as new tools adopt the skills spec.
-const KNOWN_TOOL_SKILL_DIRS = [
-  path.join(os.homedir(), '.claude', 'skills'),       // Claude Code
-  path.join(os.homedir(), '.cline', 'skills'),        // Cline
-  path.join(os.homedir(), '.continue', 'skills'),     // Continue
-];
+const KNOWN_TOOL_SKILL_DIRS = getKnownToolSkillDirs();
 
 function syncKnownToolLocations(sourceSkillDir, quiet, force) {
   for (const toolSkillsDir of KNOWN_TOOL_SKILL_DIRS) {
