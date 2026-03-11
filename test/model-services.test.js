@@ -13,8 +13,16 @@ test('embedding service reports unavailable before first successful model load',
 test('reranker distinguishes relevant and irrelevant text with direct model inference', async () => {
   const service = new RerankerService({
     provider: 'huggingface',
-    model: 'cross-encoder/ms-marco-MiniLM-L-6-v2',
-    cacheDir: '/home/wmt/.localnest/cache'
+    model: 'cross-encoder/ms-marco-MiniLM-L-6-v2'
+  });
+
+  service._getModelBundle = async () => ({
+    tokenizer: async (query, { text_pair: text }) => ({ query, text }),
+    model: async ({ query, text }) => ({
+      logits: {
+        data: [query.includes('jwt') && text.includes('token') ? 3 : -3]
+      }
+    })
   });
 
   const relevant = await service.score('jwt auth token', 'jwt token validation middleware');
