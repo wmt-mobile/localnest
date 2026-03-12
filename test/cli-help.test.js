@@ -53,12 +53,38 @@ test('localnest start subcommand help prints start usage without runtime noise',
   assert.doesNotMatch(result.stderr, /ExperimentalWarning/);
 });
 
+test('localnest task-context help prints canonical usage without executing workflow', (t) => {
+  const scriptPath = path.resolve('bin/localnest.js');
+  const result = spawnSync(process.execPath, [scriptPath, 'task-context', '--help'], { encoding: 'utf8' });
+  if (result.error?.code === 'EPERM') {
+    t.skip('process spawning is blocked in this environment');
+    return;
+  }
+
+  assert.equal(result.status, 0);
+  assert.match(result.stdout, /localnest task-context/);
+  assert.doesNotMatch(result.stdout, /"runtime":/);
+});
+
+test('legacy setup wrapper prints deprecation warning and forwards to canonical help', (t) => {
+  const scriptPath = path.resolve('bin/localnest-mcp-setup.js');
+  const result = spawnSync(process.execPath, [scriptPath, '--help'], { encoding: 'utf8' });
+  if (result.error?.code === 'EPERM') {
+    t.skip('process spawning is blocked in this environment');
+    return;
+  }
+
+  assert.equal(result.status, 0);
+  assert.match(result.stderr, /deprecated/i);
+  assert.match(result.stdout, /LocalNest setup wizard/);
+});
+
 test('task-context help prints usage without executing workflow', (t) => {
   const result = runHelp(t, 'scripts/memory/task-context-localnest.mjs');
   if (!result) return;
 
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /Usage:/);
+  assert.match(result.stdout, /localnest task-context/);
   assert.doesNotMatch(result.stdout, /"runtime":/);
 });
 
@@ -67,6 +93,6 @@ test('capture-outcome help prints usage without validation errors', (t) => {
   if (!result) return;
 
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /Usage:/);
+  assert.match(result.stdout, /localnest capture-outcome/);
   assert.equal(result.stderr.trim(), '');
 });

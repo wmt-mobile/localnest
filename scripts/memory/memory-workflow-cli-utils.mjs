@@ -10,9 +10,11 @@ export function hasHelpFlag(argv = process.argv.slice(2)) {
 export function printTaskContextHelp() {
   process.stdout.write('LocalNest task-context helper\n\n');
   process.stdout.write('Usage:\n');
-  process.stdout.write('  localnest-mcp-task-context --task "investigate issue" --project-path "/abs/project"\n');
-  process.stdout.write('  localnest-mcp-task-context --query "search terms" --root-path "/abs/root"\n');
-  process.stdout.write('  localnest-mcp-task-context --json \'{"task":"investigate issue"}\'\n');
+  process.stdout.write('  localnest task-context --task "investigate issue" --project-path "/abs/project"\n');
+  process.stdout.write('  localnest task-context --query "search terms" --root-path "/abs/root"\n');
+  process.stdout.write('  localnest task-context --json \'{"task":"investigate issue"}\'\n');
+  process.stdout.write('\nCompatibility alias (deprecated):\n');
+  process.stdout.write('  localnest-mcp-task-context\n');
   process.stdout.write('Options:\n');
   process.stdout.write('  --task=<text>            task description\n');
   process.stdout.write('  --query=<text>           recall query\n');
@@ -29,8 +31,10 @@ export function printTaskContextHelp() {
 export function printCaptureOutcomeHelp() {
   process.stdout.write('LocalNest capture-outcome helper\n\n');
   process.stdout.write('Usage:\n');
-  process.stdout.write('  localnest-mcp-capture-outcome --task "fix issue" --status completed --summary "what changed"\n');
-  process.stdout.write('  localnest-mcp-capture-outcome --json \'{"task":"fix issue","summary":"what changed"}\'\n');
+  process.stdout.write('  localnest capture-outcome --task "fix issue" --status completed --summary "what changed"\n');
+  process.stdout.write('  localnest capture-outcome --json \'{"task":"fix issue","summary":"what changed"}\'\n');
+  process.stdout.write('\nCompatibility alias (deprecated):\n');
+  process.stdout.write('  localnest-mcp-capture-outcome\n');
   process.stdout.write('Options:\n');
   process.stdout.write('  --task=<text>             task title\n');
   process.stdout.write('  --title=<text>            explicit event title\n');

@@ -93,7 +93,7 @@ export function buildRipgrepHelpMessage() {
     'ripgrep (rg) is required by localnest-mcp for fast code search.',
     install,
     'If rg is installed but MCP still fails, set PATH in your MCP client env.',
-    'Run doctor for detailed checks: npx -y localnest-mcp-doctor'
+    'Run doctor for detailed checks: localnest doctor'
   ].join(' ');
 }
 

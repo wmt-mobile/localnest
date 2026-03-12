@@ -171,7 +171,7 @@ function checkConfigFile() {
       id: 'config_file',
       ok: false,
       detail: `Config not found: ${configPath}`,
-      fix: 'Run localnest-mcp-setup to create config.'
+      fix: 'Run localnest setup to create config.'
     };
   }
 
@@ -333,6 +333,8 @@ function printHelp() {
   process.stdout.write('Usage:\n');
   process.stdout.write('  localnest doctor\n');
   process.stdout.write('  localnest doctor --verbose\n');
+  process.stdout.write('  localnest doctor --json\n');
+  process.stdout.write('\nCompatibility alias (deprecated):\n');
   process.stdout.write('  localnest-mcp-doctor\n');
   process.stdout.write('  localnest-mcp-doctor --json\n');
   process.stdout.write('Options:\n');

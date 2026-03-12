@@ -2,7 +2,11 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
-import { buildForwardArgv, hasVersionFlag } from '../bin/_shared.js';
+import {
+  buildForwardArgv,
+  buildLocalnestCommandArgv,
+  hasVersionFlag
+} from '../bin/_shared.js';
 import { SERVER_VERSION } from '../src/runtime/version.js';
 
 function assertVersionCommand(t, scriptPath) {
@@ -26,6 +30,18 @@ test('hasVersionFlag detects short and long flags', () => {
 test('buildForwardArgv preserves process launcher slots', () => {
   const out = buildForwardArgv(['doctor', '--verbose'], ['node', 'bin/localnest.js', 'setup']);
   assert.deepEqual(out, ['node', 'bin/localnest.js', 'doctor', '--verbose']);
+});
+
+test('buildLocalnestCommandArgv rewrites legacy wrapper argv to canonical localnest command', () => {
+  const out = buildLocalnestCommandArgv(
+    ['setup'],
+    new URL('../bin/localnest-mcp-setup.js', import.meta.url),
+    ['node', 'bin/localnest-mcp-setup.js', '--json']
+  );
+
+  assert.equal(out[0], 'node');
+  assert.match(out[1], /bin\/localnest\.js$/);
+  assert.deepEqual(out.slice(2), ['setup', '--json']);
 });
 
 test('localnest --version prints version without starting runtime-heavy paths', (t) => {

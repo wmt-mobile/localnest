@@ -1,2 +1,8 @@
 #!/usr/bin/env node
-import '../scripts/runtime/setup-localnest.mjs';
+import { forwardDeprecatedCommand } from './_shared.js';
+
+await forwardDeprecatedCommand({
+  metaUrl: import.meta.url,
+  legacyCommand: 'localnest-mcp-setup',
+  replacementCommand: 'localnest setup'
+});

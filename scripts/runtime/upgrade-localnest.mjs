@@ -7,6 +7,7 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { stdin as input, stdout as output } from 'node:process';
 import { migrateLocalnestHomeLayout, resolveLocalnestHome } from '../../src/runtime/index.js';
+import { SERVER_VERSION } from '../../src/runtime/version.js';
 import { normalizeInstallTarget, normalizeUpdateChannel } from '../../src/services/update/helpers.js';
 import {
   findMissingRequiredSetupFields,
@@ -247,9 +248,9 @@ async function main() {
     process.stdout.write('  localnest upgrade\n');
     process.stdout.write('  localnest upgrade stable\n');
     process.stdout.write('  localnest upgrade beta\n');
-    process.stdout.write('  localnest upgrade 0.0.5\n');
-    process.stdout.write('  localnest upgrade install 0.0.5\n');
-    process.stdout.write('  localnest upgrade --version=0.0.5\n');
+    process.stdout.write(`  localnest upgrade ${SERVER_VERSION}\n`);
+    process.stdout.write(`  localnest upgrade install ${SERVER_VERSION}\n`);
+    process.stdout.write(`  localnest upgrade --version=${SERVER_VERSION}\n`);
     process.stdout.write('  localnest upgrade --dry-run\n');
     process.stdout.write('Options:\n');
     process.stdout.write('  --version=<semver|latest|stable|beta>  target package version or channel\n');
