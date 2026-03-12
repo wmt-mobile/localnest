@@ -4,24 +4,6 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.0.6-beta.1] - 2026-03-12
-
-### CLI
-
-- Added canonical `localnest task-context` and `localnest capture-outcome` commands for memory workflow automation.
-- Soft-deprecated legacy helper binaries by turning `localnest-mcp-setup`, `localnest-mcp-doctor`, `localnest-mcp-upgrade`, `localnest-mcp-install-skill`, `localnest-mcp-task-context`, and `localnest-mcp-capture-outcome` into warning-forwarding compatibility wrappers.
-- Kept the `localnest-mcp` MCP server binary unchanged so existing client configs continue to start the server without migration.
-
-### Docs & Guidance
-
-- Updated CLI help, runtime guidance, and README examples to prefer canonical `localnest ...` commands while documenting the compatibility aliases.
-- Added beta release notes and version-matrix entries for `0.0.6-beta.1`.
-
-### Release Tooling
-
-- Bumped bundled skill metadata to the beta package version so packaged installs stay version-aligned.
-- Removed stale hardcoded `0.0.5` defaults from release-prep helpers by aligning version output with the active package version.
-
 ## [0.0.5] - 2026-03-11
 
 ### Stable Release

@@ -29,8 +29,8 @@ localnest upgrade
 ```bash
 npx -y localnest-mcp --help
 localnest install skills --force
-npx -y localnest-mcp-setup   # deprecated compatibility wrapper
-npx -y localnest-mcp-doctor  # deprecated compatibility wrapper
+npx -y localnest-mcp-setup
+npx -y localnest-mcp-doctor
 ```
 
 ## Install sequence
@@ -113,7 +113,7 @@ After setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client 
 - For the recommended `sqlite-vec` backend, setup now installs or detects the native `vec0` extension and writes its path into config/client env automatically.
 - If setup cannot provision `vec0`, rerun `localnest setup` before relying on sqlite-vec in MCP clients.
 - Memory is opt-in. On Node 18/20, the rest of LocalNest still works, but memory remains unavailable.
-- `localnest install skills` is version-aware on this branch and skips reinstalling bundled skills when they are already current unless `--force` is used. `localnest-mcp-install-skill` remains available as a deprecated compatibility alias.
+- `localnest install skills` is version-aware on this branch and skips reinstalling bundled skills when they are already current unless `--force` is used. `localnest-mcp-install-skill` remains as a legacy alias.
 - Setup warms embedding/reranker models on first run (downloads into `~/.localnest/cache` by default).
 - `0.0.5` promotes the beta.9 install/runtime fixes into the stable line. A single upstream ONNX-runtime deprecation warning may still appear during npm install.
 - If `~/.localnest/cache` is not writable, LocalNest automatically falls back to a per-user temp cache path.

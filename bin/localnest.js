@@ -9,9 +9,7 @@ const rest = args.slice(1);
 const COMMAND_MODULES = new Map([
   ['setup', '../scripts/runtime/setup-localnest.mjs'],
   ['doctor', '../scripts/runtime/doctor-localnest.mjs'],
-  ['upgrade', '../scripts/runtime/upgrade-localnest.mjs'],
-  ['task-context', '../scripts/memory/task-context-localnest.mjs'],
-  ['capture-outcome', '../scripts/memory/capture-outcome-localnest.mjs']
+  ['upgrade', '../scripts/runtime/upgrade-localnest.mjs']
 ]);
 
 function printHelp() {
@@ -24,8 +22,6 @@ function printHelp() {
   process.stdout.write('  setup                     run setup wizard\n');
   process.stdout.write('  doctor                    run diagnostics\n');
   process.stdout.write('  upgrade                   upgrade package and migrate setup\n');
-  process.stdout.write('  task-context              print runtime + recalled local memory context\n');
-  process.stdout.write('  capture-outcome           persist a task outcome into local memory\n');
   process.stdout.write('  version                   print version\n');
   process.stdout.write('  help                      show this help\n');
 }

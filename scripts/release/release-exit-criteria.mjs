@@ -5,7 +5,6 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { detectAiToolTargets } from '../../src/setup/client-installer.js';
-import { SERVER_VERSION } from '../../src/runtime/version.js';
 
 function parseCliArgs(argv) {
   const out = {};
@@ -268,7 +267,7 @@ function renderMarkdown({ versionLabel, reportPath, evaluation, supportedClients
 
 async function main() {
   const args = parseCliArgs(process.argv.slice(2));
-  const versionLabel = args['version-label'] || SERVER_VERSION;
+  const versionLabel = args['version-label'] || '0.0.5';
   const outputPaths = buildOutputPaths({
     versionLabel,
     markdownPath: args['markdown-report-path'],

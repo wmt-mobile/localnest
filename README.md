@@ -271,7 +271,7 @@ Setup writes everything to `~/.localnest/`:
 
 ## Install Note
 
-`0.0.6-beta.1` keeps `0.0.5` as the current stable line while previewing the CLI deprecation pass: canonical `localnest task-context` / `localnest capture-outcome` commands, deprecated compatibility wrappers for older `localnest-mcp-*` helpers, and no change to the `localnest-mcp` server binary used by MCP clients. Some npm environments may still show a single upstream deprecation warning from the ONNX runtime dependency chain; LocalNest functionality is unaffected.
+`0.0.5` promotes the beta.9 install/runtime fixes into the stable line, including bundled skill version reporting, installed-runtime validation hardening, and the simplified skill-sync flow. Some npm environments may still show a single upstream deprecation warning from the ONNX runtime dependency chain; LocalNest functionality is unaffected.
 
 **Performance tips:**
 - Scope queries with `project_path` + a narrow `glob` whenever possible
@@ -287,17 +287,17 @@ LocalNest ships bundled AI agent skills from one canonical source and installs t
 ```bash
 localnest install skills             # install or update bundled skills
 localnest install skills --force     # force reinstall
-localnest-mcp-install-skill          # deprecated compatibility alias
+localnest-mcp-install-skill          # legacy alias
 ```
 
 **Shell CLI tools** for automation and hooks:
 
 ```bash
-localnest task-context --task "debug auth" --project-path /path/to/project
-localnest capture-outcome --task "fix auth" --summary "..." --files-changed 2
+localnest-mcp-task-context --task "debug auth" --project-path /path/to/project
+localnest-mcp-capture-outcome --task "fix auth" --summary "..." --files-changed 2
 ```
 
-Legacy aliases `localnest-mcp-task-context` and `localnest-mcp-capture-outcome` still work for compatibility. Both commands accept JSON on stdin. Install from GitHub:
+Both commands accept JSON on stdin. Install from GitHub:
 
 ```bash
 npx skills add https://github.com/wmt-mobile/localnest --skill localnest-mcp

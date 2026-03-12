@@ -1,8 +1,4 @@
 #!/usr/bin/env node
-import { forwardDeprecatedCommand } from './_shared.js';
+import { main } from '../scripts/runtime/install-localnest-skill.mjs';
 
-await forwardDeprecatedCommand({
-  metaUrl: import.meta.url,
-  legacyCommand: 'localnest-mcp-install-skill',
-  replacementCommand: 'localnest install skills'
-});
+main();

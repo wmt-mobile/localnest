@@ -163,7 +163,7 @@ export class MemoryService {
 
   assertEnabled() {
     if (!this.enabled) {
-      throw new Error('Local memory is disabled. Re-run localnest setup and opt in to memory.');
+      throw new Error('Local memory is disabled. Re-run localnest-mcp-setup and opt in to memory.');
     }
   }
 

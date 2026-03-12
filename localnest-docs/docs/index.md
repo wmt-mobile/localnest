@@ -54,8 +54,8 @@ localnest doctor
 Fallback:
 
 ```bash
-npx -y localnest-mcp-setup   # deprecated compatibility wrapper
-npx -y localnest-mcp-doctor  # deprecated compatibility wrapper
+npx -y localnest-mcp-setup
+npx -y localnest-mcp-doctor
 ```
 
 Upgrade paths:

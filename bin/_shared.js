@@ -1,40 +1,9 @@
-import { fileURLToPath } from 'node:url';
-
 export function hasVersionFlag(argv = process.argv) {
   return argv.includes('--version') || argv.includes('-v');
 }
 
 export function buildForwardArgv(rest, argv = process.argv) {
   return [argv[0], argv[1], ...rest];
-}
-
-export function buildLocalnestCommandArgv(commandArgs = [], metaUrl, argv = process.argv) {
-  return [
-    argv[0],
-    fileURLToPath(new URL('./localnest.js', metaUrl)),
-    ...commandArgs,
-    ...argv.slice(2)
-  ];
-}
-
-export function printDeprecationWarning({ legacyCommand, replacementCommand, note = '' }) {
-  if (process.env.LOCALNEST_SUPPRESS_DEPRECATION_WARNINGS === 'true') return;
-  const suffix = note ? ` ${note}` : '';
-  process.stderr.write(
-    `[localnest] '${legacyCommand}' is deprecated and will be removed in a future release. Prefer '${replacementCommand}'.${suffix}\n`
-  );
-}
-
-export async function forwardDeprecatedCommand({
-  metaUrl,
-  legacyCommand,
-  replacementCommand,
-  commandArgs = [],
-  note = ''
-}) {
-  printDeprecationWarning({ legacyCommand, replacementCommand, note });
-  process.argv = buildLocalnestCommandArgv(commandArgs, metaUrl, process.argv);
-  return importRelative('./localnest.js', metaUrl);
 }
 
 export async function importRelative(modulePath, metaUrl) {

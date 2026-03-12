@@ -1,2 +1,2 @@
 export const SERVER_NAME = 'localnest';
-export const SERVER_VERSION = '0.0.6-beta.1';
+export const SERVER_VERSION = '0.0.5';
