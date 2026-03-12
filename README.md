@@ -16,6 +16,12 @@ LocalNest is a local-first MCP server that gives AI agents safe, scoped access t
 
 📖 [Full documentation](https://wmt-mobile.github.io/localnest/) · [Architecture deep dive](./guides/architecture.md)
 
+## README Languages
+
+English · [العربية الفصحى](./readme/README.ar-001.md) · [বাংলা (বাংলাদেশ)](./readme/README.bn-BD.md) · [Deutsch (Deutschland)](./readme/README.de-DE.md) · [Español (Latinoamérica)](./readme/README.es-419.md) · [Français (France)](./readme/README.fr-FR.md) · [हिन्दी (भारत)](./readme/README.hi-IN.md) · [Bahasa Indonesia](./readme/README.id-ID.md) · [日本語](./readme/README.ja-JP.md) · [한국어](./readme/README.ko-KR.md) · [Português (Brasil)](./readme/README.pt-BR.md) · [Русский](./readme/README.ru-RU.md) · [Türkçe](./readme/README.tr-TR.md) · [简体中文](./readme/README.zh-CN.md)
+
+These translated files are locale-specific full README translations. See [translation policy](./readme/TRANSLATION_POLICY.md) for the target locale matrix and terminology rules. The English [README.md](./README.md) remains the source of truth for the newest commands, release notes, and full details.
+
 ---
 
 ## Why LocalNest?
