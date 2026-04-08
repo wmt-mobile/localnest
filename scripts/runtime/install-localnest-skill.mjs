@@ -56,6 +56,97 @@ function buildToolSpecificSkillMarkdown(rawText, toolFamily) {
   return `${preamble}\n\n${rawText}`;
 }
 
+/**
+ * Generate client-native instruction files alongside the standard SKILL.md.
+ * Some AI clients look for specific files beyond skills/ directories.
+ */
+function generateClientNativeFiles(targetSkillDir, toolFamily, skillContent) {
+  const parentDir = path.dirname(targetSkillDir);
+  const grandparentDir = path.dirname(parentDir);
+
+  // Extract the core instruction content (strip YAML frontmatter for non-Claude clients)
+  const coreContent = skillContent.replace(/^---\n[\s\S]*?\n---\n\n?/, '');
+  const toolLine = SKILL_TOOL_PREAMBLES[toolFamily] || '';
+  const header = toolLine ? `${toolLine}\n\n` : '';
+
+  switch (toolFamily) {
+    case 'cursor': {
+      // Cursor reads .cursor/rules/*.mdc or .cursorrules at project root
+      const rulesDir = path.join(grandparentDir, 'rules');
+      fs.mkdirSync(rulesDir, { recursive: true });
+      const ruleContent = [
+        '---',
+        'description: LocalNest MCP — local code retrieval and persistent memory',
+        'globs: **/*',
+        'alwaysApply: true',
+        '---',
+        '',
+        header + coreContent
+      ].join('\n');
+      fs.writeFileSync(path.join(rulesDir, 'localnest.mdc'), ruleContent, 'utf8');
+      break;
+    }
+    case 'windsurf': {
+      // Windsurf reads .windsurf/rules/*.md
+      const rulesDir = path.join(grandparentDir, 'rules');
+      fs.mkdirSync(rulesDir, { recursive: true });
+      fs.writeFileSync(path.join(rulesDir, 'localnest.md'), header + coreContent, 'utf8');
+      break;
+    }
+    case 'opencode': {
+      // OpenCode reads AGENTS.md with frontmatter (globs, keywords)
+      const agentsContent = [
+        '---',
+        'description: LocalNest MCP — local code retrieval, knowledge graph, and persistent memory',
+        'keywords: [localnest, memory, knowledge, graph, search, code, file, project, nest, branch, recall, ingest]',
+        'globs: ["**/*"]',
+        '---',
+        '',
+        header + coreContent
+      ].join('\n');
+      const agentsMdPath = path.join(grandparentDir, 'AGENTS.md');
+      if (!fs.existsSync(agentsMdPath)) {
+        fs.writeFileSync(agentsMdPath, agentsContent, 'utf8');
+      }
+      break;
+    }
+    case 'copilot': {
+      // GitHub Copilot reads .github/copilot-instructions.md
+      const ghDir = path.join(grandparentDir);
+      const instructionsPath = path.join(ghDir, 'copilot-instructions.md');
+      if (!fs.existsSync(instructionsPath)) {
+        fs.writeFileSync(instructionsPath, header + coreContent, 'utf8');
+      }
+      break;
+    }
+    case 'cline': {
+      // Cline reads .clinerules or .cline/rules/*.md
+      const rulesDir = path.join(grandparentDir, 'rules');
+      fs.mkdirSync(rulesDir, { recursive: true });
+      fs.writeFileSync(path.join(rulesDir, 'localnest.md'), header + coreContent, 'utf8');
+      break;
+    }
+    case 'gemini': {
+      // Gemini CLI reads GEMINI.md or .gemini/GEMINI.md
+      const geminiMdPath = path.join(grandparentDir, 'GEMINI.md');
+      if (!fs.existsSync(geminiMdPath)) {
+        fs.writeFileSync(geminiMdPath, header + coreContent, 'utf8');
+      }
+      break;
+    }
+    case 'codex': {
+      // Codex reads AGENTS.md
+      const agentsMdPath = path.join(grandparentDir, 'AGENTS.md');
+      if (!fs.existsSync(agentsMdPath)) {
+        fs.writeFileSync(agentsMdPath, header + coreContent, 'utf8');
+      }
+      break;
+    }
+    default:
+      break;
+  }
+}
+
 function copyDirWithVariant(source, destination, toolFamily = 'default', relativePath = '') {
   const stats = fs.statSync(source);
   if (stats.isDirectory()) {
@@ -249,7 +340,17 @@ function installOrUpdateSkill(sourceSkillDir, targetSkillDir, { quiet, force } =
   if (state.exists) {
     fs.rmSync(targetSkillDir, { recursive: true, force: true });
   }
-  copyDirWithVariant(sourceSkillDir, targetSkillDir, detectSkillToolFamily(targetSkillDir));
+  const toolFamily = detectSkillToolFamily(targetSkillDir);
+  copyDirWithVariant(sourceSkillDir, targetSkillDir, toolFamily);
+
+  // Generate client-native instruction files (rules, AGENTS.md, etc.)
+  try {
+    const skillContent = fs.readFileSync(path.join(targetSkillDir, 'SKILL.md'), 'utf8');
+    generateClientNativeFiles(targetSkillDir, toolFamily, skillContent);
+  } catch {
+    // Non-fatal — skill is installed, native files are best-effort
+  }
+
   if (!quiet) {
     const verb = force
       ? 'synced'
