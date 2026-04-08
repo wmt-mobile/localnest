@@ -29,7 +29,7 @@ import {
   listBranches as listBranchesFn,
   getTaxonomyTree as getTaxonomyTreeFn
 } from './taxonomy.js';
-import { traverseGraph as traverseGraphFn } from './graph.js';
+import { traverseGraph as traverseGraphFn, discoverBridges as discoverBridgesFn } from './graph.js';
 import {
   addEntity as addEntityFn,
   getEntity as getEntityFn,
@@ -255,5 +255,10 @@ export class MemoryStore {
   async traverseGraph(args) {
     await this.init();
     return traverseGraphFn(this.adapter, args);
+  }
+
+  async discoverBridges(args) {
+    await this.init();
+    return discoverBridgesFn(this.adapter, args);
   }
 }
