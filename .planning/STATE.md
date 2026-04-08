@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 08-01-PLAN.md
-last_updated: "2026-04-08T07:16:00.000Z"
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-04-08T07:23:00.000Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 9
   completed_phases: 8
-  total_plans: 11
-  completed_plans: 11
-  percent: 89
+  total_plans: 13
+  completed_plans: 12
+  percent: 92
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory -- no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** Phase 08 — conversation-ingestion (complete)
+**Current focus:** Phase 09 — mcp-tool-registration (in progress)
 
 ## Current Position
 
-Phase: 08 (conversation-ingestion) — COMPLETE
-Plan: 1 of 1
-Status: Phase 08 complete — ready for Phase 09
+Phase: 09 (mcp-tool-registration)
+Plan: 1 of 2 complete
+Status: Plan 09-01 complete — ready for Plan 09-02
 Last activity: 2026-04-08
 
-Progress: [########.] 89%
+Progress: [#########] 92%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 10
+- Total plans completed: 12
 - Average duration: 2min
-- Total execution time: 0.32 hours
+- Total execution time: 0.37 hours
 
 **By Phase:**
 
@@ -52,10 +52,11 @@ Progress: [########.] 89%
 | Phase 06 | 1 | 2min | 2min |
 | Phase 07 | 1 | 2min | 2min |
 | Phase 08 | 1 | 3min | 3min |
+| Phase 09 | 1 | 2min | 2min |
 
 **Recent Trend:**
 
-- Last 5 plans: 05-01 (2min), 05-02 (1min), 06-01 (2min), 07-01 (2min), 08-01 (3min)
+- Last 5 plans: 06-01 (2min), 07-01 (2min), 08-01 (3min), 09-01 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -70,6 +71,7 @@ Progress: [########.] 89%
 | Phase 06 P01 | 2min | 2 tasks | 7 files |
 | Phase 07 P01 | 2min | 2 tasks | 5 files |
 | Phase 08 P01 | 3min | 3 tasks | 4 files |
+| Phase 09 P01 | 2min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -113,6 +115,8 @@ Recent decisions affecting current work:
 - [Phase 08]: Entity extraction uses 5 regex types with 100+ stop words for noise reduction
 - [Phase 08]: KG triples use mentioned_by (0.7 confidence) and co_occurs_with (0.5) predicates
 - [Phase 08]: Turn importance 30 keeps conversation entries below manual memories (50)
+- [Phase 09]: All 17 tools in single registrar file (graph-tools.js, 377 lines) following registerJsonTool pattern
+- [Phase 09]: Dedup tool uses localnest_memory_check_duplicate to stay in memory namespace
 
 ### Pending Todos
 
@@ -124,6 +128,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T07:16:00.000Z
-Stopped at: Completed 08-01-PLAN.md
+Last session: 2026-04-08T07:23:00.000Z
+Stopped at: Completed 09-01-PLAN.md
 Resume file: None

@@ -71,12 +71,12 @@
 
 ### MCP Tool Registration
 
-- [ ] **TOOL-01**: All knowledge graph operations exposed as localnest_kg_* MCP tools
-- [ ] **TOOL-02**: All nest/branch operations exposed as localnest_nest_* MCP tools
-- [ ] **TOOL-03**: All graph traversal operations exposed as localnest_graph_* MCP tools
-- [ ] **TOOL-04**: Agent diary operations exposed as localnest_diary_* MCP tools
-- [ ] **TOOL-05**: Conversation ingestion exposed as localnest_ingest_* MCP tools
-- [ ] **TOOL-06**: Duplicate check exposed as localnest_memory_check_duplicate MCP tool
+- [x] **TOOL-01**: All knowledge graph operations exposed as localnest_kg_* MCP tools
+- [x] **TOOL-02**: All nest/branch operations exposed as localnest_nest_* MCP tools
+- [x] **TOOL-03**: All graph traversal operations exposed as localnest_graph_* MCP tools
+- [x] **TOOL-04**: Agent diary operations exposed as localnest_diary_* MCP tools
+- [x] **TOOL-05**: Conversation ingestion exposed as localnest_ingest_* MCP tools
+- [x] **TOOL-06**: Duplicate check exposed as localnest_memory_check_duplicate MCP tool
 
 ## v2 Requirements
 
@@ -152,12 +152,12 @@ Deferred to future milestone.
 | INGEST-03 | Phase 8 | Complete |
 | INGEST-04 | Phase 8 | Complete |
 | INGEST-05 | Phase 8 | Complete |
-| TOOL-01 | Phase 9 | Pending |
-| TOOL-02 | Phase 9 | Pending |
-| TOOL-03 | Phase 9 | Pending |
-| TOOL-04 | Phase 9 | Pending |
-| TOOL-05 | Phase 9 | Pending |
-| TOOL-06 | Phase 9 | Pending |
+| TOOL-01 | Phase 9 | Complete |
+| TOOL-02 | Phase 9 | Complete |
+| TOOL-03 | Phase 9 | Complete |
+| TOOL-04 | Phase 9 | Complete |
+| TOOL-05 | Phase 9 | Complete |
+| TOOL-06 | Phase 9 | Complete |
 
 **Coverage:**
 - v1 requirements: 43 total

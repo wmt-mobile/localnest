@@ -155,8 +155,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 09-01: graph-tools.js registrar for KG, temporal, and traversal tools
-- [ ] 09-02: Tool registration for nest, diary, ingest, and dedup tools
+- [x] 09-01: graph-tools.js registrar for all 17 MCP tools (KG, nest, graph, diary, ingest, dedup)
+- [ ] 09-02: (merged into 09-01 — all tools registered in single file)
 
 ## Progress
 
@@ -173,4 +173,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 6. Agent-Scoped Memory | 1/1 | Complete | 2026-04-08 |
 | 7. Semantic Duplicate Detection | 1/1 | Complete | 2026-04-08 |
 | 8. Conversation Ingestion | 1/1 | Complete | 2026-04-08 |
-| 9. MCP Tool Registration | 0/2 | Not started | - |
+| 9. MCP Tool Registration | 1/2 | In Progress | - |
