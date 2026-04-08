@@ -19,9 +19,11 @@ export function buildLocalnestCommandArgv(commandArgs = [], metaUrl, argv = proc
 
 export function printDeprecationWarning({ legacyCommand, replacementCommand, note = '' }) {
   if (process.env.LOCALNEST_SUPPRESS_DEPRECATION_WARNINGS === 'true') return;
+  const yellow = '\x1b[33m';
+  const reset = '\x1b[0m';
   const suffix = note ? ` ${note}` : '';
   process.stderr.write(
-    `[localnest] '${legacyCommand}' is deprecated and will be removed in a future release. Prefer '${replacementCommand}'.${suffix}\n`
+    `${yellow}[localnest] DEPRECATED: Use "${replacementCommand}" instead of "${legacyCommand}".${suffix}${reset}\n`
   );
 }
 
