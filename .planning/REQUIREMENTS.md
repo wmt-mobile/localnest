@@ -14,11 +14,11 @@
 
 ### Memory CLI
 
-- [ ] **MCLI-01**: `localnest memory add` stores a memory with --type, --importance, --nest, --branch flags
-- [ ] **MCLI-02**: `localnest memory search` recalls memories by query with --limit, --nest, --branch filters
-- [ ] **MCLI-03**: `localnest memory list` shows stored memories with --json, --limit, --kind filters
-- [ ] **MCLI-04**: `localnest memory show <id>` displays one memory with revision history
-- [ ] **MCLI-05**: `localnest memory delete <id>` removes a memory with -f/--force for non-interactive
+- [x] **MCLI-01**: `localnest memory add` stores a memory with --type, --importance, --nest, --branch flags
+- [x] **MCLI-02**: `localnest memory search` recalls memories by query with --limit, --nest, --branch filters
+- [x] **MCLI-03**: `localnest memory list` shows stored memories with --json, --limit, --kind filters
+- [x] **MCLI-04**: `localnest memory show <id>` displays one memory with revision history
+- [x] **MCLI-05**: `localnest memory delete <id>` removes a memory with -f/--force for non-interactive
 
 ### Knowledge Graph CLI
 
@@ -81,11 +81,11 @@
 | CLI-02 | Phase 10 | Complete |
 | CLI-03 | Phase 10 | Complete |
 | CLI-04 | Phase 10 | Complete |
-| MCLI-01 | Phase 11 | Pending |
-| MCLI-02 | Phase 11 | Pending |
-| MCLI-03 | Phase 11 | Pending |
-| MCLI-04 | Phase 11 | Pending |
-| MCLI-05 | Phase 11 | Pending |
+| MCLI-01 | Phase 11 | Complete |
+| MCLI-02 | Phase 11 | Complete |
+| MCLI-03 | Phase 11 | Complete |
+| MCLI-04 | Phase 11 | Complete |
+| MCLI-05 | Phase 11 | Complete |
 | KGCLI-01 | Phase 12 | Pending |
 | KGCLI-02 | Phase 12 | Pending |
 | KGCLI-03 | Phase 12 | Pending |
