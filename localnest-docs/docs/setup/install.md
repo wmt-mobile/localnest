@@ -2,9 +2,10 @@
 
 <div className="docPanel docPanel--compact">
   <p>
-    The recommended path is a global install followed by setup and doctor. Use the generated MCP
-    config block instead of hand-writing the client command when possible. On this branch, setup also
-    collects one-time consent for optional local memory.
+    The recommended path is a global install followed by setup and doctor. As of <strong>0.0.7-beta.1</strong>,
+    LocalNest includes a full CLI with <code>localnest memory</code>, <code>localnest kg</code>,
+    <code>localnest skill</code>, and <code>localnest ingest</code> subcommands — plus 52 MCP tools
+    including temporal knowledge graph, multi-hop traversal, and conversation ingestion.
   </p>
 </div>
 

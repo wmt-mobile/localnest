@@ -6,7 +6,7 @@ title: Getting Started
 
 # Getting Started
 
-LocalNest MCP is a local-first MCP server that gives AI agents scoped access to your codebase, with optional semantic indexing, hybrid retrieval, and local memory.
+LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scoped access to your codebase — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory. **52 MCP tools, zero cloud dependencies.**
 
 <div className="docHero">
   <div className="docHero__lead">
@@ -19,8 +19,12 @@ LocalNest MCP is a local-first MCP server that gives AI agents scoped access to 
   </div>
   <div className="docPanel docPanel--compact">
     <div className="docStat">
-      <span className="docStat__label">Current stable package</span>
-      <strong>0.0.5</strong>
+      <span className="docStat__label">Latest beta</span>
+      <strong>0.0.7-beta.1</strong>
+    </div>
+    <div className="docStat">
+      <span className="docStat__label">MCP tools</span>
+      <strong>52</strong>
     </div>
     <div className="docStat">
       <span className="docStat__label">Preferred backend</span>
@@ -81,7 +85,7 @@ localnest upgrade 0.0.5
   </a>
   <a className="docLinkCard" href="./releases/current">
     <strong>Current release</strong>
-    <span>See what changed in `0.0.5` before you upgrade or publish.</span>
+    <span>See what changed in `0.0.7-beta.1` — temporal KG, CLI-first architecture, 52 tools.</span>
   </a>
   <a className="docLinkCard" href="./versions/0.0.4-beta.8/overview">
     <strong>Archived beta.8</strong>
@@ -131,7 +135,7 @@ localnest upgrade 0.0.5
   </a>
   <a className="docLinkCard" href="./releases/current">
     <strong>Current release</strong>
-    <span>See the `0.0.5` stable behavior, including runtime updates, install behavior, and the current memory workflow.</span>
+    <span>See the latest release behavior — `0.0.7-beta.1` with temporal KG, CLI, hooks, and 52 MCP tools.</span>
   </a>
   <a className="docLinkCard" href="./releases/history">
     <strong>Release matrix</strong>

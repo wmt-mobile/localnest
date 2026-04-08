@@ -2,9 +2,10 @@
 
 <div className="docPanel docPanel--compact">
   <p>
-    Setup writes a config file for roots and indexing, plus a ready-to-paste MCP client block. Most
-    installations only need to change roots or switch index backends. This branch also persists
-    memory settings into config and generated MCP snippets.
+    Setup writes a config file for roots and indexing, plus a ready-to-paste MCP client block. As of
+    <strong>0.0.7-beta.1</strong>, setup also auto-detects and installs skills for 13 AI clients
+    (Claude, Cursor, Windsurf, Copilot, Gemini, Kiro, Codex, Cline, Continue, OpenCode, and more).
+    Run <code>localnest mcp config</code> to generate client-specific config blocks.
   </p>
 </div>
 

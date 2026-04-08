@@ -8,7 +8,8 @@ Use this page to choose a LocalNest version line and install it explicitly.
 
 ## Recommended defaults
 
-- Want the latest beta: use `0.0.6-beta.1`
+- Want the latest beta: use `0.0.7-beta.1` (temporal KG, CLI-first, 52 tools)
+- Want the previous beta: use `0.0.6-beta.1`
 - Want the current stable release: use `0.0.5`
 - Want the previous stable behavior: use `0.0.3`
 - Need older behavior for compatibility: use the archived beta rows below
@@ -18,7 +19,7 @@ Common upgrade commands:
 ```bash
 localnest upgrade stable
 localnest upgrade beta
-localnest upgrade 0.0.6-beta.1
+localnest upgrade 0.0.7-beta.1
 localnest upgrade 0.0.5
 localnest upgrade 0.0.3
 ```
@@ -27,7 +28,8 @@ localnest upgrade 0.0.3
 
 | Version | Channel | Install command |
 | --- | --- | --- |
-| `0.0.6-beta.1` | current beta | `npm install -g localnest-mcp@0.0.6-beta.1` |
+| `0.0.7-beta.1` | current beta | `npm install -g localnest-mcp@0.0.7-beta.1` |
+| `0.0.6-beta.1` | previous beta | `npm install -g localnest-mcp@0.0.6-beta.1` |
 | `0.0.5` | current stable | `npm install -g localnest-mcp@0.0.5` |
 | `0.0.4-beta.9` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.9` |
 | `0.0.4-beta.8` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.8` |
