@@ -1,2 +1,9 @@
 #!/usr/bin/env node
-import '../scripts/runtime/upgrade-localnest.mjs';
+import { forwardDeprecatedCommand } from './_shared.js';
+
+await forwardDeprecatedCommand({
+  metaUrl: import.meta.url,
+  legacyCommand: 'localnest-mcp-upgrade',
+  replacementCommand: 'localnest upgrade',
+  commandArgs: ['upgrade']
+});

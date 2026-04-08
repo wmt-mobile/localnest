@@ -144,3 +144,72 @@ Removes a specific directed relation between two memory entries.
 
 ### `localnest_memory_related`
 Traverses the knowledge graph one hop in both directions from a given memory.
+
+### `localnest_memory_check_duplicate`
+Checks whether content is a semantic duplicate of an existing memory entry. Params: `content` (required), `threshold` (float 0-1, default 0.92), `nest`, `branch`, `project_path`. Returns matching entry details if duplicate found.
+
+## Knowledge graph tools
+
+### `localnest_kg_add_entity`
+Creates or updates an entity. Entity IDs are auto-generated as normalized slugs (lowercase, underscored). Params: `name` (required), `entity_type` (default "concept"), `properties` (JSON object), `memory_id` (optional FK to memory entry).
+
+### `localnest_kg_add_triple`
+Adds a subject-predicate-object triple. Entities are auto-created on first reference. Detects contradictions (same subject+predicate with different valid object) and warns without blocking. Params: `subject` (required), `predicate` (required), `object` (required), `valid_from` (ISO date), `confidence` (0-1, default 1.0), `source_memory_id`.
+
+### `localnest_kg_query`
+Queries all relationships for an entity. Params: `entity` (required), `direction` (outgoing/incoming/both, default both).
+
+### `localnest_kg_invalidate`
+Sets valid_to on a triple to mark it as no longer current. Params: `subject` (required), `predicate` (required), `object` (required), `ended` (ISO date, default today).
+
+### `localnest_kg_as_of`
+Queries triples for an entity at a specific point in time. Params: `entity` (required), `as_of` (required, ISO date), `direction` (default both).
+
+### `localnest_kg_timeline`
+Returns chronological timeline of all triples for an entity, including invalidated facts. Params: `entity` (required).
+
+### `localnest_kg_stats`
+Returns knowledge graph statistics: total entity count, total triple count, active triple count, and breakdown by predicate type.
+
+## Nest/branch organization tools
+
+### `localnest_nest_list`
+Lists all nests (top-level memory domains) with their memory entry counts.
+
+### `localnest_nest_branches`
+Lists all branches (topics) within a specific nest. Params: `nest` (required).
+
+### `localnest_nest_tree`
+Returns the full taxonomy tree: all nests, their branches, and memory counts at each level.
+
+## Graph traversal tools
+
+### `localnest_graph_traverse`
+Multi-hop traversal from a starting entity using SQLite recursive CTEs. Params: `entity` (required), `max_hops` (1-5, default 2), `direction` (outgoing/incoming/both). Returns discovered entities with path information (hop sequence).
+
+### `localnest_graph_bridges`
+Discovers cross-nest bridges: entities connected by triples that span different nests. Useful for finding connections across domains.
+
+## Agent diary tools
+
+### `localnest_diary_write`
+Writes a private diary entry for an agent. Diary entries are isolated and only visible to the owning agent. Params: `agent_id` (required), `content` (required), `topic` (optional).
+
+### `localnest_diary_read`
+Reads recent diary entries for a specific agent. Only returns entries belonging to the requesting agent. Params: `agent_id` (required), `limit` (default 10), `topic` (optional filter).
+
+## Conversation ingestion tools
+
+### `localnest_ingest_markdown`
+Ingests a Markdown conversation export into memory entries and knowledge graph triples. Params: `content` (required, raw markdown), `nest` (optional), `branch` (optional), `agent_id` (optional). Splits by turns, extracts entities, runs dedup, skips re-ingestion of same content.
+
+### `localnest_ingest_json`
+Ingests a JSON conversation export (array of `{role, content, timestamp?}` objects). Same params and behavior as `localnest_ingest_markdown`.
+
+## Hook introspection tools
+
+### `localnest_hooks_stats`
+Returns hook system statistics: whether hooks are enabled, total registered listener count, and a breakdown of listener counts per event type. No params. Use this to audit active hooks or verify that a hook registration succeeded.
+
+### `localnest_hooks_list_events`
+Returns all valid hook event names that listeners can subscribe to. No params. Covers memory lifecycle, knowledge graph, graph traversal, diary, ingestion, dedup, taxonomy, wildcards, and the error event.

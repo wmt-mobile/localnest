@@ -17,9 +17,14 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Reference',
       items: [
-        { type: 'doc', id: 'tools/overview', label: 'Tool Overview' },
+        { type: 'doc', id: 'tools/overview', label: 'Tool Overview (52 tools)' },
         { type: 'doc', id: 'tools/search', label: 'Search' },
         { type: 'doc', id: 'tools/indexing', label: 'Indexing' },
+        { type: 'doc', id: 'tools/memory', label: 'Memory' },
+        { type: 'doc', id: 'tools/knowledge-graph', label: 'Knowledge Graph' },
+        { type: 'doc', id: 'tools/organization', label: 'Nest/Branch & Agents' },
+        { type: 'doc', id: 'tools/hooks', label: 'Hooks' },
+        { type: 'doc', id: 'tools/cli', label: 'CLI Reference' },
         { type: 'doc', id: 'tools/updates', label: 'Updates' }
       ]
     },
@@ -29,6 +34,7 @@ const sidebars: SidebarsConfig = {
       items: [
         { type: 'doc', id: 'releases/version-selection', label: 'Version Selection' },
         { type: 'doc', id: 'releases/current', label: 'Current Release' },
+        { type: 'doc', id: 'releases/0.0.7-beta.1', label: '0.0.7-beta.1' },
         { type: 'doc', id: 'releases/history', label: 'Release Matrix' }
       ],
       collapsed: false
@@ -38,6 +44,30 @@ const sidebars: SidebarsConfig = {
       label: 'Version Archive',
       collapsed: true,
       items: [
+        {
+          type: 'category',
+          label: 'Beta 0.0.7-beta.1',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'versions/0.0.7-beta.1/overview', label: 'Overview' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Beta 0.0.6-beta.1',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'versions/0.0.6-beta.1/overview', label: 'Overview' }
+          ]
+        },
+        {
+          type: 'category',
+          label: 'Stable 0.0.5',
+          collapsed: true,
+          items: [
+            { type: 'doc', id: 'versions/0.0.5/overview', label: 'Overview' }
+          ]
+        },
         {
           type: 'category',
           label: 'Beta 0.0.4-beta.9',

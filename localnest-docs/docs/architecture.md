@@ -1,7 +1,7 @@
 ---
 title: Architecture
 sidebar_position: 4
-description: LocalNest architecture overview covering boot flow, retrieval pipeline, indexing, memory graph, and runtime design decisions.
+description: LocalNest architecture overview covering boot flow, retrieval pipeline, indexing, memory graph, knowledge graph, graph traversal, agent isolation, hooks system, CLI modules, and runtime design decisions.
 ---
 
 # Architecture
@@ -10,7 +10,7 @@ description: LocalNest architecture overview covering boot flow, retrieval pipel
   <p>
     Use this page when you need a systems view of LocalNest instead of task-by-task setup or tool
     reference guidance. It explains how the MCP server boots, how retrieval is fused, how indexing
-    and memory are structured, and which runtime decisions shape the product.
+    and memory are structured, how the knowledge graph and traversal work, and which runtime decisions shape the product.
   </p>
 </div>
 
@@ -27,8 +27,8 @@ description: LocalNest architecture overview covering boot flow, retrieval pipel
   </div>
   <div className="docPanel">
     <span className="docEyebrow">State</span>
-    <h3>Local memory + index</h3>
-    <p>Index data and optional memory stay on disk on the user’s machine rather than leaving the environment.</p>
+    <h3>Local memory + KG + index</h3>
+    <p>Index data, optional memory, and knowledge graph stay on disk on the user's machine rather than leaving the environment.</p>
   </div>
 </div>
 
@@ -40,6 +40,9 @@ flowchart LR
     B --> C["Your Files"]
     B --> D["Index DB"]
     B --> E["Memory DB"]
+    B --> F["Knowledge Graph"]
+    A -->|CLI commands| G["localnest CLI"]
+    G --> B
 ```
 
 ## Boot sequence
@@ -55,26 +58,33 @@ flowchart LR
   <div className="docStep">
     <span>2</span>
     <div>
-      <strong>Build services</strong>
-      <p>Workspace, retrieval, indexing, memory, and update services are constructed from the resolved config.</p>
+      <strong>Run schema migrations</strong>
+      <p>Per-version transaction wrapping upgrades SQLite schemas from v5 through v9 (KG entities, triples, agent diary, conversation sources) with rollback safety.</p>
     </div>
   </div>
   <div className="docStep">
     <span>3</span>
     <div>
-      <strong>Register tools</strong>
-      <p>MCP handlers are bound to the service layer with schema validation and response normalization.</p>
+      <strong>Build services</strong>
+      <p>Workspace, retrieval, indexing, memory, knowledge graph, taxonomy, scopes, dedup, ingest, and hooks services are constructed from the resolved config.</p>
     </div>
   </div>
   <div className="docStep">
     <span>4</span>
+    <div>
+      <strong>Register tools</strong>
+      <p>52 MCP handlers are bound to the service layer with schema validation and response normalization.</p>
+    </div>
+  </div>
+  <div className="docStep">
+    <span>5</span>
     <div>
       <strong>Start monitors</strong>
       <p>Background staleness and health monitors are initialized without blocking the process exit path.</p>
     </div>
   </div>
   <div className="docStep">
-    <span>5</span>
+    <span>6</span>
     <div>
       <strong>Open stdio transport</strong>
       <p>The MCP server begins serving requests to the connected AI client.</p>
@@ -122,6 +132,49 @@ flowchart LR
       <li><code>localnest_task_context</code></li>
       <li><code>localnest_capture_outcome</code></li>
       <li><code>localnest_memory_capture_event</code></li>
+    </ul>
+  </div>
+  <div className="docPanel">
+    <h3>Knowledge Graph</h3>
+    <p>Temporal entity-triple store with point-in-time queries and contradiction detection.</p>
+    <ul>
+      <li><code>localnest_kg_add_entity</code></li>
+      <li><code>localnest_kg_add_triple</code></li>
+      <li><code>localnest_kg_query</code></li>
+      <li><code>localnest_kg_invalidate</code></li>
+      <li><code>localnest_kg_as_of</code></li>
+      <li><code>localnest_kg_timeline</code></li>
+      <li><code>localnest_kg_stats</code></li>
+    </ul>
+  </div>
+  <div className="docPanel">
+    <h3>Nest/Branch + Traversal</h3>
+    <p>Two-level memory taxonomy and multi-hop graph walking.</p>
+    <ul>
+      <li><code>localnest_nest_list</code></li>
+      <li><code>localnest_nest_branches</code></li>
+      <li><code>localnest_nest_tree</code></li>
+      <li><code>localnest_graph_traverse</code></li>
+      <li><code>localnest_graph_bridges</code></li>
+    </ul>
+  </div>
+  <div className="docPanel">
+    <h3>Agent Diary</h3>
+    <p>Per-agent private scratchpad with scoped isolation.</p>
+    <ul>
+      <li><code>localnest_diary_write</code></li>
+      <li><code>localnest_diary_read</code></li>
+    </ul>
+  </div>
+  <div className="docPanel">
+    <h3>Ingestion + Dedup + Hooks</h3>
+    <p>Conversation import, duplicate detection, and operation callbacks.</p>
+    <ul>
+      <li><code>localnest_ingest_markdown</code></li>
+      <li><code>localnest_ingest_json</code></li>
+      <li><code>localnest_memory_check_duplicate</code></li>
+      <li><code>localnest_hooks_stats</code></li>
+      <li><code>localnest_hooks_list_events</code></li>
     </ul>
   </div>
 </div>
@@ -185,16 +238,52 @@ flowchart LR
   </div>
 </div>
 
+## Knowledge graph pipeline
+
+The temporal knowledge graph stores structured facts as subject-predicate-object triples with time validity.
+
+```mermaid
+flowchart LR
+    Entity["kg_add_entity()"] --> Store["kg_entities table"]
+    Triple["kg_add_triple()"] --> Check["Contradiction check"]
+    Check -->|"conflict"| Warn["Warning (non-blocking)"]
+    Check -->|"clean"| Persist["kg_triples table"]
+    Persist --> Query["kg_query() / kg_as_of()"]
+    Query --> Traverse["graph_traverse() (recursive CTEs)"]
+```
+
+<div className="docGrid docGrid--2">
+  <div className="docPanel">
+    <h3>Temporal validity</h3>
+    <p>Every triple carries <code>valid_from</code> and <code>valid_to</code> timestamps. Point-in-time queries via <code>kg_as_of</code> return what was true at any given date.</p>
+  </div>
+  <div className="docPanel">
+    <h3>Multi-hop traversal</h3>
+    <p>Recursive CTEs walk relationships 1-5 hops deep with cycle prevention. <code>graph_bridges</code> discovers cross-nest connections.</p>
+  </div>
+  <div className="docPanel">
+    <h3>Contradiction detection</h3>
+    <p>At write time, new triples are checked against existing valid triples on the same subject+predicate. Conflicts are flagged as warnings without blocking the write.</p>
+  </div>
+  <div className="docPanel">
+    <h3>Entity auto-creation</h3>
+    <p>Entities are auto-created on first triple reference with normalized slug IDs. Provenance is tracked via <code>source_memory_id</code>.</p>
+  </div>
+</div>
+
 ## Memory pipeline
 
 Events are scored before they are promoted into durable memory.
 
 ```mermaid
 flowchart LR
-    Event["capture_event()"] --> Score["Signal score"]
+    Event["capture_event()"] --> Dedup["Semantic dedup (0.92 cosine)"]
+    Dedup -->|"duplicate"| Skip["Skipped"]
+    Dedup -->|"unique"| Score["Signal score"]
     Score -->|"above threshold"| Promote["Durable entry"]
     Score -->|"below threshold"| Ignore["Discarded after 30d"]
-    Promote --> Graph["Knowledge graph"]
+    Promote --> Nest["Nest/Branch assignment"]
+    Nest --> Graph["Knowledge graph"]
     Graph --> Recall["recall()"]
 ```
 
@@ -206,6 +295,47 @@ flowchart LR
     C["ESM preference"] -->|related| B
     B -->|depends_on| D["token refresh pattern"]
 ```
+
+<div className="docGrid docGrid--2">
+  <div className="docPanel">
+    <h3>Nest/Branch hierarchy</h3>
+    <p>Two-level taxonomy: nests are top-level domains, branches are topics within nests. Metadata-filtered recall narrows candidates before scoring.</p>
+  </div>
+  <div className="docPanel">
+    <h3>Semantic dedup</h3>
+    <p>Every write passes through an embedding similarity gate (default 0.92 cosine threshold). Near-duplicates are caught before storage.</p>
+  </div>
+  <div className="docPanel">
+    <h3>Agent isolation</h3>
+    <p>Each agent gets its own memory scope and private diary via the <code>agent_id</code> column (schema v8). Recall returns own + global memories, never another agent's private data.</p>
+  </div>
+  <div className="docPanel">
+    <h3>Conversation ingestion</h3>
+    <p>Markdown/JSON chat exports are parsed into per-turn memory entries with automatic entity extraction and KG triple creation. Re-ingestion is prevented by content hash.</p>
+  </div>
+</div>
+
+## Hooks system
+
+```mermaid
+flowchart LR
+    Op["Operation (store, recall, kg_add, ...)"] --> Pre["before:* hooks"]
+    Pre -->|"cancel / transform"| Decision["Continue?"]
+    Decision -->|"yes"| Execute["Execute operation"]
+    Execute --> Post["after:* hooks"]
+    Decision -->|"cancelled"| Skip["Skip operation"]
+```
+
+<div className="docGrid docGrid--2">
+  <div className="docPanel">
+    <h3>Hook types</h3>
+    <p>Pre-hooks can cancel or transform payloads. Post-hooks run after completion. Wildcards (<code>before:&#42;</code>, <code>after:&#42;</code>) catch all events.</p>
+  </div>
+  <div className="docPanel">
+    <h3>Introspection</h3>
+    <p><code>localnest_hooks_stats</code> reports registered hook counts. <code>localnest_hooks_list_events</code> shows available hook event names.</p>
+  </div>
+</div>
 
 ## Request handling
 
@@ -237,9 +367,31 @@ Handlers validate with Zod and delegate the real behavior to services.
 
 ```text
 src/
-├── app/
+├── app/                          # Application bootstrap
 ├── mcp/
+│   └── tools/
+│       └── graph-tools.js        # MCP registration for KG, traversal, diary, ingest, hooks
 ├── services/
+│   ├── memory/
+│   │   ├── kg.js                 # Knowledge graph entity and triple CRUD
+│   │   ├── graph.js              # Recursive CTE traversal and bridge discovery
+│   │   ├── taxonomy.js           # Nest/branch hierarchy helpers
+│   │   ├── scopes.js             # Agent diary CRUD and scope isolation
+│   │   ├── dedup.js              # Embedding similarity gate
+│   │   ├── ingest.js             # Conversation parsing and ingestion pipeline
+│   │   └── hooks.js              # Pre/post operation hook system
+│   └── ...                       # Existing retrieval, indexing, workspace services
+├── cli/
+│   ├── options.js                # Global CLI flag parser
+│   ├── help.js                   # Colored help renderer
+│   ├── router.js                 # Noun-verb subcommand dispatcher
+│   └── commands/
+│       ├── memory.js             # Memory CLI (add, search, list, show, delete)
+│       ├── kg.js                 # Knowledge Graph CLI (add, query, timeline, stats)
+│       ├── skill.js              # Skill management CLI (install, list, remove)
+│       ├── mcp.js                # MCP lifecycle CLI (start, status, config)
+│       ├── ingest.js             # Conversation ingestion CLI
+│       └── completion.js         # Shell completion generators (bash, zsh, fish)
 ├── runtime/
 ```
 
@@ -256,10 +408,18 @@ src/
   </div>
   <div className="docPanel">
     <h3>Local-first execution</h3>
-    <p>Embeddings, reranking, indexing, and memory stay on the local machine.</p>
+    <p>Embeddings, reranking, indexing, memory, and knowledge graph stay on the local machine.</p>
   </div>
   <div className="docPanel">
     <h3>Thin handlers</h3>
     <p>Handlers validate and normalize; service modules own the business logic.</p>
+  </div>
+  <div className="docPanel">
+    <h3>SQLite for everything</h3>
+    <p>Index, memory, knowledge graph, and agent diary all use SQLite. Zero external database dependencies.</p>
+  </div>
+  <div className="docPanel">
+    <h3>Additive migrations</h3>
+    <p>Schema versions v5 through v9 are all additive and backward-compatible. Per-version transaction wrapping ensures safe rollback on failure.</p>
   </div>
 </div>

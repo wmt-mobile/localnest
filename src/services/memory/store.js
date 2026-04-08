@@ -24,6 +24,26 @@ import {
   removeRelation as removeRelationFn,
   getRelated as getRelatedFn
 } from './relations.js';
+import {
+  listNests as listNestsFn,
+  listBranches as listBranchesFn,
+  getTaxonomyTree as getTaxonomyTreeFn
+} from './taxonomy.js';
+import { traverseGraph as traverseGraphFn, discoverBridges as discoverBridgesFn } from './graph.js';
+import { writeDiaryEntry as writeDiaryEntryFn, readDiaryEntries as readDiaryEntriesFn } from './scopes.js';
+import { checkDuplicate as checkDuplicateFn } from './dedup.js';
+import { ingestMarkdown as ingestMarkdownFn, ingestJson as ingestJsonFn } from './ingest.js';
+import { MemoryHooks } from './hooks.js';
+import {
+  addEntity as addEntityFn,
+  getEntity as getEntityFn,
+  addTriple as addTripleFn,
+  invalidateTriple as invalidateTripleFn,
+  queryEntityRelationships as queryEntityRelationshipsFn,
+  queryTriplesAsOf as queryTriplesAsOfFn,
+  getEntityTimeline as getEntityTimelineFn,
+  getKgStats as getKgStatsFn
+} from './kg.js';
 
 export class MemoryStore {
   constructor({
@@ -36,6 +56,7 @@ export class MemoryStore {
     this.requestedBackend = backend || 'auto';
     this.dbPath = dbPath;
     this.embeddingService = embeddingService || null;
+    this.hooks = new MemoryHooks();
     this.adapter = null;
     this.selectedBackend = null;
   }
@@ -151,7 +172,8 @@ export class MemoryStore {
     await this.init();
     return captureEventFn(this.adapter, input, {
       storeEntry: (args) => this.storeEntry(args),
-      updateEntry: (id, patch) => this.updateEntry(id, patch)
+      updateEntry: (id, patch) => this.updateEntry(id, patch),
+      embeddingService: this.embeddingService
     });
   }
 
@@ -178,5 +200,95 @@ export class MemoryStore {
   async getRelated(memoryId) {
     await this.init();
     return getRelatedFn(this.adapter, memoryId);
+  }
+
+  async addEntity(args) {
+    await this.init();
+    return addEntityFn(this.adapter, args);
+  }
+
+  async getEntity(entityId) {
+    await this.init();
+    return getEntityFn(this.adapter, entityId);
+  }
+
+  async addTriple(args) {
+    await this.init();
+    return addTripleFn(this.adapter, args);
+  }
+
+  async invalidateTriple(tripleId, validTo) {
+    await this.init();
+    return invalidateTripleFn(this.adapter, tripleId, validTo);
+  }
+
+  async queryEntityRelationships(entityId, opts) {
+    await this.init();
+    return queryEntityRelationshipsFn(this.adapter, entityId, opts);
+  }
+
+  async queryTriplesAsOf(entityId, asOfDate) {
+    await this.init();
+    return queryTriplesAsOfFn(this.adapter, entityId, asOfDate);
+  }
+
+  async getEntityTimeline(entityId) {
+    await this.init();
+    return getEntityTimelineFn(this.adapter, entityId);
+  }
+
+  async getKgStats() {
+    await this.init();
+    return getKgStatsFn(this.adapter);
+  }
+
+  async listNests() {
+    await this.init();
+    return listNestsFn(this.adapter);
+  }
+
+  async listBranches(nest) {
+    await this.init();
+    return listBranchesFn(this.adapter, nest);
+  }
+
+  async getTaxonomyTree() {
+    await this.init();
+    return getTaxonomyTreeFn(this.adapter);
+  }
+
+  async traverseGraph(args) {
+    await this.init();
+    return traverseGraphFn(this.adapter, args);
+  }
+
+  async discoverBridges(args) {
+    await this.init();
+    return discoverBridgesFn(this.adapter, args);
+  }
+
+  async writeDiaryEntry(args) {
+    await this.init();
+    return writeDiaryEntryFn(this.adapter, args);
+  }
+
+  async readDiaryEntries(args) {
+    await this.init();
+    return readDiaryEntriesFn(this.adapter, args);
+  }
+
+  async checkDuplicate(content, opts = {}) {
+    await this.init();
+    return checkDuplicateFn(this.adapter, this.embeddingService, content, opts);
+  }
+
+  async ingestMarkdown(opts = {}) {
+    await this.init();
+    return ingestMarkdownFn(this.adapter, this.embeddingService, opts);
+  }
+
+  async ingestJson(opts = {}) {
+    await this.init();
+    return ingestJsonFn(this.adapter, this.embeddingService, opts);
   }
 }

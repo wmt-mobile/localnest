@@ -12,9 +12,34 @@
 
 **Your codebase. Your AI. Your machine — no cloud, no leaks, no surprises.**
 
-LocalNest is a local-first MCP server that gives AI agents safe, scoped access to your code — with hybrid search, semantic indexing, and persistent memory that never leaves your machine.
+LocalNest is a local-first MCP server and CLI tool that gives AI agents safe, scoped access to your code — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory that never leaves your machine.
+
+**52 MCP tools** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
 
 📖 [Full documentation](https://wmt-mobile.github.io/localnest/) · [Architecture deep dive](./guides/architecture.md)
+
+## README Languages
+
+English · [العربية الفصحى](./readme/README.ar-001.md) · [বাংলা (বাংলাদেশ)](./readme/README.bn-BD.md) · [Deutsch (Deutschland)](./readme/README.de-DE.md) · [Español (Latinoamérica)](./readme/README.es-419.md) · [Français (France)](./readme/README.fr-FR.md) · [हिन्दी (भारत)](./readme/README.hi-IN.md) · [Bahasa Indonesia](./readme/README.id-ID.md) · [日本語](./readme/README.ja-JP.md) · [한국어](./readme/README.ko-KR.md) · [Português (Brasil)](./readme/README.pt-BR.md) · [Русский](./readme/README.ru-RU.md) · [Türkçe](./readme/README.tr-TR.md) · [简体中文](./readme/README.zh-CN.md)
+
+These translated files are locale-specific full README translations. See [translation policy](./readme/TRANSLATION_POLICY.md) for the target locale matrix and terminology rules. The English [README.md](./README.md) remains the source of truth for the newest commands, release notes, and full details.
+
+---
+
+## What's New in 0.0.7
+
+> Full changelog: [CHANGELOG.md](./CHANGELOG.md)
+
+- **Temporal knowledge graph** — entities, triples, as_of queries, timelines, contradiction detection
+- **Multi-hop graph traversal** — walk relationships 2-5 hops deep via recursive CTEs (unique to LocalNest)
+- **Nest/Branch hierarchy** — LocalNest's own two-level memory taxonomy for organized retrieval
+- **Agent-scoped memory** — per-agent isolation with private diary entries
+- **Semantic dedup** — embedding similarity gate prevents near-duplicate memory pollution
+- **Conversation ingestion** — import Markdown/JSON chat exports with entity extraction
+- **Hooks system** — pre/post operation callbacks for memory, KG, traversal, ingestion
+- **CLI-first architecture** — unified `localnest <noun> <verb>` commands for everything
+- **Shell completions** — bash, zsh, fish tab completion
+- **17 new MCP tools** (52 total) — KG, nests, traversal, diary, ingest, dedup, hooks
 
 ---
 
@@ -32,6 +57,12 @@ Everything — file reads, vector embeddings, memory — runs in-process on your
 | **Hybrid retrieval** | Lexical + semantic fused with RRF ranking for best-of-both results |
 | **Project awareness** | Auto-detects projects from marker files, scopes every tool call |
 | **Agent memory** | Durable, queryable knowledge graph — your AI remembers what it learned |
+| **Temporal knowledge graph** | Subject-predicate-object triples with time validity — query what was true when |
+| **Multi-hop graph traversal** | Walk relationships 2-5 hops deep via recursive CTEs — no other local tool does this |
+| **Nest/Branch hierarchy** | Two-level memory taxonomy for organized retrieval with metadata-filtered boost |
+| **Conversation ingestion** | Import Markdown/JSON chat exports into structured memory + KG triples |
+| **Agent isolation** | Per-agent diary and memory scoping — multiple agents, zero cross-contamination |
+| **Hooks system** | Pre/post operation hooks for memory, KG, traversal, ingestion — plug in your own logic |
 
 ---
 
@@ -112,10 +143,9 @@ localnest version              # check current
 
 ## How Agents Use It
 
-Two workflows cover almost everything:
+Four workflows cover almost everything:
 
 ### Fast lookup — find it, read it, done
-Best for pinpointing a file, symbol, or code pattern.
 
 ```
 localnest_search_files   → find the module by path/name
@@ -124,7 +154,6 @@ localnest_read_file      → read the relevant lines
 ```
 
 ### Deep task — debug, refactor, review with context
-Best for complex work where memory and semantic understanding matter.
 
 ```
 localnest_task_context    → one call: runtime status + recalled memories
@@ -133,7 +162,62 @@ localnest_read_file       → read the relevant sections
 localnest_capture_outcome → persist what you learned for next time
 ```
 
-> **Tool success ≠ useful result.** A tool can return OK and still be empty. Treat non-empty file matches and real line content as meaningful evidence — not just process success.
+### Knowledge graph — structured facts about the project
+
+```
+localnest_kg_add_triple   → store a fact: "auth-service" uses "JWT"
+localnest_kg_query        → what does "auth-service" relate to?
+localnest_kg_as_of        → what was true about this on March 1st?
+localnest_graph_traverse  → walk 2-3 hops to discover connections
+```
+
+### Conversation memory — learn from past chats
+
+```
+localnest_ingest_markdown → import a conversation export
+localnest_memory_recall   → what do I already know about this?
+localnest_diary_write     → private scratchpad for this agent
+```
+
+---
+
+## CLI Reference
+
+LocalNest is a full CLI tool. Everything is managed from the terminal:
+
+```bash
+localnest setup                     # configure roots, backends, AI clients
+localnest doctor                    # health check
+localnest upgrade                   # self-update
+localnest version                   # current version
+localnest status                    # runtime status
+
+localnest memory add "content"      # store a memory
+localnest memory search "query"     # find memories
+localnest memory list               # list all memories
+localnest memory show <id>          # view one memory
+localnest memory delete <id>        # remove a memory
+
+localnest kg add Alice works_on ProjectX    # add a fact
+localnest kg query Alice                     # query relationships
+localnest kg timeline Alice                  # fact evolution
+localnest kg stats                           # graph statistics
+
+localnest skill install             # install skills to AI clients
+localnest skill list                # show installed skills
+localnest skill remove <name>       # uninstall a skill
+
+localnest mcp start                 # start MCP server
+localnest mcp status                # server health
+localnest mcp config                # config JSON for AI clients
+
+localnest ingest ./chat.md          # import conversation
+localnest ingest ./export.json      # import JSON chat
+
+localnest completion bash           # shell completions
+```
+
+**Global flags** work on every command: `--json` (machine output), `--verbose`, `--quiet`, `--config <path>`
 
 ---
 
@@ -182,6 +266,48 @@ localnest_capture_outcome → persist what you learned for next time
 | `localnest_memory_suggest_relations` | Auto-suggest related memories by similarity |
 | `localnest_memory_status` | Memory consent, backend, and database status |
 
+### Knowledge Graph
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_kg_add_entity` | Create entities (people, projects, concepts, tools) |
+| `localnest_kg_add_triple` | Add subject-predicate-object facts with temporal validity |
+| `localnest_kg_query` | Query entity relationships with direction filtering |
+| `localnest_kg_invalidate` | Mark a fact as no longer valid (archival, not deletion) |
+| `localnest_kg_as_of` | Point-in-time queries — what was true on date X? |
+| `localnest_kg_timeline` | Chronological fact evolution for an entity |
+| `localnest_kg_stats` | Entity count, triple count, predicate breakdown |
+
+### Nest/Branch Organization
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_nest_list` | List all nests (top-level memory domains) with counts |
+| `localnest_nest_branches` | List branches (topics) within a nest |
+| `localnest_nest_tree` | Full hierarchy: nests, branches, and counts |
+
+### Graph Traversal
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_graph_traverse` | Multi-hop traversal with path tracking (recursive CTEs) |
+| `localnest_graph_bridges` | Find cross-nest bridges — connections across domains |
+
+### Agent Diary
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_diary_write` | Write a private scratchpad entry (agent-isolated) |
+| `localnest_diary_read` | Read your own recent diary entries |
+
+### Conversation Ingestion
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_ingest_markdown` | Import Markdown conversation exports into memory + KG |
+| `localnest_ingest_json` | Import JSON conversation exports into memory + KG |
+| `localnest_memory_check_duplicate` | Semantic duplicate detection before filing |
+
 ### Server & Updates
 
 | Tool | What it does |
@@ -192,7 +318,33 @@ localnest_capture_outcome → persist what you learned for next time
 | `localnest_update_status` | Check npm for latest version (cached) |
 | `localnest_update_self` | Update globally and sync bundled skill (approval required) |
 
-All tools support `response_format: "json"` (default) or `"markdown"`. List tools return `total_count`, `has_more`, `next_offset` for pagination.
+**50 tools total.** All support `response_format: "json"` (default) or `"markdown"`. List tools return `total_count`, `has_more`, `next_offset` for pagination.
+
+---
+
+## How LocalNest Compares
+
+LocalNest is the only local-first MCP server that combines code retrieval AND structured memory in a single tool. Here's where it stands:
+
+| Capability | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
+|---|---|---|---|---|---|
+| **Local-first (no cloud)** | Yes | Yes | No ($25+/mo) | No (Neo4j) | No ($20-200/mo) |
+| **Code retrieval** | 50 MCP tools, AST-aware, hybrid search | None | None | None | None |
+| **Knowledge graph** | SQLite triples with temporal validity | SQLite triples | Neo4j | Neo4j | Key-value |
+| **Multi-hop traversal** | Yes (recursive CTEs, 2-5 hops) | No (flat lookup only) | No | Yes (requires Neo4j) | No |
+| **Temporal queries (as_of)** | Yes | Yes | Yes | Yes | No |
+| **Contradiction detection** | Yes (write-time warnings) | Exists but not wired in | No | No | No |
+| **Conversation ingestion** | Markdown + JSON | Markdown + JSON + Slack | No | No | No |
+| **Agent isolation** | Per-agent scoping + private diary | Wing-per-agent | User/session scoping | No | User/agent/run/session |
+| **Semantic dedup** | 0.92 cosine gate on all writes | 0.9 threshold | No | No | No |
+| **Memory hierarchy** | Nest/Branch (original) | Wing/Room/Hall (palace) | Flat | Flat | Flat |
+| **Hooks system** | Pre/post operation hooks | None | Webhooks | None | None |
+| **Runtime** | Node.js (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
+| **Dependencies** | 0 new (pure SQLite) | ChromaDB (heavy) | Neo4j ($25+/mo) | Neo4j | Cloud API |
+| **MCP tools** | 50 | 19 | 0 | 0 | 0 |
+| **Cost** | Free | Free | $25+/mo | $25+/mo | $20-200/mo |
+
+**LocalNest's unique position:** The only tool that gives your AI both deep code understanding AND structured persistent memory — entirely local, zero cloud, zero cost.
 
 ---
 
@@ -204,6 +356,18 @@ Enable memory during `localnest setup` and LocalNest starts building a durable k
 - Memory failure never blocks other tools — everything degrades independently
 
 **How auto-promotion works:** events captured via `localnest_memory_capture_event` are scored for signal strength. High-signal events — bug fixes, decisions, preferences — get promoted into durable memories. Weak exploratory events are recorded and quietly discarded after 30 days.
+
+**Knowledge graph:** Store structured facts as subject-predicate-object triples with temporal validity. Query what was true at any point in time with `as_of`. Walk relationships 2-5 hops deep with recursive CTE traversal. Detect contradictions at write time.
+
+**Nest/Branch hierarchy:** Organize memories into nests (top-level domains) and branches (topics). Metadata-filtered recall narrows candidates before scoring for faster, more precise results.
+
+**Agent isolation:** Each agent gets its own memory scope and private diary. Recall returns own + global memories, never another agent's private data.
+
+**Semantic dedup:** Every write passes through an embedding similarity gate (default 0.92 cosine threshold). Near-duplicates are caught before storage — your memory stays clean.
+
+**Conversation ingestion:** Import Markdown or JSON chat exports. Each turn becomes a memory entry with automatic entity extraction and KG triple creation. Re-ingestion of the same file is skipped by content hash.
+
+**Hooks:** Register pre/post callbacks on any memory operation — store, recall, KG writes, traversal, ingestion. Build custom pipelines without modifying core code.
 
 ---
 
@@ -271,7 +435,7 @@ Setup writes everything to `~/.localnest/`:
 
 ## Install Note
 
-`0.0.5` promotes the beta.9 install/runtime fixes into the stable line, including bundled skill version reporting, installed-runtime validation hardening, and the simplified skill-sync flow. Some npm environments may still show a single upstream deprecation warning from the ONNX runtime dependency chain; LocalNest functionality is unaffected.
+`0.0.6-beta.1` keeps `0.0.5` as the current stable line while previewing the CLI deprecation pass: canonical `localnest task-context` / `localnest capture-outcome` commands, deprecated compatibility wrappers for older `localnest-mcp-*` helpers, and no change to the `localnest-mcp` server binary used by MCP clients. Some npm environments may still show a single upstream deprecation warning from the ONNX runtime dependency chain; LocalNest functionality is unaffected.
 
 **Performance tips:**
 - Scope queries with `project_path` + a narrow `glob` whenever possible
@@ -282,22 +446,22 @@ Setup writes everything to `~/.localnest/`:
 
 ## Skill Distribution
 
-LocalNest ships a bundled AI agent skill for Claude Code, Cursor, Codex, and other supported clients. Install once and your agent knows exactly how to use every tool.
+LocalNest ships bundled AI agent skills from one canonical source and installs tool-specific variants for supported clients. Current user-level targets include generic agents directories plus Codex, Copilot, Claude Code, Cursor, Windsurf, OpenCode, Gemini, Antigravity, Cline, and Continue.
 
 ```bash
 localnest install skills             # install or update bundled skills
 localnest install skills --force     # force reinstall
-localnest-mcp-install-skill          # legacy alias
+localnest-mcp-install-skill          # deprecated compatibility alias
 ```
 
 **Shell CLI tools** for automation and hooks:
 
 ```bash
-localnest-mcp-task-context --task "debug auth" --project-path /path/to/project
-localnest-mcp-capture-outcome --task "fix auth" --summary "..." --files-changed 2
+localnest task-context --task "debug auth" --project-path /path/to/project
+localnest capture-outcome --task "fix auth" --summary "..." --files-changed 2
 ```
 
-Both commands accept JSON on stdin. Install from GitHub:
+Legacy aliases `localnest-mcp-task-context` and `localnest-mcp-capture-outcome` still work for compatibility. Both commands accept JSON on stdin. Install from GitHub:
 
 ```bash
 npx skills add https://github.com/wmt-mobile/localnest --skill localnest-mcp

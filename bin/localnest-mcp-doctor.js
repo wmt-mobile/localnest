@@ -1,2 +1,9 @@
 #!/usr/bin/env node
-import '../scripts/runtime/doctor-localnest.mjs';
+import { forwardDeprecatedCommand } from './_shared.js';
+
+await forwardDeprecatedCommand({
+  metaUrl: import.meta.url,
+  legacyCommand: 'localnest-mcp-doctor',
+  replacementCommand: 'localnest doctor',
+  commandArgs: ['doctor']
+});

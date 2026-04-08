@@ -4,6 +4,7 @@ import {
   ensureArray, normalizeLinks, stableJson, makeFingerprint, generateMemoryId,
   buildSearchTerms, deserializeEntry
 } from './utils.js';
+import { checkDuplicate } from './dedup.js';
 
 async function embedMemory(store, { title, summary, content }) {
   if (!store.embeddingService?.isEnabled?.()) return null;
@@ -77,6 +78,7 @@ export async function listEntries(store, {
   const rows = await store.adapter.all(
     `SELECT id, kind, title, summary, status, importance, confidence,
             scope_root_path, scope_project_path, scope_branch_name, topic, feature,
+            nest, branch,
             tags_json, source_type, source_ref, created_at, updated_at, last_recalled_at, recall_count
        FROM memory_entries
        ${where}
@@ -128,6 +130,9 @@ export async function getEntry(store, id) {
 export async function storeEntry(store, input) {
   await store.init();
   const scope = normalizeScope(input.scope);
+  const nest = cleanString(input.nest || scope.project_path || '', 200);
+  const branch = cleanString(input.branch || scope.topic || '', 200);
+  const agentId = cleanString(input.agent_id || '', 200);
   const kind = cleanString(input.kind || 'knowledge', 40) || 'knowledge';
   const content = cleanString(input.content, 20000);
   const summary = deriveSummary(input.summary, content);
@@ -163,6 +168,22 @@ export async function storeEntry(store, input) {
     return { created: false, duplicate: true, memory: await getEntry(store, existing.id) };
   }
 
+  const dedupResult = await checkDuplicate(store.adapter, store.embeddingService, content, {
+    threshold: input.dedup_threshold,
+    nest,
+    branch,
+    projectPath: scope.project_path
+  });
+  if (dedupResult.isDuplicate) {
+    const matchedEntry = await getEntry(store, dedupResult.match.id);
+    return {
+      created: false,
+      duplicate: true,
+      semantic_match: dedupResult.match,
+      memory: matchedEntry
+    };
+  }
+
   const id = generateMemoryId();
   const createdAt = nowIso();
 
@@ -172,12 +193,14 @@ export async function storeEntry(store, input) {
       `INSERT INTO memory_entries(
         id, kind, title, summary, content, status, importance, confidence,
         scope_root_path, scope_project_path, scope_branch_name, topic, feature,
+        nest, branch, agent_id,
         tags_json, search_terms_json, links_json, source_type, source_ref, fingerprint,
         created_at, updated_at, last_recalled_at, recall_count
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 0)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 0)`,
       [
         id, kind, title, summary, content, status, importance, confidence,
         scope.root_path, scope.project_path, scope.branch_name, scope.topic, scope.feature,
+        nest, branch, agentId,
         stableJson(tags), stableJson(searchTerms), stableJson(links),
         sourceType, sourceRef, fingerprint, createdAt, createdAt
       ]
@@ -237,6 +260,9 @@ export async function updateEntry(store, id, patch = {}) {
     source_ref: patch.source_ref === undefined ? existing.source_ref : cleanString(patch.source_ref, 1000)
   };
 
+  const nest = cleanString(patch.nest ?? existing.nest ?? '', 200);
+  const branch = cleanString(patch.branch ?? existing.branch ?? '', 200);
+
   const fingerprint = makeFingerprint({
     kind: next.kind, title: next.title, summary: next.summary,
     content: next.content, scope, tags: next.tags
@@ -255,12 +281,14 @@ export async function updateEntry(store, id, patch = {}) {
           SET kind = ?, title = ?, summary = ?, content = ?, status = ?,
               importance = ?, confidence = ?,
               scope_root_path = ?, scope_project_path = ?, scope_branch_name = ?, topic = ?, feature = ?,
+              nest = ?, branch = ?,
               tags_json = ?, search_terms_json = ?, links_json = ?, source_type = ?, source_ref = ?, fingerprint = ?, updated_at = ?
         WHERE id = ?`,
       [
         next.kind, next.title, next.summary, next.content, next.status,
         next.importance, next.confidence,
         scope.root_path, scope.project_path, scope.branch_name, scope.topic, scope.feature,
+        nest, branch,
         stableJson(next.tags), stableJson(searchTerms), stableJson(next.links),
         next.source_type, next.source_ref, fingerprint, updatedAt, id
       ]

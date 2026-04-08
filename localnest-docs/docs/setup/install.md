@@ -2,9 +2,10 @@
 
 <div className="docPanel docPanel--compact">
   <p>
-    The recommended path is a global install followed by setup and doctor. Use the generated MCP
-    config block instead of hand-writing the client command when possible. On this branch, setup also
-    collects one-time consent for optional local memory.
+    The recommended path is a global install followed by setup and doctor. As of <strong>0.0.7-beta.1</strong>,
+    LocalNest includes a full CLI with <code>localnest memory</code>, <code>localnest kg</code>,
+    <code>localnest skill</code>, and <code>localnest ingest</code> subcommands — plus 52 MCP tools
+    including temporal knowledge graph, multi-hop traversal, and conversation ingestion.
   </p>
 </div>
 
@@ -29,8 +30,8 @@ localnest upgrade
 ```bash
 npx -y localnest-mcp --help
 localnest install skills --force
-npx -y localnest-mcp-setup
-npx -y localnest-mcp-doctor
+npx -y localnest-mcp-setup   # deprecated compatibility wrapper
+npx -y localnest-mcp-doctor  # deprecated compatibility wrapper
 ```
 
 ## Install sequence
@@ -51,6 +52,32 @@ localnest doctor
 # 5. Upgrade when needed
 localnest upgrade
 ```
+
+## Bundled skill targets
+
+`localnest install skills` installs tool-specific skill packages from one canonical LocalNest skill source.
+
+Current user-level targets include:
+
+- generic agents-compatible `~/.agents/skills`
+- `~/.codex/skills`
+- `~/.copilot/skills`
+- `~/.claude/skills`
+- `~/.cursor/skills`
+- `~/.codeium/windsurf/skills`
+- `~/.opencode/skills`
+- `~/.config/opencode/skills`
+- `~/.gemini/skills`
+- `~/.gemini/antigravity/skills`
+- `~/.cline/skills`
+- `~/.continue/skills`
+
+Current project-level targets include:
+
+- `.github/skills`
+- `.claude/skills`
+- `.windsurf/skills`
+- `.opencode/skills`
 
 ## MCP client config
 
@@ -87,7 +114,7 @@ After setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client 
 - For the recommended `sqlite-vec` backend, setup now installs or detects the native `vec0` extension and writes its path into config/client env automatically.
 - If setup cannot provision `vec0`, rerun `localnest setup` before relying on sqlite-vec in MCP clients.
 - Memory is opt-in. On Node 18/20, the rest of LocalNest still works, but memory remains unavailable.
-- `localnest install skills` is version-aware on this branch and skips reinstalling bundled skills when they are already current unless `--force` is used. `localnest-mcp-install-skill` remains as a legacy alias.
+- `localnest install skills` is version-aware on this branch and skips reinstalling bundled skills when they are already current unless `--force` is used. `localnest-mcp-install-skill` remains available as a deprecated compatibility alias.
 - Setup warms embedding/reranker models on first run (downloads into `~/.localnest/cache` by default).
 - `0.0.5` promotes the beta.9 install/runtime fixes into the stable line. A single upstream ONNX-runtime deprecation warning may still appear during npm install.
 - If `~/.localnest/cache` is not writable, LocalNest automatically falls back to a per-user temp cache path.

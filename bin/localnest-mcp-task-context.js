@@ -1,2 +1,8 @@
 #!/usr/bin/env node
-import '../scripts/memory/task-context-localnest.mjs';
+import { forwardDeprecatedCommand } from './_shared.js';
+
+await forwardDeprecatedCommand({
+  metaUrl: import.meta.url,
+  legacyCommand: 'localnest-mcp-task-context',
+  replacementCommand: 'localnest task-context'
+});

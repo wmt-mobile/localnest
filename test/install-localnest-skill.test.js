@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import {
+  detectSkillToolFamily,
   getKnownToolSkillDirs,
   getKnownProjectSkillDirs,
   listBundledSkillDirs,
@@ -50,11 +51,19 @@ test('known skill install locations include codex and Claude-style skill directo
   const dirs = getKnownToolSkillDirs('/tmp/localnest-home');
 
   assert.deepEqual(dirs, [
+    path.join('/tmp/localnest-home', '.agents', 'skills'),
     path.join('/tmp/localnest-home', '.codex', 'skills'),
     path.join('/tmp/localnest-home', '.copilot', 'skills'),
     path.join('/tmp/localnest-home', '.claude', 'skills'),
+    path.join('/tmp/localnest-home', '.cursor', 'skills'),
+    path.join('/tmp/localnest-home', '.codeium', 'windsurf', 'skills'),
+    path.join('/tmp/localnest-home', '.opencode', 'skills'),
+    path.join('/tmp/localnest-home', '.config', 'opencode', 'skills'),
+    path.join('/tmp/localnest-home', '.gemini', 'skills'),
+    path.join('/tmp/localnest-home', '.gemini', 'antigravity', 'skills'),
     path.join('/tmp/localnest-home', '.cline', 'skills'),
-    path.join('/tmp/localnest-home', '.continue', 'skills')
+    path.join('/tmp/localnest-home', '.continue', 'skills'),
+    path.join('/tmp/localnest-home', '.kiro', 'skills')
   ]);
 });
 
@@ -63,8 +72,25 @@ test('known project skill locations include github and claude layouts', () => {
 
   assert.deepEqual(dirs, [
     path.join('/tmp/project', '.github', 'skills'),
-    path.join('/tmp/project', '.claude', 'skills')
+    path.join('/tmp/project', '.claude', 'skills'),
+    path.join('/tmp/project', '.windsurf', 'skills'),
+    path.join('/tmp/project', '.opencode', 'skills')
   ]);
+});
+
+test('detectSkillToolFamily resolves supported tool families from target path', () => {
+  assert.equal(detectSkillToolFamily('/tmp/home/.codex/skills/localnest-mcp'), 'codex');
+  assert.equal(detectSkillToolFamily('/tmp/home/.copilot/skills/localnest-mcp'), 'copilot');
+  assert.equal(detectSkillToolFamily('/tmp/home/.claude/skills/localnest-mcp'), 'claude');
+  assert.equal(detectSkillToolFamily('/tmp/home/.cursor/skills/localnest-mcp'), 'cursor');
+  assert.equal(detectSkillToolFamily('/tmp/home/.codeium/windsurf/skills/localnest-mcp'), 'windsurf');
+  assert.equal(detectSkillToolFamily('/tmp/home/.opencode/skills/localnest-mcp'), 'opencode');
+  assert.equal(detectSkillToolFamily('/tmp/home/.config/opencode/skills/localnest-mcp'), 'opencode');
+  assert.equal(detectSkillToolFamily('/tmp/home/.gemini/skills/localnest-mcp'), 'gemini');
+  assert.equal(detectSkillToolFamily('/tmp/home/.gemini/antigravity/skills/localnest-mcp'), 'antigravity');
+  assert.equal(detectSkillToolFamily('/tmp/home/.cline/skills/localnest-mcp'), 'cline');
+  assert.equal(detectSkillToolFamily('/tmp/home/.continue/skills/localnest-mcp'), 'continue');
+  assert.equal(detectSkillToolFamily('/tmp/home/.agents/skills/localnest-mcp'), 'agents');
 });
 
 test('resolveInstallTarget defaults to agents skill dir', () => {

@@ -8,10 +8,11 @@ import {
   mergeText,
   findMergeCandidate
 } from './event-heuristics.js';
+import { checkDuplicate } from './dedup.js';
 export { recall } from './recall.js';
 export { listEvents } from './event-list.js';
 
-export async function captureEvent(adapter, input, { storeEntry, updateEntry }) {
+export async function captureEvent(adapter, input, { storeEntry, updateEntry, embeddingService }) {
   const scope = normalizeScope(input.scope);
   const eventType = cleanString(input.event_type || input.eventType || 'task', 60) || 'task';
   const rawContent = cleanString(input.content, 20000);
@@ -65,6 +66,17 @@ export async function captureEvent(adapter, input, { storeEntry, updateEntry }) 
 
   let promotedMemoryId = null;
   if (signalScore >= promotionThreshold) {
+    const dedupResult = await checkDuplicate(adapter, embeddingService, content || summary, {
+      nest: input.nest,
+      branch: input.branch,
+      projectPath: scope.project_path
+    });
+    if (dedupResult.isDuplicate) {
+      record.status = 'duplicate';
+      promotedMemoryId = dedupResult.match.id;
+    }
+
+    if (record.status !== 'duplicate') {
     const memoryKind = input.kind || (eventType === 'preference' ? 'preference' : 'knowledge');
     const mergeTarget = await findMergeCandidate(adapter, {
       kind: memoryKind,
@@ -115,6 +127,7 @@ export async function captureEvent(adapter, input, { storeEntry, updateEntry }) 
       });
       promotedMemoryId = result.memory?.id || null;
       record.status = result.duplicate ? 'duplicate' : 'promoted';
+    }
     }
   }
 

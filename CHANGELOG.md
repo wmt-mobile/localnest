@@ -4,6 +4,121 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7-beta.1] - 2026-04-08
+
+### Knowledge Graph
+
+- **Temporal knowledge graph** with entities and subject-predicate-object triples (`kg_entities`, `kg_triples` tables, schema v6).
+- **Temporal validity** on all triples: `valid_from`/`valid_to` columns, point-in-time `as_of` queries, chronological timeline view, and KG statistics.
+- **Multi-hop graph traversal** via SQLite recursive CTEs with cycle prevention (configurable 1-5 hops). No other local-first memory system offers this.
+- **Contradiction detection** at write time: warns when a new triple conflicts with an existing valid triple on the same subject+predicate. Never blocks, just flags.
+- **Cross-nest bridge discovery**: find entities connected across different memory domains.
+- Entity auto-creation on first triple reference with normalized slug IDs.
+- Triple provenance tracking via `source_memory_id` linking back to originating memory entries.
+
+### Memory Organization
+
+- **Nest/Branch hierarchy**: two-level memory taxonomy using LocalNest's own organic metaphor (not copied from any competitor). Nests are top-level domains, branches are topics within nests.
+- **Metadata-filtered recall**: memory recall filters by nest and/or branch for more precise retrieval.
+- Taxonomy tools: list nests, list branches within a nest, get full taxonomy tree with counts.
+
+### Agent Isolation
+
+- **Agent-scoped memory**: `agent_id` column on memory entries for per-agent isolation (schema v8).
+- **Private diary**: separate `agent_diary` table for agent scratchpad entries not visible to other agents.
+- **Scoped recall**: agents see own memories + global memories, never other agents' private data.
+
+### Semantic Dedup
+
+- **Embedding similarity gate** on all memory writes (default 0.92 cosine threshold, configurable).
+- Dedup runs automatically on `memory_store` and `memory_capture_event` operations.
+- Explicit `check_duplicate` tool for pre-filing checks with match details.
+
+### Conversation Ingestion
+
+- **Markdown and JSON conversation import**: parse chat exports into per-turn memory entries with automatic nest/branch assignment.
+- **Rule-based entity extraction**: creates knowledge graph triples from conversation content without LLM dependency.
+- **Re-ingestion protection**: tracks ingested files by path + SHA-256 hash (schema v9, `conversation_sources` table).
+
+### Hooks System
+
+- **Pre/post operation hooks** for memory, KG, graph traversal, diary, ingestion, and dedup operations.
+- Support for cancel, payload transform, one-time listeners, and catch-all wildcards (`before:*`, `after:*`).
+- Two new MCP tools: `localnest_hooks_stats` and `localnest_hooks_list_events` for hook introspection.
+
+### CLI-First Architecture
+
+- **Unified noun-verb CLI**: `localnest <noun> <verb>` subcommand pattern with zero new dependencies (hand-rolled, not Commander.js).
+- **Memory CLI**: `localnest memory add|search|list|show|delete` with full flag support.
+- **Knowledge Graph CLI**: `localnest kg add|query|timeline|stats` for terminal-based KG operations.
+- **Skill CLI**: `localnest skill install|list|remove` with multi-client detection.
+- **MCP Lifecycle CLI**: `localnest mcp start|status|config` for server management.
+- **Ingest CLI**: `localnest ingest <file>` with auto-format detection (Markdown/JSON).
+- **Global flags**: `--json`, `--verbose`, `--quiet`, `--config` work on all commands.
+- **Colored help**: organized by command categories (Core, Memory, KG, Skills, Diagnostics).
+- **Shell completions**: `localnest completion bash|zsh|fish` for tab completion.
+- **Legacy deprecation**: old `localnest-mcp-*` binaries now show yellow deprecation warnings and redirect to canonical commands.
+
+### Migration Safety
+
+- **Per-version transaction wrapping**: each schema migration runs inside its own SQLite transaction with immediate version stamping. Failure mid-migration rolls back cleanly.
+- Schema versions: v5 (existing) through v9 (conversation sources), all additive and backward-compatible.
+
+### MCP Tools
+
+- **17 new MCP tools** registered (52 total):
+  - 7 knowledge graph tools (`localnest_kg_*`)
+  - 3 nest/branch tools (`localnest_nest_*`)
+  - 2 graph traversal tools (`localnest_graph_*`)
+  - 2 agent diary tools (`localnest_diary_*`)
+  - 2 conversation ingestion tools (`localnest_ingest_*`)
+  - 1 duplicate check tool (`localnest_memory_check_duplicate`)
+  - 2 hook introspection tools (`localnest_hooks_*`)
+
+### Documentation
+
+- **Competitive comparison table** in README vs MemPalace, Zep, Graphiti, Mem0.
+- Updated skill files (SKILL.md, tool-reference.md) with all 52 tool workflows.
+- Expanded Memory section with KG, hierarchy, hooks, dedup, and ingestion details.
+
+### New Files
+
+- `src/services/memory/kg.js` — Knowledge graph entity and triple CRUD
+- `src/services/memory/graph.js` — Recursive CTE traversal and bridge discovery
+- `src/services/memory/taxonomy.js` — Nest/branch hierarchy helpers
+- `src/services/memory/scopes.js` — Agent diary CRUD and scope isolation
+- `src/services/memory/dedup.js` — Embedding similarity gate
+- `src/services/memory/ingest.js` — Conversation parsing and ingestion pipeline
+- `src/services/memory/hooks.js` — Pre/post operation hook system
+- `src/mcp/tools/graph-tools.js` — MCP tool registration for all new features
+- `src/cli/options.js` — Global CLI flag parser
+- `src/cli/help.js` — Colored help renderer
+- `src/cli/router.js` — Noun-verb subcommand dispatcher
+- `src/cli/commands/memory.js` — Memory CLI implementation
+- `src/cli/commands/kg.js` — Knowledge Graph CLI implementation
+- `src/cli/commands/skill.js` — Skill management CLI
+- `src/cli/commands/mcp.js` — MCP lifecycle CLI
+- `src/cli/commands/ingest.js` — Conversation ingestion CLI
+- `src/cli/commands/completion.js` — Shell completion generators
+
+## [0.0.6-beta.1] - 2026-03-12
+
+### CLI
+
+- Added canonical `localnest task-context` and `localnest capture-outcome` commands for memory workflow automation.
+- Soft-deprecated legacy helper binaries by turning `localnest-mcp-setup`, `localnest-mcp-doctor`, `localnest-mcp-upgrade`, `localnest-mcp-install-skill`, `localnest-mcp-task-context`, and `localnest-mcp-capture-outcome` into warning-forwarding compatibility wrappers.
+- Kept the `localnest-mcp` MCP server binary unchanged so existing client configs continue to start the server without migration.
+
+### Docs & Guidance
+
+- Updated CLI help, runtime guidance, and README examples to prefer canonical `localnest ...` commands while documenting the compatibility aliases.
+- Added beta release notes and version-matrix entries for `0.0.6-beta.1`.
+
+### Release Tooling
+
+- Bumped bundled skill metadata to the beta package version so packaged installs stay version-aligned.
+- Removed stale hardcoded `0.0.5` defaults from release-prep helpers by aligning version output with the active package version.
+
 ## [0.0.5] - 2026-03-11
 
 ### Stable Release

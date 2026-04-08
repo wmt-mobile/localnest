@@ -20,7 +20,8 @@ import {
   registerCoreTools,
   registerMemoryWorkflowTools,
   registerMemoryStoreTools,
-  registerRetrievalTools
+  registerRetrievalTools,
+  registerGraphTools
 } from '../mcp/index.js';
 import { MemoryWorkflowService } from '../services/memory/index.js';
 
@@ -78,5 +79,11 @@ export function registerAppTools(server, runtime, services) {
     search: services.search,
     defaultMaxReadLines: DEFAULT_MAX_READ_LINES,
     defaultMaxResults: DEFAULT_MAX_RESULTS
+  });
+
+  registerGraphTools({
+    registerJsonTool,
+    schemas: sharedSchemas,
+    memory: services.memory
   });
 }

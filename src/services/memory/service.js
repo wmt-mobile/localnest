@@ -161,9 +161,99 @@ export class MemoryService {
     return this.store.getRelated(memoryId);
   }
 
+  async addEntity(args) {
+    this.assertEnabled();
+    return this.store.addEntity(args);
+  }
+
+  async getEntity(entityId) {
+    this.assertEnabled();
+    return this.store.getEntity(entityId);
+  }
+
+  async addTriple(args) {
+    this.assertEnabled();
+    return this.store.addTriple(args);
+  }
+
+  async invalidateTriple(tripleId, validTo) {
+    this.assertEnabled();
+    return this.store.invalidateTriple(tripleId, validTo);
+  }
+
+  async queryEntityRelationships(entityId, opts = {}) {
+    this.assertEnabled();
+    return this.store.queryEntityRelationships(entityId, opts);
+  }
+
+  async queryTriplesAsOf(entityId, asOfDate) {
+    this.assertEnabled();
+    return this.store.queryTriplesAsOf(entityId, asOfDate);
+  }
+
+  async getEntityTimeline(entityId) {
+    this.assertEnabled();
+    return this.store.getEntityTimeline(entityId);
+  }
+
+  async getKgStats() {
+    this.assertEnabled();
+    return this.store.getKgStats();
+  }
+
+  async listNests() {
+    this.assertEnabled();
+    return this.store.listNests();
+  }
+
+  async listBranches(nest) {
+    this.assertEnabled();
+    return this.store.listBranches(nest);
+  }
+
+  async getTaxonomyTree() {
+    this.assertEnabled();
+    return this.store.getTaxonomyTree();
+  }
+
+  async traverseGraph(args) {
+    this.assertEnabled();
+    return this.store.traverseGraph(args);
+  }
+
+  async discoverBridges(args) {
+    this.assertEnabled();
+    return this.store.discoverBridges(args);
+  }
+
+  async writeDiaryEntry(args) {
+    this.assertEnabled();
+    return this.store.writeDiaryEntry(args);
+  }
+
+  async readDiaryEntries(args) {
+    this.assertEnabled();
+    return this.store.readDiaryEntries(args);
+  }
+
+  async checkDuplicate(content, opts = {}) {
+    this.assertEnabled();
+    return this.store.checkDuplicate(content, opts);
+  }
+
+  async ingestMarkdown(opts = {}) {
+    this.assertEnabled();
+    return this.store.ingestMarkdown(opts);
+  }
+
+  async ingestJson(opts = {}) {
+    this.assertEnabled();
+    return this.store.ingestJson(opts);
+  }
+
   assertEnabled() {
     if (!this.enabled) {
-      throw new Error('Local memory is disabled. Re-run localnest-mcp-setup and opt in to memory.');
+      throw new Error('Local memory is disabled. Re-run localnest setup and opt in to memory.');
     }
   }
 
