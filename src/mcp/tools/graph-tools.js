@@ -3,7 +3,6 @@ import { MemoryHooks } from '../../services/memory/hooks.js';
 
 export function registerGraphTools({
   registerJsonTool,
-  schemas,
   memory
 }) {
   // ─── KG Tools (localnest_kg_*) ──────────────────────────────────────

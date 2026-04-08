@@ -40,7 +40,6 @@ import {
   addTriple as addTripleFn,
   invalidateTriple as invalidateTripleFn,
   queryEntityRelationships as queryEntityRelationshipsFn,
-  ensureEntity as ensureEntityFn,
   queryTriplesAsOf as queryTriplesAsOfFn,
   getEntityTimeline as getEntityTimelineFn,
   getKgStats as getKgStatsFn

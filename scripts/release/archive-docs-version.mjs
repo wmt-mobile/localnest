@@ -40,7 +40,6 @@ function extractChangelogSection(version) {
 }
 
 function countTools() {
-  const graphToolsPath = path.join(ROOT, 'src', 'mcp', 'tools', 'graph-tools.js');
   const toolFiles = ['core.js', 'memory-store.js', 'memory-workflow.js', 'retrieval.js', 'graph-tools.js'];
   let count = 0;
   for (const file of toolFiles) {

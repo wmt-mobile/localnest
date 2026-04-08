@@ -125,7 +125,7 @@ function writeError(msg, json) {
 /* ------------------------------------------------------------------ */
 
 async function handleStart(args, opts) {
-  const { flags } = parseFlags(args, {
+  parseFlags(args, {
     foreground: { alias: 'f', type: 'boolean' },
   });
 

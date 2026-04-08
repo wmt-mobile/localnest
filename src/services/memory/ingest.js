@@ -257,7 +257,7 @@ export async function ingestMarkdown(adapter, embeddingService, opts = {}) {
     try {
       rawContent = fs.readFileSync(filePath, 'utf8');
     } catch (err) {
-      throw new Error(`Cannot read file: ${filePath} — ${err.message}`);
+      throw new Error(`Cannot read file: ${filePath} — ${err.message}`, { cause: err });
     }
   }
 
@@ -317,7 +317,7 @@ export async function ingestJson(adapter, embeddingService, opts = {}) {
     try {
       rawContent = fs.readFileSync(filePath, 'utf8');
     } catch (err) {
-      throw new Error(`Cannot read file: ${filePath} — ${err.message}`);
+      throw new Error(`Cannot read file: ${filePath} — ${err.message}`, { cause: err });
     }
   }
 

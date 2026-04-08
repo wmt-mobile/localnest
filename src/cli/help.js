@@ -28,7 +28,6 @@ const GREEN = `${ESC}32m`;
 const YELLOW = `${ESC}33m`;
 const MAGENTA = `${ESC}35m`;
 const BLUE = `${ESC}34m`;
-const WHITE = `${ESC}37m`;
 
 function c(code, text) {
   return useColor() ? `${code}${text}${RESET}` : text;

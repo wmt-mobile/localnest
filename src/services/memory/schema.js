@@ -127,7 +127,7 @@ export async function ensureSchema(adapter) {
   `);
 }
 
-export async function runMigrations({ adapter, getMeta, setMeta }) {
+export async function runMigrations({ adapter, getMeta }) {
   const currentVersion = Number.parseInt(await getMeta('schema_version') || '0', 10) || 0;
 
   if (currentVersion >= SCHEMA_VERSION) {

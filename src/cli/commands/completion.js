@@ -137,7 +137,7 @@ complete -F _localnest localnest
 
 function generateZsh() {
   const topEntries = Object.entries(COMMAND_TREE)
-    .map(([cmd, subs]) => {
+    .map(([cmd]) => {
       const desc = getCommandDesc(cmd);
       return `      '${cmd}:${desc}'`;
     })
@@ -248,7 +248,7 @@ function generateFish() {
     '# Top-level commands',
   ];
 
-  for (const [cmd, subs] of Object.entries(COMMAND_TREE)) {
+  for (const [cmd] of Object.entries(COMMAND_TREE)) {
     const desc = getCommandDesc(cmd);
     lines.push(
       `complete -c localnest -n __localnest_no_subcommand -a ${cmd} -d "${desc}"`
