@@ -36,7 +36,7 @@ test('localnest start --help prints usage without starting server', (t) => {
   if (!result) return;
 
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /LocalNest CLI|Usage:/);
+  assert.match(result.stdout, /LocalNest|USAGE|Usage:/);
   assert.match(result.stdout, /install skills/);
 });
 

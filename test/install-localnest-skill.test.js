@@ -62,7 +62,8 @@ test('known skill install locations include codex and Claude-style skill directo
     path.join('/tmp/localnest-home', '.gemini', 'skills'),
     path.join('/tmp/localnest-home', '.gemini', 'antigravity', 'skills'),
     path.join('/tmp/localnest-home', '.cline', 'skills'),
-    path.join('/tmp/localnest-home', '.continue', 'skills')
+    path.join('/tmp/localnest-home', '.continue', 'skills'),
+    path.join('/tmp/localnest-home', '.kiro', 'skills')
   ]);
 });
 
