@@ -33,6 +33,7 @@ import { traverseGraph as traverseGraphFn, discoverBridges as discoverBridgesFn 
 import { writeDiaryEntry as writeDiaryEntryFn, readDiaryEntries as readDiaryEntriesFn } from './scopes.js';
 import { checkDuplicate as checkDuplicateFn } from './dedup.js';
 import { ingestMarkdown as ingestMarkdownFn, ingestJson as ingestJsonFn } from './ingest.js';
+import { MemoryHooks } from './hooks.js';
 import {
   addEntity as addEntityFn,
   getEntity as getEntityFn,
@@ -56,6 +57,7 @@ export class MemoryStore {
     this.requestedBackend = backend || 'auto';
     this.dbPath = dbPath;
     this.embeddingService = embeddingService || null;
+    this.hooks = new MemoryHooks();
     this.adapter = null;
     this.selectedBackend = null;
   }

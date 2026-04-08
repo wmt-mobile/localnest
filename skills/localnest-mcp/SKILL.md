@@ -144,6 +144,64 @@ When to use the memory graph:
 - When starting a complex task: run `localnest_memory_related` on the most relevant recalled memory to surface connected context.
 - When a new decision supersedes or contradicts a prior one: link them with the appropriate `relation_type`.
 
+Knowledge graph workflow (structured facts):
+1. `localnest_kg_add_entity` ← create named entities (people, projects, concepts, tools)
+2. `localnest_kg_add_triple` ← add facts as subject-predicate-object triples with optional valid_from date
+3. `localnest_kg_query` ← query all relationships for an entity (incoming, outgoing, or both)
+4. `localnest_kg_invalidate` ← mark a fact as no longer valid (sets valid_to without deleting)
+5. `localnest_kg_as_of` ← query what was true at a specific point in time
+6. `localnest_kg_timeline` ← see chronological evolution of facts about an entity
+7. `localnest_kg_stats` ← entity count, triple count, predicate breakdown
+
+When to use the knowledge graph:
+- After learning a structured fact (X uses Y, A depends on B, user prefers Z): store as a triple.
+- When investigating relationships: query entity → discover connections.
+- When facts change (switched from REST to GraphQL): invalidate the old triple, add new one.
+- When asking "what did we know on date X?": use as_of queries.
+- After adding triples, check for contradictions in the response — the system warns but doesn't block.
+
+Nest/branch organization workflow:
+1. `localnest_nest_list` ← see all top-level nests (project domains) with counts
+2. `localnest_nest_branches` ← see branches (topics) within a specific nest
+3. `localnest_nest_tree` ← full hierarchy view: nests → branches → counts
+
+When to use nest/branch:
+- Pass `nest` and `branch` params when storing memories for organized retrieval.
+- Use nest/branch filters on `localnest_memory_recall` for focused results.
+- Nests represent domains (projects, people, topics). Branches represent subtopics within nests.
+
+Graph traversal workflow:
+1. `localnest_graph_traverse` ← multi-hop walk from a starting entity (default 2 hops, max 5)
+2. `localnest_graph_bridges` ← find entities connected across different nests
+
+When to use graph traversal:
+- To discover non-obvious connections between entities (2-3 hops out).
+- To find cross-domain bridges: entities that link different nests together.
+- This is LocalNest's key differentiator — no other local-first memory system has multi-hop traversal.
+
+Agent diary workflow:
+1. `localnest_diary_write` ← write a private scratchpad entry (visible only to the owning agent)
+2. `localnest_diary_read` ← read your own recent diary entries
+
+When to use agent diary:
+- For private agent notes that shouldn't pollute shared memory.
+- For tracking investigation progress across sessions.
+- Each agent only sees its own diary — no cross-agent visibility.
+
+Conversation ingestion workflow:
+1. `localnest_ingest_markdown` ← parse a Markdown conversation export into memories + KG triples
+2. `localnest_ingest_json` ← parse a JSON conversation export ({role, content, timestamp} arrays)
+
+When to use conversation ingestion:
+- When a user wants to import past conversations (Claude, ChatGPT exports).
+- Ingestion auto-extracts entities, creates triples, runs dedup, and assigns nest/branch.
+- Re-ingesting the same file (same hash) is automatically skipped.
+
+Duplicate detection:
+- `localnest_memory_check_duplicate` ← check if content is semantically similar to existing memories before filing
+- Automatic dedup runs on every `localnest_memory_store` and `localnest_memory_capture_event`.
+- Default threshold: 0.92 cosine similarity. Configurable per call.
+
 Automatic memory triggers:
 - Run `localnest_task_context` before deeper analysis when the task involves debugging, implementation, code review, repeated repo work, or user/project preferences.
 - Run `localnest_capture_outcome` after:
