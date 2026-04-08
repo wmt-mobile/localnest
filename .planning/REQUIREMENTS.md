@@ -49,10 +49,10 @@
 
 ### Agent-Scoped Memory
 
-- [ ] **AGNT-01**: Memory entries support an agent_id column for per-agent isolation
-- [ ] **AGNT-02**: Agent can write diary entries (private scratchpad, not visible to other agents) via MCP tool
-- [ ] **AGNT-03**: Agent can read its own recent diary entries via MCP tool
-- [ ] **AGNT-04**: Memory recall respects agent scope -- agent sees own memories + global memories, not other agents' private memories
+- [x] **AGNT-01**: Memory entries support an agent_id column for per-agent isolation
+- [x] **AGNT-02**: Agent can write diary entries (private scratchpad, not visible to other agents) via MCP tool
+- [x] **AGNT-03**: Agent can read its own recent diary entries via MCP tool
+- [x] **AGNT-04**: Memory recall respects agent scope -- agent sees own memories + global memories, not other agents' private memories
 
 ### Semantic Duplicate Detection
 
@@ -139,10 +139,10 @@ Deferred to future milestone.
 | TRAV-04 | Phase 5 | Complete |
 | CONT-01 | Phase 5 | Complete |
 | CONT-02 | Phase 5 | Complete |
-| AGNT-01 | Phase 6 | Pending |
-| AGNT-02 | Phase 6 | Pending |
-| AGNT-03 | Phase 6 | Pending |
-| AGNT-04 | Phase 6 | Pending |
+| AGNT-01 | Phase 6 | Complete |
+| AGNT-02 | Phase 6 | Complete |
+| AGNT-03 | Phase 6 | Complete |
+| AGNT-04 | Phase 6 | Complete |
 | DEDUP-01 | Phase 7 | Pending |
 | DEDUP-02 | Phase 7 | Pending |
 | DEDUP-03 | Phase 7 | Pending |

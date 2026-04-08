@@ -17,7 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Temporal Validity** - Point-in-time queries, fact timelines, and KG statistics
 - [x] **Phase 4: Nest/Branch Hierarchy** - Two-level memory taxonomy with filtered recall
 - [x] **Phase 5: Graph Traversal and Contradiction Detection** - Multi-hop walks, cross-nest bridges, and write-time contradiction warnings
-- [ ] **Phase 6: Agent-Scoped Memory** - Per-agent namespaces with isolated diary entries
+- [x] **Phase 6: Agent-Scoped Memory** - Per-agent namespaces with isolated diary entries
 - [ ] **Phase 7: Semantic Duplicate Detection** - Embedding similarity gate before storage
 - [ ] **Phase 8: Conversation Ingestion** - Parse Markdown/JSON conversations into memories and triples
 - [ ] **Phase 9: MCP Tool Registration** - Expose all new capabilities as localnest_* MCP tools
@@ -110,7 +110,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 06-01: Agent scopes table, diary CRUD, and recall isolation
+- [x] 06-01: Agent scopes table, diary CRUD, and recall isolation
 
 ### Phase 7: Semantic Duplicate Detection
 **Goal**: The system prevents near-duplicate memories from polluting the store by comparing embeddings before storage
@@ -171,7 +171,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 3. Temporal Validity | 1/1 | Complete | 2026-04-08 |
 | 4. Nest/Branch Hierarchy | 2/2 | Complete | 2026-04-08 |
 | 5. Graph Traversal and Contradiction Detection | 2/2 | Complete | 2026-04-08 |
-| 6. Agent-Scoped Memory | 0/1 | Not started | - |
+| 6. Agent-Scoped Memory | 1/1 | Complete | 2026-04-08 |
 | 7. Semantic Duplicate Detection | 0/1 | Not started | - |
 | 8. Conversation Ingestion | 0/2 | Not started | - |
 | 9. MCP Tool Registration | 0/2 | Not started | - |

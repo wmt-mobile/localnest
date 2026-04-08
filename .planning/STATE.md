@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 05-02-PLAN.md
-last_updated: "2026-04-08T06:58:00.000Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-04-08T07:05:00.000Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 9
-  completed_phases: 5
-  total_plans: 8
-  completed_plans: 8
-  percent: 42
+  completed_phases: 6
+  total_plans: 9
+  completed_plans: 9
+  percent: 50
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory -- no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** Phase 04 — nest-branch-hierarchy (complete)
+**Current focus:** Phase 06 — agent-scoped-memory (complete)
 
 ## Current Position
 
-Phase: 05 (graph-traversal-and-contradiction-detection) — COMPLETE
-Plan: 2 of 2
-Status: Phase 05 complete — ready for Phase 06
+Phase: 06 (agent-scoped-memory) — COMPLETE
+Plan: 1 of 1
+Status: Phase 06 complete — ready for Phase 07
 Last activity: 2026-04-08
 
-Progress: [########..] 80%
+Progress: [########..] 83%
 
 ## Performance Metrics
 
@@ -49,10 +49,11 @@ Progress: [########..] 80%
 | Phase 03 | 1 | 2min | 2min |
 | Phase 04 | 2 | 3min | 1.5min |
 | Phase 05 | 2 | 3min | 1.5min |
+| Phase 06 | 1 | 2min | 2min |
 
 **Recent Trend:**
 
-- Last 5 plans: 03-01 (2min), 04-01 (2min), 04-02 (1min), 05-01 (2min), 05-02 (1min)
+- Last 5 plans: 04-01 (2min), 04-02 (1min), 05-01 (2min), 05-02 (1min), 06-01 (2min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -64,6 +65,7 @@ Progress: [########..] 80%
 | Phase 04 P02 | 1min | 2 tasks | 3 files |
 | Phase 05 P01 | 2min | 2 tasks | 3 files |
 | Phase 05 P02 | 1min | 3 tasks | 4 files |
+| Phase 06 P01 | 2min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -94,6 +96,10 @@ Recent decisions affecting current work:
 - [Phase 05]: Cycle prevention uses path NOT LIKE substring check within CTE
 - [Phase 05]: Contradiction detection runs inside transaction, never blocks writes
 - [Phase 05]: Bridge detection uses INNER JOIN on memory_entries for nest resolution
+- [Phase 06]: agent_id TEXT NOT NULL DEFAULT '' — empty string means global memory
+- [Phase 06]: Recall filter: (agent_id = ? OR agent_id = '') for own + global scope
+- [Phase 06]: agent_diary as separate table from memory_entries for clean isolation
+- [Phase 06]: No agentId in recall shows global-only — conservative default
 
 ### Pending Todos
 
@@ -105,6 +111,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T06:58:00.000Z
-Stopped at: Completed 05-02-PLAN.md
+Last session: 2026-04-08T07:05:00.000Z
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None
