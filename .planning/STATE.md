@@ -4,14 +4,14 @@ milestone: v2.0
 milestone_name: CLI-First Architecture
 status: in_progress
 stopped_at: Completed 11-1-PLAN.md (Memory CLI Commands)
-last_updated: "2026-04-08T08:48:21Z"
+last_updated: "2026-04-08T08:55:00Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 9
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 22
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
+  percent: 33
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A unified, premium CLI that makes LocalNest feel like a standalone product -- not just an MCP server.
-**Current focus:** Phase 11 -- Memory CLI Commands (plan 1 complete)
+**Current focus:** Phase 12 -- Knowledge Graph CLI (plan 1 complete)
 
 ## Current Position
 
-Phase: 11 of 18 (Memory CLI Commands)
+Phase: 12 of 18 (Knowledge Graph CLI)
 Plan: 1 of 1 in current phase (complete)
-Status: Phase 11 complete -- ready for Phase 12
-Last activity: 2026-04-08 -- Memory CLI subcommands (add, search, list, show, delete) implemented
+Status: Phase 12 complete -- ready for Phase 13
+Last activity: 2026-04-08 -- KG CLI subcommands (add, query, timeline, stats) implemented
 
-Progress: [##........] 22%
+Progress: [###.......] 33%
 
 ## Performance Metrics
 
@@ -45,11 +45,13 @@ Progress: [##........] 22%
 |-------|-------|-------|----------|
 | 10 | 1 | 4m25s | 4m25s |
 | 11 | 1 | 2m30s | 2m30s |
+| 12 | 1 | 3m00s | 3m00s |
 
 **Recent Trend:**
 - Plan 10-1: 4m25s (6 tasks, 11 files)
 - Plan 11-1: 2m30s (1 task, 1 file)
-- Trend: improving
+- Plan 12-1: 3m00s (1 task, 1 file)
+- Trend: stable
 
 *Updated after each plan completion*
 
@@ -69,6 +71,8 @@ Recent decisions affecting current work:
 - [Phase 10-1]: Noun-verb routing via Map-based module dispatch in src/cli/router.js
 - [Phase 11-1]: Bootstrap MemoryService from buildRuntimeConfig + EmbeddingService (lightweight, skips workspace/search/vector services)
 - [Phase 11-1]: Hand-rolled parseFlags helper for CLI flag parsing, consistent with zero-dep approach
+- [Phase 12-1]: KG CLI uses normalizeEntityId (toSlug) to convert entity names to IDs for store lookups
+- [Phase 12-1]: Reused identical MemoryService bootstrap and parseFlags patterns from memory.js
 
 ### Pending Todos
 
@@ -80,6 +84,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T08:48:21Z
-Stopped at: Completed 11-1-PLAN.md (Memory CLI Commands)
+Last session: 2026-04-08T08:55:00Z
+Stopped at: Completed 12-1-PLAN.md (Knowledge Graph CLI)
 Resume file: None

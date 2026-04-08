@@ -32,7 +32,7 @@
 
 - [x] **Phase 10: CLI Framework Setup** - Commander.js skeleton with global flags, colored help, and version display
 - [x] **Phase 11: Memory CLI Commands** - Full memory CRUD via localnest memory subcommands
-- [ ] **Phase 12: Knowledge Graph CLI** - KG triple and entity operations from the command line
+- [x] **Phase 12: Knowledge Graph CLI** - KG triple and entity operations from the command line
 - [ ] **Phase 13: Skill CLI Commands** - Install, list, and remove bundled skills across AI clients
 - [ ] **Phase 14: MCP Lifecycle CLI** - Start, status, and config generation for MCP server
 - [ ] **Phase 15: Ingest CLI** - Conversation file ingestion with format detection and taxonomy
@@ -156,7 +156,7 @@ Phases execute in numeric order: 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17 ->
 | 9. MCP Tool Registration | v1.0 | 1/1 | Complete | 2026-04-08 |
 | 10. CLI Framework Setup | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 11. Memory CLI Commands | v2.0 | 1/1 | Complete | 2026-04-08 |
-| 12. Knowledge Graph CLI | v2.0 | 0/? | Not started | - |
+| 12. Knowledge Graph CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 13. Skill CLI Commands | v2.0 | 0/? | Not started | - |
 | 14. MCP Lifecycle CLI | v2.0 | 0/? | Not started | - |
 | 15. Ingest CLI | v2.0 | 0/? | Not started | - |
