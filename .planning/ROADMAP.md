@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 4: Nest/Branch Hierarchy** - Two-level memory taxonomy with filtered recall
 - [x] **Phase 5: Graph Traversal and Contradiction Detection** - Multi-hop walks, cross-nest bridges, and write-time contradiction warnings
 - [x] **Phase 6: Agent-Scoped Memory** - Per-agent namespaces with isolated diary entries
-- [ ] **Phase 7: Semantic Duplicate Detection** - Embedding similarity gate before storage
+- [x] **Phase 7: Semantic Duplicate Detection** - Embedding similarity gate before storage
 - [ ] **Phase 8: Conversation Ingestion** - Parse Markdown/JSON conversations into memories and triples
 - [ ] **Phase 9: MCP Tool Registration** - Expose all new capabilities as localnest_* MCP tools
 
@@ -124,7 +124,7 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 07-01: dedup.js embedding similarity gate and integration with entries/event-capture
+- [x] 07-01: dedup.js embedding similarity gate and integration with entries/event-capture
 
 ### Phase 8: Conversation Ingestion
 **Goal**: Users can ingest conversation exports into structured memories and knowledge graph triples
@@ -172,6 +172,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 4. Nest/Branch Hierarchy | 2/2 | Complete | 2026-04-08 |
 | 5. Graph Traversal and Contradiction Detection | 2/2 | Complete | 2026-04-08 |
 | 6. Agent-Scoped Memory | 1/1 | Complete | 2026-04-08 |
-| 7. Semantic Duplicate Detection | 0/1 | Not started | - |
+| 7. Semantic Duplicate Detection | 1/1 | Complete | 2026-04-08 |
 | 8. Conversation Ingestion | 0/2 | Not started | - |
 | 9. MCP Tool Registration | 0/2 | Not started | - |

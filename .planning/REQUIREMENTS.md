@@ -56,10 +56,10 @@
 
 ### Semantic Duplicate Detection
 
-- [ ] **DEDUP-01**: System checks embedding similarity before storing new memories (configurable threshold, default 0.92)
-- [ ] **DEDUP-02**: User can check for duplicates before filing via MCP tool with content and threshold parameters
-- [ ] **DEDUP-03**: Duplicate detection returns the matching existing entry when a duplicate is found
-- [ ] **DEDUP-04**: Event capture pipeline runs dedup check before auto-promotion
+- [x] **DEDUP-01**: System checks embedding similarity before storing new memories (configurable threshold, default 0.92)
+- [x] **DEDUP-02**: User can check for duplicates before filing via MCP tool with content and threshold parameters
+- [x] **DEDUP-03**: Duplicate detection returns the matching existing entry when a duplicate is found
+- [x] **DEDUP-04**: Event capture pipeline runs dedup check before auto-promotion
 
 ### Conversation Ingestion
 
@@ -143,10 +143,10 @@ Deferred to future milestone.
 | AGNT-02 | Phase 6 | Complete |
 | AGNT-03 | Phase 6 | Complete |
 | AGNT-04 | Phase 6 | Complete |
-| DEDUP-01 | Phase 7 | Pending |
-| DEDUP-02 | Phase 7 | Pending |
-| DEDUP-03 | Phase 7 | Pending |
-| DEDUP-04 | Phase 7 | Pending |
+| DEDUP-01 | Phase 7 | Complete |
+| DEDUP-02 | Phase 7 | Complete |
+| DEDUP-03 | Phase 7 | Complete |
+| DEDUP-04 | Phase 7 | Complete |
 | INGEST-01 | Phase 8 | Pending |
 | INGEST-02 | Phase 8 | Pending |
 | INGEST-03 | Phase 8 | Pending |
