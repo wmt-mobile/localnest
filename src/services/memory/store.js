@@ -152,20 +152,36 @@ export class MemoryStore {
   }
 
   async storeEntry(input) {
-    return storeMemoryEntry(this, input);
+    const hookResult = await this.hooks.emit('before:store', input);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await storeMemoryEntry(this, hookResult.payload);
+    await this.hooks.emit('after:store', result);
+    return result;
   }
 
   async updateEntry(id, patch = {}) {
-    return updateMemoryEntry(this, id, patch);
+    const hookResult = await this.hooks.emit('before:update', { id, patch });
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await updateMemoryEntry(this, hookResult.payload.id, hookResult.payload.patch);
+    await this.hooks.emit('after:update', result);
+    return result;
   }
 
   async deleteEntry(id) {
-    return deleteMemoryEntry(this, id);
+    const hookResult = await this.hooks.emit('before:delete', { id });
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await deleteMemoryEntry(this, hookResult.payload.id);
+    await this.hooks.emit('after:delete', result);
+    return result;
   }
 
   async recall(args) {
     await this.init();
-    return recallFn(this.adapter, args);
+    const hookResult = await this.hooks.emit('before:recall', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await recallFn(this.adapter, hookResult.payload);
+    await this.hooks.emit('after:recall', result);
+    return result;
   }
 
   async captureEvent(input) {
@@ -204,7 +220,11 @@ export class MemoryStore {
 
   async addEntity(args) {
     await this.init();
-    return addEntityFn(this.adapter, args);
+    const hookResult = await this.hooks.emit('before:kg:addEntity', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await addEntityFn(this.adapter, hookResult.payload);
+    await this.hooks.emit('after:kg:addEntity', result);
+    return result;
   }
 
   async getEntity(entityId) {
@@ -214,12 +234,20 @@ export class MemoryStore {
 
   async addTriple(args) {
     await this.init();
-    return addTripleFn(this.adapter, args);
+    const hookResult = await this.hooks.emit('before:kg:addTriple', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await addTripleFn(this.adapter, hookResult.payload);
+    await this.hooks.emit('after:kg:addTriple', result);
+    return result;
   }
 
   async invalidateTriple(tripleId, validTo) {
     await this.init();
-    return invalidateTripleFn(this.adapter, tripleId, validTo);
+    const hookResult = await this.hooks.emit('before:kg:invalidate', { tripleId, validTo });
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await invalidateTripleFn(this.adapter, hookResult.payload.tripleId, hookResult.payload.validTo);
+    await this.hooks.emit('after:kg:invalidate', result);
+    return result;
   }
 
   async queryEntityRelationships(entityId, opts) {
@@ -259,17 +287,29 @@ export class MemoryStore {
 
   async traverseGraph(args) {
     await this.init();
-    return traverseGraphFn(this.adapter, args);
+    const hookResult = await this.hooks.emit('before:graph:traverse', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await traverseGraphFn(this.adapter, hookResult.payload);
+    await this.hooks.emit('after:graph:traverse', result);
+    return result;
   }
 
   async discoverBridges(args) {
     await this.init();
-    return discoverBridgesFn(this.adapter, args);
+    const hookResult = await this.hooks.emit('before:graph:bridges', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await discoverBridgesFn(this.adapter, hookResult.payload);
+    await this.hooks.emit('after:graph:bridges', result);
+    return result;
   }
 
   async writeDiaryEntry(args) {
     await this.init();
-    return writeDiaryEntryFn(this.adapter, args);
+    const hookResult = await this.hooks.emit('before:diary:write', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await writeDiaryEntryFn(this.adapter, hookResult.payload);
+    await this.hooks.emit('after:diary:write', result);
+    return result;
   }
 
   async readDiaryEntries(args) {
@@ -279,16 +319,28 @@ export class MemoryStore {
 
   async checkDuplicate(content, opts = {}) {
     await this.init();
-    return checkDuplicateFn(this.adapter, this.embeddingService, content, opts);
+    const hookResult = await this.hooks.emit('before:dedup', { content, opts });
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await checkDuplicateFn(this.adapter, this.embeddingService, hookResult.payload.content, hookResult.payload.opts);
+    await this.hooks.emit('after:dedup', result);
+    return result;
   }
 
   async ingestMarkdown(opts = {}) {
     await this.init();
-    return ingestMarkdownFn(this.adapter, this.embeddingService, opts);
+    const hookResult = await this.hooks.emit('before:ingest', { type: 'markdown', opts });
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await ingestMarkdownFn(this.adapter, this.embeddingService, hookResult.payload.opts);
+    await this.hooks.emit('after:ingest', result);
+    return result;
   }
 
   async ingestJson(opts = {}) {
     await this.init();
-    return ingestJsonFn(this.adapter, this.embeddingService, opts);
+    const hookResult = await this.hooks.emit('before:ingest', { type: 'json', opts });
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await ingestJsonFn(this.adapter, this.embeddingService, hookResult.payload.opts);
+    await this.hooks.emit('after:ingest', result);
+    return result;
   }
 }
