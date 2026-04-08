@@ -1,5 +1,5 @@
 ---
-description: Current stable package notes for localnest-mcp, including runtime updates, install behavior, memory workflows, and canonical tool behavior.
+description: Current stable package notes for localnest-mcp, including runtime updates, install behavior, memory workflows, and canonical tool behavior. Beta channel is at 0.0.7-beta.1.
 ---
 
 # Current Release
@@ -18,9 +18,9 @@ Current stable package documentation for `localnest-mcp@0.0.5`, covering memory 
     <p>Use this page for the currently shipped stable contract and runtime behavior.</p>
   </div>
   <div className="docPanel">
-    <span className="docEyebrow">Docs contract</span>
-    <h3>Retrieval + memory workflow</h3>
-    <p>The current release docs include the full memory tool surface and setup/config changes.</p>
+    <span className="docEyebrow">Beta channel</span>
+    <h3>0.0.7-beta.1 available</h3>
+    <p>The latest beta adds a temporal knowledge graph, multi-hop traversal, agent isolation, and 17 new MCP tools. See the <a href="./0.0.7-beta.1">beta release notes</a>.</p>
   </div>
 </div>
 
@@ -33,9 +33,9 @@ Current stable package documentation for `localnest-mcp@0.0.5`, covering memory 
     <strong>Configure MCP</strong>
     <span>Use the generated MCP block, supported client setup, and startup timeout guidance.</span>
   </a>
-  <a className="docLinkCard" href="./0.0.4-beta.9">
-    <strong>Compare with beta.9</strong>
-    <span>Open the archived beta.9 package notes when you need the last prerelease contract before stable.</span>
+  <a className="docLinkCard" href="./0.0.7-beta.1">
+    <strong>Preview 0.0.7-beta.1</strong>
+    <span>See the beta release notes for the temporal KG, graph traversal, nest/branch hierarchy, and CLI-first architecture.</span>
   </a>
 </div>
 
@@ -71,19 +71,37 @@ Current stable package documentation for `localnest-mcp@0.0.5`, covering memory 
   </div>
 </div>
 
+## Beta Preview
+
+The beta channel is at `0.0.7-beta.1` with significant new capabilities:
+
+- **Temporal knowledge graph** with entities, triples, as_of queries, and timelines
+- **Multi-hop graph traversal** via recursive CTEs (2-5 hops)
+- **Nest/Branch hierarchy** for organized memory retrieval
+- **Agent-scoped memory** with private diary entries
+- **Semantic dedup** to prevent near-duplicate memory pollution
+- **Conversation ingestion** for Markdown/JSON chat imports
+- **Hooks system** for pre/post operation callbacks
+- **CLI-first architecture** with unified noun-verb commands
+- **17 new MCP tools** (52 total)
+
+Install the beta: `npm install -g localnest-mcp@beta`
+
 ## How to use this page
 
 - Treat this page as the source of truth for the current stable release behavior.
 - Use the archived `0.0.3` pages when you need the previous stable release contract.
 - Use archived beta pages such as [0.0.4-beta.9](./0.0.4-beta.9) or [0.0.4-beta.8](./0.0.4-beta.8) when you need a frozen prerelease contract instead of the maintained current summary.
 - If you need explicit install commands per version, use [Version Selection](./version-selection).
+- For the latest beta features, see [0.0.7-beta.1](./0.0.7-beta.1).
 
 ## Need a Different Release View?
 
 - Use [Version Selection](./version-selection) when you need exact install commands.
 - Use [Release Matrix](./history) when you need the full release-to-page mapping.
+- Use [0.0.7-beta.1](./0.0.7-beta.1) for the latest beta with knowledge graph and traversal.
+- Use [0.0.6-beta.1](./0.0.6-beta.1) for the CLI deprecation beta.
 - Use [0.0.4-beta.9](./0.0.4-beta.9) if you are debugging the last beta before the stable promotion.
-- Use [0.0.4-beta.8](./0.0.4-beta.8) if you need the earlier beta runtime contract.
 
 ## Version Source
 
@@ -91,5 +109,6 @@ This page is based on the current stable package version and maintained changelo
 
 - package version: `0.0.5`
 - release date: `2026-03-11`
+- beta channel: `0.0.7-beta.1` (2026-04-08)
 - changelog sections document the changes shipped in this stable package
 - prior stable published release docs remain archived under `0.0.3`

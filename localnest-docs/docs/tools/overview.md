@@ -4,7 +4,8 @@
   <p>
     Use the tools in layers: discover files first, then run exact or semantic search, then confirm
     with file reads. When memory is enabled, recall it before analysis and capture meaningful outcomes
-    after the work is done.
+    after the work is done. For structured facts, use the knowledge graph. For organized retrieval,
+    scope memories into nests and branches.
   </p>
 </div>
 
@@ -40,6 +41,7 @@
       <li>`localnest_search_hybrid`</li>
       <li>`localnest_get_symbol`</li>
       <li>`localnest_find_usages`</li>
+      <li>`localnest_embed_status`</li>
     </ul>
   </div>
   <div className="docPanel">
@@ -56,6 +58,59 @@
       <li>`localnest_capture_outcome`</li>
       <li>`localnest_memory_capture_event`</li>
       <li>`localnest_memory_events`</li>
+      <li>`localnest_memory_add_relation`</li>
+      <li>`localnest_memory_remove_relation`</li>
+      <li>`localnest_memory_related`</li>
+      <li>`localnest_memory_suggest_relations`</li>
+    </ul>
+  </div>
+  <div className="docPanel">
+    <h3>Knowledge Graph</h3>
+    <ul>
+      <li>`localnest_kg_add_entity`</li>
+      <li>`localnest_kg_add_triple`</li>
+      <li>`localnest_kg_query`</li>
+      <li>`localnest_kg_invalidate`</li>
+      <li>`localnest_kg_as_of`</li>
+      <li>`localnest_kg_timeline`</li>
+      <li>`localnest_kg_stats`</li>
+    </ul>
+  </div>
+  <div className="docPanel">
+    <h3>Nest/Branch Organization</h3>
+    <ul>
+      <li>`localnest_nest_list`</li>
+      <li>`localnest_nest_branches`</li>
+      <li>`localnest_nest_tree`</li>
+    </ul>
+  </div>
+  <div className="docPanel">
+    <h3>Graph Traversal</h3>
+    <ul>
+      <li>`localnest_graph_traverse`</li>
+      <li>`localnest_graph_bridges`</li>
+    </ul>
+  </div>
+  <div className="docPanel">
+    <h3>Agent Diary</h3>
+    <ul>
+      <li>`localnest_diary_write`</li>
+      <li>`localnest_diary_read`</li>
+    </ul>
+  </div>
+  <div className="docPanel">
+    <h3>Conversation Ingestion</h3>
+    <ul>
+      <li>`localnest_ingest_markdown`</li>
+      <li>`localnest_ingest_json`</li>
+      <li>`localnest_memory_check_duplicate`</li>
+    </ul>
+  </div>
+  <div className="docPanel">
+    <h3>Hooks</h3>
+    <ul>
+      <li>`localnest_hooks_stats`</li>
+      <li>`localnest_hooks_list_events`</li>
     </ul>
   </div>
   <div className="docPanel">
@@ -77,6 +132,14 @@
 | Retrieve by concept/intent | `localnest_index_status`, `localnest_index_project` | `localnest_search_hybrid`, `localnest_read_file` |
 | Rehydrate prior context | `localnest_task_context` | `localnest_memory_recall` (if needed) |
 | Capture outcome for future tasks | `localnest_capture_outcome` | `localnest_memory_events` |
+| Store structured facts | `localnest_kg_add_entity`, `localnest_kg_add_triple` | `localnest_kg_query`, `localnest_kg_as_of` |
+| Track fact evolution over time | `localnest_kg_timeline` | `localnest_kg_as_of` |
+| Discover indirect connections | `localnest_graph_traverse` | `localnest_graph_bridges` |
+| Organize memories by domain | `localnest_nest_list`, `localnest_nest_tree` | `localnest_memory_recall` (with nest/branch filter) |
+| Import conversation history | `localnest_ingest_markdown`, `localnest_ingest_json` | `localnest_memory_recall` |
+| Check for duplicate memories | `localnest_memory_check_duplicate` | `localnest_memory_store` |
+| Private agent scratchpad | `localnest_diary_write` | `localnest_diary_read` |
+| Monitor hook activity | `localnest_hooks_stats` | `localnest_hooks_list_events` |
 
 ## Response format
 
@@ -132,8 +195,15 @@ A successful MCP call means the tool executed. It does not always mean the respo
   <div className="docStep">
     <span>6</span>
     <div>
+      <strong>Query the knowledge graph</strong>
+      <p>Use `localnest_kg_query` for direct relationships and `localnest_graph_traverse` for multi-hop discovery across domains.</p>
+    </div>
+  </div>
+  <div className="docStep">
+    <span>7</span>
+    <div>
       <strong>Capture durable outcomes</strong>
-      <p>After a fix, decision, review, or preference discovery, emit `localnest_capture_outcome` when memory is enabled.</p>
+      <p>After a fix, decision, review, or preference discovery, emit `localnest_capture_outcome` when memory is enabled. Store structured facts with `localnest_kg_add_triple`.</p>
     </div>
   </div>
 </div>
