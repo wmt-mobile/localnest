@@ -25,4 +25,16 @@ export class NodeSqliteAdapter {
     const stmt = this.db.prepare(sql);
     return stmt.all(...params) || [];
   }
+
+  async transaction(fn) {
+    this.db.exec('BEGIN');
+    try {
+      const result = await fn(this);
+      this.db.exec('COMMIT');
+      return result;
+    } catch (err) {
+      this.db.exec('ROLLBACK');
+      throw err;
+    }
+  }
 }
