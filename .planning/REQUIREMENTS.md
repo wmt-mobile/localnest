@@ -1,7 +1,7 @@
 # Requirements: LocalNest Memory Enhancement
 
 **Defined:** 2026-04-08
-**Core Value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
+**Core Value:** A single local MCP server that handles both code retrieval AND rich structured memory -- no cloud dependencies, no external databases, pure SQLite.
 
 ## v1 Requirements
 
@@ -160,10 +160,10 @@ Deferred to future milestone.
 | TOOL-06 | Phase 9 | Pending |
 
 **Coverage:**
-- v1 requirements: 42 total
-- Mapped to phases: 42
+- v1 requirements: 43 total
+- Mapped to phases: 43
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-08*
-*Last updated: 2026-04-08 after initial definition*
+*Last updated: 2026-04-08 after roadmap creation (corrected count from 42 to 43)*
