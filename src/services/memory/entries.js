@@ -131,6 +131,7 @@ export async function storeEntry(store, input) {
   const scope = normalizeScope(input.scope);
   const nest = cleanString(input.nest || scope.project_path || '', 200);
   const branch = cleanString(input.branch || scope.topic || '', 200);
+  const agentId = cleanString(input.agent_id || '', 200);
   const kind = cleanString(input.kind || 'knowledge', 40) || 'knowledge';
   const content = cleanString(input.content, 20000);
   const summary = deriveSummary(input.summary, content);
@@ -175,14 +176,14 @@ export async function storeEntry(store, input) {
       `INSERT INTO memory_entries(
         id, kind, title, summary, content, status, importance, confidence,
         scope_root_path, scope_project_path, scope_branch_name, topic, feature,
-        nest, branch,
+        nest, branch, agent_id,
         tags_json, search_terms_json, links_json, source_type, source_ref, fingerprint,
         created_at, updated_at, last_recalled_at, recall_count
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 0)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 0)`,
       [
         id, kind, title, summary, content, status, importance, confidence,
         scope.root_path, scope.project_path, scope.branch_name, scope.topic, scope.feature,
-        nest, branch,
+        nest, branch, agentId,
         stableJson(tags), stableJson(searchTerms), stableJson(links),
         sourceType, sourceRef, fingerprint, createdAt, createdAt
       ]

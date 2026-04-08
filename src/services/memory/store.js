@@ -30,6 +30,7 @@ import {
   getTaxonomyTree as getTaxonomyTreeFn
 } from './taxonomy.js';
 import { traverseGraph as traverseGraphFn, discoverBridges as discoverBridgesFn } from './graph.js';
+import { writeDiaryEntry as writeDiaryEntryFn, readDiaryEntries as readDiaryEntriesFn } from './scopes.js';
 import {
   addEntity as addEntityFn,
   getEntity as getEntityFn,
@@ -260,5 +261,15 @@ export class MemoryStore {
   async discoverBridges(args) {
     await this.init();
     return discoverBridgesFn(this.adapter, args);
+  }
+
+  async writeDiaryEntry(args) {
+    await this.init();
+    return writeDiaryEntryFn(this.adapter, args);
+  }
+
+  async readDiaryEntries(args) {
+    await this.init();
+    return readDiaryEntriesFn(this.adapter, args);
   }
 }

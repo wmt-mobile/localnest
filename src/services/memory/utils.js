@@ -216,6 +216,7 @@ export function deserializeEntry(row) {
     feature: row.feature,
     nest: row.nest || '',
     branch: row.branch || '',
+    agent_id: row.agent_id || '',
     tags: JSON.parse(row.tags_json || '[]'),
     links: JSON.parse(row.links_json || '[]'),
     source_type: row.source_type,

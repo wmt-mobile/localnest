@@ -226,6 +226,16 @@ export class MemoryService {
     return this.store.discoverBridges(args);
   }
 
+  async writeDiaryEntry(args) {
+    this.assertEnabled();
+    return this.store.writeDiaryEntry(args);
+  }
+
+  async readDiaryEntries(args) {
+    this.assertEnabled();
+    return this.store.readDiaryEntries(args);
+  }
+
   assertEnabled() {
     if (!this.enabled) {
       throw new Error('Local memory is disabled. Re-run localnest setup and opt in to memory.');
