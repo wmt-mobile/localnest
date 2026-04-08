@@ -30,7 +30,10 @@ import {
   addTriple as addTripleFn,
   invalidateTriple as invalidateTripleFn,
   queryEntityRelationships as queryEntityRelationshipsFn,
-  ensureEntity as ensureEntityFn
+  ensureEntity as ensureEntityFn,
+  queryTriplesAsOf as queryTriplesAsOfFn,
+  getEntityTimeline as getEntityTimelineFn,
+  getKgStats as getKgStatsFn
 } from './kg.js';
 
 export class MemoryStore {
@@ -211,5 +214,20 @@ export class MemoryStore {
   async queryEntityRelationships(entityId, opts) {
     await this.init();
     return queryEntityRelationshipsFn(this.adapter, entityId, opts);
+  }
+
+  async queryTriplesAsOf(entityId, asOfDate) {
+    await this.init();
+    return queryTriplesAsOfFn(this.adapter, entityId, asOfDate);
+  }
+
+  async getEntityTimeline(entityId) {
+    await this.init();
+    return getEntityTimelineFn(this.adapter, entityId);
+  }
+
+  async getKgStats() {
+    await this.init();
+    return getKgStatsFn(this.adapter);
   }
 }

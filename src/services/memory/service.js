@@ -186,6 +186,21 @@ export class MemoryService {
     return this.store.queryEntityRelationships(entityId, opts);
   }
 
+  async queryTriplesAsOf(entityId, asOfDate) {
+    this.assertEnabled();
+    return this.store.queryTriplesAsOf(entityId, asOfDate);
+  }
+
+  async getEntityTimeline(entityId) {
+    this.assertEnabled();
+    return this.store.getEntityTimeline(entityId);
+  }
+
+  async getKgStats() {
+    this.assertEnabled();
+    return this.store.getKgStats();
+  }
+
   assertEnabled() {
     if (!this.enabled) {
       throw new Error('Local memory is disabled. Re-run localnest setup and opt in to memory.');
