@@ -32,10 +32,10 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. Each schema version bump executes inside its own SQLite transaction -- a failure mid-migration rolls back that version's changes without corrupting the database
   2. The migration runner checks the current schema_version before applying any migration and skips versions already applied
   3. Running migrations on an already-current database is a safe no-op
-**Plans**: TBD
+**Plans:** 1 plan
 
 Plans:
-- [ ] 01-01: Transaction-wrapped migrations and version validation
+- [ ] 01-01-PLAN.md -- Transaction-wrapped migrations and version validation
 
 ### Phase 2: Knowledge Graph Core
 **Goal**: Users can store and query structured knowledge as entities and triples with provenance
@@ -166,7 +166,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Migration Infrastructure Hardening | 0/1 | Not started | - |
+| 1. Migration Infrastructure Hardening | 0/1 | Planning complete | - |
 | 2. Knowledge Graph Core | 0/2 | Not started | - |
 | 3. Temporal Validity | 0/1 | Not started | - |
 | 4. Nest/Branch Hierarchy | 0/2 | Not started | - |
