@@ -124,11 +124,29 @@ export async function addTriple(adapter, {
       objId = await ensureEntity(ad, objectName);
     }
 
+    // Contradiction detection: same subject + predicate, different object, still valid
+    const conflicting = await ad.all(
+      `SELECT t.id, t.object_id, e.name AS object_name
+         FROM kg_triples t
+         JOIN kg_entities e ON e.id = t.object_id
+        WHERE t.subject_id = ?
+          AND t.predicate = ?
+          AND t.object_id != ?
+          AND t.valid_to IS NULL`,
+      [subId, pred, objId]
+    );
+
     await ad.run(
       `INSERT INTO kg_triples (id, subject_id, predicate, object_id, valid_from, valid_to, confidence, source_memory_id, source_type, created_at)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [id, subId, pred, objId, vFrom, vTo, conf, srcMemId, srcType, now]
     );
+
+    const contradictions = conflicting.map(c => ({
+      existing_triple_id: c.id,
+      existing_object_id: c.object_id,
+      existing_object_name: c.object_name
+    }));
 
     return {
       id,
@@ -140,7 +158,9 @@ export async function addTriple(adapter, {
       confidence: conf,
       source_memory_id: srcMemId,
       source_type: srcType,
-      created_at: now
+      created_at: now,
+      contradictions,
+      has_contradiction: contradictions.length > 0
     };
   });
 
