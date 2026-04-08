@@ -157,7 +157,7 @@ const config: Config = {
         {
           title: 'Versions',
           items: [
-            { label: 'Current (0.0.7-beta.1)', to: '/docs/releases/current' },
+            { label: 'Current (0.0.7-beta.2)', to: '/docs/releases/current' },
             { label: 'Release matrix', to: '/docs/releases/history' }
           ]
         },

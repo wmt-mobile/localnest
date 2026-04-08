@@ -20,7 +20,7 @@ LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scop
   <div className="docPanel docPanel--compact">
     <div className="docStat">
       <span className="docStat__label">Latest beta</span>
-      <strong>0.0.7-beta.1</strong>
+      <strong>0.0.7-beta.2</strong>
     </div>
     <div className="docStat">
       <span className="docStat__label">MCP tools</span>
@@ -68,7 +68,7 @@ Upgrade paths:
 localnest upgrade
 localnest upgrade stable
 localnest upgrade beta
-localnest upgrade 0.0.7-beta.1
+localnest upgrade 0.0.7-beta.2
 ```
 
 ## Choose your path
@@ -85,7 +85,7 @@ localnest upgrade 0.0.7-beta.1
   </a>
   <a className="docLinkCard" href="./releases/current">
     <strong>Current release</strong>
-    <span>See what changed in `0.0.7-beta.1` — temporal KG, CLI-first architecture, 52 tools.</span>
+    <span>See what changed in `0.0.7-beta.2` — temporal KG, CLI-first architecture, 52 tools.</span>
   </a>
   <a className="docLinkCard" href="./versions/0.0.4-beta.8/overview">
     <strong>Archived beta.8</strong>
@@ -135,7 +135,7 @@ localnest upgrade 0.0.7-beta.1
   </a>
   <a className="docLinkCard" href="./releases/current">
     <strong>Current release</strong>
-    <span>See the latest release behavior — `0.0.7-beta.1` with temporal KG, CLI, hooks, and 52 MCP tools.</span>
+    <span>See the latest release behavior — `0.0.7-beta.2` with temporal KG, CLI, hooks, and 52 MCP tools.</span>
   </a>
   <a className="docLinkCard" href="./releases/history">
     <strong>Release matrix</strong>

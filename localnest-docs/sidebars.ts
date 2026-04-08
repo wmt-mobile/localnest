@@ -34,7 +34,7 @@ const sidebars: SidebarsConfig = {
       items: [
         { type: 'doc', id: 'releases/version-selection', label: 'Version Selection' },
         { type: 'doc', id: 'releases/current', label: 'Current Release' },
-        { type: 'doc', id: 'releases/0.0.7-beta.1', label: '0.0.7-beta.1' },
+        { type: 'doc', id: 'releases/0.0.7-beta.2', label: '0.0.7-beta.2' },
         { type: 'doc', id: 'releases/history', label: 'Release Matrix' }
       ],
       collapsed: false
@@ -46,10 +46,10 @@ const sidebars: SidebarsConfig = {
       items: [
         {
           type: 'category',
-          label: 'Beta 0.0.7-beta.1',
+          label: 'Beta 0.0.7-beta.2',
           collapsed: true,
           items: [
-            { type: 'doc', id: 'versions/0.0.7-beta.1/overview', label: 'Overview' }
+            { type: 'doc', id: 'versions/0.0.7-beta.2/overview', label: 'Overview' }
           ]
         },
         {

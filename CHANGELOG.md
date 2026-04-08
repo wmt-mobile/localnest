@@ -4,6 +4,35 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7-beta.2] - 2026-04-08
+
+### Interactive CLI
+
+- **TUI Dashboard** (`localnest dashboard`): Live-refreshing terminal dashboard with keyboard navigation. Memory stats, KG overview, nest distribution with progress bars, recent memories timeline, server status. Auto-refreshes every 5s. Keys: 1=Memory, 2=KG, 3=Recent, r=Refresh, q=Quit.
+- **Onboarding Wizard** (`localnest onboard`): Guided first-run experience that auto-detects environment (Node, ripgrep, AI clients), runs setup, installs skills to all detected clients, installs Claude Code hooks, and runs doctor — all in one command.
+- **Self-Test** (`localnest selftest`): End-to-end pipeline validation testing runtime, memory CRUD, knowledge graph, taxonomy, dedup, embeddings, search, skills, and hooks. Reports pass/warn/fail with colored output.
+- **Redesigned CLI help**: Box-drawn header with MCP badge, category icons (●◆◇▸⚡), separator lines, quick start guide, and docs URL footer.
+
+### Claude Code Integration
+
+- **10 slash commands**: `/localnest:recall`, `/localnest:remember`, `/localnest:fact`, `/localnest:search`, `/localnest:status`, `/localnest:context`, `/localnest:ingest`, `/localnest:dashboard`, `/localnest:selftest`, `/localnest:onboard`. Auto-installed to `~/.claude/commands/localnest/` via `localnest skill install`.
+- **Pre-tool hook**: Auto-retrieves relevant memories before Edit/Write/Bash tools (30s debounce).
+- **Post-tool hook**: Auto-captures outcomes after Edit/Write/Bash tools (60s debounce) + writes agent diary entries.
+- **Hook installer**: `localnest hooks install` wires hooks into `~/.claude/settings.json`.
+- **Auto skill sync**: `postinstall` npm hook auto-syncs skills on `npm install -g`.
+
+### Bug Fixes
+
+- Fixed nested transaction deadlock — adapter supports re-entrant calls via SQLite SAVEPOINT.
+- Fixed path traversal in MCP ingest tools — content-only, no file_path from MCP clients.
+- Fixed LIKE cycle detection in graph traversal — delimiter-bounded matching prevents false substring matches.
+- Fixed CI audit gate — transitive-only vulnerabilities no longer block pipeline.
+- Fixed zod `z.unknown()` compatibility with MCP SDK — use `z.any()` instead.
+
+### Dependencies
+
+- Bumped `@huggingface/transformers` from 3.8.1 to 4.0.1.
+
 ## [0.0.7-beta.1] - 2026-04-08
 
 ### Security & Code Quality

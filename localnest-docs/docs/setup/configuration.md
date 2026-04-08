@@ -3,7 +3,7 @@
 <div className="docPanel docPanel--compact">
   <p>
     Setup writes a config file for roots and indexing, plus a ready-to-paste MCP client block. As of
-    <strong>0.0.7-beta.1</strong>, setup also auto-detects and installs skills for 13 AI clients
+    <strong>0.0.7-beta.2</strong>, setup also auto-detects and installs skills for 13 AI clients
     (Claude, Cursor, Windsurf, Copilot, Gemini, Kiro, Codex, Cline, Continue, OpenCode, and more).
     Run <code>localnest mcp config</code> to generate client-specific config blocks.
   </p>
@@ -81,7 +81,7 @@ Most teams only adjust these values:
 For release verification, prefer the installed-runtime harness over ad hoc manual checks:
 
 ```bash
-node scripts/release/release-test-installed-runtime.mjs --version-label 0.0.7-beta.1
+node scripts/release/release-test-installed-runtime.mjs --version-label 0.0.7-beta.2
 ```
 
 This validates the installed binary and writes both markdown and JSON reports under `reports/`.
