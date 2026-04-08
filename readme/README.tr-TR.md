@@ -188,33 +188,33 @@ localnest_diary_write     → bu ajan için özel çizim tahtası
 LocalNest eksiksiz bir CLI aracıdır. Her şey terminalden yönetilir:
 
 ```bash
-localnest setup                     # configure roots, backends, AI clients
-localnest doctor                    # health check
-localnest upgrade                   # self-update
-localnest version                   # current version
-localnest status                    # runtime status
+localnest setup                     # kökleri, backend'leri, AI istemcilerini yapılandır
+localnest doctor                    # sağlık kontrolü
+localnest upgrade                   # kendi kendini güncelle
+localnest version                   # mevcut sürüm
+localnest status                    # runtime durumu
 
-localnest memory add "content"      # store a memory
-localnest memory search "query"     # find memories
-localnest memory list               # list all memories
-localnest memory show <id>          # view one memory
-localnest memory delete <id>        # remove a memory
+localnest memory add "içerik"       # bir bellek kaydet
+localnest memory search "sorgu"     # bellek ara
+localnest memory list               # tüm bellekleri listele
+localnest memory show <id>          # bir belleği görüntüle
+localnest memory delete <id>        # bir belleği kaldır
 
-localnest kg add Alice works_on ProjectX    # add a fact
-localnest kg query Alice                     # query relationships
-localnest kg timeline Alice                  # fact evolution
-localnest kg stats                           # graph statistics
+localnest kg add Alice works_on ProjectX    # bir gerçek ekle
+localnest kg query Alice                     # ilişkileri sorgula
+localnest kg timeline Alice                  # gerçek evrimi
+localnest kg stats                           # graf istatistikleri
 
-localnest skill install             # install skills to AI clients
-localnest skill list                # show installed skills
-localnest skill remove <name>       # uninstall a skill
+localnest skill install             # AI istemcilerine skill'leri kur
+localnest skill list                # kurulu skill'leri göster
+localnest skill remove <name>       # bir skill'i kaldır
 
-localnest mcp start                 # start MCP server
-localnest mcp status                # server health
-localnest mcp config                # config JSON for AI clients
+localnest mcp start                 # MCP sunucusunu başlat
+localnest mcp status                # sunucu sağlığı
+localnest mcp config                # AI istemcileri için yapılandırma JSON'ı
 
-localnest ingest ./chat.md          # import conversation
-localnest ingest ./export.json      # import JSON chat
+localnest ingest ./chat.md          # konuşmayı içe aktar
+localnest ingest ./export.json      # JSON sohbeti içe aktar
 
 localnest completion bash           # shell completions
 ```

@@ -188,35 +188,35 @@ localnest_diary_write     → 此代理的私人便签本
 LocalNest 是一个完整的 CLI 工具。一切都通过终端管理:
 
 ```bash
-localnest setup                     # configure roots, backends, AI clients
-localnest doctor                    # health check
-localnest upgrade                   # self-update
-localnest version                   # current version
-localnest status                    # runtime status
+localnest setup                     # 配置根目录、后端、AI 客户端
+localnest doctor                    # 健康检查
+localnest upgrade                   # 自我更新
+localnest version                   # 当前版本
+localnest status                    # 运行时状态
 
-localnest memory add "content"      # store a memory
-localnest memory search "query"     # find memories
-localnest memory list               # list all memories
-localnest memory show <id>          # view one memory
-localnest memory delete <id>        # remove a memory
+localnest memory add "内容"         # 存储一条记忆
+localnest memory search "查询"      # 查找记忆
+localnest memory list               # 列出所有记忆
+localnest memory show <id>          # 查看一条记忆
+localnest memory delete <id>        # 删除一条记忆
 
-localnest kg add Alice works_on ProjectX    # add a fact
-localnest kg query Alice                     # query relationships
-localnest kg timeline Alice                  # fact evolution
-localnest kg stats                           # graph statistics
+localnest kg add Alice works_on ProjectX    # 添加一个事实
+localnest kg query Alice                     # 查询关系
+localnest kg timeline Alice                  # 事实演变
+localnest kg stats                           # 图谱统计
 
-localnest skill install             # install skills to AI clients
-localnest skill list                # show installed skills
-localnest skill remove <name>       # uninstall a skill
+localnest skill install             # 向 AI 客户端安装 skill
+localnest skill list                # 显示已安装的 skill
+localnest skill remove <name>       # 卸载一个 skill
 
-localnest mcp start                 # start MCP server
-localnest mcp status                # server health
-localnest mcp config                # config JSON for AI clients
+localnest mcp start                 # 启动 MCP 服务器
+localnest mcp status                # 服务器健康状态
+localnest mcp config                # AI 客户端的配置 JSON
 
-localnest ingest ./chat.md          # import conversation
-localnest ingest ./export.json      # import JSON chat
+localnest ingest ./chat.md          # 导入对话
+localnest ingest ./export.json      # 导入 JSON 聊天
 
-localnest completion bash           # shell completions
+localnest completion bash           # shell 补全
 ```
 
 **全局标志**在每个命令上都可用: `--json` (机器输出)、`--verbose`、`--quiet`、`--config <path>`
