@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Knowledge Graph Core** - Entity and triple storage with schema v6, temporal columns, provenance tracking
 - [x] **Phase 3: Temporal Validity** - Point-in-time queries, fact timelines, and KG statistics
 - [x] **Phase 4: Nest/Branch Hierarchy** - Two-level memory taxonomy with filtered recall
-- [ ] **Phase 5: Graph Traversal and Contradiction Detection** - Multi-hop walks, cross-nest bridges, and write-time contradiction warnings
+- [x] **Phase 5: Graph Traversal and Contradiction Detection** - Multi-hop walks, cross-nest bridges, and write-time contradiction warnings
 - [ ] **Phase 6: Agent-Scoped Memory** - Per-agent namespaces with isolated diary entries
 - [ ] **Phase 7: Semantic Duplicate Detection** - Embedding similarity gate before storage
 - [ ] **Phase 8: Conversation Ingestion** - Parse Markdown/JSON conversations into memories and triples
@@ -95,8 +95,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 05-01: graph.js recursive CTE traversal with path tracking
-- [ ] 05-02: Cross-nest bridge discovery and contradiction detection at write time
+- [x] 05-01: graph.js recursive CTE traversal with path tracking
+- [x] 05-02: Cross-nest bridge discovery and contradiction detection at write time
 
 ### Phase 6: Agent-Scoped Memory
 **Goal**: Multiple agents can maintain isolated memory namespaces and private diaries without seeing each other's private data
@@ -170,7 +170,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 2. Knowledge Graph Core | 2/2 | Complete | 2026-04-08 |
 | 3. Temporal Validity | 1/1 | Complete | 2026-04-08 |
 | 4. Nest/Branch Hierarchy | 2/2 | Complete | 2026-04-08 |
-| 5. Graph Traversal and Contradiction Detection | 0/2 | Not started | - |
+| 5. Graph Traversal and Contradiction Detection | 2/2 | Complete | 2026-04-08 |
 | 6. Agent-Scoped Memory | 0/1 | Not started | - |
 | 7. Semantic Duplicate Detection | 0/1 | Not started | - |
 | 8. Conversation Ingestion | 0/2 | Not started | - |

@@ -37,15 +37,15 @@
 
 ### Graph Traversal
 
-- [ ] **TRAV-01**: User can traverse the knowledge graph from a starting entity with configurable max hops (default 2) via MCP tool
-- [ ] **TRAV-02**: Traversal uses SQLite recursive CTEs for zero-dependency multi-hop walks
-- [ ] **TRAV-03**: User can discover cross-nest bridges (entities connected across different nests) via MCP tool
-- [ ] **TRAV-04**: Traversal results include path information (hop sequence from start to each discovered entity)
+- [x] **TRAV-01**: User can traverse the knowledge graph from a starting entity with configurable max hops (default 2) via MCP tool
+- [x] **TRAV-02**: Traversal uses SQLite recursive CTEs for zero-dependency multi-hop walks
+- [x] **TRAV-03**: User can discover cross-nest bridges (entities connected across different nests) via MCP tool
+- [x] **TRAV-04**: Traversal results include path information (hop sequence from start to each discovered entity)
 
 ### Contradiction Detection
 
-- [ ] **CONT-01**: System detects contradicting triples at write time (same subject+predicate with different currently-valid objects)
-- [ ] **CONT-02**: Contradictions are flagged in the response when adding a new triple (not blocked, just warned)
+- [x] **CONT-01**: System detects contradicting triples at write time (same subject+predicate with different currently-valid objects)
+- [x] **CONT-02**: Contradictions are flagged in the response when adding a new triple (not blocked, just warned)
 
 ### Agent-Scoped Memory
 
@@ -133,12 +133,12 @@ Deferred to future milestone.
 | NEST-03 | Phase 4 | Complete |
 | NEST-04 | Phase 4 | Complete |
 | NEST-05 | Phase 4 | Complete |
-| TRAV-01 | Phase 5 | Pending |
-| TRAV-02 | Phase 5 | Pending |
-| TRAV-03 | Phase 5 | Pending |
-| TRAV-04 | Phase 5 | Pending |
-| CONT-01 | Phase 5 | Pending |
-| CONT-02 | Phase 5 | Pending |
+| TRAV-01 | Phase 5 | Complete |
+| TRAV-02 | Phase 5 | Complete |
+| TRAV-03 | Phase 5 | Complete |
+| TRAV-04 | Phase 5 | Complete |
+| CONT-01 | Phase 5 | Complete |
+| CONT-02 | Phase 5 | Complete |
 | AGNT-01 | Phase 6 | Pending |
 | AGNT-02 | Phase 6 | Pending |
 | AGNT-03 | Phase 6 | Pending |
