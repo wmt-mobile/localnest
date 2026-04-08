@@ -1,6 +1,6 @@
 import { buildSearchTerms, stableJson } from './utils.js';
 
-export const SCHEMA_VERSION = 6;
+export const SCHEMA_VERSION = 7;
 
 export async function ensureSchema(adapter) {
   await adapter.exec(`
@@ -23,6 +23,8 @@ export async function ensureSchema(adapter) {
       scope_branch_name TEXT NOT NULL DEFAULT '',
       topic TEXT NOT NULL DEFAULT '',
       feature TEXT NOT NULL DEFAULT '',
+      nest TEXT NOT NULL DEFAULT '',
+      branch TEXT NOT NULL DEFAULT '',
       tags_json TEXT NOT NULL DEFAULT '[]',
       search_terms_json TEXT NOT NULL DEFAULT '[]',
       links_json TEXT NOT NULL DEFAULT '[]',
@@ -94,6 +96,8 @@ export async function ensureSchema(adapter) {
       ON memory_entries(scope_project_path, status, importance DESC);
     CREATE INDEX IF NOT EXISTS idx_memory_entries_kind_status
       ON memory_entries(kind, status);
+    CREATE INDEX IF NOT EXISTS idx_memory_entries_nest_branch
+      ON memory_entries(nest, branch);
   `);
 }
 
@@ -209,6 +213,22 @@ export async function runMigrations({ adapter, getMeta, setMeta }) {
         await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_predicate ON kg_triples(predicate)`);
         await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_valid ON kg_triples(valid_from, valid_to)`);
         await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_source ON kg_triples(source_memory_id)`);
+      }
+    },
+    {
+      version: 7,
+      migrate: async (ad) => {
+        try {
+          await ad.exec(`ALTER TABLE memory_entries ADD COLUMN nest TEXT NOT NULL DEFAULT ''`);
+        } catch {
+          // Column may already exist on fresh schema
+        }
+        try {
+          await ad.exec(`ALTER TABLE memory_entries ADD COLUMN branch TEXT NOT NULL DEFAULT ''`);
+        } catch {
+          // Column may already exist on fresh schema
+        }
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_memory_entries_nest_branch ON memory_entries(nest, branch)`);
       }
     }
   ];
