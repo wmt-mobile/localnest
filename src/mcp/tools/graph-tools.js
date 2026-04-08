@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { MemoryHooks } from '../../services/memory/hooks.js';
 
 export function registerGraphTools({
   registerJsonTool,
@@ -373,5 +374,39 @@ export function registerGraphTools({
     },
     async ({ content, threshold, nest, branch, project_path }) =>
       memory.checkDuplicate(content, { threshold, nest, branch, projectPath: project_path })
+  );
+
+  // ─── Hook Introspection Tools (localnest_hooks_*) ────────────────────
+
+  registerJsonTool(
+    ['localnest_hooks_stats'],
+    {
+      title: 'Hooks Stats',
+      description: 'Returns hook system statistics: whether hooks are enabled, total registered listener count, and a breakdown of listener counts per event type.',
+      inputSchema: {},
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async () => memory.store.hooks.getStats()
+  );
+
+  registerJsonTool(
+    ['localnest_hooks_list_events'],
+    {
+      title: 'Hooks List Events',
+      description: 'Returns all valid hook event names that listeners can subscribe to. Covers memory lifecycle (store, update, delete, recall), knowledge graph operations (addEntity, addTriple, invalidate), graph traversal, diary, ingestion, dedup, taxonomy, and catch-all wildcards.',
+      inputSchema: {},
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async () => ({ events: MemoryHooks.validEvents() })
   );
 }
