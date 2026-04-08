@@ -17,7 +17,22 @@ const config: Config = {
       onBrokenMarkdownLinks: 'warn'
     }
   },
-  themes: ['@docusaurus/theme-mermaid'],
+  themes: [
+    '@docusaurus/theme-mermaid',
+    ['@easyops-cn/docusaurus-search-local', {
+      hashed: true,
+      indexBlog: false,
+      docsRouteBasePath: '/docs',
+      highlightSearchTermsOnTargetPage: true,
+      searchBarShortcutHint: true,
+    }],
+  ],
+  plugins: [
+    ['docusaurus-plugin-llms', {
+      generateLLMsTxt: true,
+      generateLLMsFullTxt: true,
+    }],
+  ],
   i18n: {
     defaultLocale: 'en',
     locales: ['en']
@@ -157,6 +172,7 @@ const config: Config = {
       copyright: `Copyright ${new Date().getFullYear()} LocalNest`
     },
     prism: {
+      additionalLanguages: ['bash', 'json', 'typescript', 'python', 'diff', 'sql', 'yaml', 'toml'],
       theme: {
         plain: {
           color: '#d6e9ff',

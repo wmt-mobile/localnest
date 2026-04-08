@@ -812,6 +812,53 @@ body {
   border-left-width: 4px;
 }
 
+/* Better table styling */
+.theme-doc-markdown table {
+  border: var(--site-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.theme-doc-markdown th {
+  background: color-mix(in srgb, var(--ifm-color-primary-lightest) 50%, transparent);
+  font-weight: 700;
+  font-size: 0.86rem;
+  letter-spacing: 0.02em;
+}
+
+[data-theme='dark'] .theme-doc-markdown th {
+  background: color-mix(in srgb, var(--ifm-color-primary-lightest) 30%, transparent);
+}
+
+/* Code block refinements */
+.theme-code-block pre {
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+/* Breadcrumb polish */
+.breadcrumbs__link {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* TOC active highlight */
+.table-of-contents__link--active {
+  font-weight: 700;
+  color: var(--ifm-color-primary);
+}
+
+/* Tabs styling */
+.tabs__item {
+  border-radius: 8px 8px 0 0;
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.tabs__item--active {
+  border-bottom-color: var(--ifm-color-primary);
+}
+
 /* Smooth scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
