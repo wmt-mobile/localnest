@@ -81,7 +81,7 @@ Most teams only adjust these values:
 For release verification, prefer the installed-runtime harness over ad hoc manual checks:
 
 ```bash
-node scripts/release/release-test-installed-runtime.mjs --version-label 0.0.5
+node scripts/release/release-test-installed-runtime.mjs --version-label 0.0.7-beta.1
 ```
 
 This validates the installed binary and writes both markdown and JSON reports under `reports/`.
