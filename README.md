@@ -38,6 +38,12 @@ Everything — file reads, vector embeddings, memory — runs in-process on your
 | **Hybrid retrieval** | Lexical + semantic fused with RRF ranking for best-of-both results |
 | **Project awareness** | Auto-detects projects from marker files, scopes every tool call |
 | **Agent memory** | Durable, queryable knowledge graph — your AI remembers what it learned |
+| **Temporal knowledge graph** | Subject-predicate-object triples with time validity — query what was true when |
+| **Multi-hop graph traversal** | Walk relationships 2-5 hops deep via recursive CTEs — no other local tool does this |
+| **Nest/Branch hierarchy** | Two-level memory taxonomy for organized retrieval with metadata-filtered boost |
+| **Conversation ingestion** | Import Markdown/JSON chat exports into structured memory + KG triples |
+| **Agent isolation** | Per-agent diary and memory scoping — multiple agents, zero cross-contamination |
+| **Hooks system** | Pre/post operation hooks for memory, KG, traversal, ingestion — plug in your own logic |
 
 ---
 
@@ -188,6 +194,48 @@ localnest_capture_outcome → persist what you learned for next time
 | `localnest_memory_suggest_relations` | Auto-suggest related memories by similarity |
 | `localnest_memory_status` | Memory consent, backend, and database status |
 
+### Knowledge Graph
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_kg_add_entity` | Create entities (people, projects, concepts, tools) |
+| `localnest_kg_add_triple` | Add subject-predicate-object facts with temporal validity |
+| `localnest_kg_query` | Query entity relationships with direction filtering |
+| `localnest_kg_invalidate` | Mark a fact as no longer valid (archival, not deletion) |
+| `localnest_kg_as_of` | Point-in-time queries — what was true on date X? |
+| `localnest_kg_timeline` | Chronological fact evolution for an entity |
+| `localnest_kg_stats` | Entity count, triple count, predicate breakdown |
+
+### Nest/Branch Organization
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_nest_list` | List all nests (top-level memory domains) with counts |
+| `localnest_nest_branches` | List branches (topics) within a nest |
+| `localnest_nest_tree` | Full hierarchy: nests, branches, and counts |
+
+### Graph Traversal
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_graph_traverse` | Multi-hop traversal with path tracking (recursive CTEs) |
+| `localnest_graph_bridges` | Find cross-nest bridges — connections across domains |
+
+### Agent Diary
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_diary_write` | Write a private scratchpad entry (agent-isolated) |
+| `localnest_diary_read` | Read your own recent diary entries |
+
+### Conversation Ingestion
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_ingest_markdown` | Import Markdown conversation exports into memory + KG |
+| `localnest_ingest_json` | Import JSON conversation exports into memory + KG |
+| `localnest_memory_check_duplicate` | Semantic duplicate detection before filing |
+
 ### Server & Updates
 
 | Tool | What it does |
@@ -198,7 +246,33 @@ localnest_capture_outcome → persist what you learned for next time
 | `localnest_update_status` | Check npm for latest version (cached) |
 | `localnest_update_self` | Update globally and sync bundled skill (approval required) |
 
-All tools support `response_format: "json"` (default) or `"markdown"`. List tools return `total_count`, `has_more`, `next_offset` for pagination.
+**50 tools total.** All support `response_format: "json"` (default) or `"markdown"`. List tools return `total_count`, `has_more`, `next_offset` for pagination.
+
+---
+
+## How LocalNest Compares
+
+LocalNest is the only local-first MCP server that combines code retrieval AND structured memory in a single tool. Here's where it stands:
+
+| Capability | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
+|---|---|---|---|---|---|
+| **Local-first (no cloud)** | Yes | Yes | No ($25+/mo) | No (Neo4j) | No ($20-200/mo) |
+| **Code retrieval** | 50 MCP tools, AST-aware, hybrid search | None | None | None | None |
+| **Knowledge graph** | SQLite triples with temporal validity | SQLite triples | Neo4j | Neo4j | Key-value |
+| **Multi-hop traversal** | Yes (recursive CTEs, 2-5 hops) | No (flat lookup only) | No | Yes (requires Neo4j) | No |
+| **Temporal queries (as_of)** | Yes | Yes | Yes | Yes | No |
+| **Contradiction detection** | Yes (write-time warnings) | Exists but not wired in | No | No | No |
+| **Conversation ingestion** | Markdown + JSON | Markdown + JSON + Slack | No | No | No |
+| **Agent isolation** | Per-agent scoping + private diary | Wing-per-agent | User/session scoping | No | User/agent/run/session |
+| **Semantic dedup** | 0.92 cosine gate on all writes | 0.9 threshold | No | No | No |
+| **Memory hierarchy** | Nest/Branch (original) | Wing/Room/Hall (palace) | Flat | Flat | Flat |
+| **Hooks system** | Pre/post operation hooks | None | Webhooks | None | None |
+| **Runtime** | Node.js (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
+| **Dependencies** | 0 new (pure SQLite) | ChromaDB (heavy) | Neo4j ($25+/mo) | Neo4j | Cloud API |
+| **MCP tools** | 50 | 19 | 0 | 0 | 0 |
+| **Cost** | Free | Free | $25+/mo | $25+/mo | $20-200/mo |
+
+**LocalNest's unique position:** The only tool that gives your AI both deep code understanding AND structured persistent memory — entirely local, zero cloud, zero cost.
 
 ---
 
@@ -210,6 +284,18 @@ Enable memory during `localnest setup` and LocalNest starts building a durable k
 - Memory failure never blocks other tools — everything degrades independently
 
 **How auto-promotion works:** events captured via `localnest_memory_capture_event` are scored for signal strength. High-signal events — bug fixes, decisions, preferences — get promoted into durable memories. Weak exploratory events are recorded and quietly discarded after 30 days.
+
+**Knowledge graph:** Store structured facts as subject-predicate-object triples with temporal validity. Query what was true at any point in time with `as_of`. Walk relationships 2-5 hops deep with recursive CTE traversal. Detect contradictions at write time.
+
+**Nest/Branch hierarchy:** Organize memories into nests (top-level domains) and branches (topics). Metadata-filtered recall narrows candidates before scoring for faster, more precise results.
+
+**Agent isolation:** Each agent gets its own memory scope and private diary. Recall returns own + global memories, never another agent's private data.
+
+**Semantic dedup:** Every write passes through an embedding similarity gate (default 0.92 cosine threshold). Near-duplicates are caught before storage — your memory stays clean.
+
+**Conversation ingestion:** Import Markdown or JSON chat exports. Each turn becomes a memory entry with automatic entity extraction and KG triple creation. Re-ingestion of the same file is skipped by content hash.
+
+**Hooks:** Register pre/post callbacks on any memory operation — store, recall, KG writes, traversal, ingestion. Build custom pipelines without modifying core code.
 
 ---
 
