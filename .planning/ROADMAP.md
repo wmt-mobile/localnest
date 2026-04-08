@@ -62,10 +62,10 @@ Plans:
   2. User can query triples with an as_of date parameter and receives only facts valid at that point in time
   3. User can view a chronological timeline of all triples for an entity (ordered by valid_from)
   4. User can retrieve KG statistics: total entity count, total triple count, and breakdown by relationship type
-**Plans:** 2 plans
+**Plans:** 1 plan
 
 Plans:
-- [ ] 03-01: as_of temporal queries, timeline view, and KG stats
+- [ ] 03-01-PLAN.md -- as_of temporal queries, timeline view, and KG stats
 
 ### Phase 4: Nest/Branch Hierarchy
 **Goal**: Users can organize memories into a two-level hierarchy (nests and branches) and recall is filtered accordingly
