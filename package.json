@@ -47,6 +47,7 @@
     "node": ">=18"
   },
   "scripts": {
+    "postinstall": "node scripts/runtime/install-localnest-skill.mjs --quiet 2>/dev/null || true",
     "setup": "node scripts/runtime/setup-localnest.mjs",
     "upgrade": "node scripts/runtime/upgrade-localnest.mjs",
     "doctor": "node scripts/runtime/doctor-localnest.mjs",
