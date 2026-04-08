@@ -1,6 +1,6 @@
 import { buildSearchTerms, stableJson } from './utils.js';
 
-export const SCHEMA_VERSION = 7;
+export const SCHEMA_VERSION = 8;
 
 export async function ensureSchema(adapter) {
   await adapter.exec(`
@@ -25,6 +25,7 @@ export async function ensureSchema(adapter) {
       feature TEXT NOT NULL DEFAULT '',
       nest TEXT NOT NULL DEFAULT '',
       branch TEXT NOT NULL DEFAULT '',
+      agent_id TEXT NOT NULL DEFAULT '',
       tags_json TEXT NOT NULL DEFAULT '[]',
       search_terms_json TEXT NOT NULL DEFAULT '[]',
       links_json TEXT NOT NULL DEFAULT '[]',
@@ -98,6 +99,19 @@ export async function ensureSchema(adapter) {
       ON memory_entries(kind, status);
     CREATE INDEX IF NOT EXISTS idx_memory_entries_nest_branch
       ON memory_entries(nest, branch);
+    CREATE INDEX IF NOT EXISTS idx_memory_entries_agent_id
+      ON memory_entries(agent_id);
+
+    CREATE TABLE IF NOT EXISTS agent_diary (
+      id TEXT PRIMARY KEY,
+      agent_id TEXT NOT NULL,
+      content TEXT NOT NULL,
+      topic TEXT NOT NULL DEFAULT '',
+      created_at TEXT NOT NULL
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_agent_diary_agent_created
+      ON agent_diary(agent_id, created_at DESC);
   `);
 }
 
@@ -229,6 +243,27 @@ export async function runMigrations({ adapter, getMeta, setMeta }) {
           // Column may already exist on fresh schema
         }
         await ad.exec(`CREATE INDEX IF NOT EXISTS idx_memory_entries_nest_branch ON memory_entries(nest, branch)`);
+      }
+    },
+    {
+      version: 8,
+      migrate: async (ad) => {
+        try {
+          await ad.exec(`ALTER TABLE memory_entries ADD COLUMN agent_id TEXT NOT NULL DEFAULT ''`);
+        } catch {
+          // Column may already exist on fresh schema
+        }
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_memory_entries_agent_id ON memory_entries(agent_id)`);
+        await ad.exec(`
+          CREATE TABLE IF NOT EXISTS agent_diary (
+            id TEXT PRIMARY KEY,
+            agent_id TEXT NOT NULL,
+            content TEXT NOT NULL,
+            topic TEXT NOT NULL DEFAULT '',
+            created_at TEXT NOT NULL
+          )
+        `);
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_agent_diary_agent_created ON agent_diary(agent_id, created_at DESC)`);
       }
     }
   ];
