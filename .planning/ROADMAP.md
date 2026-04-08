@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 1: Migration Infrastructure Hardening** - Safe, transactional schema migrations with version validation
 - [ ] **Phase 2: Knowledge Graph Core** - Entity and triple storage with schema v6, temporal columns, provenance tracking
 - [x] **Phase 3: Temporal Validity** - Point-in-time queries, fact timelines, and KG statistics
-- [ ] **Phase 4: Nest/Branch Hierarchy** - Two-level memory taxonomy with filtered recall
+- [x] **Phase 4: Nest/Branch Hierarchy** - Two-level memory taxonomy with filtered recall
 - [ ] **Phase 5: Graph Traversal and Contradiction Detection** - Multi-hop walks, cross-nest bridges, and write-time contradiction warnings
 - [ ] **Phase 6: Agent-Scoped Memory** - Per-agent namespaces with isolated diary entries
 - [ ] **Phase 7: Semantic Duplicate Detection** - Embedding similarity gate before storage
@@ -80,8 +80,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 04-01: Schema v7 nest/branch columns and recall filter integration
-- [ ] 04-02: Taxonomy listing and tree query helpers
+- [x] 04-01: Schema v7 nest/branch columns and recall filter integration
+- [x] 04-02: Taxonomy listing and tree query helpers
 
 ### Phase 5: Graph Traversal and Contradiction Detection
 **Goal**: Users can navigate the knowledge graph across multiple hops and receive warnings when new facts contradict existing ones
@@ -169,7 +169,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 1. Migration Infrastructure Hardening | 1/1 | Complete | 2026-04-08 |
 | 2. Knowledge Graph Core | 2/2 | Complete | 2026-04-08 |
 | 3. Temporal Validity | 1/1 | Complete | 2026-04-08 |
-| 4. Nest/Branch Hierarchy | 0/2 | Not started | - |
+| 4. Nest/Branch Hierarchy | 2/2 | Complete | 2026-04-08 |
 | 5. Graph Traversal and Contradiction Detection | 0/2 | Not started | - |
 | 6. Agent-Scoped Memory | 0/1 | Not started | - |
 | 7. Semantic Duplicate Detection | 0/1 | Not started | - |

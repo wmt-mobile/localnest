@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 03-01-PLAN.md
-last_updated: "2026-04-08T06:36:24.000Z"
+stopped_at: Completed 04-02-PLAN.md
+last_updated: "2026-04-08T06:48:23.999Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 9
-  completed_phases: 3
-  total_plans: 4
-  completed_plans: 4
+  completed_phases: 4
+  total_plans: 6
+  completed_plans: 6
   percent: 29
 ---
 
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory -- no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** Phase 02 — knowledge-graph-core (complete)
+**Current focus:** Phase 04 — nest-branch-hierarchy (complete)
 
 ## Current Position
 
-Phase: 03 (temporal-validity) — COMPLETE
-Plan: 1 of 1
-Status: Phase 03 complete — ready for Phase 04
+Phase: 04 (nest-branch-hierarchy) — COMPLETE
+Plan: 2 of 2
+Status: Phase 04 complete — ready for Phase 05
 Last activity: 2026-04-08
 
-Progress: [###.......] 29%
+Progress: [#######...] 67%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 4
+- Total plans completed: 6
 - Average duration: 2min
-- Total execution time: 0.13 hours
+- Total execution time: 0.17 hours
 
 **By Phase:**
 
@@ -47,10 +47,11 @@ Progress: [###.......] 29%
 | Phase 01 | 1 | 1min | 1min |
 | Phase 02 | 2 | 4min | 2min |
 | Phase 03 | 1 | 2min | 2min |
+| Phase 04 | 2 | 3min | 1.5min |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-01 (1min), 02-01 (2min), 02-02 (2min), 03-01 (2min)
+- Last 5 plans: 02-01 (2min), 02-02 (2min), 03-01 (2min), 04-01 (2min), 04-02 (1min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -58,6 +59,8 @@ Progress: [###.......] 29%
 | Phase 02 P01 | 2min | 2 tasks | 2 files |
 | Phase 02 P02 | 2min | 2 tasks | 3 files |
 | Phase 03 P01 | 2min | 2 tasks | 3 files |
+| Phase 04 P01 | 2min | 2 tasks | 4 files |
+| Phase 04 P02 | 1min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -78,6 +81,12 @@ Recent decisions affecting current work:
 - [Phase 03]: queryTriplesAsOf uses half-open interval semantics (valid_from <= asOf, valid_to > asOf)
 - [Phase 03]: getEntityTimeline returns all triples including invalidated for full history
 - [Phase 03]: getKgStats groups by predicate only for active triples
+- [Phase 04]: nest/branch as TEXT NOT NULL DEFAULT '' columns on memory_entries
+- [Phase 04]: Composite index on (nest, branch) for fast taxonomy queries
+- [Phase 04]: scoreScopeMatch boosts nest by 2.5 and branch by 1.5
+- [Phase 04]: storeEntry defaults nest from project_path and branch from topic
+- [Phase 04]: listNests filters status=active and nest!='' for meaningful results
+- [Phase 04]: getTaxonomyTree uses Map accumulator for O(n) single-pass aggregation
 
 ### Pending Todos
 
@@ -89,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T06:36:24.000Z
-Stopped at: Completed 03-01-PLAN.md
+Last session: 2026-04-08T06:48:00.000Z
+Stopped at: Completed 04-02-PLAN.md
 Resume file: None

@@ -29,11 +29,11 @@
 
 ### Hierarchical Memory Organization (Nest/Branch)
 
-- [ ] **NEST-01**: Memory entries support nest (top-level domain) and branch (topic within nest) metadata columns
-- [ ] **NEST-02**: Memory recall filters results by nest and/or branch when provided
-- [ ] **NEST-03**: User can list all nests with their memory counts via MCP tool
-- [ ] **NEST-04**: User can list branches within a nest via MCP tool
-- [ ] **NEST-05**: User can get full taxonomy tree (nests to branches to counts) via MCP tool
+- [x] **NEST-01**: Memory entries support nest (top-level domain) and branch (topic within nest) metadata columns
+- [x] **NEST-02**: Memory recall filters results by nest and/or branch when provided
+- [x] **NEST-03**: User can list all nests with their memory counts via MCP tool
+- [x] **NEST-04**: User can list branches within a nest via MCP tool
+- [x] **NEST-05**: User can get full taxonomy tree (nests to branches to counts) via MCP tool
 
 ### Graph Traversal
 
@@ -128,11 +128,11 @@ Deferred to future milestone.
 | TEMP-02 | Phase 3 | Complete |
 | TEMP-03 | Phase 3 | Complete |
 | TEMP-04 | Phase 3 | Complete |
-| NEST-01 | Phase 4 | Pending |
-| NEST-02 | Phase 4 | Pending |
-| NEST-03 | Phase 4 | Pending |
-| NEST-04 | Phase 4 | Pending |
-| NEST-05 | Phase 4 | Pending |
+| NEST-01 | Phase 4 | Complete |
+| NEST-02 | Phase 4 | Complete |
+| NEST-03 | Phase 4 | Complete |
+| NEST-04 | Phase 4 | Complete |
+| NEST-05 | Phase 4 | Complete |
 | TRAV-01 | Phase 5 | Pending |
 | TRAV-02 | Phase 5 | Pending |
 | TRAV-03 | Phase 5 | Pending |
