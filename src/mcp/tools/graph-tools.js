@@ -308,10 +308,10 @@ export function registerGraphTools({
     ['localnest_ingest_markdown'],
     {
       title: 'Ingest Markdown Conversation',
-      description: 'Ingest a Markdown conversation export into memory entries and knowledge graph triples. Supports ## Role, **Role:**, and Role: formats. Runs semantic dedup and re-ingestion tracking.',
+      description: 'Ingest a Markdown conversation export into memory entries and knowledge graph triples. Pass the full text content directly — file reading is handled by the CLI, not MCP tools.',
       inputSchema: {
-        content: z.string().min(1).max(500000),
-        file_path: z.string().max(1000).optional(),
+        content: z.string().min(1).max(500000).describe('Full markdown text content to ingest'),
+        source_label: z.string().max(1000).optional().describe('Optional label for re-ingestion tracking (e.g. filename)'),
         nest: z.string().max(200).default(''),
         branch: z.string().max(200).default(''),
         agent_id: z.string().max(200).default('')
@@ -323,18 +323,18 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ content, file_path, nest, branch, agent_id }) =>
-      memory.ingestMarkdown({ content, filePath: file_path, nest, branch, agentId: agent_id })
+    async ({ content, source_label, nest, branch, agent_id }) =>
+      memory.ingestMarkdown({ content, filePath: source_label || '', nest, branch, agentId: agent_id })
   );
 
   registerJsonTool(
     ['localnest_ingest_json'],
     {
       title: 'Ingest JSON Conversation',
-      description: 'Ingest a JSON conversation export (array of {role, content, timestamp?} objects) into memory entries and knowledge graph triples. Runs semantic dedup and re-ingestion tracking.',
+      description: 'Ingest a JSON conversation export (array of {role, content, timestamp?} objects) into memory entries and knowledge graph triples. Pass the full JSON text directly.',
       inputSchema: {
-        content: z.string().min(1).max(500000),
-        file_path: z.string().max(1000).optional(),
+        content: z.string().min(1).max(500000).describe('Full JSON text content to ingest'),
+        source_label: z.string().max(1000).optional().describe('Optional label for re-ingestion tracking'),
         nest: z.string().max(200).default(''),
         branch: z.string().max(200).default(''),
         agent_id: z.string().max(200).default('')
@@ -346,8 +346,8 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ content, file_path, nest, branch, agent_id }) =>
-      memory.ingestJson({ content, filePath: file_path, nest, branch, agentId: agent_id })
+    async ({ content, source_label, nest, branch, agent_id }) =>
+      memory.ingestJson({ content, filePath: source_label || '', nest, branch, agentId: agent_id })
   );
 
   // ─── Dedup Tool (localnest_memory_check_duplicate) ──────────────────

@@ -187,9 +187,8 @@ export async function storeEntry(store, input) {
   const id = generateMemoryId();
   const createdAt = nowIso();
 
-  await store.adapter.exec('BEGIN');
-  try {
-    await store.adapter.run(
+  await store.adapter.transaction(async (ad) => {
+    await ad.run(
       `INSERT INTO memory_entries(
         id, kind, title, summary, content, status, importance, confidence,
         scope_root_path, scope_project_path, scope_branch_name, topic, feature,
@@ -205,7 +204,7 @@ export async function storeEntry(store, input) {
         sourceType, sourceRef, fingerprint, createdAt, createdAt
       ]
     );
-    await store.adapter.run(
+    await ad.run(
       `INSERT INTO memory_revisions(
         memory_id, revision, title, summary, content, tags_json, links_json, change_note, created_at
       ) VALUES (?, 1, ?, ?, ?, ?, ?, ?, ?)`,
@@ -214,11 +213,7 @@ export async function storeEntry(store, input) {
         cleanString(input.change_note || 'Initial memory creation', 400), createdAt
       ]
     );
-    await store.adapter.exec('COMMIT');
-  } catch (error) {
-    await store.adapter.exec('ROLLBACK');
-    throw error;
-  }
+  });
 
   const embedding = await embedMemory(store, { title, summary, content });
   if (embedding) {
@@ -274,9 +269,8 @@ export async function updateEntry(store, id, patch = {}) {
   const updatedAt = nowIso();
   const revision = (existing.revisions?.[0]?.revision || 0) + 1;
 
-  await store.adapter.exec('BEGIN');
-  try {
-    await store.adapter.run(
+  await store.adapter.transaction(async (ad) => {
+    await ad.run(
       `UPDATE memory_entries
           SET kind = ?, title = ?, summary = ?, content = ?, status = ?,
               importance = ?, confidence = ?,
@@ -293,7 +287,7 @@ export async function updateEntry(store, id, patch = {}) {
         next.source_type, next.source_ref, fingerprint, updatedAt, id
       ]
     );
-    await store.adapter.run(
+    await ad.run(
       `INSERT INTO memory_revisions(
         memory_id, revision, title, summary, content, tags_json, links_json, change_note, created_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -303,11 +297,7 @@ export async function updateEntry(store, id, patch = {}) {
         cleanString(patch.change_note || 'Memory updated', 400), updatedAt
       ]
     );
-    await store.adapter.exec('COMMIT');
-  } catch (error) {
-    await store.adapter.exec('ROLLBACK');
-    throw error;
-  }
+  });
 
   const embedding = await embedMemory(store, { title: next.title, summary: next.summary, content: next.content });
   if (embedding) {
@@ -325,16 +315,11 @@ export async function deleteEntry(store, id) {
   const existing = await getEntry(store, id);
   if (!existing) return { deleted: false, id };
 
-  await store.adapter.exec('BEGIN');
-  try {
-    await store.adapter.run('DELETE FROM memory_relations WHERE source_id = ? OR target_id = ?', [id, id]);
-    await store.adapter.run('DELETE FROM memory_revisions WHERE memory_id = ?', [id]);
-    await store.adapter.run('DELETE FROM memory_entries WHERE id = ?', [id]);
-    await store.adapter.exec('COMMIT');
-  } catch (error) {
-    await store.adapter.exec('ROLLBACK');
-    throw error;
-  }
+  await store.adapter.transaction(async (ad) => {
+    await ad.run('DELETE FROM memory_relations WHERE source_id = ? OR target_id = ?', [id, id]);
+    await ad.run('DELETE FROM memory_revisions WHERE memory_id = ?', [id]);
+    await ad.run('DELETE FROM memory_entries WHERE id = ?', [id]);
+  });
 
   return { deleted: true, id };
 }
