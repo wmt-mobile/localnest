@@ -205,3 +205,11 @@ Ingests a Markdown conversation export into memory entries and knowledge graph t
 
 ### `localnest_ingest_json`
 Ingests a JSON conversation export (array of `{role, content, timestamp?}` objects). Same params and behavior as `localnest_ingest_markdown`.
+
+## Hook introspection tools
+
+### `localnest_hooks_stats`
+Returns hook system statistics: whether hooks are enabled, total registered listener count, and a breakdown of listener counts per event type. No params. Use this to audit active hooks or verify that a hook registration succeeded.
+
+### `localnest_hooks_list_events`
+Returns all valid hook event names that listeners can subscribe to. No params. Covers memory lifecycle, knowledge graph, graph traversal, diary, ingestion, dedup, taxonomy, wildcards, and the error event.
