@@ -18,6 +18,7 @@ const SKILL_TOOL_PREAMBLES = {
   opencode: 'Tool target: OpenCode. Keep guidance CLI-friendly and compatible with OpenCode skill discovery.',
   gemini: 'Tool target: Gemini CLI. Keep guidance compact and explicit because Gemini uses extension-oriented local workflows.',
   antigravity: 'Tool target: Antigravity. Keep guidance concise and compatible with Gemini/Antigravity local agent workflows.',
+  kiro: 'Tool target: Kiro (AWS). Keep guidance compatible with Kiro steering and agent skills conventions.',
   agents: 'Tool target: generic agents-compatible skill directory. Keep instructions portable and convention-based.',
   github: 'Tool target: project-level GitHub Agent Skills. Keep instructions team-safe and repository-oriented.',
   default: ''
@@ -71,13 +72,14 @@ function generateClientNativeFiles(targetSkillDir, toolFamily, skillContent) {
 
   switch (toolFamily) {
     case 'cursor': {
-      // Cursor reads .cursor/rules/*.mdc or .cursorrules at project root
+      // Cursor reads .cursor/rules/*.mdc with YAML frontmatter (description, globs, alwaysApply)
       const rulesDir = path.join(grandparentDir, 'rules');
       fs.mkdirSync(rulesDir, { recursive: true });
       const ruleContent = [
         '---',
-        'description: LocalNest MCP — local code retrieval and persistent memory',
-        'globs: **/*',
+        'description: LocalNest MCP — local code retrieval, knowledge graph, and persistent memory with 52 tools',
+        'globs:',
+        '  - "**/*"',
         'alwaysApply: true',
         '---',
         '',
@@ -87,19 +89,28 @@ function generateClientNativeFiles(targetSkillDir, toolFamily, skillContent) {
       break;
     }
     case 'windsurf': {
-      // Windsurf reads .windsurf/rules/*.md
+      // Windsurf reads .windsurf/rules/*.md or ~/.codeium/windsurf/memories/ with trigger frontmatter
       const rulesDir = path.join(grandparentDir, 'rules');
       fs.mkdirSync(rulesDir, { recursive: true });
-      fs.writeFileSync(path.join(rulesDir, 'localnest.md'), header + coreContent, 'utf8');
+      const wsContent = [
+        '---',
+        'trigger: always_on',
+        'description: LocalNest MCP — local code retrieval, knowledge graph, and persistent memory',
+        '---',
+        '',
+        header + coreContent
+      ].join('\n');
+      fs.writeFileSync(path.join(rulesDir, 'localnest.md'), wsContent, 'utf8');
       break;
     }
     case 'opencode': {
-      // OpenCode reads AGENTS.md with frontmatter (globs, keywords)
+      // OpenCode reads AGENTS.md with frontmatter (globs, keywords, match)
       const agentsContent = [
         '---',
         'description: LocalNest MCP — local code retrieval, knowledge graph, and persistent memory',
-        'keywords: [localnest, memory, knowledge, graph, search, code, file, project, nest, branch, recall, ingest]',
+        'keywords: [localnest, memory, knowledge, graph, search, code, file, project, nest, branch, recall, ingest, diary, triple, entity]',
         'globs: ["**/*"]',
+        'match: any',
         '---',
         '',
         header + coreContent
@@ -111,35 +122,80 @@ function generateClientNativeFiles(targetSkillDir, toolFamily, skillContent) {
       break;
     }
     case 'copilot': {
-      // GitHub Copilot reads .github/copilot-instructions.md
-      const ghDir = path.join(grandparentDir);
-      const instructionsPath = path.join(ghDir, 'copilot-instructions.md');
+      // GitHub Copilot reads .github/copilot-instructions.md (plain markdown, no frontmatter)
+      const instructionsPath = path.join(grandparentDir, 'copilot-instructions.md');
       if (!fs.existsSync(instructionsPath)) {
         fs.writeFileSync(instructionsPath, header + coreContent, 'utf8');
       }
       break;
     }
     case 'cline': {
-      // Cline reads .clinerules or .cline/rules/*.md
+      // Cline reads .cline/rules/*.md with optional YAML frontmatter (paths, description)
       const rulesDir = path.join(grandparentDir, 'rules');
       fs.mkdirSync(rulesDir, { recursive: true });
-      fs.writeFileSync(path.join(rulesDir, 'localnest.md'), header + coreContent, 'utf8');
+      const clineContent = [
+        '---',
+        'description: LocalNest MCP — local code retrieval, knowledge graph, and persistent memory',
+        'tags: [mcp, memory, search, knowledge-graph]',
+        '---',
+        '',
+        header + coreContent
+      ].join('\n');
+      fs.writeFileSync(path.join(rulesDir, 'localnest.md'), clineContent, 'utf8');
+      break;
+    }
+    case 'continue': {
+      // Continue reads .continue/rules/*.md with YAML frontmatter (name, description, alwaysApply)
+      const rulesDir = path.join(grandparentDir, 'rules');
+      fs.mkdirSync(rulesDir, { recursive: true });
+      const continueContent = [
+        '---',
+        'name: LocalNest MCP',
+        'description: Local code retrieval, knowledge graph, and persistent memory with 52 MCP tools',
+        'alwaysApply: true',
+        '---',
+        '',
+        header + coreContent
+      ].join('\n');
+      fs.writeFileSync(path.join(rulesDir, 'localnest.md'), continueContent, 'utf8');
       break;
     }
     case 'gemini': {
-      // Gemini CLI reads GEMINI.md or .gemini/GEMINI.md
+      // Gemini CLI reads ~/.gemini/GEMINI.md (plain markdown, hierarchical loading)
       const geminiMdPath = path.join(grandparentDir, 'GEMINI.md');
       if (!fs.existsSync(geminiMdPath)) {
         fs.writeFileSync(geminiMdPath, header + coreContent, 'utf8');
       }
       break;
     }
+    case 'antigravity': {
+      // Antigravity reads ~/.gemini/GEMINI.md + AGENTS.md + .agent/rules/*.md
+      const geminiMdPath = path.join(grandparentDir, '..', 'GEMINI.md');
+      if (!fs.existsSync(geminiMdPath)) {
+        fs.writeFileSync(geminiMdPath, header + coreContent, 'utf8');
+      }
+      break;
+    }
     case 'codex': {
-      // Codex reads AGENTS.md
+      // Codex reads ~/.codex/AGENTS.md (plain markdown, no frontmatter, 32 KiB limit)
       const agentsMdPath = path.join(grandparentDir, 'AGENTS.md');
       if (!fs.existsSync(agentsMdPath)) {
         fs.writeFileSync(agentsMdPath, header + coreContent, 'utf8');
       }
+      break;
+    }
+    case 'kiro': {
+      // Kiro reads .kiro/steering/*.md with YAML frontmatter (inclusion, fileMatchPattern)
+      const steeringDir = path.join(grandparentDir, 'steering');
+      fs.mkdirSync(steeringDir, { recursive: true });
+      const kiroContent = [
+        '---',
+        'inclusion: always',
+        '---',
+        '',
+        header + coreContent
+      ].join('\n');
+      fs.writeFileSync(path.join(steeringDir, 'localnest.md'), kiroContent, 'utf8');
       break;
     }
     default:
@@ -215,7 +271,8 @@ export function getKnownToolSkillDirs(homeDir = os.homedir()) {
     path.join(homeDir, '.gemini', 'skills'),     // Gemini CLI skills/extensions-style local skills
     path.join(homeDir, '.gemini', 'antigravity', 'skills'), // Antigravity
     path.join(homeDir, '.cline', 'skills'),      // Cline
-    path.join(homeDir, '.continue', 'skills')    // Continue
+    path.join(homeDir, '.continue', 'skills'),   // Continue
+    path.join(homeDir, '.kiro', 'skills')         // Kiro (AWS)
   ];
 }
 
@@ -240,6 +297,7 @@ export function detectSkillToolFamily(targetSkillDir) {
   if (normalized.includes('/.gemini/skills/')) return 'gemini';
   if (normalized.includes('/.cline/skills/')) return 'cline';
   if (normalized.includes('/.continue/skills/')) return 'continue';
+  if (normalized.includes('/.kiro/skills/')) return 'kiro';
   if (normalized.includes('/.agents/skills/')) return 'agents';
   return 'default';
 }
