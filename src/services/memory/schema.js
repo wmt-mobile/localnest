@@ -1,6 +1,6 @@
 import { buildSearchTerms, stableJson } from './utils.js';
 
-export const SCHEMA_VERSION = 5;
+export const SCHEMA_VERSION = 6;
 
 export async function ensureSchema(adapter) {
   await adapter.exec(`
@@ -168,6 +168,47 @@ export async function runMigrations({ adapter, getMeta, setMeta }) {
           CREATE INDEX IF NOT EXISTS idx_memory_entries_kind_status
             ON memory_entries(kind, status);
         `);
+      }
+    },
+    {
+      version: 6,
+      migrate: async (ad) => {
+        await ad.exec(`
+          CREATE TABLE IF NOT EXISTS kg_entities (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            entity_type TEXT NOT NULL DEFAULT 'concept',
+            properties_json TEXT NOT NULL DEFAULT '{}',
+            memory_id TEXT,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL
+          )
+        `);
+
+        await ad.exec(`
+          CREATE TABLE IF NOT EXISTS kg_triples (
+            id TEXT PRIMARY KEY,
+            subject_id TEXT NOT NULL,
+            predicate TEXT NOT NULL,
+            object_id TEXT NOT NULL,
+            valid_from TEXT,
+            valid_to TEXT,
+            confidence REAL NOT NULL DEFAULT 1.0,
+            source_memory_id TEXT,
+            source_type TEXT NOT NULL DEFAULT 'manual',
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (subject_id) REFERENCES kg_entities(id),
+            FOREIGN KEY (object_id) REFERENCES kg_entities(id)
+          )
+        `);
+
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_entities_type ON kg_entities(entity_type)`);
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_entities_memory ON kg_entities(memory_id)`);
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_subject ON kg_triples(subject_id)`);
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_object ON kg_triples(object_id)`);
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_predicate ON kg_triples(predicate)`);
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_valid ON kg_triples(valid_from, valid_to)`);
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_source ON kg_triples(source_memory_id)`);
       }
     }
   ];
