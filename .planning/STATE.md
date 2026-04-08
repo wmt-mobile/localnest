@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 07-01-PLAN.md
-last_updated: "2026-04-08T07:10:00.000Z"
+stopped_at: Completed 08-01-PLAN.md
+last_updated: "2026-04-08T07:16:00.000Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 9
-  completed_phases: 7
-  total_plans: 10
-  completed_plans: 10
-  percent: 56
+  completed_phases: 8
+  total_plans: 11
+  completed_plans: 11
+  percent: 89
 ---
 
 # Project State
@@ -21,24 +21,24 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory -- no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** Phase 07 — semantic-duplicate-detection (complete)
+**Current focus:** Phase 08 — conversation-ingestion (complete)
 
 ## Current Position
 
-Phase: 07 (semantic-duplicate-detection) — COMPLETE
+Phase: 08 (conversation-ingestion) — COMPLETE
 Plan: 1 of 1
-Status: Phase 07 complete — ready for Phase 08
+Status: Phase 08 complete — ready for Phase 09
 Last activity: 2026-04-08
 
-Progress: [########..] 88%
+Progress: [########.] 89%
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 9
+- Total plans completed: 10
 - Average duration: 2min
-- Total execution time: 0.27 hours
+- Total execution time: 0.32 hours
 
 **By Phase:**
 
@@ -51,10 +51,11 @@ Progress: [########..] 88%
 | Phase 05 | 2 | 3min | 1.5min |
 | Phase 06 | 1 | 2min | 2min |
 | Phase 07 | 1 | 2min | 2min |
+| Phase 08 | 1 | 3min | 3min |
 
 **Recent Trend:**
 
-- Last 5 plans: 04-02 (1min), 05-01 (2min), 05-02 (1min), 06-01 (2min), 07-01 (2min)
+- Last 5 plans: 05-01 (2min), 05-02 (1min), 06-01 (2min), 07-01 (2min), 08-01 (3min)
 - Trend: stable
 
 *Updated after each plan completion*
@@ -68,6 +69,7 @@ Progress: [########..] 88%
 | Phase 05 P02 | 1min | 3 tasks | 4 files |
 | Phase 06 P01 | 2min | 2 tasks | 7 files |
 | Phase 07 P01 | 2min | 2 tasks | 5 files |
+| Phase 08 P01 | 3min | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -106,6 +108,11 @@ Recent decisions affecting current work:
 - [Phase 07]: Max 200 candidates compared per check, recent-first ordering
 - [Phase 07]: Graceful degradation — embeddings disabled returns isDuplicate: false, never blocks writes
 - [Phase 07]: Dedup in event-capture runs before merge candidate check for early exit
+- [Phase 08]: Schema v9 conversation_sources tracks files by path + SHA-256 hash for re-ingestion skip
+- [Phase 08]: Markdown parser handles 3 role patterns (## Role, **Role:**, Role:) with human/ai normalization
+- [Phase 08]: Entity extraction uses 5 regex types with 100+ stop words for noise reduction
+- [Phase 08]: KG triples use mentioned_by (0.7 confidence) and co_occurs_with (0.5) predicates
+- [Phase 08]: Turn importance 30 keeps conversation entries below manual memories (50)
 
 ### Pending Todos
 
@@ -117,6 +124,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T07:10:00.000Z
-Stopped at: Completed 07-01-PLAN.md
+Last session: 2026-04-08T07:16:00.000Z
+Stopped at: Completed 08-01-PLAN.md
 Resume file: None

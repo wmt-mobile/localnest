@@ -19,7 +19,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 5: Graph Traversal and Contradiction Detection** - Multi-hop walks, cross-nest bridges, and write-time contradiction warnings
 - [x] **Phase 6: Agent-Scoped Memory** - Per-agent namespaces with isolated diary entries
 - [x] **Phase 7: Semantic Duplicate Detection** - Embedding similarity gate before storage
-- [ ] **Phase 8: Conversation Ingestion** - Parse Markdown/JSON conversations into memories and triples
+- [x] **Phase 8: Conversation Ingestion** - Parse Markdown/JSON conversations into memories and triples
 - [ ] **Phase 9: MCP Tool Registration** - Expose all new capabilities as localnest_* MCP tools
 
 ## Phase Details
@@ -136,11 +136,10 @@ Plans:
   3. Ingestion extracts entities and creates knowledge graph triples from conversation content using rule-based heuristics (not LLM)
   4. Ingestion runs semantic dedup to prevent storing duplicate conversation turns
   5. Previously ingested files (matched by path + SHA-256 hash) are skipped on re-ingestion
-**Plans:** 2 plans
+**Plans:** 1 plan
 
 Plans:
-- [ ] 08-01: Schema v8, Markdown parser, and turn splitting
-- [ ] 08-02: JSON parser, entity extraction heuristics, and dedup integration
+- [x] 08-01: Schema v9, parsers, entity extraction, dedup, and store/service wiring
 
 ### Phase 9: MCP Tool Registration
 **Goal**: All new memory capabilities are accessible to MCP clients through properly registered tools
@@ -173,5 +172,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 | 5. Graph Traversal and Contradiction Detection | 2/2 | Complete | 2026-04-08 |
 | 6. Agent-Scoped Memory | 1/1 | Complete | 2026-04-08 |
 | 7. Semantic Duplicate Detection | 1/1 | Complete | 2026-04-08 |
-| 8. Conversation Ingestion | 0/2 | Not started | - |
+| 8. Conversation Ingestion | 1/1 | Complete | 2026-04-08 |
 | 9. MCP Tool Registration | 0/2 | Not started | - |

@@ -63,11 +63,11 @@
 
 ### Conversation Ingestion
 
-- [ ] **INGEST-01**: User can ingest Markdown conversation exports into memory via MCP tool
-- [ ] **INGEST-02**: User can ingest JSON conversation exports (role/content/timestamp arrays) via MCP tool
-- [ ] **INGEST-03**: Ingestion splits conversations into per-turn memory entries with proper nest/branch assignment
-- [ ] **INGEST-04**: Ingestion extracts entities and creates knowledge graph triples from conversation content using rule-based heuristics
-- [ ] **INGEST-05**: Ingestion runs semantic dedup to prevent storing duplicate conversation turns
+- [x] **INGEST-01**: User can ingest Markdown conversation exports into memory via MCP tool
+- [x] **INGEST-02**: User can ingest JSON conversation exports (role/content/timestamp arrays) via MCP tool
+- [x] **INGEST-03**: Ingestion splits conversations into per-turn memory entries with proper nest/branch assignment
+- [x] **INGEST-04**: Ingestion extracts entities and creates knowledge graph triples from conversation content using rule-based heuristics
+- [x] **INGEST-05**: Ingestion runs semantic dedup to prevent storing duplicate conversation turns
 
 ### MCP Tool Registration
 
@@ -147,11 +147,11 @@ Deferred to future milestone.
 | DEDUP-02 | Phase 7 | Complete |
 | DEDUP-03 | Phase 7 | Complete |
 | DEDUP-04 | Phase 7 | Complete |
-| INGEST-01 | Phase 8 | Pending |
-| INGEST-02 | Phase 8 | Pending |
-| INGEST-03 | Phase 8 | Pending |
-| INGEST-04 | Phase 8 | Pending |
-| INGEST-05 | Phase 8 | Pending |
+| INGEST-01 | Phase 8 | Complete |
+| INGEST-02 | Phase 8 | Complete |
+| INGEST-03 | Phase 8 | Complete |
+| INGEST-04 | Phase 8 | Complete |
+| INGEST-05 | Phase 8 | Complete |
 | TOOL-01 | Phase 9 | Pending |
 | TOOL-02 | Phase 9 | Pending |
 | TOOL-03 | Phase 9 | Pending |
