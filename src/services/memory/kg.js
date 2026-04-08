@@ -47,6 +47,25 @@ export async function addEntity(adapter, { name, type, properties, memoryId } = 
   };
 }
 
+export async function ensureEntity(adapter, name, type = 'concept') {
+  const cleanName = cleanString(name, 400);
+  if (!cleanName) throw new Error('entity name is required');
+
+  const id = toSlug(cleanName);
+  if (!id) throw new Error('entity name must produce a valid slug');
+
+  const entityType = cleanString(type, 100) || 'concept';
+  const now = nowIso();
+
+  await adapter.run(
+    `INSERT OR IGNORE INTO kg_entities (id, name, entity_type, properties_json, memory_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [id, cleanName, entityType, stableJson({}), null, now, now]
+  );
+
+  return id;
+}
+
 export async function getEntity(adapter, entityId) {
   const id = cleanString(entityId, 400);
   if (!id) throw new Error('entityId is required');
@@ -73,17 +92,19 @@ export async function getEntity(adapter, entityId) {
 }
 
 export async function addTriple(adapter, {
-  subjectId, predicate, objectId,
+  subjectId, subjectName,
+  predicate,
+  objectId, objectName,
   validFrom, validTo, confidence,
   sourceMemoryId, sourceType
 } = {}) {
-  const subId = cleanString(subjectId, 400);
+  let subId = cleanString(subjectId, 400);
   const pred = cleanString(predicate, 400);
-  const objId = cleanString(objectId, 400);
+  let objId = cleanString(objectId, 400);
 
-  if (!subId) throw new Error('subjectId is required');
+  if (!subId && !subjectName) throw new Error('subject is required (provide subjectId or subjectName)');
   if (!pred) throw new Error('predicate is required');
-  if (!objId) throw new Error('objectId is required');
+  if (!objId && !objectName) throw new Error('object is required (provide objectId or objectName)');
 
   const id = `triple_${crypto.randomUUID()}`;
   const vFrom = validFrom || null;
@@ -95,24 +116,35 @@ export async function addTriple(adapter, {
   const srcType = cleanString(sourceType, 100) || 'manual';
   const now = nowIso();
 
-  await adapter.run(
-    `INSERT INTO kg_triples (id, subject_id, predicate, object_id, valid_from, valid_to, confidence, source_memory_id, source_type, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [id, subId, pred, objId, vFrom, vTo, conf, srcMemId, srcType, now]
-  );
+  const result = await adapter.transaction(async (ad) => {
+    if (!subId && subjectName) {
+      subId = await ensureEntity(ad, subjectName);
+    }
+    if (!objId && objectName) {
+      objId = await ensureEntity(ad, objectName);
+    }
 
-  return {
-    id,
-    subject_id: subId,
-    predicate: pred,
-    object_id: objId,
-    valid_from: vFrom,
-    valid_to: vTo,
-    confidence: conf,
-    source_memory_id: srcMemId,
-    source_type: srcType,
-    created_at: now
-  };
+    await ad.run(
+      `INSERT INTO kg_triples (id, subject_id, predicate, object_id, valid_from, valid_to, confidence, source_memory_id, source_type, created_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, subId, pred, objId, vFrom, vTo, conf, srcMemId, srcType, now]
+    );
+
+    return {
+      id,
+      subject_id: subId,
+      predicate: pred,
+      object_id: objId,
+      valid_from: vFrom,
+      valid_to: vTo,
+      confidence: conf,
+      source_memory_id: srcMemId,
+      source_type: srcType,
+      created_at: now
+    };
+  });
+
+  return result;
 }
 
 export async function invalidateTriple(adapter, tripleId, validTo) {
