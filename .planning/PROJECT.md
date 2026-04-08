@@ -1,8 +1,23 @@
-# LocalNest Memory Enhancement
+# LocalNest
 
 ## What This Is
 
-LocalNest is an MCP server for local code retrieval and persistent agent memory. This milestone closes the memory capability gaps identified by comparing LocalNest against MemPalace — upgrading from basic flat memory entries to a full knowledge graph with temporal triples, conversation ingestion, hierarchical taxonomy, graph traversal, agent-scoped namespaces, and semantic deduplication.
+LocalNest is a local-first MCP server that gives AI agents safe, scoped access to code — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory that never leaves your machine. 50 MCP tools, zero cloud dependencies, pure SQLite.
+
+## Current Milestone: v2.0 CLI-First Architecture
+
+**Goal:** Consolidate all commands into a unified noun-verb CLI and polish hooks/MCP for universal AI interoperability.
+
+**Target features:**
+- Commander.js CLI framework with `localnest <noun> <verb>` subcommands
+- Memory CLI commands (add/search/list/show/delete)
+- Knowledge Graph CLI commands (kg add/query/timeline/stats)
+- Skill CLI commands (skill install/list/remove/search)
+- MCP lifecycle CLI (mcp start/status/config)
+- Ingest CLI (ingest markdown/json)
+- Hook MCP tools + polish for AI discoverability
+- Shell completions + --json flag + colored help formatting
+- Deprecate old localnest-mcp-* fragmented binaries
 
 ## Core Value
 
@@ -23,11 +38,15 @@ A single local MCP server that handles both code retrieval AND rich structured m
 
 ### Active
 
-- [ ] Knowledge graph with temporal triples (subject→predicate→object, valid_from/valid_to)
-- [ ] Conversation/chat ingestion pipeline (Markdown, JSON, Slack exports)
-- [ ] Temporal validity on facts (as_of queries, fact invalidation)
-- [ ] Hierarchical memory organization (nest/branch taxonomy — LocalNest's own organic metaphor)
-- [ ] Graph traversal (multi-hop walks, cross-domain tunnel discovery)
+- [ ] Unified CLI framework with Commander.js noun-verb subcommands
+- [ ] Memory CLI commands (localnest memory add/search/list/show/delete)
+- [ ] Knowledge Graph CLI commands (localnest kg add/query/timeline/stats)
+- [ ] Skill CLI commands (localnest skill install/list/remove/search)
+- [ ] MCP lifecycle CLI (localnest mcp start/status/config)
+- [ ] Ingest CLI (localnest ingest markdown/json)
+- [ ] Hook MCP tools (localnest_hooks_stats, before/after event exposure)
+- [ ] Shell completions + --json flag + colored help
+- [ ] Deprecate old localnest-mcp-* binaries
 - [ ] Agent-scoped memory (per-agent isolated namespaces/diaries)
 - [ ] Semantic duplicate detection (similarity-based dedup before storage)
 
@@ -85,4 +104,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 after initialization*
+*Last updated: 2026-04-08 after milestone v2.0 initialization*
