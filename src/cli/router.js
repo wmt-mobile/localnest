@@ -21,6 +21,7 @@ const NOUN_MODULES = new Map([
   ['mcp', '../src/cli/commands/mcp.js'],
   ['ingest', '../src/cli/commands/ingest.js'],
   ['completion', '../src/cli/commands/completion.js'],
+  ['hooks', '../src/cli/commands/hooks.js'],
 ]);
 
 /** @type {Map<string, string>} flat command -> script path (relative to bin/) */
