@@ -17,6 +17,8 @@ export async function recall(adapter, {
   branchName,
   rootPath,
   kind,
+  nest,
+  branch,
   limit = 10
 }) {
   const safeLimit = clampInt(limit, 10, 1, 50);
@@ -34,6 +36,14 @@ export async function recall(adapter, {
   if (kind) {
     filters.push('kind = ?');
     params.push(kind);
+  }
+  if (nest) {
+    filters.push('nest = ?');
+    params.push(nest);
+  }
+  if (branch) {
+    filters.push('branch = ?');
+    params.push(branch);
   }
 
   const rows = await adapter.all(
@@ -72,7 +82,9 @@ export async function recall(adapter, {
         project_path: projectPath,
         branch_name: branchName,
         topic,
-        feature
+        feature,
+        nest,
+        branch
       });
       if (row.last_recalled_at) score += Math.min(row.recall_count || 0, 5) * 0.1;
       if (row.kind === 'preference') score += 0.25;

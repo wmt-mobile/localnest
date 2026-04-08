@@ -182,6 +182,8 @@ export function scoreScopeMatch(row, scope = {}) {
   if (scope.feature && row.feature === scope.feature) score += 1.5;
   if (scope.branch_name && row.scope_branch_name === scope.branch_name) score += 1;
   if (scope.root_path && row.scope_root_path === scope.root_path) score += 1;
+  if (scope.nest && row.nest === scope.nest) score += 2.5;
+  if (scope.branch && row.branch === scope.branch) score += 1.5;
   return score;
 }
 
@@ -212,6 +214,8 @@ export function deserializeEntry(row) {
     scope_branch_name: row.scope_branch_name,
     topic: row.topic,
     feature: row.feature,
+    nest: row.nest || '',
+    branch: row.branch || '',
     tags: JSON.parse(row.tags_json || '[]'),
     links: JSON.parse(row.links_json || '[]'),
     source_type: row.source_type,
