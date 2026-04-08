@@ -26,7 +26,7 @@ A single local MCP server that handles both code retrieval AND rich structured m
 - [ ] Knowledge graph with temporal triples (subject→predicate→object, valid_from/valid_to)
 - [ ] Conversation/chat ingestion pipeline (Markdown, JSON, Slack exports)
 - [ ] Temporal validity on facts (as_of queries, fact invalidation)
-- [ ] Hierarchical memory organization (wing→room→hall taxonomy with metadata filtering)
+- [ ] Hierarchical memory organization (nest/branch taxonomy — LocalNest's own organic metaphor)
 - [ ] Graph traversal (multi-hop walks, cross-domain tunnel discovery)
 - [ ] Agent-scoped memory (per-agent isolated namespaces/diaries)
 - [ ] Semantic duplicate detection (similarity-based dedup before storage)
@@ -64,7 +64,8 @@ A single local MCP server that handles both code retrieval AND rich structured m
 | SQLite triples over Neo4j/graph DB | Matches existing stack, zero new deps, MemPalace proves it works | -- Pending |
 | Additive schema migrations only | Protect existing users' data | -- Pending |
 | Verbatim storage over LLM summaries | MemPalace showed AAAK compression regresses recall 96.6→84.2% | -- Pending |
-| Wing/room as metadata columns, not separate tables | Simpler queries, easier to filter, proven 34% retrieval boost | -- Pending |
+| Nest/branch as metadata columns, not separate tables | Simpler queries, easier to filter, proven retrieval boost with metadata filtering | -- Pending |
+| Nest/branch naming over wing/room | Original LocalNest identity — nests are organic, layered, interconnected — not a copy of MemPalace's palace metaphor | -- Pending |
 
 ## Evolution
 

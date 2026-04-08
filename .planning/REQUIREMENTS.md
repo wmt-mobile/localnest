@@ -27,19 +27,19 @@
 - [ ] **TEMP-03**: User can view chronological timeline of all triples for an entity via MCP tool
 - [ ] **TEMP-04**: KG stats MCP tool reports entity count, triple count, and relationship type breakdown
 
-### Hierarchical Memory Organization
+### Hierarchical Memory Organization (Nest/Branch)
 
-- [ ] **TAXO-01**: Memory entries support wing and room metadata columns
-- [ ] **TAXO-02**: Memory recall filters results by wing and/or room when provided
-- [ ] **TAXO-03**: User can list all wings with their memory counts via MCP tool
-- [ ] **TAXO-04**: User can list rooms within a wing via MCP tool
-- [ ] **TAXO-05**: User can get full taxonomy tree (wings to rooms to counts) via MCP tool
+- [ ] **NEST-01**: Memory entries support nest (top-level domain) and branch (topic within nest) metadata columns
+- [ ] **NEST-02**: Memory recall filters results by nest and/or branch when provided
+- [ ] **NEST-03**: User can list all nests with their memory counts via MCP tool
+- [ ] **NEST-04**: User can list branches within a nest via MCP tool
+- [ ] **NEST-05**: User can get full taxonomy tree (nests to branches to counts) via MCP tool
 
 ### Graph Traversal
 
 - [ ] **TRAV-01**: User can traverse the knowledge graph from a starting entity with configurable max hops (default 2) via MCP tool
 - [ ] **TRAV-02**: Traversal uses SQLite recursive CTEs for zero-dependency multi-hop walks
-- [ ] **TRAV-03**: User can discover cross-domain tunnels (entities connected across different wings) via MCP tool
+- [ ] **TRAV-03**: User can discover cross-nest bridges (entities connected across different nests) via MCP tool
 - [ ] **TRAV-04**: Traversal results include path information (hop sequence from start to each discovered entity)
 
 ### Contradiction Detection
@@ -65,14 +65,14 @@
 
 - [ ] **INGEST-01**: User can ingest Markdown conversation exports into memory via MCP tool
 - [ ] **INGEST-02**: User can ingest JSON conversation exports (role/content/timestamp arrays) via MCP tool
-- [ ] **INGEST-03**: Ingestion splits conversations into per-turn memory entries with proper wing/room assignment
+- [ ] **INGEST-03**: Ingestion splits conversations into per-turn memory entries with proper nest/branch assignment
 - [ ] **INGEST-04**: Ingestion extracts entities and creates knowledge graph triples from conversation content using rule-based heuristics
 - [ ] **INGEST-05**: Ingestion runs semantic dedup to prevent storing duplicate conversation turns
 
 ### MCP Tool Registration
 
 - [ ] **TOOL-01**: All knowledge graph operations exposed as localnest_kg_* MCP tools
-- [ ] **TOOL-02**: All taxonomy operations exposed as localnest_taxonomy_* MCP tools
+- [ ] **TOOL-02**: All nest/branch operations exposed as localnest_nest_* MCP tools
 - [ ] **TOOL-03**: All graph traversal operations exposed as localnest_graph_* MCP tools
 - [ ] **TOOL-04**: Agent diary operations exposed as localnest_diary_* MCP tools
 - [ ] **TOOL-05**: Conversation ingestion exposed as localnest_ingest_* MCP tools
@@ -128,11 +128,11 @@ Deferred to future milestone.
 | TEMP-02 | Phase 3 | Pending |
 | TEMP-03 | Phase 3 | Pending |
 | TEMP-04 | Phase 3 | Pending |
-| TAXO-01 | Phase 4 | Pending |
-| TAXO-02 | Phase 4 | Pending |
-| TAXO-03 | Phase 4 | Pending |
-| TAXO-04 | Phase 4 | Pending |
-| TAXO-05 | Phase 4 | Pending |
+| NEST-01 | Phase 4 | Pending |
+| NEST-02 | Phase 4 | Pending |
+| NEST-03 | Phase 4 | Pending |
+| NEST-04 | Phase 4 | Pending |
+| NEST-05 | Phase 4 | Pending |
 | TRAV-01 | Phase 5 | Pending |
 | TRAV-02 | Phase 5 | Pending |
 | TRAV-03 | Phase 5 | Pending |
