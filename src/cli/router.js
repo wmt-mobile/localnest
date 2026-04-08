@@ -22,6 +22,9 @@ const NOUN_MODULES = new Map([
   ['ingest', '../src/cli/commands/ingest.js'],
   ['completion', '../src/cli/commands/completion.js'],
   ['hooks', '../src/cli/commands/hooks.js'],
+  ['selftest', '../src/cli/commands/selftest.js'],
+  ['onboard', '../src/cli/commands/onboard.js'],
+  ['dashboard', '../src/cli/commands/dashboard.js'],
 ]);
 
 /** @type {Map<string, string>} flat command -> script path (relative to bin/) */
