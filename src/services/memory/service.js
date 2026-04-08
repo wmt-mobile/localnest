@@ -201,6 +201,21 @@ export class MemoryService {
     return this.store.getKgStats();
   }
 
+  async listNests() {
+    this.assertEnabled();
+    return this.store.listNests();
+  }
+
+  async listBranches(nest) {
+    this.assertEnabled();
+    return this.store.listBranches(nest);
+  }
+
+  async getTaxonomyTree() {
+    this.assertEnabled();
+    return this.store.getTaxonomyTree();
+  }
+
   assertEnabled() {
     if (!this.enabled) {
       throw new Error('Local memory is disabled. Re-run localnest setup and opt in to memory.');

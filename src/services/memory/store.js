@@ -25,6 +25,11 @@ import {
   getRelated as getRelatedFn
 } from './relations.js';
 import {
+  listNests as listNestsFn,
+  listBranches as listBranchesFn,
+  getTaxonomyTree as getTaxonomyTreeFn
+} from './taxonomy.js';
+import {
   addEntity as addEntityFn,
   getEntity as getEntityFn,
   addTriple as addTripleFn,
@@ -229,5 +234,20 @@ export class MemoryStore {
   async getKgStats() {
     await this.init();
     return getKgStatsFn(this.adapter);
+  }
+
+  async listNests() {
+    await this.init();
+    return listNestsFn(this.adapter);
+  }
+
+  async listBranches(nest) {
+    await this.init();
+    return listBranchesFn(this.adapter, nest);
+  }
+
+  async getTaxonomyTree() {
+    await this.init();
+    return getTaxonomyTreeFn(this.adapter);
   }
 }
