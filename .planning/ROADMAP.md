@@ -34,7 +34,7 @@
 - [x] **Phase 11: Memory CLI Commands** - Full memory CRUD via localnest memory subcommands
 - [x] **Phase 12: Knowledge Graph CLI** - KG triple and entity operations from the command line
 - [x] **Phase 13: Skill CLI Commands** - Install, list, and remove bundled skills across AI clients
-- [ ] **Phase 14: MCP Lifecycle CLI** - Start, status, and config generation for MCP server
+- [x] **Phase 14: MCP Lifecycle CLI** - Start, status, and config generation for MCP server
 - [ ] **Phase 15: Ingest CLI** - Conversation file ingestion with format detection and taxonomy
 - [ ] **Phase 16: Hook MCP Tools** - Hook introspection tools and documentation for AI discoverability
 - [ ] **Phase 17: Shell Completions and Polish** - Tab completions for bash, zsh, and fish
@@ -94,7 +94,7 @@
   1. User can run `localnest mcp start` and the MCP server launches in stdio mode, ready for client connections
   2. User can run `localnest mcp status` and see server health (running/stopped), registered tool count, and active config path
   3. User can run `localnest mcp config` and get ready-to-paste JSON for adding LocalNest to Claude/Cursor/other MCP clients
-**Plans**: TBD
+**Plans**: 1 (complete)
 
 ### Phase 15: Ingest CLI
 **Goal**: Users can ingest conversation exports into LocalNest memory and KG directly from the command line
@@ -158,7 +158,7 @@ Phases execute in numeric order: 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17 ->
 | 11. Memory CLI Commands | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 12. Knowledge Graph CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 13. Skill CLI Commands | v2.0 | 1/1 | Complete | 2026-04-08 |
-| 14. MCP Lifecycle CLI | v2.0 | 0/? | Not started | - |
+| 14. MCP Lifecycle CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 15. Ingest CLI | v2.0 | 0/? | Not started | - |
 | 16. Hook MCP Tools | v2.0 | 0/? | Not started | - |
 | 17. Shell Completions | v2.0 | 0/? | Not started | - |

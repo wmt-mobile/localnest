@@ -35,9 +35,9 @@
 
 ### MCP Lifecycle CLI
 
-- [ ] **MCP-01**: `localnest mcp start` starts the MCP server (stdio mode)
-- [ ] **MCP-02**: `localnest mcp status` shows server health and config
-- [ ] **MCP-03**: `localnest mcp config` outputs ready-to-paste MCP config JSON for AI clients
+- [x] **MCP-01**: `localnest mcp start` starts the MCP server (stdio mode)
+- [x] **MCP-02**: `localnest mcp status` shows server health and config
+- [x] **MCP-03**: `localnest mcp config` outputs ready-to-paste MCP config JSON for AI clients
 
 ### Ingest CLI
 
@@ -93,9 +93,9 @@
 | SKILL-01 | Phase 13 | Pending |
 | SKILL-02 | Phase 13 | Pending |
 | SKILL-03 | Phase 13 | Pending |
-| MCP-01 | Phase 14 | Pending |
-| MCP-02 | Phase 14 | Pending |
-| MCP-03 | Phase 14 | Pending |
+| MCP-01 | Phase 14 | Complete |
+| MCP-02 | Phase 14 | Complete |
+| MCP-03 | Phase 14 | Complete |
 | ING-01 | Phase 15 | Pending |
 | ING-02 | Phase 15 | Pending |
 | ING-03 | Phase 15 | Pending |

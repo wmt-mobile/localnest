@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CLI-First Architecture
 status: in_progress
-stopped_at: Completed 13-1 (Skill CLI Commands)
-last_updated: "2026-04-08T08:57:00Z"
+stopped_at: Completed 14-1 (MCP Lifecycle CLI)
+last_updated: "2026-04-08T09:02:23Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 9
-  completed_phases: 3
-  total_plans: 4
-  completed_plans: 4
-  percent: 44
+  completed_phases: 4
+  total_plans: 5
+  completed_plans: 5
+  percent: 55
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A unified, premium CLI that makes LocalNest feel like a standalone product -- not just an MCP server.
-**Current focus:** Phase 13 -- Skill CLI Commands (plan 1 complete)
+**Current focus:** Phase 14 -- MCP Lifecycle CLI (plan 1 complete)
 
 ## Current Position
 
-Phase: 13 of 18 (Skill CLI Commands)
+Phase: 14 of 18 (MCP Lifecycle CLI)
 Plan: 1 of 1 in current phase (complete)
-Status: Phase 13 complete -- ready for Phase 14
-Last activity: 2026-04-08 -- Skill CLI subcommands (install, list, remove) implemented
+Status: Phase 14 complete -- ready for Phase 15
+Last activity: 2026-04-08 -- MCP lifecycle subcommands (start, status, config) implemented
 
-Progress: [####......] 44%
+Progress: [#####.....] 55%
 
 ## Performance Metrics
 
@@ -47,12 +47,14 @@ Progress: [####......] 44%
 | 11 | 1 | 2m30s | 2m30s |
 | 12 | 1 | 3m00s | 3m00s |
 | 13 | 1 | 1m38s | 1m38s |
+| 14 | 1 | 2m05s | 2m05s |
 
 **Recent Trend:**
 - Plan 10-1: 4m25s (6 tasks, 11 files)
 - Plan 11-1: 2m30s (1 task, 1 file)
 - Plan 12-1: 3m00s (1 task, 1 file)
 - Plan 13-1: 1m38s (1 task, 1 file)
+- Plan 14-1: 2m05s (1 task, 1 file)
 - Trend: accelerating
 
 *Updated after each plan completion*
@@ -77,6 +79,9 @@ Recent decisions affecting current work:
 - [Phase 12-1]: Reused identical MemoryService bootstrap and parseFlags patterns from memory.js
 - [Phase 13-1]: Skill CLI reuses exported functions from install-localnest-skill.mjs (zero logic duplication)
 - [Phase 13-1]: Skill list scans all 12 user + 4 project AI client directories for installed skills
+- [Phase 14-1]: mcp start directly imports mcp-server.js main() instead of fork -- keeps stdio passthrough clean
+- [Phase 14-1]: mcp status is stateless -- reads runtime config and checks file existence, no running server needed
+- [Phase 14-1]: mcp config reads saved snippet from ~/.localnest/config/mcp.localnest.json when available; --raw generates generic npx config
 
 ### Pending Todos
 
@@ -88,6 +93,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T08:57:00Z
-Stopped at: Completed 13-1 (Skill CLI Commands)
+Last session: 2026-04-08T09:02:23Z
+Stopped at: Completed 14-1 (MCP Lifecycle CLI)
 Resume file: None
