@@ -12,13 +12,13 @@
 
 ### Knowledge Graph Core
 
-- [ ] **KG-01**: System stores entities with id, name, type, properties, and optional memory_entry link
-- [ ] **KG-02**: System stores triples (subject-predicate-object) with confidence scores
-- [ ] **KG-03**: User can add a triple via MCP tool with subject, predicate, object, and optional valid_from date
-- [ ] **KG-04**: User can query an entity's relationships via MCP tool with optional direction filter
-- [ ] **KG-05**: User can invalidate a triple by setting valid_to date via MCP tool
-- [ ] **KG-06**: Triples track provenance via source_memory_id linking back to the originating memory entry
-- [ ] **KG-07**: Entity IDs are normalized slugs (lowercase, underscored) with auto-creation on first reference
+- [x] **KG-01**: System stores entities with id, name, type, properties, and optional memory_entry link
+- [x] **KG-02**: System stores triples (subject-predicate-object) with confidence scores
+- [x] **KG-03**: User can add a triple via MCP tool with subject, predicate, object, and optional valid_from date
+- [x] **KG-04**: User can query an entity's relationships via MCP tool with optional direction filter
+- [x] **KG-05**: User can invalidate a triple by setting valid_to date via MCP tool
+- [x] **KG-06**: Triples track provenance via source_memory_id linking back to the originating memory entry
+- [x] **KG-07**: Entity IDs are normalized slugs (lowercase, underscored) with auto-creation on first reference
 
 ### Temporal Validity
 
@@ -117,13 +117,13 @@ Deferred to future milestone.
 |-------------|-------|--------|
 | MIGR-01 | Phase 1 | Complete |
 | MIGR-02 | Phase 1 | Complete |
-| KG-01 | Phase 2 | Pending |
-| KG-02 | Phase 2 | Pending |
-| KG-03 | Phase 2 | Pending |
-| KG-04 | Phase 2 | Pending |
-| KG-05 | Phase 2 | Pending |
-| KG-06 | Phase 2 | Pending |
-| KG-07 | Phase 2 | Pending |
+| KG-01 | Phase 2 | Complete |
+| KG-02 | Phase 2 | Complete |
+| KG-03 | Phase 2 | Complete |
+| KG-04 | Phase 2 | Complete |
+| KG-05 | Phase 2 | Complete |
+| KG-06 | Phase 2 | Complete |
+| KG-07 | Phase 2 | Complete |
 | TEMP-01 | Phase 3 | Pending |
 | TEMP-02 | Phase 3 | Pending |
 | TEMP-03 | Phase 3 | Pending |

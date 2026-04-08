@@ -50,8 +50,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 02-01: Schema v6 migration and kg.js entity/triple CRUD
-- [ ] 02-02: Entity auto-creation, slug normalization, and store/service wiring
+- [x] 02-01: Schema v6 migration and kg.js entity/triple CRUD
+- [x] 02-02: Entity auto-creation, slug normalization, and store/service wiring
 
 ### Phase 3: Temporal Validity
 **Goal**: Users can query the knowledge graph at any point in time and view fact evolution
@@ -166,8 +166,8 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7 -> 8 -> 9
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Migration Infrastructure Hardening | 0/1 | Planning complete | - |
-| 2. Knowledge Graph Core | 0/2 | Not started | - |
+| 1. Migration Infrastructure Hardening | 1/1 | Complete | 2026-04-08 |
+| 2. Knowledge Graph Core | 2/2 | Complete | 2026-04-08 |
 | 3. Temporal Validity | 0/1 | Not started | - |
 | 4. Nest/Branch Hierarchy | 0/2 | Not started | - |
 | 5. Graph Traversal and Contradiction Detection | 0/2 | Not started | - |
