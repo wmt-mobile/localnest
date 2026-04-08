@@ -30,7 +30,10 @@ const DEBOUNCE_MS = 30000; // 30s between context retrievals
 const fs = require('fs');
 
 let input = '';
-const stdinTimeout = setTimeout(() => process.exit(0), 8000);
+const stdinTimeout = setTimeout(() => {
+  process.stdout.write('{}');
+  process.exit(0);
+}, 7000);
 process.stdin.setEncoding('utf8');
 process.stdin.on('data', chunk => input += chunk);
 process.stdin.on('end', () => {

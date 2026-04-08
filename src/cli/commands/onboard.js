@@ -200,7 +200,7 @@ function runSkillInstall() {
 }
 
 function runHooksInstall() {
-  const hooksScript = path.join(PROJECT_ROOT, 'scripts', 'hooks', 'install-hooks.js');
+  const hooksScript = path.join(PROJECT_ROOT, 'scripts', 'hooks', 'install-hooks.cjs');
   const result = spawnSync(process.execPath, [hooksScript], {
     stdio: 'ignore',
     encoding: 'utf8',
