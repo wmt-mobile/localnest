@@ -1,0 +1,23 @@
+---
+name: localnest:recall
+description: Recall relevant memories for the current task or query
+argument-hint: "[query]"
+allowed-tools:
+  - Read
+  - Bash
+  - Glob
+  - Grep
+---
+
+<objective>
+Recall relevant memories from LocalNest for the current task context.
+</objective>
+
+<process>
+1. If $ARGUMENTS is provided, use it as the query.
+2. If no arguments, infer the query from the current conversation context (what files are open, what task is being discussed).
+3. Call `localnest_memory_recall` with the query to retrieve relevant memories.
+4. If memory is not enabled, call `localnest_memory_status` to check and inform the user.
+5. Present recalled memories in a clear format showing title, summary, and relevance.
+6. If knowledge graph triples exist for related entities, call `localnest_kg_query` to surface structured facts.
+</process>

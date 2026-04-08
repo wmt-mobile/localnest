@@ -409,6 +409,27 @@ function installOrUpdateSkill(sourceSkillDir, targetSkillDir, { quiet, force } =
     // Non-fatal — skill is installed, native files are best-effort
   }
 
+  // Install Claude Code slash commands (if this is a Claude-family target)
+  if (toolFamily === 'claude') {
+    try {
+      const commandsSource = path.join(sourceSkillDir, 'commands');
+      if (fs.existsSync(commandsSource)) {
+        const commandsDest = path.join(path.dirname(targetSkillDir), '..', 'commands', 'localnest');
+        fs.mkdirSync(commandsDest, { recursive: true });
+        for (const entry of fs.readdirSync(commandsSource)) {
+          if (entry.endsWith('.md')) {
+            fs.copyFileSync(path.join(commandsSource, entry), path.join(commandsDest, entry));
+          }
+        }
+        if (!quiet) {
+          console.log(`[localnest-skill] installed slash commands → ${commandsDest}`);
+        }
+      }
+    } catch {
+      // Non-fatal — commands are best-effort
+    }
+  }
+
   if (!quiet) {
     const verb = force
       ? 'synced'
