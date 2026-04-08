@@ -36,7 +36,7 @@
 - [x] **Phase 13: Skill CLI Commands** - Install, list, and remove bundled skills across AI clients
 - [x] **Phase 14: MCP Lifecycle CLI** - Start, status, and config generation for MCP server
 - [x] **Phase 15: Ingest CLI** - Conversation file ingestion with format detection and taxonomy
-- [ ] **Phase 16: Hook MCP Tools** - Hook introspection tools and documentation for AI discoverability
+- [x] **Phase 16: Hook MCP Tools** - Hook introspection tools and documentation for AI discoverability
 - [ ] **Phase 17: Shell Completions and Polish** - Tab completions for bash, zsh, and fish
 - [ ] **Phase 18: Binary Deprecation** - Redirect old fragmented binaries to unified CLI with warnings
 
@@ -114,7 +114,7 @@
   1. Calling `localnest_hooks_stats` via MCP returns registered hook counts grouped by event type
   2. Calling `localnest_hooks_list_events` via MCP returns all valid hook event names an agent can subscribe to
   3. The bundled skill file documents hook usage with concrete before/after examples that an AI agent can follow
-**Plans**: TBD
+**Plans**: 1 (complete)
 
 ### Phase 17: Shell Completions and Polish
 **Goal**: Users get tab-completion for all localnest commands in their preferred shell
@@ -160,6 +160,6 @@ Phases execute in numeric order: 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17 ->
 | 13. Skill CLI Commands | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 14. MCP Lifecycle CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 15. Ingest CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
-| 16. Hook MCP Tools | v2.0 | 0/? | Not started | - |
+| 16. Hook MCP Tools | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 17. Shell Completions | v2.0 | 0/? | Not started | - |
 | 18. Binary Deprecation | v2.0 | 0/? | Not started | - |

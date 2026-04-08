@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CLI-First Architecture
 status: in_progress
-stopped_at: Completed 15-1 (Ingest CLI)
-last_updated: "2026-04-08T09:06:09Z"
+stopped_at: Completed 16-1 (Hook MCP Tools)
+last_updated: "2026-04-08T09:10:29Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 9
-  completed_phases: 5
-  total_plans: 6
-  completed_plans: 6
-  percent: 66
+  completed_phases: 6
+  total_plans: 7
+  completed_plans: 7
+  percent: 77
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A unified, premium CLI that makes LocalNest feel like a standalone product -- not just an MCP server.
-**Current focus:** Phase 15 -- Ingest CLI (plan 1 complete)
+**Current focus:** Phase 16 -- Hook MCP Tools (plan 1 complete)
 
 ## Current Position
 
-Phase: 15 of 18 (Ingest CLI)
+Phase: 16 of 18 (Hook MCP Tools)
 Plan: 1 of 1 in current phase (complete)
-Status: Phase 15 complete -- ready for Phase 16
-Last activity: 2026-04-08 -- Ingest CLI with auto-format detection and taxonomy flags
+Status: Phase 16 complete -- ready for Phase 17
+Last activity: 2026-04-08 -- Hook introspection MCP tools and skill documentation
 
-Progress: [######....] 66%
+Progress: [#######...] 77%
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Progress: [######....] 66%
 | 13 | 1 | 1m38s | 1m38s |
 | 14 | 1 | 2m05s | 2m05s |
 | 15 | 1 | 1m03s | 1m03s |
+| 16 | 1 | 1m50s | 1m50s |
 
 **Recent Trend:**
 - Plan 10-1: 4m25s (6 tasks, 11 files)
@@ -57,6 +58,7 @@ Progress: [######....] 66%
 - Plan 13-1: 1m38s (1 task, 1 file)
 - Plan 14-1: 2m05s (1 task, 1 file)
 - Plan 15-1: 1m03s (1 task, 1 file)
+- Plan 16-1: 1m50s (3 tasks, 3 files)
 - Trend: accelerating
 
 *Updated after each plan completion*
@@ -87,6 +89,9 @@ Recent decisions affecting current work:
 - [Phase 15-1]: Ingest CLI reuses MemoryService bootstrap and parseFlags patterns from memory.js
 - [Phase 15-1]: Auto-detect format from file extension (.md/.markdown -> markdown, .json -> json), with --format override
 - [Phase 15-1]: Delegates to svc.ingestMarkdown/ingestJson which handle parsing, dedup, entity extraction, and KG triple creation
+- [Phase 16-1]: Access hooks via memory.store.hooks (MemoryService.store.hooks) for instance stats
+- [Phase 16-1]: Import MemoryHooks class for static validEvents() call
+- [Phase 16-1]: Return events as { events: [...] } wrapper for consistent JSON structure
 
 ### Pending Todos
 
@@ -98,6 +103,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T09:06:09Z
-Stopped at: Completed 15-1 (Ingest CLI)
+Last session: 2026-04-08T09:10:29Z
+Stopped at: Completed 16-1 (Hook MCP Tools)
 Resume file: None
