@@ -4,6 +4,7 @@ import {
   ensureArray, normalizeLinks, stableJson, makeFingerprint, generateMemoryId,
   buildSearchTerms, deserializeEntry
 } from './utils.js';
+import { checkDuplicate } from './dedup.js';
 
 async function embedMemory(store, { title, summary, content }) {
   if (!store.embeddingService?.isEnabled?.()) return null;
@@ -165,6 +166,22 @@ export async function storeEntry(store, input) {
 
   if (existing) {
     return { created: false, duplicate: true, memory: await getEntry(store, existing.id) };
+  }
+
+  const dedupResult = await checkDuplicate(store.adapter, store.embeddingService, content, {
+    threshold: input.dedup_threshold,
+    nest,
+    branch,
+    projectPath: scope.project_path
+  });
+  if (dedupResult.isDuplicate) {
+    const matchedEntry = await getEntry(store, dedupResult.match.id);
+    return {
+      created: false,
+      duplicate: true,
+      semantic_match: dedupResult.match,
+      memory: matchedEntry
+    };
   }
 
   const id = generateMemoryId();

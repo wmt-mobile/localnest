@@ -31,6 +31,7 @@ import {
 } from './taxonomy.js';
 import { traverseGraph as traverseGraphFn, discoverBridges as discoverBridgesFn } from './graph.js';
 import { writeDiaryEntry as writeDiaryEntryFn, readDiaryEntries as readDiaryEntriesFn } from './scopes.js';
+import { checkDuplicate as checkDuplicateFn } from './dedup.js';
 import {
   addEntity as addEntityFn,
   getEntity as getEntityFn,
@@ -169,7 +170,8 @@ export class MemoryStore {
     await this.init();
     return captureEventFn(this.adapter, input, {
       storeEntry: (args) => this.storeEntry(args),
-      updateEntry: (id, patch) => this.updateEntry(id, patch)
+      updateEntry: (id, patch) => this.updateEntry(id, patch),
+      embeddingService: this.embeddingService
     });
   }
 
@@ -271,5 +273,10 @@ export class MemoryStore {
   async readDiaryEntries(args) {
     await this.init();
     return readDiaryEntriesFn(this.adapter, args);
+  }
+
+  async checkDuplicate(content, opts = {}) {
+    await this.init();
+    return checkDuplicateFn(this.adapter, this.embeddingService, content, opts);
   }
 }
