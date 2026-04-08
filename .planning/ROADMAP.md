@@ -47,11 +47,11 @@ Plans:
   3. User can query all relationships for a given entity with optional direction filtering (incoming, outgoing, or both)
   4. User can invalidate a triple by setting its valid_to date, making it no longer appear in current-state queries
   5. Schema v6 tables (kg_entities, kg_triples) and indexes exist after migration
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 02-01: Schema v6 migration and kg.js entity/triple CRUD
-- [ ] 02-02: Entity auto-creation, slug normalization, and provenance linking
+- [ ] 02-02: Entity auto-creation, slug normalization, and store/service wiring
 
 ### Phase 3: Temporal Validity
 **Goal**: Users can query the knowledge graph at any point in time and view fact evolution
@@ -62,7 +62,7 @@ Plans:
   2. User can query triples with an as_of date parameter and receives only facts valid at that point in time
   3. User can view a chronological timeline of all triples for an entity (ordered by valid_from)
   4. User can retrieve KG statistics: total entity count, total triple count, and breakdown by relationship type
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 03-01: as_of temporal queries, timeline view, and KG stats
@@ -77,7 +77,7 @@ Plans:
   3. User can list all nests with their memory counts
   4. User can list branches within a specific nest
   5. User can get the full taxonomy tree (all nests, their branches, and counts at each level)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 04-01: Schema v7 nest/branch columns and recall filter integration
@@ -92,7 +92,7 @@ Plans:
   2. Traversal uses SQLite recursive CTEs with cycle prevention -- no external graph dependencies
   3. User can discover cross-nest bridges: entities that are connected across different nests
   4. When adding a triple, the system detects if another currently-valid triple exists with the same subject and predicate but a different object, and flags the contradiction in the response (not blocked, just warned)
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 05-01: graph.js recursive CTE traversal with path tracking
@@ -107,7 +107,7 @@ Plans:
   2. An agent can write diary entries (private scratchpad) that are not visible to other agents
   3. An agent can read its own recent diary entries with pagination
   4. Memory recall respects agent scope: an agent sees its own memories plus global memories, but not other agents' private entries
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 06-01: Agent scopes table, diary CRUD, and recall isolation
@@ -121,7 +121,7 @@ Plans:
   2. User can explicitly check for duplicates before filing, providing content and an optional threshold
   3. When a duplicate is detected, the response includes the matching existing entry (ID, title, similarity score)
   4. The event capture auto-promotion pipeline runs the dedup check before promoting an event to a memory
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 07-01: dedup.js embedding similarity gate and integration with entries/event-capture
@@ -136,7 +136,7 @@ Plans:
   3. Ingestion extracts entities and creates knowledge graph triples from conversation content using rule-based heuristics (not LLM)
   4. Ingestion runs semantic dedup to prevent storing duplicate conversation turns
   5. Previously ingested files (matched by path + SHA-256 hash) are skipped on re-ingestion
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 08-01: Schema v8, Markdown parser, and turn splitting
@@ -153,7 +153,7 @@ Plans:
   4. Agent diary operations are exposed as localnest_diary_* MCP tools (write entry, read entries)
   5. Conversation ingestion is exposed as localnest_ingest_* MCP tools (ingest markdown, ingest json)
   6. Duplicate check is exposed as localnest_memory_check_duplicate MCP tool
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
 - [ ] 09-01: graph-tools.js registrar for KG, temporal, and traversal tools
