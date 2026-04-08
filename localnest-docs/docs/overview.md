@@ -12,7 +12,7 @@ LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scop
 - [Browse tool documentation](./tools/overview)
 - [See the current stable package and behavior](./releases/current)
 - [See the release matrix](./releases/history)
-- [Preview 0.0.7-beta.1 features](./releases/0.0.7-beta.1)
+- [Preview 0.0.7-beta.2 features](./releases/0.0.7-beta.2)
 
 ## Core ideas
 
@@ -24,7 +24,7 @@ LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scop
 
 ## What's new in the beta
 
-The `0.0.7-beta.1` beta adds significant new capabilities:
+The `0.0.7-beta.2` beta adds significant new capabilities:
 
 - **Temporal knowledge graph** -- store structured facts as subject-predicate-object triples with time validity. Query what was true at any point in time with `as_of`.
 - **Multi-hop graph traversal** -- walk relationships 2-5 hops deep via recursive CTEs. No other local-first tool offers this.
