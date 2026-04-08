@@ -116,7 +116,7 @@ After setup, copy `~/.localnest/config/mcp.localnest.json` into your MCP client 
 - Memory is opt-in. On Node 18/20, the rest of LocalNest still works, but memory remains unavailable.
 - `localnest install skills` is version-aware on this branch and skips reinstalling bundled skills when they are already current unless `--force` is used. `localnest-mcp-install-skill` remains available as a deprecated compatibility alias.
 - Setup warms embedding/reranker models on first run (downloads into `~/.localnest/cache` by default).
-- `0.0.5` promotes the beta.9 install/runtime fixes into the stable line. A single upstream ONNX-runtime deprecation warning may still appear during npm install.
+- `0.0.7-beta.1` adds temporal knowledge graph, CLI-first architecture, and 52 MCP tools. Schema migrations v5-v9 are additive and backward-compatible.
 - If `~/.localnest/cache` is not writable, LocalNest automatically falls back to a per-user temp cache path.
 - Cache fallback is acceptable when startup succeeds, but fixing the preferred cache path is still recommended for persistent model reuse.
 - Run `localnest doctor --verbose` to confirm model cache writeability for the current user.

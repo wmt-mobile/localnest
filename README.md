@@ -435,7 +435,7 @@ Setup writes everything to `~/.localnest/`:
 
 ## Install Note
 
-`0.0.6-beta.1` keeps `0.0.5` as the current stable line while previewing the CLI deprecation pass: canonical `localnest task-context` / `localnest capture-outcome` commands, deprecated compatibility wrappers for older `localnest-mcp-*` helpers, and no change to the `localnest-mcp` server binary used by MCP clients. Some npm environments may still show a single upstream deprecation warning from the ONNX runtime dependency chain; LocalNest functionality is unaffected.
+`0.0.7-beta.1` is a major feature release adding temporal knowledge graph, multi-hop traversal, nest/branch hierarchy, agent-scoped memory, semantic dedup, conversation ingestion, hooks system, and a full CLI-first architecture with 52 MCP tools. Schema migrations v5 through v9 are all additive and backward-compatible — existing databases upgrade automatically on first run.
 
 **Performance tips:**
 - Scope queries with `project_path` + a narrow `glob` whenever possible

@@ -68,7 +68,7 @@ Upgrade paths:
 localnest upgrade
 localnest upgrade stable
 localnest upgrade beta
-localnest upgrade 0.0.5
+localnest upgrade 0.0.7-beta.1
 ```
 
 ## Choose your path
