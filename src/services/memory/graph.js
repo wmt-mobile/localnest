@@ -102,3 +102,62 @@ export async function traverseGraph(adapter, { startEntityId, maxHops, direction
     }))
   };
 }
+
+/**
+ * Discover entities that bridge across different nests.
+ * Finds triples where the subject's nest differs from the object's nest.
+ *
+ * @param {object} adapter - NodeSqliteAdapter instance
+ * @param {object} [opts]
+ * @param {string} [opts.nest] - Optional nest filter
+ * @returns {Promise<object>} Bridge triples crossing nest boundaries
+ */
+export async function discoverBridges(adapter, { nest } = {}) {
+  const cleanNest = nest ? cleanString(nest, 200) : null;
+
+  let sql = `
+    SELECT DISTINCT
+      t.id AS triple_id,
+      t.subject_id,
+      s.name AS subject_name,
+      t.predicate,
+      t.object_id,
+      o.name AS object_name,
+      ms.nest AS subject_nest,
+      mo.nest AS object_nest
+    FROM kg_triples t
+    JOIN kg_entities s ON s.id = t.subject_id
+    JOIN kg_entities o ON o.id = t.object_id
+    JOIN memory_entries ms ON ms.id = s.memory_id
+    JOIN memory_entries mo ON mo.id = o.memory_id
+    WHERE t.valid_to IS NULL
+      AND ms.nest != ''
+      AND mo.nest != ''
+      AND ms.nest != mo.nest`;
+
+  const params = [];
+
+  if (cleanNest) {
+    sql += `\n      AND (ms.nest = ? OR mo.nest = ?)`;
+    params.push(cleanNest, cleanNest);
+  }
+
+  sql += `\n    ORDER BY ms.nest, mo.nest, s.name`;
+
+  const rows = await adapter.all(sql, params);
+
+  return {
+    filter_nest: cleanNest,
+    bridge_count: rows.length,
+    bridges: rows.map(row => ({
+      triple_id: row.triple_id,
+      subject_id: row.subject_id,
+      subject_name: row.subject_name,
+      predicate: row.predicate,
+      object_id: row.object_id,
+      object_name: row.object_name,
+      subject_nest: row.subject_nest,
+      object_nest: row.object_nest
+    }))
+  };
+}
