@@ -7,12 +7,14 @@
 [![Node.js](https://img.shields.io/node/v/localnest-mcp)](https://nodejs.org)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Quality](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml)
-[![CodeQL](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml)
+[![CodeQL](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml)
 [![Socket](https://badge.socket.dev/npm/package/localnest-mcp)](https://socket.dev/npm/package/localnest-mcp)
 
 **আপনার কোডবেস। আপনার AI। আপনার মেশিন — কোনো ক্লাউড নয়, কোনো লিক নয়, কোনো চমক নয়।**
 
-LocalNest হলো একটি local-first MCP server, যা AI agent-দের আপনার code-এ নিরাপদ, scoped access দেয় — hybrid search, semantic indexing এবং persistent memoryসহ, যা কখনও আপনার machine ছাড়ে না।
+LocalNest হলো একটি local-first MCP server এবং CLI tool, যা AI agent-দের আপনার code-এ নিরাপদ, scoped access দেয় — hybrid search, semantic indexing, temporal knowledge graph এবং persistent memoryসহ, যা কখনও আপনার machine ছাড়ে না।
+
+**52 MCP tools** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
 
 📖 [পূর্ণ ডকুমেন্টেশন](https://wmt-mobile.github.io/localnest/) · [আর্কিটেকচারের বিস্তারিত বিশ্লেষণ](../guides/architecture.md)
 
@@ -21,6 +23,23 @@ LocalNest হলো একটি local-first MCP server, যা AI agent-দে�
 [English](../README.md) · [العربية الفصحى](./README.ar-001.md) · বাংলা (বাংলাদেশ) · [Deutsch (Deutschland)](./README.de-DE.md) · [Español (Latinoamérica)](./README.es-419.md) · [Français (France)](./README.fr-FR.md) · [हिन्दी (भारत)](./README.hi-IN.md) · [Bahasa Indonesia](./README.id-ID.md) · [日本語](./README.ja-JP.md) · [한국어](./README.ko-KR.md) · [Português (Brasil)](./README.pt-BR.md) · [Русский](./README.ru-RU.md) · [Türkçe](./README.tr-TR.md) · [简体中文](./README.zh-CN.md)
 
 এই অনূদিত ফাইলগুলো প্রতিটি locale-এর জন্য পূর্ণ README অনুবাদ। লক্ষ্য locale matrix এবং terminology rule-এর জন্য [translation policy](./TRANSLATION_POLICY.md) দেখুন। নতুন command, release note এবং পূর্ণ বিবরণের জন্য ইংরেজি [README.md](../README.md) এখনও source of truth।
+
+---
+
+## 0.0.7-এ নতুন কী আছে
+
+> পূর্ণ changelog: [CHANGELOG.md](../CHANGELOG.md)
+
+- **Temporal knowledge graph** — entity, triple, as_of query, timeline, contradiction detection
+- **Multi-hop graph traversal** — recursive CTE দিয়ে 2-5 hop গভীরতায় relationship walk করুন (LocalNest-এর অনন্য ফিচার)
+- **Nest/Branch hierarchy** — সুসংগঠিত retrieval-এর জন্য LocalNest-এর নিজস্ব two-level memory taxonomy
+- **Agent-scoped memory** — private diary entrysহ per-agent isolation
+- **Semantic dedup** — embedding similarity gate near-duplicate memory pollution রোধ করে
+- **Conversation ingestion** — entity extraction সহ Markdown/JSON chat export import করুন
+- **Hooks system** — memory, KG, traversal, ingestion-এ pre/post operation callback
+- **CLI-first architecture** — সবকিছুর জন্য একীভূত `localnest <noun> <verb>` command
+- **Shell completions** — bash, zsh, fish tab completion
+- **17টি নতুন MCP tool** (মোট 52) — KG, nest, traversal, diary, ingest, dedup, hooks
 
 ---
 
@@ -38,6 +57,12 @@ LocalNest হলো একটি local-first MCP server, যা AI agent-দে�
 | **hybrid retrieval** | সেরা ফলের জন্য lexical + semantic search, RRF ranking দিয়ে একসাথে |
 | **project awareness** | marker file থেকে project auto-detect করে এবং প্রতিটি tool call scope করে |
 | **agent memory** | durable, queryable knowledge graph, তাই আপনার AI যা শিখেছে তা মনে রাখে |
+| **Temporal knowledge graph** | সময়ের বৈধতা সহ subject-predicate-object triple — কোন সময় কী সত্য ছিল, query করুন |
+| **Multi-hop graph traversal** | recursive CTE দিয়ে 2-5 hop গভীরতায় relationship walk করুন — অন্য কোনো local tool এটি করে না |
+| **Nest/Branch hierarchy** | metadata-filtered boost সহ সুসংগঠিত retrieval-এর জন্য two-level memory taxonomy |
+| **Conversation ingestion** | Markdown/JSON chat export-কে structured memory + KG triple-এ import করুন |
+| **Agent isolation** | per-agent diary এবং memory scoping — একাধিক agent, শূন্য cross-contamination |
+| **Hooks system** | memory, KG, traversal, ingestion-এ pre/post operation hook — নিজের logic যোগ করুন |
 
 ---
 
@@ -118,10 +143,9 @@ localnest version              # check current
 
 ## এজেন্টরা এটি কীভাবে ব্যবহার করে
 
-দুটি workflow প্রায় সবকিছু কভার করে:
+চারটি workflow প্রায় সবকিছু কভার করে:
 
 ### দ্রুত lookup — খুঁজুন, পড়ুন, কাজ শেষ
-কোনো file, symbol বা code pattern দ্রুত নির্দিষ্ট করতে সবচেয়ে উপযোগী।
 
 ```
 localnest_search_files   → find the module by path/name
@@ -130,7 +154,6 @@ localnest_read_file      → read the relevant lines
 ```
 
 ### গভীর কাজ — contextসহ debug, refactor, review
-যেখানে memory ও semantic understanding গুরুত্বপূর্ণ, এমন জটিল কাজের জন্য সবচেয়ে উপযোগী।
 
 ```
 localnest_task_context    → one call: runtime status + recalled memories
@@ -139,7 +162,62 @@ localnest_read_file       → read the relevant sections
 localnest_capture_outcome → persist what you learned for next time
 ```
 
-> **টুলের সফলতা ≠ উপযোগী ফলাফল।** কোনো tool OK ফেরালেও ফল ফাঁকা হতে পারে। খালি নয় এমন file match এবং আসল line content-কে অর্থবহ প্রমাণ হিসেবে ধরুন, শুধু process success নয়।
+### Knowledge graph — project সম্পর্কে structured fact
+
+```
+localnest_kg_add_triple   → store a fact: "auth-service" uses "JWT"
+localnest_kg_query        → what does "auth-service" relate to?
+localnest_kg_as_of        → what was true about this on March 1st?
+localnest_graph_traverse  → walk 2-3 hops to discover connections
+```
+
+### Conversation memory — আগের চ্যাট থেকে শিখুন
+
+```
+localnest_ingest_markdown → import a conversation export
+localnest_memory_recall   → what do I already know about this?
+localnest_diary_write     → private scratchpad for this agent
+```
+
+---
+
+## CLI Reference
+
+LocalNest একটি পূর্ণাঙ্গ CLI tool। সবকিছু terminal থেকে পরিচালনা করা যায়:
+
+```bash
+localnest setup                     # configure roots, backends, AI clients
+localnest doctor                    # health check
+localnest upgrade                   # self-update
+localnest version                   # current version
+localnest status                    # runtime status
+
+localnest memory add "content"      # store a memory
+localnest memory search "query"     # find memories
+localnest memory list               # list all memories
+localnest memory show <id>          # view one memory
+localnest memory delete <id>        # remove a memory
+
+localnest kg add Alice works_on ProjectX    # add a fact
+localnest kg query Alice                     # query relationships
+localnest kg timeline Alice                  # fact evolution
+localnest kg stats                           # graph statistics
+
+localnest skill install             # install skills to AI clients
+localnest skill list                # show installed skills
+localnest skill remove <name>       # uninstall a skill
+
+localnest mcp start                 # start MCP server
+localnest mcp status                # server health
+localnest mcp config                # config JSON for AI clients
+
+localnest ingest ./chat.md          # import conversation
+localnest ingest ./export.json      # import JSON chat
+
+localnest completion bash           # shell completions
+```
+
+**Global flag** প্রতিটি command-এ কাজ করে: `--json` (machine output), `--verbose`, `--quiet`, `--config <path>`
 
 ---
 
@@ -188,6 +266,48 @@ localnest_capture_outcome → persist what you learned for next time
 | `localnest_memory_suggest_relations` | similarity অনুযায়ী related memory auto-suggest করে |
 | `localnest_memory_status` | memory consent, backend এবং database status |
 
+### Knowledge Graph
+
+| টুল | এটি কী করে |
+|------|-------------|
+| `localnest_kg_add_entity` | entity তৈরি করে (people, project, concept, tool) |
+| `localnest_kg_add_triple` | temporal validity সহ subject-predicate-object fact যোগ করে |
+| `localnest_kg_query` | direction filtering সহ entity relationship query করে |
+| `localnest_kg_invalidate` | একটি fact-কে আর বৈধ নয় হিসেবে mark করে (archival, deletion নয়) |
+| `localnest_kg_as_of` | point-in-time query — X তারিখে কী সত্য ছিল? |
+| `localnest_kg_timeline` | একটি entity-র জন্য chronological fact evolution |
+| `localnest_kg_stats` | entity count, triple count, predicate breakdown |
+
+### Nest/Branch Organization
+
+| টুল | এটি কী করে |
+|------|-------------|
+| `localnest_nest_list` | count সহ সব nest (top-level memory domain) দেখায় |
+| `localnest_nest_branches` | একটি nest-এর ভেতরের branch (topic) দেখায় |
+| `localnest_nest_tree` | পূর্ণ hierarchy: nest, branch, এবং count |
+
+### Graph Traversal
+
+| টুল | এটি কী করে |
+|------|-------------|
+| `localnest_graph_traverse` | path tracking সহ multi-hop traversal (recursive CTE) |
+| `localnest_graph_bridges` | cross-nest bridge খুঁজে বের করে — domain জুড়ে connection |
+
+### Agent Diary
+
+| টুল | এটি কী করে |
+|------|-------------|
+| `localnest_diary_write` | private scratchpad entry লেখে (agent-isolated) |
+| `localnest_diary_read` | নিজের সাম্প্রতিক diary entry পড়ে |
+
+### Conversation Ingestion
+
+| টুল | এটি কী করে |
+|------|-------------|
+| `localnest_ingest_markdown` | Markdown conversation export memory + KG-তে import করে |
+| `localnest_ingest_json` | JSON conversation export memory + KG-তে import করে |
+| `localnest_memory_check_duplicate` | filing-এর আগে semantic duplicate detection |
+
 ### সার্ভার ও আপডেট
 
 | টুল | এটি কী করে |
@@ -198,7 +318,33 @@ localnest_capture_outcome → persist what you learned for next time
 | `localnest_update_status` | npm-এ latest version check করে (cached) |
 | `localnest_update_self` | globally update করে এবং bundled skill sync করে (approval required) |
 
-সব টুল `response_format: "json"` (ডিফল্ট) বা `"markdown"` সমর্থন করে। list tool-গুলো pagination-এর জন্য `total_count`, `has_more`, `next_offset` ফেরত দেয়।
+**মোট 50টি tool।** সব টুল `response_format: "json"` (ডিফল্ট) বা `"markdown"` সমর্থন করে। list tool-গুলো pagination-এর জন্য `total_count`, `has_more`, `next_offset` ফেরত দেয়।
+
+---
+
+## LocalNest-এর তুলনা
+
+LocalNest একমাত্র local-first MCP server যা code retrieval এবং structured memory দুটোকেই একটি tool-এ একত্রিত করে। এখানে এর অবস্থান দেখুন:
+
+| সক্ষমতা | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
+|---|---|---|---|---|---|
+| **Local-first (no cloud)** | হ্যাঁ | হ্যাঁ | না ($25+/mo) | না (Neo4j) | না ($20-200/mo) |
+| **Code retrieval** | 50 MCP tool, AST-aware, hybrid search | নেই | নেই | নেই | নেই |
+| **Knowledge graph** | temporal validity সহ SQLite triple | SQLite triple | Neo4j | Neo4j | Key-value |
+| **Multi-hop traversal** | হ্যাঁ (recursive CTE, 2-5 hop) | না (flat lookup only) | না | হ্যাঁ (Neo4j দরকার) | না |
+| **Temporal queries (as_of)** | হ্যাঁ | হ্যাঁ | হ্যাঁ | হ্যাঁ | না |
+| **Contradiction detection** | হ্যাঁ (write-time warning) | আছে কিন্তু wired নয় | না | না | না |
+| **Conversation ingestion** | Markdown + JSON | Markdown + JSON + Slack | না | না | না |
+| **Agent isolation** | per-agent scoping + private diary | Wing-per-agent | User/session scoping | না | User/agent/run/session |
+| **Semantic dedup** | 0.92 cosine gate on all writes | 0.9 threshold | না | না | না |
+| **Memory hierarchy** | Nest/Branch (original) | Wing/Room/Hall (palace) | Flat | Flat | Flat |
+| **Hooks system** | Pre/post operation hooks | নেই | Webhooks | নেই | নেই |
+| **Runtime** | Node.js (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
+| **Dependencies** | 0 new (pure SQLite) | ChromaDB (heavy) | Neo4j ($25+/mo) | Neo4j | Cloud API |
+| **MCP tools** | 50 | 19 | 0 | 0 | 0 |
+| **খরচ** | বিনামূল্যে | বিনামূল্যে | $25+/mo | $25+/mo | $20-200/mo |
+
+**LocalNest-এর অনন্য অবস্থান:** একমাত্র tool যা আপনার AI-কে deep code understanding এবং structured persistent memory দুটোই দেয় — সম্পূর্ণ local, zero cloud, zero cost।
 
 ---
 
@@ -210,6 +356,18 @@ localnest_capture_outcome → persist what you learned for next time
 - memory ব্যর্থ হলেও অন্য tool আটকে যায় না, সবকিছু আলাদাভাবে degrade করে
 
 **auto-promotion কীভাবে কাজ করে:** `localnest_memory_capture_event` দিয়ে ধরা event-গুলো signal strength অনুযায়ী score করা হয়। bug fix, decision, preference-এর মতো high-signal event durable memory-তে promote হয়। দুর্বল exploratory event রেকর্ড হয়, তারপর 30 দিন পরে নীরবে বাদ পড়ে।
+
+**Knowledge graph:** structured fact-কে temporal validity সহ subject-predicate-object triple হিসেবে store করুন। `as_of` দিয়ে যেকোনো সময়ে কী সত্য ছিল query করুন। Recursive CTE traversal দিয়ে 2-5 hop গভীরতায় relationship walk করুন। Write time-এ contradiction detect করুন।
+
+**Nest/Branch hierarchy:** memory-কে nest (top-level domain) এবং branch (topic)-এ সংগঠিত করুন। Metadata-filtered recall scoring-এর আগে candidate সংকুচিত করে দ্রুত ও আরো নির্ভুল ফলাফল দেয়।
+
+**Agent isolation:** প্রতিটি agent-এর নিজস্ব memory scope এবং private diary থাকে। Recall-এ নিজের + global memory আসে, কখনো অন্য agent-এর private data নয়।
+
+**Semantic dedup:** প্রতিটি write embedding similarity gate (default 0.92 cosine threshold) দিয়ে যায়। Near-duplicate storage-র আগেই ধরা পড়ে — আপনার memory পরিষ্কার থাকে।
+
+**Conversation ingestion:** Markdown বা JSON chat export import করুন। প্রতিটি turn একটি memory entry হয়, automatic entity extraction এবং KG triple creation সহ। Content hash-এর ভিত্তিতে একই file-এর re-ingestion skip হয়ে যায়।
+
+**Hooks:** যেকোনো memory operation-এ pre/post callback register করুন — store, recall, KG write, traversal, ingestion। Core code পরিবর্তন না করেই custom pipeline তৈরি করুন।
 
 ---
 

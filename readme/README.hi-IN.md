@@ -12,7 +12,9 @@
 
 **आपका कोडबेस। आपकी AI। आपकी मशीन — न क्लाउड, न लीक, न कोई चौंकाने वाली बात।**
 
-LocalNest एक local-first MCP server है, जो AI agent को आपके code तक सुरक्षित, scoped access देता है — hybrid search, semantic indexing और persistent memory के साथ, जो कभी आपकी machine से बाहर नहीं जाती।
+LocalNest एक local-first MCP server और CLI tool है, जो AI agent को आपके code तक सुरक्षित, scoped access देता है — hybrid search, semantic indexing, temporal knowledge graph और persistent memory के साथ, जो कभी आपकी machine से बाहर नहीं जाती।
+
+**52 MCP tools** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
 
 📖 [पूर्ण दस्तावेज़](https://wmt-mobile.github.io/localnest/) · [आर्किटेक्चर की विस्तृत पड़ताल](../guides/architecture.md)
 
@@ -21,6 +23,23 @@ LocalNest एक local-first MCP server है, जो AI agent को आपक
 [English](../README.md) · [العربية الفصحى](./README.ar-001.md) · [বাংলা (বাংলাদেশ)](./README.bn-BD.md) · [Deutsch (Deutschland)](./README.de-DE.md) · [Español (Latinoamérica)](./README.es-419.md) · [Français (France)](./README.fr-FR.md) · हिन्दी (भारत) · [Bahasa Indonesia](./README.id-ID.md) · [日本語](./README.ja-JP.md) · [한국어](./README.ko-KR.md) · [Português (Brasil)](./README.pt-BR.md) · [Русский](./README.ru-RU.md) · [Türkçe](./README.tr-TR.md) · [简体中文](./README.zh-CN.md)
 
 ये अनूदित फ़ाइलें हर locale के लिए पूरी README अनुवाद प्रतियाँ हैं। लक्ष्य locale matrix और terminology rules के लिए [translation policy](./TRANSLATION_POLICY.md) देखें। नए command, release note और पूरी जानकारी के लिए अंग्रेज़ी [README.md](../README.md) अब भी source of truth है।
+
+---
+
+## 0.0.7 में क्या नया है
+
+> पूरा changelog: [CHANGELOG.md](../CHANGELOG.md)
+
+- **Temporal knowledge graph** — entity, triple, as_of query, timeline, contradiction detection
+- **Multi-hop graph traversal** — recursive CTE के ज़रिए 2-5 hop गहराई तक relationship walk करें (LocalNest का अनूठा feature)
+- **Nest/Branch hierarchy** — व्यवस्थित retrieval के लिए LocalNest की अपनी two-level memory taxonomy
+- **Agent-scoped memory** — per-agent isolation, निजी diary entry के साथ
+- **Semantic dedup** — embedding similarity gate near-duplicate memory pollution को रोकता है
+- **Conversation ingestion** — entity extraction के साथ Markdown/JSON chat export import करें
+- **Hooks system** — memory, KG, traversal, ingestion पर pre/post operation callback
+- **CLI-first architecture** — हर चीज़ के लिए एकीकृत `localnest <noun> <verb>` command
+- **Shell completions** — bash, zsh, fish tab completion
+- **17 नए MCP tools** (कुल 52) — KG, nests, traversal, diary, ingest, dedup, hooks
 
 ---
 
@@ -38,6 +57,12 @@ LocalNest एक local-first MCP server है, जो AI agent को आपक
 | **hybrid retrieval** | बेहतर नतीजों के लिए lexical + semantic search को RRF ranking के साथ जोड़ा जाता है |
 | **project awareness** | marker file से project auto-detect करता है और हर tool call को scope करता है |
 | **agent memory** | durable, queryable knowledge graph, ताकि आपकी AI सीखी हुई बात याद रखे |
+| **Temporal knowledge graph** | subject-predicate-object triple, समय वैधता के साथ — किसी भी समय क्या सत्य था, query करें |
+| **Multi-hop graph traversal** | recursive CTE के ज़रिए 2-5 hop गहराई तक relationship walk करें — कोई अन्य local tool ऐसा नहीं करता |
+| **Nest/Branch hierarchy** | metadata-filtered boost के साथ व्यवस्थित retrieval के लिए two-level memory taxonomy |
+| **Conversation ingestion** | Markdown/JSON chat export को structured memory + KG triple में import करें |
+| **Agent isolation** | per-agent diary और memory scoping — कई agent, शून्य cross-contamination |
+| **Hooks system** | memory, KG, traversal, ingestion पर pre/post operation hook — अपनी logic जोड़ें |
 
 ---
 
@@ -118,10 +143,9 @@ localnest version              # check current
 
 ## एजेंट इसे कैसे उपयोग करते हैं
 
-दो workflow लगभग सब कुछ कवर करते हैं:
+चार workflow लगभग सब कुछ कवर करते हैं:
 
 ### तेज lookup — ढूँढें, पढ़ें, काम पूरा
-किसी file, symbol, या code pattern को जल्दी pinpoint करने के लिए सबसे अच्छा।
 
 ```
 localnest_search_files   → find the module by path/name
@@ -130,7 +154,6 @@ localnest_read_file      → read the relevant lines
 ```
 
 ### गहरा task — context के साथ debug, refactor, review
-उन जटिल कामों के लिए सबसे अच्छा जहाँ memory और semantic understanding मायने रखती है।
 
 ```
 localnest_task_context    → one call: runtime status + recalled memories
@@ -139,7 +162,62 @@ localnest_read_file       → read the relevant sections
 localnest_capture_outcome → persist what you learned for next time
 ```
 
-> **Tool success ≠ useful result.** कोई tool OK लौटाए और फिर भी खाली हो सकता है। non-empty file match और असली line content को ही अर्थपूर्ण सबूत मानें, सिर्फ process success को नहीं।
+### Knowledge graph — project के बारे में structured facts
+
+```
+localnest_kg_add_triple   → store a fact: "auth-service" uses "JWT"
+localnest_kg_query        → what does "auth-service" relate to?
+localnest_kg_as_of        → what was true about this on March 1st?
+localnest_graph_traverse  → walk 2-3 hops to discover connections
+```
+
+### Conversation memory — पिछली चैट से सीखें
+
+```
+localnest_ingest_markdown → import a conversation export
+localnest_memory_recall   → what do I already know about this?
+localnest_diary_write     → private scratchpad for this agent
+```
+
+---
+
+## CLI Reference
+
+LocalNest एक पूर्ण CLI tool है। सब कुछ terminal से manage होता है:
+
+```bash
+localnest setup                     # configure roots, backends, AI clients
+localnest doctor                    # health check
+localnest upgrade                   # self-update
+localnest version                   # current version
+localnest status                    # runtime status
+
+localnest memory add "content"      # store a memory
+localnest memory search "query"     # find memories
+localnest memory list               # list all memories
+localnest memory show <id>          # view one memory
+localnest memory delete <id>        # remove a memory
+
+localnest kg add Alice works_on ProjectX    # add a fact
+localnest kg query Alice                     # query relationships
+localnest kg timeline Alice                  # fact evolution
+localnest kg stats                           # graph statistics
+
+localnest skill install             # install skills to AI clients
+localnest skill list                # show installed skills
+localnest skill remove <name>       # uninstall a skill
+
+localnest mcp start                 # start MCP server
+localnest mcp status                # server health
+localnest mcp config                # config JSON for AI clients
+
+localnest ingest ./chat.md          # import conversation
+localnest ingest ./export.json      # import JSON chat
+
+localnest completion bash           # shell completions
+```
+
+**Global flags** हर command पर काम करते हैं: `--json` (machine output), `--verbose`, `--quiet`, `--config <path>`
 
 ---
 
@@ -188,6 +266,48 @@ localnest_capture_outcome → persist what you learned for next time
 | `localnest_memory_suggest_relations` | similarity के आधार पर related memory auto-suggest करता है |
 | `localnest_memory_status` | memory consent, backend और database status |
 
+### Knowledge Graph
+
+| टूल | यह क्या करता है |
+|------|-------------|
+| `localnest_kg_add_entity` | entity बनाता है (people, project, concept, tool) |
+| `localnest_kg_add_triple` | temporal validity के साथ subject-predicate-object fact जोड़ता है |
+| `localnest_kg_query` | direction filtering के साथ entity relationship query करता है |
+| `localnest_kg_invalidate` | किसी fact को अब मान्य नहीं के रूप में mark करता है (archival, deletion नहीं) |
+| `localnest_kg_as_of` | point-in-time query — किसी date X पर क्या सत्य था? |
+| `localnest_kg_timeline` | किसी entity के लिए chronological fact evolution |
+| `localnest_kg_stats` | entity count, triple count, predicate breakdown |
+
+### Nest/Branch Organization
+
+| टूल | यह क्या करता है |
+|------|-------------|
+| `localnest_nest_list` | count के साथ सभी nest (top-level memory domain) दिखाता है |
+| `localnest_nest_branches` | किसी nest के भीतर branch (topic) दिखाता है |
+| `localnest_nest_tree` | पूरी hierarchy: nest, branch, और count |
+
+### Graph Traversal
+
+| टूल | यह क्या करता है |
+|------|-------------|
+| `localnest_graph_traverse` | path tracking के साथ multi-hop traversal (recursive CTE) |
+| `localnest_graph_bridges` | cross-nest bridge खोजता है — domain के पार connection |
+
+### Agent Diary
+
+| टूल | यह क्या करता है |
+|------|-------------|
+| `localnest_diary_write` | private scratchpad entry लिखता है (agent-isolated) |
+| `localnest_diary_read` | अपनी हाल की diary entry पढ़ता है |
+
+### Conversation Ingestion
+
+| टूल | यह क्या करता है |
+|------|-------------|
+| `localnest_ingest_markdown` | Markdown conversation export को memory + KG में import करता है |
+| `localnest_ingest_json` | JSON conversation export को memory + KG में import करता है |
+| `localnest_memory_check_duplicate` | filing से पहले semantic duplicate detection |
+
 ### सर्वर और अपडेट
 
 | टूल | यह क्या करता है |
@@ -198,7 +318,33 @@ localnest_capture_outcome → persist what you learned for next time
 | `localnest_update_status` | npm पर latest version check करता है (cached) |
 | `localnest_update_self` | globally update करता है और bundled skill sync करता है (approval required) |
 
-सभी tools `response_format: "json"` (default) या `"markdown"` को support करते हैं। list tools pagination के लिए `total_count`, `has_more`, `next_offset` लौटाते हैं।
+**कुल 50 tools।** सभी tools `response_format: "json"` (default) या `"markdown"` को support करते हैं। list tools pagination के लिए `total_count`, `has_more`, `next_offset` लौटाते हैं।
+
+---
+
+## LocalNest की तुलना
+
+LocalNest एकमात्र local-first MCP server है जो code retrieval और structured memory दोनों को एक ही tool में जोड़ता है। यहाँ इसकी स्थिति देखें:
+
+| क्षमता | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
+|---|---|---|---|---|---|
+| **Local-first (no cloud)** | हाँ | हाँ | नहीं ($25+/mo) | नहीं (Neo4j) | नहीं ($20-200/mo) |
+| **Code retrieval** | 50 MCP tools, AST-aware, hybrid search | कोई नहीं | कोई नहीं | कोई नहीं | कोई नहीं |
+| **Knowledge graph** | temporal validity वाले SQLite triple | SQLite triple | Neo4j | Neo4j | Key-value |
+| **Multi-hop traversal** | हाँ (recursive CTE, 2-5 hop) | नहीं (flat lookup only) | नहीं | हाँ (Neo4j ज़रूरी) | नहीं |
+| **Temporal queries (as_of)** | हाँ | हाँ | हाँ | हाँ | नहीं |
+| **Contradiction detection** | हाँ (write-time warning) | मौजूद पर wired नहीं | नहीं | नहीं | नहीं |
+| **Conversation ingestion** | Markdown + JSON | Markdown + JSON + Slack | नहीं | नहीं | नहीं |
+| **Agent isolation** | per-agent scoping + private diary | Wing-per-agent | User/session scoping | नहीं | User/agent/run/session |
+| **Semantic dedup** | 0.92 cosine gate on all writes | 0.9 threshold | नहीं | नहीं | नहीं |
+| **Memory hierarchy** | Nest/Branch (original) | Wing/Room/Hall (palace) | Flat | Flat | Flat |
+| **Hooks system** | Pre/post operation hooks | कोई नहीं | Webhooks | कोई नहीं | कोई नहीं |
+| **Runtime** | Node.js (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
+| **Dependencies** | 0 new (pure SQLite) | ChromaDB (heavy) | Neo4j ($25+/mo) | Neo4j | Cloud API |
+| **MCP tools** | 50 | 19 | 0 | 0 | 0 |
+| **लागत** | मुफ़्त | मुफ़्त | $25+/mo | $25+/mo | $20-200/mo |
+
+**LocalNest की अनूठी स्थिति:** एकमात्र tool जो आपकी AI को deep code understanding और structured persistent memory दोनों देता है — पूरी तरह local, शून्य cloud, शून्य लागत।
 
 ---
 
@@ -210,6 +356,18 @@ localnest_capture_outcome → persist what you learned for next time
 - memory failure कभी दूसरे tools को block नहीं करती, सब कुछ स्वतंत्र रूप से degrade होता है
 
 **auto-promotion कैसे काम करता है:** `localnest_memory_capture_event` के जरिए capture किए गए event को signal strength के हिसाब से score किया जाता है। bug fix, decision, और preference जैसे high-signal event durable memory में promote हो जाते हैं। कमज़ोर exploratory event रिकॉर्ड होते हैं और 30 दिन बाद चुपचाप हटा दिए जाते हैं।
+
+**Knowledge graph:** structured fact को subject-predicate-object triple के रूप में temporal validity के साथ store करें। `as_of` के ज़रिए किसी भी समय-बिंदु पर क्या सत्य था, query करें। Recursive CTE traversal से 2-5 hop गहराई तक relationship walk करें। Write time पर contradiction detect करें।
+
+**Nest/Branch hierarchy:** memory को nest (top-level domain) और branch (topic) में व्यवस्थित करें। Metadata-filtered recall तेज़ और ज़्यादा सटीक नतीजों के लिए scoring से पहले candidate को संकुचित करता है।
+
+**Agent isolation:** हर agent को अपना memory scope और private diary मिलता है। Recall में अपनी + global memory आती है, कभी दूसरे agent का private data नहीं।
+
+**Semantic dedup:** हर write embedding similarity gate (default 0.92 cosine threshold) से गुज़रता है। Near-duplicate storage से पहले ही पकड़ लिए जाते हैं — आपकी memory साफ़ रहती है।
+
+**Conversation ingestion:** Markdown या JSON chat export import करें। हर turn एक memory entry बनता है, automatic entity extraction और KG triple creation के साथ। Content hash के आधार पर same file की re-ingestion skip हो जाती है।
+
+**Hooks:** किसी भी memory operation पर pre/post callback register करें — store, recall, KG write, traversal, ingestion। Core code में बदलाव किए बिना custom pipeline बनाएँ।
 
 ---
 

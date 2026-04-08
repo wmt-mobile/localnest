@@ -12,7 +12,9 @@
 
 **قاعدة الشفرة الخاصة بك. ذكاؤك الاصطناعي. جهازك — لا سحابة، لا تسريبات، لا مفاجآت.**
 
-LocalNest هو خادم MCP محلي أولًا يمنح وكلاء الذكاء الاصطناعي وصولًا آمنًا ومحدود النطاق إلى شفرتك، مع بحث هجين، وفهرسة دلالية، وذاكرة دائمة لا تغادر جهازك أبدًا.
+LocalNest هو خادم MCP محلي أولًا وأداة CLI تمنح وكلاء الذكاء الاصطناعي وصولًا آمنًا ومحدود النطاق إلى شفرتك، مع بحث هجين، وفهرسة دلالية، ورسم معرفة زمني، وذاكرة دائمة لا تغادر جهازك أبدًا.
+
+**52 أداة MCP** | **رسم معرفة زمني** | **عبور رسم بياني متعدد القفزات** | **ذاكرة محددة النطاق لكل وكيل** | **بدون أي اعتماد على السحابة**
 
 📖 [الوثائق الكاملة](https://wmt-mobile.github.io/localnest/) · [تعمق معماري](../guides/architecture.md)
 
@@ -21,6 +23,23 @@ LocalNest هو خادم MCP محلي أولًا يمنح وكلاء الذكاء
 [English](../README.md) · العربية الفصحى · [বাংলা (বাংলাদেশ)](./README.bn-BD.md) · [Deutsch (Deutschland)](./README.de-DE.md) · [Español (Latinoamérica)](./README.es-419.md) · [Français (France)](./README.fr-FR.md) · [हिन्दी (भारत)](./README.hi-IN.md) · [Bahasa Indonesia](./README.id-ID.md) · [日本語](./README.ja-JP.md) · [한국어](./README.ko-KR.md) · [Português (Brasil)](./README.pt-BR.md) · [Русский](./README.ru-RU.md) · [Türkçe](./README.tr-TR.md) · [简体中文](./README.zh-CN.md)
 
 هذه الملفات المترجمة هي ترجمات README كاملة ومخصصة لكل لغة محلية. راجع [سياسة الترجمة](./TRANSLATION_POLICY.md) للاطلاع على مصفوفة اللغات المستهدفة وقواعد المصطلحات. يظل ملف [README.md](../README.md) الإنجليزي هو المصدر المرجعي للأوامر الأحدث، وملاحظات الإصدارات، وكل التفاصيل الكاملة.
+
+---
+
+## الجديد في الإصدار 0.0.7
+
+> سجل التغييرات الكامل: [CHANGELOG.md](../CHANGELOG.md)
+
+- **رسم معرفة زمني** — كيانات، ثلاثيات، استعلامات as_of، خطوط زمنية، كشف التناقضات
+- **عبور رسم بياني متعدد القفزات** — استكشف العلاقات بعمق 2-5 قفزات عبر CTEs التكرارية (حصري لـ LocalNest)
+- **تنظيم Nest/Branch** — تصنيف ذاكرة ذو مستويين خاص بـ LocalNest لاسترجاع منظم
+- **ذاكرة محددة النطاق لكل وكيل** — عزل لكل وكيل مع إدخالات يوميات خاصة
+- **إزالة التكرار الدلالي** — بوابة تشابه embedding تمنع تلوث الذاكرة بالنسخ شبه المكررة
+- **استيعاب المحادثات** — استيراد صادرات محادثات Markdown/JSON مع استخراج الكيانات
+- **نظام الخطافات** — ردود نداء قبل/بعد العملية للذاكرة وKG والعبور والاستيعاب
+- **بنية CLI-first** — أوامر `localnest <noun> <verb>` موحدة لكل شيء
+- **إكمال تلقائي للطرفية** — إكمال tab في bash وzsh وfish
+- **17 أداة MCP جديدة** (52 إجمالاً) — KG، الأعشاش، العبور، اليوميات، الاستيعاب، إزالة التكرار، الخطافات
 
 ---
 
@@ -38,6 +57,12 @@ LocalNest هو خادم MCP محلي أولًا يمنح وكلاء الذكاء
 | **استرجاع هجين** | دمج بين البحث المعجمي والدلالي مع ترتيب RRF للحصول على أفضل ما في الطريقتين |
 | **وعي بالمشروع** | يكتشف المشاريع تلقائيًا من ملفات المؤشرات ويحدّد نطاق كل استدعاء أداة |
 | **ذاكرة الوكيل** | رسم معرفة متين وقابل للاستعلام، بحيث يتذكر ذكاؤك الاصطناعي ما تعلّمه |
+| **رسم معرفة زمني** | ثلاثيات فاعل-محمول-مفعول مع صلاحية زمنية — استعلم عما كان صحيحًا في أي وقت |
+| **عبور رسم بياني متعدد القفزات** | استكشف العلاقات بعمق 2-5 قفزات عبر CTEs التكرارية — لا توجد أداة محلية أخرى تقدم هذا |
+| **تنظيم Nest/Branch** | تصنيف ذاكرة ذو مستويين مع تعزيز مصفى بالبيانات الوصفية لاسترجاع منظم |
+| **استيعاب المحادثات** | استيراد صادرات محادثات Markdown/JSON إلى ذاكرة مُهيكلة + ثلاثيات KG |
+| **عزل الوكلاء** | يوميات ونطاق ذاكرة لكل وكيل — وكلاء متعددون، بلا تلوث متبادل |
+| **نظام الخطافات** | خطافات قبل/بعد العملية للذاكرة وKG والعبور والاستيعاب — أضف منطقك الخاص |
 
 ---
 
@@ -118,10 +143,9 @@ localnest version              # check current
 
 ## كيف يستخدمه الوكلاء
 
-يغطي مساران عمليان تقريبًا كل شيء:
+أربعة مسارات عملية تغطي تقريبًا كل شيء:
 
 ### بحث سريع — اعثر عليه، اقرأه، وانتهى
-الأفضل لتحديد ملف أو رمز أو نمط شيفرة بدقة.
 
 ```
 localnest_search_files   → find the module by path/name
@@ -130,7 +154,6 @@ localnest_read_file      → read the relevant lines
 ```
 
 ### مهمة عميقة — تصحيح الأخطاء، وإعادة الهيكلة، والمراجعة مع السياق
-الأفضل للأعمال المعقدة التي تكون فيها الذاكرة والفهم الدلالي مهمين.
 
 ```
 localnest_task_context    → one call: runtime status + recalled memories
@@ -139,7 +162,62 @@ localnest_read_file       → read the relevant sections
 localnest_capture_outcome → persist what you learned for next time
 ```
 
-> **نجاح الأداة ≠ نتيجة مفيدة.** قد تُرجع الأداة حالة OK ومع ذلك تكون النتيجة فارغة. اعتبر تطابقات الملفات غير الفارغة ومحتوى الأسطر الحقيقي دليلًا ذا معنى، لا مجرد نجاح للعملية.
+### رسم المعرفة — حقائق مُهيكلة عن المشروع
+
+```
+localnest_kg_add_triple   → store a fact: "auth-service" uses "JWT"
+localnest_kg_query        → what does "auth-service" relate to?
+localnest_kg_as_of        → what was true about this on March 1st?
+localnest_graph_traverse  → walk 2-3 hops to discover connections
+```
+
+### ذاكرة المحادثات — تعلّم من المحادثات السابقة
+
+```
+localnest_ingest_markdown → import a conversation export
+localnest_memory_recall   → what do I already know about this?
+localnest_diary_write     → private scratchpad for this agent
+```
+
+---
+
+## مرجع CLI
+
+LocalNest هو أداة CLI كاملة. كل شيء يُدار من الطرفية:
+
+```bash
+localnest setup                     # configure roots, backends, AI clients
+localnest doctor                    # health check
+localnest upgrade                   # self-update
+localnest version                   # current version
+localnest status                    # runtime status
+
+localnest memory add "content"      # store a memory
+localnest memory search "query"     # find memories
+localnest memory list               # list all memories
+localnest memory show <id>          # view one memory
+localnest memory delete <id>        # remove a memory
+
+localnest kg add Alice works_on ProjectX    # add a fact
+localnest kg query Alice                     # query relationships
+localnest kg timeline Alice                  # fact evolution
+localnest kg stats                           # graph statistics
+
+localnest skill install             # install skills to AI clients
+localnest skill list                # show installed skills
+localnest skill remove <name>       # uninstall a skill
+
+localnest mcp start                 # start MCP server
+localnest mcp status                # server health
+localnest mcp config                # config JSON for AI clients
+
+localnest ingest ./chat.md          # import conversation
+localnest ingest ./export.json      # import JSON chat
+
+localnest completion bash           # shell completions
+```
+
+**علامات عامة** تعمل على كل أمر: `--json` (إخراج آلي)، `--verbose`، `--quiet`، `--config <path>`
 
 ---
 
@@ -188,6 +266,48 @@ localnest_capture_outcome → persist what you learned for next time
 | `localnest_memory_suggest_relations` | يقترح تلقائيًا ذكريات مرتبطة حسب التشابه |
 | `localnest_memory_status` | حالة موافقة الذاكرة، والخلفية، وقاعدة البيانات |
 
+### رسم المعرفة
+
+| الأداة | ما الذي تفعله |
+|------|-------------|
+| `localnest_kg_add_entity` | إنشاء كيانات (أشخاص، مشاريع، مفاهيم، أدوات) |
+| `localnest_kg_add_triple` | إضافة حقائق فاعل-محمول-مفعول مع صلاحية زمنية |
+| `localnest_kg_query` | استعلام عن علاقات الكيانات مع تصفية الاتجاه |
+| `localnest_kg_invalidate` | وضع علامة على حقيقة بأنها لم تعد صالحة (أرشفة، وليس حذف) |
+| `localnest_kg_as_of` | استعلامات في نقطة زمنية — ماذا كان صحيحًا في التاريخ X؟ |
+| `localnest_kg_timeline` | تطور الحقائق الزمني لكيان ما |
+| `localnest_kg_stats` | عدد الكيانات، وعدد الثلاثيات، وتفصيل المحمولات |
+
+### تنظيم Nest/Branch
+
+| الأداة | ما الذي تفعله |
+|------|-------------|
+| `localnest_nest_list` | سرد جميع الأعشاش (نطاقات الذاكرة العليا) مع الأعداد |
+| `localnest_nest_branches` | سرد الفروع (المواضيع) داخل عش |
+| `localnest_nest_tree` | التسلسل الهرمي الكامل: الأعشاش والفروع والأعداد |
+
+### عبور الرسم البياني
+
+| الأداة | ما الذي تفعله |
+|------|-------------|
+| `localnest_graph_traverse` | عبور متعدد القفزات مع تتبع المسار (CTEs التكرارية) |
+| `localnest_graph_bridges` | إيجاد الجسور بين الأعشاش — الروابط عبر النطاقات |
+
+### يوميات الوكيل
+
+| الأداة | ما الذي تفعله |
+|------|-------------|
+| `localnest_diary_write` | كتابة مدخل في دفتر الملاحظات الخاص (معزول لكل وكيل) |
+| `localnest_diary_read` | قراءة مدخلات اليوميات الأخيرة الخاصة بك |
+
+### استيعاب المحادثات
+
+| الأداة | ما الذي تفعله |
+|------|-------------|
+| `localnest_ingest_markdown` | استيراد صادرات محادثات Markdown إلى الذاكرة + KG |
+| `localnest_ingest_json` | استيراد صادرات محادثات JSON إلى الذاكرة + KG |
+| `localnest_memory_check_duplicate` | كشف التكرار الدلالي قبل الحفظ |
+
 ### الخادم والتحديثات
 
 | الأداة | ما الذي تفعله |
@@ -198,7 +318,33 @@ localnest_capture_outcome → persist what you learned for next time
 | `localnest_update_status` | يفحص npm لمعرفة أحدث إصدار (مع تخزين مؤقت) |
 | `localnest_update_self` | يحدّث التثبيت العام ويزامن المهارة المضمّنة (يتطلب موافقة) |
 
-تدعم جميع الأدوات `response_format: "json"` (افتراضيًا) أو `"markdown"`. وتُرجع أدوات القوائم `total_count` و`has_more` و`next_offset` من أجل الترقيم الصفحي.
+**50 أداة إجمالاً.** تدعم جميع الأدوات `response_format: "json"` (افتراضيًا) أو `"markdown"`. وتُرجع أدوات القوائم `total_count` و`has_more` و`next_offset` من أجل الترقيم الصفحي.
+
+---
+
+## كيف يقارن LocalNest
+
+LocalNest هو خادم MCP المحلي الأول الوحيد الذي يجمع بين استرجاع الشفرة والذاكرة المُهيكلة في أداة واحدة. إليك مكانته:
+
+| القدرة | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
+|---|---|---|---|---|---|
+| **محلي أولاً (بدون سحابة)** | نعم | نعم | لا ($25+/شهر) | لا (Neo4j) | لا ($20-200/شهر) |
+| **استرجاع الشفرة** | 50 أداة MCP، مدرك لـ AST، بحث هجين | لا يوجد | لا يوجد | لا يوجد | لا يوجد |
+| **رسم المعرفة** | ثلاثيات SQLite مع صلاحية زمنية | ثلاثيات SQLite | Neo4j | Neo4j | Key-value |
+| **عبور متعدد القفزات** | نعم (CTEs التكرارية، 2-5 قفزات) | لا (بحث مسطح فقط) | لا | نعم (يتطلب Neo4j) | لا |
+| **استعلامات زمنية (as_of)** | نعم | نعم | نعم | نعم | لا |
+| **كشف التناقضات** | نعم (تحذيرات وقت الكتابة) | موجود لكن غير مفعّل | لا | لا | لا |
+| **استيعاب المحادثات** | Markdown + JSON | Markdown + JSON + Slack | لا | لا | لا |
+| **عزل الوكلاء** | نطاق لكل وكيل + يوميات خاصة | Wing-per-agent | User/session scoping | لا | User/agent/run/session |
+| **إزالة التكرار الدلالي** | بوابة cosine 0.92 على كل الكتابات | عتبة 0.9 | لا | لا | لا |
+| **تنظيم الذاكرة** | Nest/Branch (أصلي) | Wing/Room/Hall (palace) | مسطح | مسطح | مسطح |
+| **نظام الخطافات** | خطافات قبل/بعد العملية | لا يوجد | Webhooks | لا يوجد | لا يوجد |
+| **بيئة التشغيل** | Node.js (خفيف) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (سحابي) |
+| **التبعيات** | 0 جديد (SQLite صرف) | ChromaDB (ثقيل) | Neo4j ($25+/شهر) | Neo4j | Cloud API |
+| **أدوات MCP** | 50 | 19 | 0 | 0 | 0 |
+| **التكلفة** | مجاني | مجاني | $25+/شهر | $25+/شهر | $20-200/شهر |
+
+**موقع LocalNest الفريد:** الأداة الوحيدة التي تمنح ذكاءك الاصطناعي فهمًا عميقًا للشفرة وذاكرة دائمة مُهيكلة — محلية بالكامل، بدون سحابة، بدون تكلفة.
 
 ---
 
@@ -209,7 +355,19 @@ localnest_capture_outcome → persist what you learned for next time
 - تتطلب **Node 22.13+**، بينما تعمل أدوات البحث والملفات جيدًا على Node 18/20 بدونها
 - فشل الذاكرة لا يحجب الأدوات الأخرى أبدًا، فكل شيء يتدهور بشكل مستقل
 
-**كيف تعمل الترقية التلقائية:** تُقيَّم الأحداث الملتقطة عبر `localnest_memory_capture_event` بحسب قوة الإشارة. وتُرقّى الأحداث عالية الإشارة، مثل إصلاحات الأعطال والقرارات والتفضيلات، إلى ذكريات دائمة. أما الأحداث الاستكشافية الأضعف فتُسجَّل ثم تُحذف بهدوء بعد 30 يومًا.
+**كيف تعمل الترقية التلقائية:** تُقيَّم الأحداث الملتقطة عبر `localnest_memory_capture_event` بحسب قوة الإشارة. وتُرقّى الأحداث عالية الإشارة، مثل إصلاحات الأعطال والقرارات والتفضيلات، إلى ذكريات دائمة. أما الأحداث الاستكشافية الأضعف فتُسجَّل ثم تُحذف بهدوء بعد 30 يومًا.
+
+**رسم المعرفة:** خزّن الحقائق المُهيكلة كثلاثيات فاعل-محمول-مفعول مع صلاحية زمنية. استعلم عما كان صحيحًا في أي نقطة زمنية باستخدام `as_of`. استكشف العلاقات بعمق 2-5 قفزات عبر عبور CTE التكراري. اكتشف التناقضات وقت الكتابة.
+
+**تنظيم Nest/Branch:** نظّم الذكريات في أعشاش (نطاقات عليا) وفروع (مواضيع). الاسترجاع المصفّى بالبيانات الوصفية يضيّق المرشحين قبل التسجيل للحصول على نتائج أسرع وأدق.
+
+**عزل الوكلاء:** يحصل كل وكيل على نطاق ذاكرة خاص ويوميات خاصة. الاسترجاع يعيد الذكريات الخاصة + العامة، ولا يعيد بيانات وكيل آخر الخاصة أبدًا.
+
+**إزالة التكرار الدلالي:** كل كتابة تمر عبر بوابة تشابه embedding (عتبة cosine الافتراضية 0.92). تُلتقط النسخ شبه المكررة قبل التخزين — تظل ذاكرتك نظيفة.
+
+**استيعاب المحادثات:** استورد صادرات محادثات Markdown أو JSON. يصبح كل دور إدخال ذاكرة مع استخراج كيانات تلقائي وإنشاء ثلاثيات KG. يتم تخطي إعادة استيعاب نفس الملف بناءً على hash المحتوى.
+
+**الخطافات:** سجّل ردود نداء قبل/بعد على أي عملية ذاكرة — التخزين، والاسترجاع، وكتابات KG، والعبور، والاستيعاب. ابنِ خطوط أنابيب مخصصة دون تعديل الشفرة الأساسية.
 
 ---
 
