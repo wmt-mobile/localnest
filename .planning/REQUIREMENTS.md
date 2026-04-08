@@ -22,10 +22,10 @@
 
 ### Temporal Validity
 
-- [ ] **TEMP-01**: Triples support valid_from and valid_to date columns (NULL valid_to = still valid)
-- [ ] **TEMP-02**: User can query triples with as_of date parameter to get point-in-time state
-- [ ] **TEMP-03**: User can view chronological timeline of all triples for an entity via MCP tool
-- [ ] **TEMP-04**: KG stats MCP tool reports entity count, triple count, and relationship type breakdown
+- [x] **TEMP-01**: Triples support valid_from and valid_to date columns (NULL valid_to = still valid)
+- [x] **TEMP-02**: User can query triples with as_of date parameter to get point-in-time state
+- [x] **TEMP-03**: User can view chronological timeline of all triples for an entity via MCP tool
+- [x] **TEMP-04**: KG stats MCP tool reports entity count, triple count, and relationship type breakdown
 
 ### Hierarchical Memory Organization (Nest/Branch)
 
@@ -124,10 +124,10 @@ Deferred to future milestone.
 | KG-05 | Phase 2 | Complete |
 | KG-06 | Phase 2 | Complete |
 | KG-07 | Phase 2 | Complete |
-| TEMP-01 | Phase 3 | Pending |
-| TEMP-02 | Phase 3 | Pending |
-| TEMP-03 | Phase 3 | Pending |
-| TEMP-04 | Phase 3 | Pending |
+| TEMP-01 | Phase 3 | Complete |
+| TEMP-02 | Phase 3 | Complete |
+| TEMP-03 | Phase 3 | Complete |
+| TEMP-04 | Phase 3 | Complete |
 | NEST-01 | Phase 4 | Pending |
 | NEST-02 | Phase 4 | Pending |
 | NEST-03 | Phase 4 | Pending |
