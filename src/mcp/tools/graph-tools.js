@@ -15,7 +15,7 @@ export function registerGraphTools({
       inputSchema: {
         name: z.string().min(1).max(400),
         type: z.string().max(100).default('concept'),
-        properties: z.record(z.unknown()).default({}),
+        properties: z.record(z.string(), z.any()).default({}),
         memory_id: z.string().optional()
       },
       annotations: {
