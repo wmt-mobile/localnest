@@ -1,6 +1,6 @@
 import { buildSearchTerms, stableJson } from './utils.js';
 
-export const SCHEMA_VERSION = 8;
+export const SCHEMA_VERSION = 9;
 
 export async function ensureSchema(adapter) {
   await adapter.exec(`
@@ -112,6 +112,18 @@ export async function ensureSchema(adapter) {
 
     CREATE INDEX IF NOT EXISTS idx_agent_diary_agent_created
       ON agent_diary(agent_id, created_at DESC);
+
+    CREATE TABLE IF NOT EXISTS conversation_sources (
+      id TEXT PRIMARY KEY,
+      file_path TEXT NOT NULL,
+      file_hash TEXT NOT NULL,
+      turn_count INTEGER NOT NULL DEFAULT 0,
+      memory_ids_json TEXT NOT NULL DEFAULT '[]',
+      ingested_at TEXT NOT NULL
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_conv_sources_path_hash
+      ON conversation_sources(file_path, file_hash);
   `);
 }
 
@@ -264,6 +276,22 @@ export async function runMigrations({ adapter, getMeta, setMeta }) {
           )
         `);
         await ad.exec(`CREATE INDEX IF NOT EXISTS idx_agent_diary_agent_created ON agent_diary(agent_id, created_at DESC)`);
+      }
+    },
+    {
+      version: 9,
+      migrate: async (ad) => {
+        await ad.exec(`
+          CREATE TABLE IF NOT EXISTS conversation_sources (
+            id TEXT PRIMARY KEY,
+            file_path TEXT NOT NULL,
+            file_hash TEXT NOT NULL,
+            turn_count INTEGER NOT NULL DEFAULT 0,
+            memory_ids_json TEXT NOT NULL DEFAULT '[]',
+            ingested_at TEXT NOT NULL
+          )
+        `);
+        await ad.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_conv_sources_path_hash ON conversation_sources(file_path, file_hash)`);
       }
     }
   ];
