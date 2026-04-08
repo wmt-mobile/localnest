@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CLI-First Architecture
 status: in_progress
-stopped_at: Completed 11-1-PLAN.md (Memory CLI Commands)
-last_updated: "2026-04-08T08:55:00Z"
+stopped_at: Completed 13-1 (Skill CLI Commands)
+last_updated: "2026-04-08T08:57:00Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 9
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
-  percent: 33
+  completed_phases: 3
+  total_plans: 4
+  completed_plans: 4
+  percent: 44
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A unified, premium CLI that makes LocalNest feel like a standalone product -- not just an MCP server.
-**Current focus:** Phase 12 -- Knowledge Graph CLI (plan 1 complete)
+**Current focus:** Phase 13 -- Skill CLI Commands (plan 1 complete)
 
 ## Current Position
 
-Phase: 12 of 18 (Knowledge Graph CLI)
+Phase: 13 of 18 (Skill CLI Commands)
 Plan: 1 of 1 in current phase (complete)
-Status: Phase 12 complete -- ready for Phase 13
-Last activity: 2026-04-08 -- KG CLI subcommands (add, query, timeline, stats) implemented
+Status: Phase 13 complete -- ready for Phase 14
+Last activity: 2026-04-08 -- Skill CLI subcommands (install, list, remove) implemented
 
-Progress: [###.......] 33%
+Progress: [####......] 44%
 
 ## Performance Metrics
 
@@ -46,12 +46,14 @@ Progress: [###.......] 33%
 | 10 | 1 | 4m25s | 4m25s |
 | 11 | 1 | 2m30s | 2m30s |
 | 12 | 1 | 3m00s | 3m00s |
+| 13 | 1 | 1m38s | 1m38s |
 
 **Recent Trend:**
 - Plan 10-1: 4m25s (6 tasks, 11 files)
 - Plan 11-1: 2m30s (1 task, 1 file)
 - Plan 12-1: 3m00s (1 task, 1 file)
-- Trend: stable
+- Plan 13-1: 1m38s (1 task, 1 file)
+- Trend: accelerating
 
 *Updated after each plan completion*
 
@@ -73,6 +75,8 @@ Recent decisions affecting current work:
 - [Phase 11-1]: Hand-rolled parseFlags helper for CLI flag parsing, consistent with zero-dep approach
 - [Phase 12-1]: KG CLI uses normalizeEntityId (toSlug) to convert entity names to IDs for store lookups
 - [Phase 12-1]: Reused identical MemoryService bootstrap and parseFlags patterns from memory.js
+- [Phase 13-1]: Skill CLI reuses exported functions from install-localnest-skill.mjs (zero logic duplication)
+- [Phase 13-1]: Skill list scans all 12 user + 4 project AI client directories for installed skills
 
 ### Pending Todos
 
@@ -84,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T08:55:00Z
-Stopped at: Completed 12-1-PLAN.md (Knowledge Graph CLI)
+Last session: 2026-04-08T08:57:00Z
+Stopped at: Completed 13-1 (Skill CLI Commands)
 Resume file: None

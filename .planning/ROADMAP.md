@@ -33,7 +33,7 @@
 - [x] **Phase 10: CLI Framework Setup** - Commander.js skeleton with global flags, colored help, and version display
 - [x] **Phase 11: Memory CLI Commands** - Full memory CRUD via localnest memory subcommands
 - [x] **Phase 12: Knowledge Graph CLI** - KG triple and entity operations from the command line
-- [ ] **Phase 13: Skill CLI Commands** - Install, list, and remove bundled skills across AI clients
+- [x] **Phase 13: Skill CLI Commands** - Install, list, and remove bundled skills across AI clients
 - [ ] **Phase 14: MCP Lifecycle CLI** - Start, status, and config generation for MCP server
 - [ ] **Phase 15: Ingest CLI** - Conversation file ingestion with format detection and taxonomy
 - [ ] **Phase 16: Hook MCP Tools** - Hook introspection tools and documentation for AI discoverability
@@ -84,7 +84,7 @@
   1. User can run `localnest skill install` and have the bundled skill installed to all detected AI client config locations (Claude, Cursor, etc.)
   2. User can run `localnest skill list` and see which skills are installed and where they live on disk
   3. User can run `localnest skill remove <name>` and have the skill uninstalled from all client configs
-**Plans**: TBD
+**Plans**: 1 (complete)
 
 ### Phase 14: MCP Lifecycle CLI
 **Goal**: Users can start, inspect, and configure the MCP server from a single command surface
@@ -157,7 +157,7 @@ Phases execute in numeric order: 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17 ->
 | 10. CLI Framework Setup | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 11. Memory CLI Commands | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 12. Knowledge Graph CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
-| 13. Skill CLI Commands | v2.0 | 0/? | Not started | - |
+| 13. Skill CLI Commands | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 14. MCP Lifecycle CLI | v2.0 | 0/? | Not started | - |
 | 15. Ingest CLI | v2.0 | 0/? | Not started | - |
 | 16. Hook MCP Tools | v2.0 | 0/? | Not started | - |
