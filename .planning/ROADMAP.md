@@ -35,7 +35,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans:** 1 plan
 
 Plans:
-- [ ] 01-01-PLAN.md -- Transaction-wrapped migrations and version validation
+- [x] 01-01-PLAN.md -- Transaction-wrapped migrations and version validation
 
 ### Phase 2: Knowledge Graph Core
 **Goal**: Users can store and query structured knowledge as entities and triples with provenance

@@ -7,8 +7,8 @@
 
 ### Migration Infrastructure
 
-- [ ] **MIGR-01**: Schema migrations wrap each version bump in its own transaction for safe rollback
-- [ ] **MIGR-02**: Migration runner validates current schema version before applying new migrations
+- [x] **MIGR-01**: Schema migrations wrap each version bump in its own transaction for safe rollback
+- [x] **MIGR-02**: Migration runner validates current schema version before applying new migrations
 
 ### Knowledge Graph Core
 
@@ -115,8 +115,8 @@ Deferred to future milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MIGR-01 | Phase 1 | Pending |
-| MIGR-02 | Phase 1 | Pending |
+| MIGR-01 | Phase 1 | Complete |
+| MIGR-02 | Phase 1 | Complete |
 | KG-01 | Phase 2 | Pending |
 | KG-02 | Phase 2 | Pending |
 | KG-03 | Phase 2 | Pending |
