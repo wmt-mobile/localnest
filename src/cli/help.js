@@ -93,6 +93,7 @@ const CATEGORIES = [
       { name: 'onboard', desc: 'Guided first-run experience' },
       { name: 'upgrade', desc: 'Upgrade package and sync config' },
       { name: 'doctor', desc: 'Run health diagnostics' },
+      { name: 'selftest', desc: 'End-to-end pipeline validation' },
       { name: 'dashboard', desc: 'Show memory & KG overview' },
       { name: 'version', desc: 'Print version' },
     ],
