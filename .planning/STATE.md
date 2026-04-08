@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CLI-First Architecture
-status: in_progress
-stopped_at: Completed 16-1 (Hook MCP Tools)
-last_updated: "2026-04-08T09:10:29Z"
+status: complete
+stopped_at: Completed 18-1 (Binary Deprecation)
+last_updated: "2026-04-08T09:18:45Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 9
-  completed_phases: 6
-  total_plans: 7
-  completed_plans: 7
-  percent: 77
+  completed_phases: 9
+  total_plans: 9
+  completed_plans: 9
+  percent: 100
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A unified, premium CLI that makes LocalNest feel like a standalone product -- not just an MCP server.
-**Current focus:** Phase 16 -- Hook MCP Tools (plan 1 complete)
+**Current focus:** v2.0 CLI-First Architecture milestone COMPLETE
 
 ## Current Position
 
-Phase: 16 of 18 (Hook MCP Tools)
+Phase: 18 of 18 (Binary Deprecation)
 Plan: 1 of 1 in current phase (complete)
-Status: Phase 16 complete -- ready for Phase 17
-Last activity: 2026-04-08 -- Hook introspection MCP tools and skill documentation
+Status: All v2.0 phases complete
+Last activity: 2026-04-08 -- Yellow ANSI deprecation warnings on legacy binaries
 
-Progress: [#######...] 77%
+Progress: [##########] 100%
 
 ## Performance Metrics
 
@@ -50,6 +50,8 @@ Progress: [#######...] 77%
 | 14 | 1 | 2m05s | 2m05s |
 | 15 | 1 | 1m03s | 1m03s |
 | 16 | 1 | 1m50s | 1m50s |
+| 17 | 1 | 1m30s | 1m30s |
+| 18 | 1 | 1m46s | 1m46s |
 
 **Recent Trend:**
 - Plan 10-1: 4m25s (6 tasks, 11 files)
@@ -59,6 +61,8 @@ Progress: [#######...] 77%
 - Plan 14-1: 2m05s (1 task, 1 file)
 - Plan 15-1: 1m03s (1 task, 1 file)
 - Plan 16-1: 1m50s (3 tasks, 3 files)
+- Plan 17-1: 1m30s (1 task, 1 file)
+- Plan 18-1: 1m46s (1 task, 5 files)
 - Trend: accelerating
 
 *Updated after each plan completion*
@@ -92,6 +96,9 @@ Recent decisions affecting current work:
 - [Phase 16-1]: Access hooks via memory.store.hooks (MemoryService.store.hooks) for instance stats
 - [Phase 16-1]: Import MemoryHooks class for static validEvents() call
 - [Phase 16-1]: Return events as { events: [...] } wrapper for consistent JSON structure
+- [Phase 18-1]: Yellow ANSI codes for deprecation warning color, consistent with Phase 10 raw ANSI approach
+- [Phase 18-1]: Fixed broken command forwarding by adding commandArgs to all 4 legacy binaries
+- [Phase 18-1]: Changed localnest-mcp-install-skill replacement from 'localnest install skills' to 'localnest skill install' per DEP-04
 
 ### Pending Todos
 
@@ -103,6 +110,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T09:10:29Z
-Stopped at: Completed 16-1 (Hook MCP Tools)
+Last session: 2026-04-08T09:18:45Z
+Stopped at: Completed 18-1 (Binary Deprecation) -- v2.0 milestone COMPLETE
 Resume file: None

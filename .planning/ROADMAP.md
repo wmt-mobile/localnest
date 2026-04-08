@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 Memory Enhancement** - Phases 1-9 (shipped 2026-04-08)
-- 🚧 **v2.0 CLI-First Architecture** - Phases 10-18 (in progress)
+- ✅ **v2.0 CLI-First Architecture** - Phases 10-18 (shipped 2026-04-08)
 
 ## Phases
 
@@ -22,7 +22,7 @@
 
 </details>
 
-### 🚧 v2.0 CLI-First Architecture (In Progress)
+### ✅ v2.0 CLI-First Architecture (Complete)
 
 **Milestone Goal:** Consolidate all commands into a unified noun-verb CLI and polish hooks/MCP for universal AI interoperability.
 
@@ -38,7 +38,7 @@
 - [x] **Phase 15: Ingest CLI** - Conversation file ingestion with format detection and taxonomy
 - [x] **Phase 16: Hook MCP Tools** - Hook introspection tools and documentation for AI discoverability
 - [x] **Phase 17: Shell Completions and Polish** - Tab completions for bash, zsh, and fish
-- [ ] **Phase 18: Binary Deprecation** - Redirect old fragmented binaries to unified CLI with warnings
+- [x] **Phase 18: Binary Deprecation** - Redirect old fragmented binaries to unified CLI with warnings
 
 ## Phase Details
 
@@ -135,7 +135,7 @@
   2. Running the old `localnest-mcp-doctor` binary prints a deprecation warning and redirects to `localnest doctor`
   3. Running the old `localnest-mcp-upgrade` binary prints a deprecation warning and redirects to `localnest upgrade`
   4. Running the old `localnest-mcp-install-skill` binary prints a deprecation warning and redirects to `localnest skill install`
-**Plans**: TBD
+**Plans**: 1 (complete)
 
 ## Progress
 
@@ -162,4 +162,4 @@ Phases execute in numeric order: 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17 ->
 | 15. Ingest CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 16. Hook MCP Tools | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 17. Shell Completions | v2.0 | 1/1 | Complete | 2026-04-08 |
-| 18. Binary Deprecation | v2.0 | 0/? | Not started | - |
+| 18. Binary Deprecation | v2.0 | 1/1 | Complete | 2026-04-08 |
