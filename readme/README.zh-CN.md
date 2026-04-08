@@ -12,7 +12,9 @@
 
 **你的代码库。你的 AI。你的机器。没有云端、没有泄露、没有意外。**
 
-LocalNest 是一个 local-first 的 MCP 服务器，为 AI 代理提供安全且有范围限制的代码访问能力，同时具备混合搜索、语义索引，以及绝不会离开你机器的持久记忆。
+LocalNest 是一个 local-first 的 MCP 服务器和 CLI 工具，为 AI 代理提供安全且有范围限制的代码访问能力，同时具备混合搜索、语义索引、时序知识图谱，以及绝不会离开你机器的持久记忆。
+
+**52 MCP 工具** | **时序知识图谱** | **多跳图谱遍历** | **代理级别的内存隔离** | **零云端依赖**
 
 📖 [完整文档](https://wmt-mobile.github.io/localnest/) · [架构深度解析](../guides/architecture.md)
 
@@ -21,6 +23,23 @@ LocalNest 是一个 local-first 的 MCP 服务器，为 AI 代理提供安全且
 [English](../README.md) · [العربية الفصحى](./README.ar-001.md) · [বাংলা (বাংলাদেশ)](./README.bn-BD.md) · [Deutsch (Deutschland)](./README.de-DE.md) · [Español (Latinoamérica)](./README.es-419.md) · [Français (France)](./README.fr-FR.md) · [हिन्दी (भारत)](./README.hi-IN.md) · [Bahasa Indonesia](./README.id-ID.md) · [日本語](./README.ja-JP.md) · [한국어](./README.ko-KR.md) · [Português (Brasil)](./README.pt-BR.md) · [Русский](./README.ru-RU.md) · [Türkçe](./README.tr-TR.md) · 简体中文
 
 这些翻译文件都是针对具体区域设置的完整 README 译本。目标语言矩阵和术语规则请参阅[翻译政策](./TRANSLATION_POLICY.md)。最新命令、发布说明和完整细节仍以英文版 [README.md](../README.md) 为准。
+
+---
+
+## 0.0.7 新特性
+
+> 完整变更日志: [CHANGELOG.md](../CHANGELOG.md)
+
+- **时序知识图谱** -- 实体、三元组、as_of 查询、时间线、矛盾检测
+- **多跳图谱遍历** -- 通过递归 CTE 遍历 2-5 跳深度的关系 (LocalNest 独有)
+- **Nest/Branch 层级** -- LocalNest 自有的两级记忆分类体系,用于有组织的检索
+- **代理级别的内存** -- 每个代理独立隔离,含私人日记条目
+- **语义去重** -- embedding 相似度门控防止近重复记忆污染
+- **对话摄取** -- 导入带有实体提取的 Markdown/JSON 聊天导出
+- **Hook 系统** -- 针对记忆、KG、遍历、摄取的前/后操作回调
+- **CLI 优先架构** -- 统一的 `localnest <noun> <verb>` 命令覆盖一切
+- **Shell 补全** -- bash、zsh、fish 的 tab 补全
+- **17 个新 MCP 工具** (共 52 个) -- KG、嵌套、遍历、日记、摄取、去重、hook
 
 ---
 
@@ -38,6 +57,12 @@ LocalNest 是一个 local-first 的 MCP 服务器，为 AI 代理提供安全且
 | **混合检索** | 将 lexical 和 semantic 搜索与 RRF 排名融合，兼顾两者优势 |
 | **项目感知** | 通过标记文件自动识别项目，并为每次工具调用限定作用范围 |
 | **代理记忆** | 持久、可查询的知识图谱，让 AI 记住它学到的内容 |
+| **时序知识图谱** | 带时间有效性的主语-谓语-宾语三元组 -- 查询任意时刻什么是真实的 |
+| **多跳图谱遍历** | 通过递归 CTE 遍历 2-5 跳深度的关系 -- 没有其他本地工具能做到 |
+| **Nest/Branch 层级** | 带元数据过滤增强的两级记忆分类体系,用于有组织的检索 |
+| **对话摄取** | 将 Markdown/JSON 聊天导出导入为结构化记忆 + KG 三元组 |
+| **代理隔离** | 每代理日记和内存范围限定 -- 多代理,零交叉污染 |
+| **Hook 系统** | 针对记忆、KG、遍历、摄取的前/后操作 hook -- 插入你自己的逻辑 |
 
 ---
 
@@ -118,7 +143,7 @@ localnest version              # 查看当前版本
 
 ## 代理如何使用
 
-绝大多数场景都可以用下面两种工作流覆盖：
+绝大多数场景都可以用下面四种工作流覆盖：
 
 ### 快速查找 - 找到它，读出来，结束
 适合快速定位某个文件、符号或代码模式。
@@ -139,7 +164,62 @@ localnest_read_file       → 读取相关片段
 localnest_capture_outcome → 把这次学到的内容保存到下次可用
 ```
 
-> **工具成功 ≠ 结果有用。** 工具可能返回 OK，但内容依然是空的。真正有意义的证据是非空的文件匹配和真实的代码行内容，而不只是进程成功执行。
+### 知识图谱 -- 关于项目的结构化事实
+
+```
+localnest_kg_add_triple   → 存储一个事实: "auth-service" 使用 "JWT"
+localnest_kg_query        → "auth-service" 与什么相关?
+localnest_kg_as_of        → 3 月 1 日时关于这个什么是真实的?
+localnest_graph_traverse  → 遍历 2-3 跳以发现连接
+```
+
+### 对话记忆 -- 从过去的聊天中学习
+
+```
+localnest_ingest_markdown → 导入一段对话导出
+localnest_memory_recall   → 我对这个已经知道什么?
+localnest_diary_write     → 此代理的私人便签本
+```
+
+---
+
+## CLI 参考
+
+LocalNest 是一个完整的 CLI 工具。一切都通过终端管理:
+
+```bash
+localnest setup                     # configure roots, backends, AI clients
+localnest doctor                    # health check
+localnest upgrade                   # self-update
+localnest version                   # current version
+localnest status                    # runtime status
+
+localnest memory add "content"      # store a memory
+localnest memory search "query"     # find memories
+localnest memory list               # list all memories
+localnest memory show <id>          # view one memory
+localnest memory delete <id>        # remove a memory
+
+localnest kg add Alice works_on ProjectX    # add a fact
+localnest kg query Alice                     # query relationships
+localnest kg timeline Alice                  # fact evolution
+localnest kg stats                           # graph statistics
+
+localnest skill install             # install skills to AI clients
+localnest skill list                # show installed skills
+localnest skill remove <name>       # uninstall a skill
+
+localnest mcp start                 # start MCP server
+localnest mcp status                # server health
+localnest mcp config                # config JSON for AI clients
+
+localnest ingest ./chat.md          # import conversation
+localnest ingest ./export.json      # import JSON chat
+
+localnest completion bash           # shell completions
+```
+
+**全局标志**在每个命令上都可用: `--json` (机器输出)、`--verbose`、`--quiet`、`--config <path>`
 
 ---
 
@@ -188,6 +268,48 @@ localnest_capture_outcome → 把这次学到的内容保存到下次可用
 | `localnest_memory_suggest_relations` | 按相似度自动建议相关记忆 |
 | `localnest_memory_status` | 查看记忆同意状态、后端和数据库状态 |
 
+### Knowledge Graph
+
+| 工具 | 作用 |
+|------|-------------|
+| `localnest_kg_add_entity` | 创建实体 (人员、项目、概念、工具) |
+| `localnest_kg_add_triple` | 添加带时间有效性的主语-谓语-宾语事实 |
+| `localnest_kg_query` | 带方向过滤的实体关系查询 |
+| `localnest_kg_invalidate` | 将事实标记为不再有效 (归档而非删除) |
+| `localnest_kg_as_of` | 时间点查询 -- 日期 X 时什么是真实的? |
+| `localnest_kg_timeline` | 实体的时间顺序事实演变 |
+| `localnest_kg_stats` | 实体数量、三元组数量、谓语分布 |
+
+### Nest/Branch 组织
+
+| 工具 | 作用 |
+|------|-------------|
+| `localnest_nest_list` | 列出所有 nest (顶级记忆域) 及计数 |
+| `localnest_nest_branches` | 列出 nest 内的 branch (主题) |
+| `localnest_nest_tree` | 完整层级: nest、branch 和计数 |
+
+### 图谱遍历
+
+| 工具 | 作用 |
+|------|-------------|
+| `localnest_graph_traverse` | 带路径追踪的多跳遍历 (递归 CTE) |
+| `localnest_graph_bridges` | 发现跨 nest 桥接 -- 跨域连接 |
+
+### 代理日记
+
+| 工具 | 作用 |
+|------|-------------|
+| `localnest_diary_write` | 写入私人便签条目 (代理隔离) |
+| `localnest_diary_read` | 读取自己最近的日记条目 |
+
+### 对话摄取
+
+| 工具 | 作用 |
+|------|-------------|
+| `localnest_ingest_markdown` | 将 Markdown 对话导出导入记忆 + KG |
+| `localnest_ingest_json` | 将 JSON 对话导出导入记忆 + KG |
+| `localnest_memory_check_duplicate` | 存储前的语义重复检测 |
+
 ### 服务器与更新
 
 | 工具 | 作用 |
@@ -198,7 +320,33 @@ localnest_capture_outcome → 把这次学到的内容保存到下次可用
 | `localnest_update_status` | 检查 npm 上的最新版本（带缓存） |
 | `localnest_update_self` | 全局更新并同步内置 skill（需要批准） |
 
-所有工具都支持 `response_format: "json"`（默认）或 `"markdown"`。列表类工具会返回 `total_count`、`has_more`、`next_offset` 用于分页。
+**共 50 个工具。** 所有工具都支持 `response_format: "json"` (默认) 或 `"markdown"`。列表类工具会返回 `total_count`、`has_more`、`next_offset` 用于分页。
+
+---
+
+## LocalNest 如何与其他工具比较
+
+LocalNest 是唯一将代码检索和结构化记忆整合在一个工具中的 local-first MCP 服务器。以下是它的定位:
+
+| 能力 | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
+|---|---|---|---|---|---|
+| **Local-first (无云端)** | 是 | 是 | 否 ($25+/月) | 否 (Neo4j) | 否 ($20-200/月) |
+| **代码检索** | 50 MCP 工具,AST 感知,混合搜索 | 无 | 无 | 无 | 无 |
+| **知识图谱** | 带时间有效性的 SQLite 三元组 | SQLite 三元组 | Neo4j | Neo4j | Key-value |
+| **多跳遍历** | 是 (递归 CTE, 2-5 跳) | 否 (仅平面查找) | 否 | 是 (需要 Neo4j) | 否 |
+| **时序查询 (as_of)** | 是 | 是 | 是 | 是 | 否 |
+| **矛盾检测** | 是 (写入时警告) | 存在但未连接 | 否 | 否 | 否 |
+| **对话摄取** | Markdown + JSON | Markdown + JSON + Slack | 否 | 否 | 否 |
+| **代理隔离** | 每代理范围限定 + 私人日记 | Wing-per-agent | User/session scoping | 否 | User/agent/run/session |
+| **语义去重** | 所有写入使用 0.92 cosine 门控 | 0.9 阈值 | 否 | 否 | 否 |
+| **记忆层级** | Nest/Branch (原创) | Wing/Room/Hall (palace) | 扁平 | 扁平 | 扁平 |
+| **Hook 系统** | 前/后操作 hook | 无 | Webhooks | 无 | 无 |
+| **运行时** | Node.js (轻量) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (云端) |
+| **依赖** | 0 个新增 (纯 SQLite) | ChromaDB (较重) | Neo4j ($25+/月) | Neo4j | Cloud API |
+| **MCP 工具** | 50 | 19 | 0 | 0 | 0 |
+| **费用** | 免费 | 免费 | $25+/月 | $25+/月 | $20-200/月 |
+
+**LocalNest 的独特定位:** 唯一同时为你的 AI 提供深度代码理解和结构化持久记忆的工具 -- 完全本地,零云端,零成本。
 
 ---
 
@@ -209,7 +357,19 @@ localnest_capture_outcome → 把这次学到的内容保存到下次可用
 - 需要 **Node 22.13+**，但搜索和文件工具在没有记忆功能时也能在 Node 18/20 上正常工作
 - 记忆功能出错不会阻塞其他工具，所有能力都会彼此独立地降级
 
-**自动提升如何工作：** 通过 `localnest_memory_capture_event` 捕获的事件会按信号强度评分。高信号事件，例如 bug 修复、决策和偏好，会被提升为持久记忆。弱信号的探索性事件会先记录下来，然后在 30 天后悄悄丢弃。
+**自动提升如何工作:** 通过 `localnest_memory_capture_event` 捕获的事件会按信号强度评分。高信号事件,例如 bug 修复、决策和偏好,会被提升为持久记忆。弱信号的探索性事件会先记录下来,然后在 30 天后悄悄丢弃。
+
+**知识图谱:** 将结构化事实存储为带时间有效性的主语-谓语-宾语三元组。通过 `as_of` 查询任意时间点什么是真实的。通过递归 CTE 遍历探索 2-5 跳深度的关系。在写入时检测矛盾。
+
+**Nest/Branch 层级:** 将记忆组织到 nest (顶级域) 和 branch (主题) 中。元数据过滤的召回在评分前缩小候选范围,提供更快、更精确的结果。
+
+**代理隔离:** 每个代理获得自己的记忆范围和私人日记。召回返回自己的 + 全局记忆,永远不会返回其他代理的私有数据。
+
+**语义去重:** 每次写入都经过 embedding 相似度门控 (默认 0.92 cosine 阈值)。近重复项在存储前就被捕获 -- 你的记忆保持干净。
+
+**对话摄取:** 导入 Markdown 或 JSON 聊天导出。每个对话轮次成为一个记忆条目,带有自动实体提取和 KG 三元组创建。同一文件的重复摄取通过内容哈希跳过。
+
+**Hook:** 在任何记忆操作上注册前/后回调 -- 存储、召回、KG 写入、遍历、摄取。无需修改核心代码即可构建自定义管道。
 
 ---
 

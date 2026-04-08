@@ -12,7 +12,9 @@
 
 **Votre base de code. Votre IA. Votre machine - pas de cloud, pas de fuite, pas de surprise.**
 
-LocalNest est un serveur MCP local-first qui donne aux agents IA un accès sûr et circonscrit à votre code, avec recherche hybride, indexation sémantique et mémoire persistante qui ne quitte jamais votre machine.
+LocalNest est un serveur MCP local-first et outil CLI qui donne aux agents IA un acces sur et circonscrit a votre code, avec recherche hybride, indexation semantique, graphe de connaissances temporel et memoire persistante qui ne quitte jamais votre machine.
+
+**52 outils MCP** | **Graphe de connaissances temporel** | **Parcours multi-hop du graphe** | **Memoire par agent** | **Zero dependance cloud**
 
 📖 [Documentation complète](https://wmt-mobile.github.io/localnest/) · [Architecture détaillée](../guides/architecture.md)
 
@@ -21,6 +23,23 @@ LocalNest est un serveur MCP local-first qui donne aux agents IA un accès sûr 
 [English](../README.md) · [العربية الفصحى](./README.ar-001.md) · [বাংলা (বাংলাদেশ)](./README.bn-BD.md) · [Deutsch (Deutschland)](./README.de-DE.md) · [Español (Latinoamérica)](./README.es-419.md) · Français (France) · [हिन्दी (भारत)](./README.hi-IN.md) · [Bahasa Indonesia](./README.id-ID.md) · [日本語](./README.ja-JP.md) · [한국어](./README.ko-KR.md) · [Português (Brasil)](./README.pt-BR.md) · [Русский](./README.ru-RU.md) · [Türkçe](./README.tr-TR.md) · [简体中文](./README.zh-CN.md)
 
 Ces fichiers traduits sont des traductions complètes du README, adaptées à chaque locale. Consultez la [politique de traduction](./TRANSLATION_POLICY.md) pour la matrice des locales cibles et les règles terminologiques. Le [README.md](../README.md) anglais reste la source de référence pour les nouvelles commandes, les notes de version et l’ensemble des détails.
+
+---
+
+## Nouveautes de la version 0.0.7
+
+> Changelog complet : [CHANGELOG.md](../CHANGELOG.md)
+
+- **Graphe de connaissances temporel** -- entites, triplets, requetes as_of, chronologies, detection de contradictions
+- **Parcours multi-hop du graphe** -- exploration des relations sur 2-5 sauts via des CTEs recursives (unique a LocalNest)
+- **Hierarchie Nest/Branch** -- taxonomie de memoire a deux niveaux propre a LocalNest pour une recuperation organisee
+- **Memoire par agent** -- isolation par agent avec entrees de journal privees
+- **Dedup semantique** -- gate de similarite d'embedding empeche la pollution par des doublons quasi identiques
+- **Ingestion de conversations** -- import d'exports de chat Markdown/JSON avec extraction d'entites
+- **Systeme de hooks** -- callbacks pre/post operation pour la memoire, le KG, le parcours, l'ingestion
+- **Architecture CLI-first** -- commandes unifiees `localnest <noun> <verb>` pour tout
+- **Completions shell** -- tab completion pour bash, zsh, fish
+- **17 nouveaux outils MCP** (52 au total) -- KG, nests, parcours, journal, ingestion, dedup, hooks
 
 ---
 
@@ -37,7 +56,13 @@ Tout - lecture de fichiers, embeddings vectoriels, mémoire - s’exécute dans 
 | **Recherche sémantique** | Embeddings locaux via `all-MiniLM-L6-v2` - aucun GPU nécessaire |
 | **Récupération hybride** | Fusion recherche lexicale + sémantique avec classement RRF pour le meilleur des deux mondes |
 | **Conscience du projet** | Détecte automatiquement les projets via des fichiers marqueurs et applique un scope à chaque appel |
-| **Mémoire de l’agent** | Graphe de connaissances durable et interrogeable - votre IA se souvient de ce qu’elle apprend |
+| **Memoire de l’agent** | Graphe de connaissances durable et interrogeable - votre IA se souvient de ce qu’elle apprend |
+| **Graphe de connaissances temporel** | Triplets sujet-predicat-objet avec validite temporelle -- interrogez ce qui etait vrai a un moment donne |
+| **Parcours multi-hop du graphe** | Explorez les relations sur 2-5 sauts via des CTEs recursives -- aucun autre outil local ne le fait |
+| **Hierarchie Nest/Branch** | Taxonomie de memoire a deux niveaux avec boost filtre par metadonnees pour une recuperation organisee |
+| **Ingestion de conversations** | Importez les exports de chat Markdown/JSON en memoire structuree + triplets KG |
+| **Isolation des agents** | Journal et scope memoire par agent -- agents multiples, zero contamination croisee |
+| **Systeme de hooks** | Hooks pre/post operation pour la memoire, le KG, le parcours, l’ingestion -- branchez votre propre logique |
 
 ---
 
@@ -118,7 +143,7 @@ localnest version              # vérifier la version actuelle
 
 ## Comment les agents l’utilisent
 
-Deux workflows couvrent presque tous les cas :
+Quatre workflows couvrent presque tous les cas :
 
 ### Recherche rapide - trouver, lire, terminé
 Idéal pour localiser précisément un fichier, un symbole ou un motif de code.
@@ -139,7 +164,62 @@ localnest_read_file       → lire les sections pertinentes
 localnest_capture_outcome → persister ce qui a été appris pour la prochaine fois
 ```
 
-> **Succès d’un tool ≠ résultat utile.** Un tool peut répondre OK et rester vide. Considérez les correspondances de fichiers non vides et le vrai contenu des lignes comme une preuve utile, pas seulement le succès du processus.
+### Graphe de connaissances -- faits structures sur le projet
+
+```
+localnest_kg_add_triple   → store a fact: "auth-service" uses "JWT"
+localnest_kg_query        → what does "auth-service" relate to?
+localnest_kg_as_of        → what was true about this on March 1st?
+localnest_graph_traverse  → walk 2-3 hops to discover connections
+```
+
+### Memoire conversationnelle -- apprendre des chats precedents
+
+```
+localnest_ingest_markdown → import a conversation export
+localnest_memory_recall   → what do I already know about this?
+localnest_diary_write     → private scratchpad for this agent
+```
+
+---
+
+## Reference CLI
+
+LocalNest est un outil CLI complet. Tout se gere depuis le terminal :
+
+```bash
+localnest setup                     # configure roots, backends, AI clients
+localnest doctor                    # health check
+localnest upgrade                   # self-update
+localnest version                   # current version
+localnest status                    # runtime status
+
+localnest memory add "content"      # store a memory
+localnest memory search "query"     # find memories
+localnest memory list               # list all memories
+localnest memory show <id>          # view one memory
+localnest memory delete <id>        # remove a memory
+
+localnest kg add Alice works_on ProjectX    # add a fact
+localnest kg query Alice                     # query relationships
+localnest kg timeline Alice                  # fact evolution
+localnest kg stats                           # graph statistics
+
+localnest skill install             # install skills to AI clients
+localnest skill list                # show installed skills
+localnest skill remove <name>       # uninstall a skill
+
+localnest mcp start                 # start MCP server
+localnest mcp status                # server health
+localnest mcp config                # config JSON for AI clients
+
+localnest ingest ./chat.md          # import conversation
+localnest ingest ./export.json      # import JSON chat
+
+localnest completion bash           # shell completions
+```
+
+**Flags globaux** fonctionnent sur chaque commande : `--json` (sortie machine), `--verbose`, `--quiet`, `--config <path>`
 
 ---
 
@@ -188,6 +268,48 @@ localnest_capture_outcome → persister ce qui a été appris pour la prochaine 
 | `localnest_memory_suggest_relations` | Suggère automatiquement des mémoires liées par similarité |
 | `localnest_memory_status` | État du consentement, du backend et de la base mémoire |
 
+### Knowledge Graph
+
+| Tool | Ce qu’il fait |
+|------|-------------|
+| `localnest_kg_add_entity` | Creer des entites (personnes, projets, concepts, outils) |
+| `localnest_kg_add_triple` | Ajouter des faits sujet-predicat-objet avec validite temporelle |
+| `localnest_kg_query` | Interroger les relations d’entites avec filtrage de direction |
+| `localnest_kg_invalidate` | Marquer un fait comme n’etant plus valide (archivage, pas suppression) |
+| `localnest_kg_as_of` | Requetes point-dans-le-temps -- qu’etait-il vrai a la date X ? |
+| `localnest_kg_timeline` | Evolution chronologique des faits pour une entite |
+| `localnest_kg_stats` | Nombre d’entites, nombre de triplets, repartition des predicats |
+
+### Organisation Nest/Branch
+
+| Tool | Ce qu’il fait |
+|------|-------------|
+| `localnest_nest_list` | Lister tous les nests (domaines memoire de premier niveau) avec comptages |
+| `localnest_nest_branches` | Lister les branches (sujets) dans un nest |
+| `localnest_nest_tree` | Hierarchie complete : nests, branches et comptages |
+
+### Parcours du graphe
+
+| Tool | Ce qu’il fait |
+|------|-------------|
+| `localnest_graph_traverse` | Parcours multi-hop avec suivi de chemin (CTEs recursives) |
+| `localnest_graph_bridges` | Trouver les ponts cross-nest -- connexions entre domaines |
+
+### Journal de l’agent
+
+| Tool | Ce qu’il fait |
+|------|-------------|
+| `localnest_diary_write` | Ecrire une entree de bloc-notes privee (isolee par agent) |
+| `localnest_diary_read` | Lire vos entrees de journal recentes |
+
+### Ingestion de conversations
+
+| Tool | Ce qu’il fait |
+|------|-------------|
+| `localnest_ingest_markdown` | Importer des exports de conversation Markdown dans la memoire + KG |
+| `localnest_ingest_json` | Importer des exports de conversation JSON dans la memoire + KG |
+| `localnest_memory_check_duplicate` | Detection de doublons semantiques avant enregistrement |
+
 ### Server & Updates
 
 | Tool | Ce qu’il fait |
@@ -198,7 +320,33 @@ localnest_capture_outcome → persister ce qui a été appris pour la prochaine 
 | `localnest_update_status` | Vérifie npm pour la version la plus récente (avec cache) |
 | `localnest_update_self` | Met à jour globalement et synchronise le skill embarqué (approbation requise) |
 
-Tous les tools prennent en charge `response_format: "json"` (par défaut) ou `"markdown"`. Les tools de liste renvoient `total_count`, `has_more`, `next_offset` pour la pagination.
+**50 outils au total.** Tous les tools prennent en charge `response_format: "json"` (par defaut) ou `"markdown"`. Les tools de liste renvoient `total_count`, `has_more`, `next_offset` pour la pagination.
+
+---
+
+## Comment LocalNest se compare
+
+LocalNest est le seul serveur MCP local-first qui combine recuperation de code ET memoire structuree dans un seul outil. Voici sa position :
+
+| Capacite | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
+|---|---|---|---|---|---|
+| **Local-first (pas de cloud)** | Oui | Oui | Non ($25+/mois) | Non (Neo4j) | Non ($20-200/mois) |
+| **Recuperation de code** | 50 outils MCP, AST-aware, recherche hybride | Aucun | Aucun | Aucun | Aucun |
+| **Graphe de connaissances** | Triplets SQLite avec validite temporelle | Triplets SQLite | Neo4j | Neo4j | Key-value |
+| **Parcours multi-hop** | Oui (CTEs recursives, 2-5 sauts) | Non (lookup plat uniquement) | Non | Oui (necessite Neo4j) | Non |
+| **Requetes temporelles (as_of)** | Oui | Oui | Oui | Oui | Non |
+| **Detection de contradictions** | Oui (avertissements a l’ecriture) | Existe mais non branche | Non | Non | Non |
+| **Ingestion de conversations** | Markdown + JSON | Markdown + JSON + Slack | Non | Non | Non |
+| **Isolation des agents** | Scoping par agent + journal prive | Wing-per-agent | User/session scoping | Non | User/agent/run/session |
+| **Dedup semantique** | Gate cosine 0.92 sur toutes les ecritures | Seuil 0.9 | Non | Non | Non |
+| **Hierarchie memoire** | Nest/Branch (original) | Wing/Room/Hall (palace) | Plat | Plat | Plat |
+| **Systeme de hooks** | Hooks pre/post operation | Aucun | Webhooks | Aucun | Aucun |
+| **Runtime** | Node.js (leger) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
+| **Dependances** | 0 nouvelle (SQLite pur) | ChromaDB (lourd) | Neo4j ($25+/mois) | Neo4j | Cloud API |
+| **Outils MCP** | 50 | 19 | 0 | 0 | 0 |
+| **Cout** | Gratuit | Gratuit | $25+/mois | $25+/mois | $20-200/mois |
+
+**Position unique de LocalNest :** Le seul outil qui donne a votre IA une comprehension profonde du code ET une memoire persistante structuree -- entierement local, zero cloud, zero cout.
 
 ---
 
@@ -209,7 +357,19 @@ Activez la mémoire pendant `localnest setup` et LocalNest commencera à constru
 - Nécessite **Node 22.13+** - les tools de recherche et de fichiers fonctionnent très bien sur Node 18/20 sans cela
 - Une panne de mémoire ne bloque jamais les autres tools - tout se dégrade indépendamment
 
-**Fonctionnement de l’auto-promotion :** les événements capturés via `localnest_memory_capture_event` sont notés selon la force du signal. Les événements à fort signal - correctifs, décisions, préférences - sont promus en mémoires durables. Les événements exploratoires faibles sont enregistrés puis discrètement supprimés après 30 jours.
+**Fonctionnement de l’auto-promotion :** les evenements captures via `localnest_memory_capture_event` sont notes selon la force du signal. Les evenements a fort signal - correctifs, decisions, preferences - sont promus en memoires durables. Les evenements exploratoires faibles sont enregistres puis discretement supprimes apres 30 jours.
+
+**Graphe de connaissances :** Stockez des faits structures sous forme de triplets sujet-predicat-objet avec validite temporelle. Interrogez ce qui etait vrai a un moment donne avec `as_of`. Parcourez les relations sur 2-5 sauts avec le parcours CTE recursif. Detectez les contradictions a l’ecriture.
+
+**Hierarchie Nest/Branch :** Organisez les memoires en nests (domaines de premier niveau) et branches (sujets). La recuperation filtree par metadonnees reduit les candidats avant le scoring pour des resultats plus rapides et plus precis.
+
+**Isolation des agents :** Chaque agent dispose de son propre scope memoire et d’un journal prive. La recuperation renvoie les memoires propres + globales, jamais les donnees privees d’un autre agent.
+
+**Dedup semantique :** Chaque ecriture passe par un gate de similarite d’embedding (seuil cosine par defaut : 0.92). Les quasi-doublons sont detectes avant le stockage -- votre memoire reste propre.
+
+**Ingestion de conversations :** Importez des exports de chat Markdown ou JSON. Chaque tour devient une entree memoire avec extraction automatique d’entites et creation de triplets KG. La re-ingestion du meme fichier est ignoree par hash de contenu.
+
+**Hooks :** Enregistrez des callbacks pre/post sur toute operation memoire -- stockage, recuperation, ecritures KG, parcours, ingestion. Construisez des pipelines personnalises sans modifier le code principal.
 
 ---
 
