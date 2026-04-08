@@ -678,6 +678,159 @@ body {
   }
 }
 
+/* Status badges */
+.docBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.58rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.5;
+}
+
+.docBadge--stable {
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #86efac;
+}
+
+.docBadge--beta {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.docBadge--new {
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #60a5fa;
+}
+
+.docBadge--deprecated {
+  background: #fce7f3;
+  color: #9d174d;
+  border: 1px solid #f472b6;
+}
+
+[data-theme='dark'] .docBadge--stable {
+  background: #052e16;
+  color: #86efac;
+  border-color: #166534;
+}
+
+[data-theme='dark'] .docBadge--beta {
+  background: #451a03;
+  color: #fbbf24;
+  border-color: #92400e;
+}
+
+[data-theme='dark'] .docBadge--new {
+  background: #1e1b4b;
+  color: #93b6ff;
+  border-color: #3b5bdb;
+}
+
+[data-theme='dark'] .docBadge--deprecated {
+  background: #4c061a;
+  color: #f472b6;
+  border-color: #9d174d;
+}
+
+/* Copy button enhancement */
+.theme-code-block button[title="Copy"] {
+  border-radius: 8px;
+  opacity: 0;
+  transition: opacity 180ms ease, background 180ms ease;
+}
+
+.theme-code-block:hover button[title="Copy"] {
+  opacity: 0.7;
+}
+
+.theme-code-block button[title="Copy"]:hover {
+  opacity: 1;
+  background: var(--ifm-color-primary);
+  color: white;
+}
+
+/* Feature highlight cards */
+.docFeatureGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 0.85rem;
+  margin: 1.2rem 0 1.5rem;
+}
+
+.docFeatureCard {
+  background: var(--site-card-bg);
+  border: var(--site-border);
+  border-radius: 14px;
+  padding: 1rem;
+  transition: border-color 180ms ease, transform 180ms ease;
+}
+
+.docFeatureCard:hover {
+  border-color: color-mix(in srgb, var(--ifm-color-primary) 40%, transparent);
+  transform: translateY(-1px);
+}
+
+.docFeatureCard__title {
+  font-family: var(--ifm-font-family-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ifm-heading-color);
+  margin: 0 0 0.35rem;
+}
+
+.docFeatureCard__desc {
+  font-size: 0.88rem;
+  line-height: 1.6;
+  margin: 0;
+  color: var(--ifm-footer-color);
+}
+
+/* Tool count stat pill */
+.docStatPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--ifm-color-primary), #1a4fcc);
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* Admonition refinements */
+.alert {
+  border-radius: 12px;
+  border-left-width: 4px;
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ifm-color-primary) 30%, transparent);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--ifm-color-primary) 50%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -691,7 +844,8 @@ body {
     animation: none;
   }
 
-  .docLinkCard {
+  .docLinkCard,
+  .docFeatureCard {
     transition: none;
   }
 }

@@ -3,7 +3,7 @@ import type * as Preset from '@docusaurus/preset-classic'
 
 const config: Config = {
   title: 'LocalNest MCP',
-  tagline: 'Local-first MCP docs for setup, search, indexing, and releases',
+  tagline: 'Local-first MCP server with temporal knowledge graph, 52 tools, and zero cloud dependencies',
   favicon: 'img/logo-mark.svg',
   url: 'https://wmt-mobile.github.io',
   baseUrl: '/localnest/',
@@ -113,7 +113,7 @@ const config: Config = {
         },
         {
           href: 'https://www.npmjs.com/package/localnest-mcp',
-          label: 'v0.0.5',
+          label: 'v0.0.7-beta',
           position: 'right'
         },
         {
@@ -142,7 +142,7 @@ const config: Config = {
         {
           title: 'Versions',
           items: [
-            { label: 'Current stable (0.0.5)', to: '/docs/releases/current' },
+            { label: 'Current (0.0.7-beta.1)', to: '/docs/releases/current' },
             { label: 'Release matrix', to: '/docs/releases/history' }
           ]
         },
