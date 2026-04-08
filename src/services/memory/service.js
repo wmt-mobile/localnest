@@ -216,6 +216,11 @@ export class MemoryService {
     return this.store.getTaxonomyTree();
   }
 
+  async traverseGraph(args) {
+    this.assertEnabled();
+    return this.store.traverseGraph(args);
+  }
+
   assertEnabled() {
     if (!this.enabled) {
       throw new Error('Local memory is disabled. Re-run localnest setup and opt in to memory.');

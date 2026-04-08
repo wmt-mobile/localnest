@@ -29,6 +29,7 @@ import {
   listBranches as listBranchesFn,
   getTaxonomyTree as getTaxonomyTreeFn
 } from './taxonomy.js';
+import { traverseGraph as traverseGraphFn } from './graph.js';
 import {
   addEntity as addEntityFn,
   getEntity as getEntityFn,
@@ -249,5 +250,10 @@ export class MemoryStore {
   async getTaxonomyTree() {
     await this.init();
     return getTaxonomyTreeFn(this.adapter);
+  }
+
+  async traverseGraph(args) {
+    await this.init();
+    return traverseGraphFn(this.adapter, args);
   }
 }
