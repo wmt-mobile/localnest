@@ -12,7 +12,9 @@
 
 **Your codebase. Your AI. Your machine — no cloud, no leaks, no surprises.**
 
-LocalNest is a local-first MCP server that gives AI agents safe, scoped access to your code — with hybrid search, semantic indexing, and persistent memory that never leaves your machine.
+LocalNest is a local-first MCP server and CLI tool that gives AI agents safe, scoped access to your code — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory that never leaves your machine.
+
+**52 MCP tools** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
 
 📖 [Full documentation](https://wmt-mobile.github.io/localnest/) · [Architecture deep dive](./guides/architecture.md)
 
@@ -21,6 +23,23 @@ LocalNest is a local-first MCP server that gives AI agents safe, scoped access t
 English · [العربية الفصحى](./readme/README.ar-001.md) · [বাংলা (বাংলাদেশ)](./readme/README.bn-BD.md) · [Deutsch (Deutschland)](./readme/README.de-DE.md) · [Español (Latinoamérica)](./readme/README.es-419.md) · [Français (France)](./readme/README.fr-FR.md) · [हिन्दी (भारत)](./readme/README.hi-IN.md) · [Bahasa Indonesia](./readme/README.id-ID.md) · [日本語](./readme/README.ja-JP.md) · [한국어](./readme/README.ko-KR.md) · [Português (Brasil)](./readme/README.pt-BR.md) · [Русский](./readme/README.ru-RU.md) · [Türkçe](./readme/README.tr-TR.md) · [简体中文](./readme/README.zh-CN.md)
 
 These translated files are locale-specific full README translations. See [translation policy](./readme/TRANSLATION_POLICY.md) for the target locale matrix and terminology rules. The English [README.md](./README.md) remains the source of truth for the newest commands, release notes, and full details.
+
+---
+
+## What's New in 0.0.7
+
+> Full changelog: [CHANGELOG.md](./CHANGELOG.md)
+
+- **Temporal knowledge graph** — entities, triples, as_of queries, timelines, contradiction detection
+- **Multi-hop graph traversal** — walk relationships 2-5 hops deep via recursive CTEs (unique to LocalNest)
+- **Nest/Branch hierarchy** — LocalNest's own two-level memory taxonomy for organized retrieval
+- **Agent-scoped memory** — per-agent isolation with private diary entries
+- **Semantic dedup** — embedding similarity gate prevents near-duplicate memory pollution
+- **Conversation ingestion** — import Markdown/JSON chat exports with entity extraction
+- **Hooks system** — pre/post operation callbacks for memory, KG, traversal, ingestion
+- **CLI-first architecture** — unified `localnest <noun> <verb>` commands for everything
+- **Shell completions** — bash, zsh, fish tab completion
+- **17 new MCP tools** (52 total) — KG, nests, traversal, diary, ingest, dedup, hooks
 
 ---
 
@@ -124,10 +143,9 @@ localnest version              # check current
 
 ## How Agents Use It
 
-Two workflows cover almost everything:
+Four workflows cover almost everything:
 
 ### Fast lookup — find it, read it, done
-Best for pinpointing a file, symbol, or code pattern.
 
 ```
 localnest_search_files   → find the module by path/name
@@ -136,7 +154,6 @@ localnest_read_file      → read the relevant lines
 ```
 
 ### Deep task — debug, refactor, review with context
-Best for complex work where memory and semantic understanding matter.
 
 ```
 localnest_task_context    → one call: runtime status + recalled memories
@@ -145,7 +162,62 @@ localnest_read_file       → read the relevant sections
 localnest_capture_outcome → persist what you learned for next time
 ```
 
-> **Tool success ≠ useful result.** A tool can return OK and still be empty. Treat non-empty file matches and real line content as meaningful evidence — not just process success.
+### Knowledge graph — structured facts about the project
+
+```
+localnest_kg_add_triple   → store a fact: "auth-service" uses "JWT"
+localnest_kg_query        → what does "auth-service" relate to?
+localnest_kg_as_of        → what was true about this on March 1st?
+localnest_graph_traverse  → walk 2-3 hops to discover connections
+```
+
+### Conversation memory — learn from past chats
+
+```
+localnest_ingest_markdown → import a conversation export
+localnest_memory_recall   → what do I already know about this?
+localnest_diary_write     → private scratchpad for this agent
+```
+
+---
+
+## CLI Reference
+
+LocalNest is a full CLI tool. Everything is managed from the terminal:
+
+```bash
+localnest setup                     # configure roots, backends, AI clients
+localnest doctor                    # health check
+localnest upgrade                   # self-update
+localnest version                   # current version
+localnest status                    # runtime status
+
+localnest memory add "content"      # store a memory
+localnest memory search "query"     # find memories
+localnest memory list               # list all memories
+localnest memory show <id>          # view one memory
+localnest memory delete <id>        # remove a memory
+
+localnest kg add Alice works_on ProjectX    # add a fact
+localnest kg query Alice                     # query relationships
+localnest kg timeline Alice                  # fact evolution
+localnest kg stats                           # graph statistics
+
+localnest skill install             # install skills to AI clients
+localnest skill list                # show installed skills
+localnest skill remove <name>       # uninstall a skill
+
+localnest mcp start                 # start MCP server
+localnest mcp status                # server health
+localnest mcp config                # config JSON for AI clients
+
+localnest ingest ./chat.md          # import conversation
+localnest ingest ./export.json      # import JSON chat
+
+localnest completion bash           # shell completions
+```
+
+**Global flags** work on every command: `--json` (machine output), `--verbose`, `--quiet`, `--config <path>`
 
 ---
 
