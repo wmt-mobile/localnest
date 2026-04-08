@@ -233,4 +233,79 @@ export async function queryEntityRelationships(adapter, entityId, { direction, i
   };
 }
 
+export async function queryTriplesAsOf(adapter, entityId, asOfDate) {
+  const id = cleanString(entityId, 400);
+  if (!id) throw new Error('entityId is required');
+  if (!asOfDate) throw new Error('asOfDate is required');
+
+  const triples = await adapter.all(
+    `SELECT t.*, s.name AS subject_name, o.name AS object_name
+       FROM kg_triples t
+       JOIN kg_entities s ON s.id = t.subject_id
+       JOIN kg_entities o ON o.id = t.object_id
+      WHERE (t.subject_id = ? OR t.object_id = ?)
+        AND (t.valid_from IS NULL OR t.valid_from <= ?)
+        AND (t.valid_to IS NULL OR t.valid_to > ?)
+      ORDER BY t.valid_from ASC`,
+    [id, id, asOfDate, asOfDate]
+  );
+
+  return {
+    entity_id: id,
+    as_of: asOfDate,
+    count: triples.length,
+    triples
+  };
+}
+
+export async function getEntityTimeline(adapter, entityId) {
+  const id = cleanString(entityId, 400);
+  if (!id) throw new Error('entityId is required');
+
+  const triples = await adapter.all(
+    `SELECT t.*, s.name AS subject_name, o.name AS object_name
+       FROM kg_triples t
+       JOIN kg_entities s ON s.id = t.subject_id
+       JOIN kg_entities o ON o.id = t.object_id
+      WHERE t.subject_id = ? OR t.object_id = ?
+      ORDER BY t.valid_from ASC, t.created_at ASC`,
+    [id, id]
+  );
+
+  return {
+    entity_id: id,
+    count: triples.length,
+    triples
+  };
+}
+
+export async function getKgStats(adapter) {
+  const entityCount = await adapter.get(
+    'SELECT COUNT(*) AS count FROM kg_entities'
+  );
+
+  const tripleCount = await adapter.get(
+    'SELECT COUNT(*) AS count FROM kg_triples'
+  );
+
+  const activeTripleCount = await adapter.get(
+    'SELECT COUNT(*) AS count FROM kg_triples WHERE valid_to IS NULL'
+  );
+
+  const byPredicate = await adapter.all(
+    `SELECT predicate, COUNT(*) AS count
+       FROM kg_triples
+      WHERE valid_to IS NULL
+      GROUP BY predicate
+      ORDER BY count DESC`
+  );
+
+  return {
+    entities: entityCount?.count ?? 0,
+    triples: tripleCount?.count ?? 0,
+    active_triples: activeTripleCount?.count ?? 0,
+    by_predicate: byPredicate
+  };
+}
+
 export { toSlug as normalizeEntityId };
