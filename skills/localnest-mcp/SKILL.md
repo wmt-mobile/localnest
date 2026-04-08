@@ -202,6 +202,46 @@ Duplicate detection:
 - Automatic dedup runs on every `localnest_memory_store` and `localnest_memory_capture_event`.
 - Default threshold: 0.92 cosine similarity. Configurable per call.
 
+Hook introspection workflow:
+1. `localnest_hooks_stats` ← check whether hooks are enabled, how many listeners are registered, and which events have active listeners
+2. `localnest_hooks_list_events` ← get the full list of valid event names that hooks can subscribe to
+
+When to use hook introspection:
+- To audit which hooks are currently active before debugging unexpected memory behavior.
+- To discover available hook event names when building automation or plugins.
+- To verify that a hook registration succeeded (listener count should increase).
+
+Valid hook events cover the full memory lifecycle:
+- Memory entry: `before:store`, `after:store`, `before:update`, `after:update`, `before:delete`, `after:delete`, `before:recall`, `after:recall`
+- Knowledge graph: `before:kg:addEntity`, `after:kg:addEntity`, `before:kg:addTriple`, `after:kg:addTriple`, `before:kg:invalidate`, `after:kg:invalidate`
+- Graph traversal: `before:graph:traverse`, `after:graph:traverse`, `before:graph:bridges`, `after:graph:bridges`
+- Agent diary: `before:diary:write`, `after:diary:write`
+- Ingestion: `before:ingest`, `after:ingest`
+- Dedup: `before:dedup`, `after:dedup`
+- Taxonomy: `before:nest:list`, `after:nest:list`
+- Wildcards: `before:*`, `after:*` (catch-all for all before/after events)
+- Error: `error` (fired when a hook listener throws)
+
+Hook usage examples (programmatic, not MCP):
+```js
+// Register a hook to log every memory store operation
+hooks.on('after:store', async (entry, ctx) => {
+  console.log(`Stored memory ${entry.id} via ${ctx.event}`);
+});
+
+// Register a hook to block storage of sensitive content
+hooks.on('before:store', async (entry) => {
+  if (entry.content.includes('SECRET')) {
+    return { cancel: true, reason: 'blocked sensitive content' };
+  }
+});
+
+// One-time hook that fires only once
+hooks.once('after:kg:addTriple', async (triple) => {
+  console.log('First triple added:', triple);
+});
+```
+
 Automatic memory triggers:
 - Run `localnest_task_context` before deeper analysis when the task involves debugging, implementation, code review, repeated repo work, or user/project preferences.
 - Run `localnest_capture_outcome` after:
