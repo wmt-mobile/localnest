@@ -32,6 +32,7 @@ import {
 import { traverseGraph as traverseGraphFn, discoverBridges as discoverBridgesFn } from './graph.js';
 import { writeDiaryEntry as writeDiaryEntryFn, readDiaryEntries as readDiaryEntriesFn } from './scopes.js';
 import { checkDuplicate as checkDuplicateFn } from './dedup.js';
+import { ingestMarkdown as ingestMarkdownFn, ingestJson as ingestJsonFn } from './ingest.js';
 import {
   addEntity as addEntityFn,
   getEntity as getEntityFn,
@@ -278,5 +279,15 @@ export class MemoryStore {
   async checkDuplicate(content, opts = {}) {
     await this.init();
     return checkDuplicateFn(this.adapter, this.embeddingService, content, opts);
+  }
+
+  async ingestMarkdown(opts = {}) {
+    await this.init();
+    return ingestMarkdownFn(this.adapter, this.embeddingService, opts);
+  }
+
+  async ingestJson(opts = {}) {
+    await this.init();
+    return ingestJsonFn(this.adapter, this.embeddingService, opts);
   }
 }

@@ -241,6 +241,16 @@ export class MemoryService {
     return this.store.checkDuplicate(content, opts);
   }
 
+  async ingestMarkdown(opts = {}) {
+    this.assertEnabled();
+    return this.store.ingestMarkdown(opts);
+  }
+
+  async ingestJson(opts = {}) {
+    this.assertEnabled();
+    return this.store.ingestJson(opts);
+  }
+
   assertEnabled() {
     if (!this.enabled) {
       throw new Error('Local memory is disabled. Re-run localnest setup and opt in to memory.');
