@@ -51,7 +51,7 @@
   2. Running `localnest --version` or `localnest version` prints the current package version
   3. Passing --json to any command switches output from human-readable to JSON
   4. Passing --verbose increases output detail; passing --quiet suppresses non-essential output
-**Plans**: TBD
+**Plans**: 1 (complete)
 
 ### Phase 11: Memory CLI Commands
 **Goal**: Users can manage memories entirely from the command line without touching MCP tools
@@ -154,7 +154,7 @@ Phases execute in numeric order: 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17 ->
 | 7. Semantic Dedup | v1.0 | 1/1 | Complete | 2026-04-08 |
 | 8. Conversation Ingestion | v1.0 | 1/1 | Complete | 2026-04-08 |
 | 9. MCP Tool Registration | v1.0 | 1/1 | Complete | 2026-04-08 |
-| 10. CLI Framework Setup | v2.0 | 0/? | Not started | - |
+| 10. CLI Framework Setup | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 11. Memory CLI Commands | v2.0 | 0/? | Not started | - |
 | 12. Knowledge Graph CLI | v2.0 | 0/? | Not started | - |
 | 13. Skill CLI Commands | v2.0 | 0/? | Not started | - |

@@ -7,10 +7,10 @@
 
 ### CLI Framework
 
-- [ ] **CLI-01**: Single `localnest` binary with Commander.js noun-verb subcommands
-- [ ] **CLI-02**: Global flags work on all commands: --json, --verbose, --quiet, --config
-- [ ] **CLI-03**: Colored help text with command categories (Core, Memory, KG, Skills, Diagnostics)
-- [ ] **CLI-04**: Version display via `localnest --version` and `localnest version`
+- [x] **CLI-01**: Single `localnest` binary with noun-verb subcommands (hand-rolled, zero new deps)
+- [x] **CLI-02**: Global flags work on all commands: --json, --verbose, --quiet, --config
+- [x] **CLI-03**: Colored help text with command categories (Core, Memory, KG, Skills, Diagnostics)
+- [x] **CLI-04**: Version display via `localnest --version` and `localnest version`
 
 ### Memory CLI
 
@@ -77,10 +77,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLI-01 | Phase 10 | Pending |
-| CLI-02 | Phase 10 | Pending |
-| CLI-03 | Phase 10 | Pending |
-| CLI-04 | Phase 10 | Pending |
+| CLI-01 | Phase 10 | Complete |
+| CLI-02 | Phase 10 | Complete |
+| CLI-03 | Phase 10 | Complete |
+| CLI-04 | Phase 10 | Complete |
 | MCLI-01 | Phase 11 | Pending |
 | MCLI-02 | Phase 11 | Pending |
 | MCLI-03 | Phase 11 | Pending |
