@@ -6,6 +6,18 @@ All notable changes to this project will be documented in this file.
 
 ## [0.0.7-beta.1] - 2026-04-08
 
+### Security & Code Quality
+
+- **Nested transaction safety**: `adapter.transaction()` now supports re-entrant calls via SQLite SAVEPOINT — prevents deadlock when `storeEntry`/`updateEntry`/`deleteEntry` are called within a transaction context.
+- **Path traversal prevention**: MCP ingest tools (`localnest_ingest_markdown`, `localnest_ingest_json`) no longer accept `file_path` — content is passed directly, CLI handles file reading.
+- **Graph traversal cycle detection fix**: LIKE-based cycle prevention now uses delimiter-bounded matching to prevent false substring matches (e.g., `foo` vs `foobar`).
+- **Shared CLI flag parser**: Extracted `parseFlags` to `src/cli/parse-flags.js` — eliminates 5x copy-paste across CLI command modules.
+- **Audit tolerance for transitive vulnerabilities**: `quality:audit` now only blocks on direct dependency critical/high vulnerabilities, not transitive ones from upstream SDK chains.
+
+### Dependencies
+
+- Bumped `@huggingface/transformers` from 3.8.1 to 4.0.1 (no breaking changes — `pipeline`, `env`, `AutoTokenizer`, `AutoModelForSequenceClassification` APIs unchanged).
+
 ### Knowledge Graph
 
 - **Temporal knowledge graph** with entities and subject-predicate-object triples (`kg_entities`, `kg_triples` tables, schema v6).
