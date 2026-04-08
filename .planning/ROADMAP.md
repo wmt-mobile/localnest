@@ -37,7 +37,7 @@
 - [x] **Phase 14: MCP Lifecycle CLI** - Start, status, and config generation for MCP server
 - [x] **Phase 15: Ingest CLI** - Conversation file ingestion with format detection and taxonomy
 - [x] **Phase 16: Hook MCP Tools** - Hook introspection tools and documentation for AI discoverability
-- [ ] **Phase 17: Shell Completions and Polish** - Tab completions for bash, zsh, and fish
+- [x] **Phase 17: Shell Completions and Polish** - Tab completions for bash, zsh, and fish
 - [ ] **Phase 18: Binary Deprecation** - Redirect old fragmented binaries to unified CLI with warnings
 
 ## Phase Details
@@ -124,7 +124,7 @@
   1. Running `localnest completion bash` outputs a valid bash completion script that, when sourced, provides tab-completion for all subcommands and flags
   2. Running `localnest completion zsh` outputs a valid zsh completion script with the same coverage
   3. Running `localnest completion fish` outputs a valid fish completion script with the same coverage
-**Plans**: TBD
+**Plans**: 1 (complete)
 
 ### Phase 18: Binary Deprecation
 **Goal**: Old fragmented binaries gracefully redirect users to the unified CLI without breaking existing workflows
@@ -161,5 +161,5 @@ Phases execute in numeric order: 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17 ->
 | 14. MCP Lifecycle CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 15. Ingest CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 16. Hook MCP Tools | v2.0 | 1/1 | Complete | 2026-04-08 |
-| 17. Shell Completions | v2.0 | 0/? | Not started | - |
+| 17. Shell Completions | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 18. Binary Deprecation | v2.0 | 0/? | Not started | - |
