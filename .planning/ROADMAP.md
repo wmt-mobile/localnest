@@ -35,7 +35,7 @@
 - [x] **Phase 12: Knowledge Graph CLI** - KG triple and entity operations from the command line
 - [x] **Phase 13: Skill CLI Commands** - Install, list, and remove bundled skills across AI clients
 - [x] **Phase 14: MCP Lifecycle CLI** - Start, status, and config generation for MCP server
-- [ ] **Phase 15: Ingest CLI** - Conversation file ingestion with format detection and taxonomy
+- [x] **Phase 15: Ingest CLI** - Conversation file ingestion with format detection and taxonomy
 - [ ] **Phase 16: Hook MCP Tools** - Hook introspection tools and documentation for AI discoverability
 - [ ] **Phase 17: Shell Completions and Polish** - Tab completions for bash, zsh, and fish
 - [ ] **Phase 18: Binary Deprecation** - Redirect old fragmented binaries to unified CLI with warnings
@@ -104,7 +104,7 @@
   1. User can run `localnest ingest <file>` and have the file parsed with auto-detected format (markdown or JSON), with a summary of ingested entries printed
   2. User can override auto-detection with `--format markdown|json` and the specified parser is used
   3. User can assign taxonomy with `--nest <name> --branch <name>` and all ingested entries inherit those values
-**Plans**: TBD
+**Plans**: 1 (complete)
 
 ### Phase 16: Hook MCP Tools
 **Goal**: AI clients can discover and introspect the hook system through MCP tools, with usage examples in the bundled skill
@@ -159,7 +159,7 @@ Phases execute in numeric order: 10 -> 11 -> 12 -> 13 -> 14 -> 15 -> 16 -> 17 ->
 | 12. Knowledge Graph CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 13. Skill CLI Commands | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 14. MCP Lifecycle CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
-| 15. Ingest CLI | v2.0 | 0/? | Not started | - |
+| 15. Ingest CLI | v2.0 | 1/1 | Complete | 2026-04-08 |
 | 16. Hook MCP Tools | v2.0 | 0/? | Not started | - |
 | 17. Shell Completions | v2.0 | 0/? | Not started | - |
 | 18. Binary Deprecation | v2.0 | 0/? | Not started | - |

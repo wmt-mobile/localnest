@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CLI-First Architecture
 status: in_progress
-stopped_at: Completed 14-1 (MCP Lifecycle CLI)
-last_updated: "2026-04-08T09:02:23Z"
+stopped_at: Completed 15-1 (Ingest CLI)
+last_updated: "2026-04-08T09:06:09Z"
 last_activity: 2026-04-08
 progress:
   total_phases: 9
-  completed_phases: 4
-  total_plans: 5
-  completed_plans: 5
-  percent: 55
+  completed_phases: 5
+  total_plans: 6
+  completed_plans: 6
+  percent: 66
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-08)
 
 **Core value:** A unified, premium CLI that makes LocalNest feel like a standalone product -- not just an MCP server.
-**Current focus:** Phase 14 -- MCP Lifecycle CLI (plan 1 complete)
+**Current focus:** Phase 15 -- Ingest CLI (plan 1 complete)
 
 ## Current Position
 
-Phase: 14 of 18 (MCP Lifecycle CLI)
+Phase: 15 of 18 (Ingest CLI)
 Plan: 1 of 1 in current phase (complete)
-Status: Phase 14 complete -- ready for Phase 15
-Last activity: 2026-04-08 -- MCP lifecycle subcommands (start, status, config) implemented
+Status: Phase 15 complete -- ready for Phase 16
+Last activity: 2026-04-08 -- Ingest CLI with auto-format detection and taxonomy flags
 
-Progress: [#####.....] 55%
+Progress: [######....] 66%
 
 ## Performance Metrics
 
@@ -48,6 +48,7 @@ Progress: [#####.....] 55%
 | 12 | 1 | 3m00s | 3m00s |
 | 13 | 1 | 1m38s | 1m38s |
 | 14 | 1 | 2m05s | 2m05s |
+| 15 | 1 | 1m03s | 1m03s |
 
 **Recent Trend:**
 - Plan 10-1: 4m25s (6 tasks, 11 files)
@@ -55,6 +56,7 @@ Progress: [#####.....] 55%
 - Plan 12-1: 3m00s (1 task, 1 file)
 - Plan 13-1: 1m38s (1 task, 1 file)
 - Plan 14-1: 2m05s (1 task, 1 file)
+- Plan 15-1: 1m03s (1 task, 1 file)
 - Trend: accelerating
 
 *Updated after each plan completion*
@@ -82,6 +84,9 @@ Recent decisions affecting current work:
 - [Phase 14-1]: mcp start directly imports mcp-server.js main() instead of fork -- keeps stdio passthrough clean
 - [Phase 14-1]: mcp status is stateless -- reads runtime config and checks file existence, no running server needed
 - [Phase 14-1]: mcp config reads saved snippet from ~/.localnest/config/mcp.localnest.json when available; --raw generates generic npx config
+- [Phase 15-1]: Ingest CLI reuses MemoryService bootstrap and parseFlags patterns from memory.js
+- [Phase 15-1]: Auto-detect format from file extension (.md/.markdown -> markdown, .json -> json), with --format override
+- [Phase 15-1]: Delegates to svc.ingestMarkdown/ingestJson which handle parsing, dedup, entity extraction, and KG triple creation
 
 ### Pending Todos
 
@@ -93,6 +98,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-08T09:02:23Z
-Stopped at: Completed 14-1 (MCP Lifecycle CLI)
+Last session: 2026-04-08T09:06:09Z
+Stopped at: Completed 15-1 (Ingest CLI)
 Resume file: None
