@@ -24,6 +24,14 @@ import {
   removeRelation as removeRelationFn,
   getRelated as getRelatedFn
 } from './relations.js';
+import {
+  addEntity as addEntityFn,
+  getEntity as getEntityFn,
+  addTriple as addTripleFn,
+  invalidateTriple as invalidateTripleFn,
+  queryEntityRelationships as queryEntityRelationshipsFn,
+  ensureEntity as ensureEntityFn
+} from './kg.js';
 
 export class MemoryStore {
   constructor({
@@ -178,5 +186,30 @@ export class MemoryStore {
   async getRelated(memoryId) {
     await this.init();
     return getRelatedFn(this.adapter, memoryId);
+  }
+
+  async addEntity(args) {
+    await this.init();
+    return addEntityFn(this.adapter, args);
+  }
+
+  async getEntity(entityId) {
+    await this.init();
+    return getEntityFn(this.adapter, entityId);
+  }
+
+  async addTriple(args) {
+    await this.init();
+    return addTripleFn(this.adapter, args);
+  }
+
+  async invalidateTriple(tripleId, validTo) {
+    await this.init();
+    return invalidateTripleFn(this.adapter, tripleId, validTo);
+  }
+
+  async queryEntityRelationships(entityId, opts) {
+    await this.init();
+    return queryEntityRelationshipsFn(this.adapter, entityId, opts);
   }
 }

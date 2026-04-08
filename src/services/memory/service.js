@@ -161,6 +161,31 @@ export class MemoryService {
     return this.store.getRelated(memoryId);
   }
 
+  async addEntity(args) {
+    this.assertEnabled();
+    return this.store.addEntity(args);
+  }
+
+  async getEntity(entityId) {
+    this.assertEnabled();
+    return this.store.getEntity(entityId);
+  }
+
+  async addTriple(args) {
+    this.assertEnabled();
+    return this.store.addTriple(args);
+  }
+
+  async invalidateTriple(tripleId, validTo) {
+    this.assertEnabled();
+    return this.store.invalidateTriple(tripleId, validTo);
+  }
+
+  async queryEntityRelationships(entityId, opts = {}) {
+    this.assertEnabled();
+    return this.store.queryEntityRelationships(entityId, opts);
+  }
+
   assertEnabled() {
     if (!this.enabled) {
       throw new Error('Local memory is disabled. Re-run localnest setup and opt in to memory.');
