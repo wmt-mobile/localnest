@@ -435,7 +435,7 @@ Setup writes everything to `~/.localnest/`:
 
 ## Install Note
 
-`0.0.7-beta.1` is a major feature release adding temporal knowledge graph, multi-hop traversal, nest/branch hierarchy, agent-scoped memory, semantic dedup, conversation ingestion, hooks system, and a full CLI-first architecture with 52 MCP tools. Schema migrations v5 through v9 are all additive and backward-compatible — existing databases upgrade automatically on first run.
+`0.0.7-beta.2` is a major feature release adding temporal knowledge graph, multi-hop traversal, nest/branch hierarchy, agent-scoped memory, semantic dedup, conversation ingestion, hooks system, CLI-first architecture with 52 MCP tools, 10 Claude Code slash commands, interactive TUI dashboard, guided onboarding wizard, and end-to-end selftest. Schema migrations v5 through v9 are all additive and backward-compatible — existing databases upgrade automatically on first run.
 
 **Performance tips:**
 - Scope queries with `project_path` + a narrow `glob` whenever possible
