@@ -329,7 +329,7 @@ flowchart LR
 <div className="docGrid docGrid--2">
   <div className="docPanel">
     <h3>Hook types</h3>
-    <p>Pre-hooks can cancel or transform payloads. Post-hooks run after completion. Wildcards (<code>before:*</code>, <code>after:*</code>) catch all events.</p>
+    <p>Pre-hooks can cancel or transform payloads. Post-hooks run after completion. Wildcards (<code>before:&#42;</code>, <code>after:&#42;</code>) catch all events.</p>
   </div>
   <div className="docPanel">
     <h3>Introspection</h3>
