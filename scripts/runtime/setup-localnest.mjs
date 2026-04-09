@@ -359,15 +359,17 @@ function buildExistingDefaults(existingConfig) {
 }
 
 function resolveModelCacheDirs(preferredEmbedDir, preferredRerankerDir) {
+  // Pass only HOME — not the full env object — to avoid CodeQL CWE-532 (clear-text logging of env)
+  const safeEnv = { HOME: process.env.HOME || '' };
   const embed = resolveWritableModelCacheDir({
     preferredDir: preferredEmbedDir,
     localnestHome,
-    env: process.env
+    env: safeEnv
   });
   const reranker = resolveWritableModelCacheDir({
     preferredDir: preferredRerankerDir,
     localnestHome,
-    env: process.env
+    env: safeEnv
   });
 
   if (embed.fallbackUsed) {

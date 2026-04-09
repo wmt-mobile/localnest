@@ -271,15 +271,17 @@ function checkModelCacheWritable() {
     configCaches.rerankerCacheDir ||
     defaultCache
   );
+  // Pass only HOME — not full env — to avoid CodeQL CWE-532 (clear-text logging of env)
+  const safeEnv = { HOME: process.env.HOME || '' };
   const embedResolved = resolveWritableModelCacheDir({
     preferredDir: embedPreferred,
     localnestHome,
-    env: process.env
+    env: safeEnv
   });
   const rerankerResolved = resolveWritableModelCacheDir({
     preferredDir: rerankerPreferred,
     localnestHome,
-    env: process.env
+    env: safeEnv
   });
 
   if (!embedResolved.writable || !rerankerResolved.writable) {
