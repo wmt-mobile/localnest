@@ -6,7 +6,7 @@
 
 ## What it is
 
-An MCP server that gives AI clients safe, read-focused access to your local codebase and agent memory with a full knowledge graph. Everything runs in-process over stdio — no HTTP, no cloud, no external service.
+A TypeScript MCP server that gives AI clients safe, read-focused access to your local codebase and agent memory with a full knowledge graph. Everything runs in-process over stdio — no HTTP, no cloud, no external service.
 
 ```mermaid
 flowchart LR
@@ -26,7 +26,7 @@ flowchart LR
 2. Build services (workspace, search, index, memory, updates)
 3. Run forward-only schema migrations (v1 → v9)
 4. Initialize hooks system (`MemoryHooks` instance on the store)
-5. Register 50+ MCP tools across 8 groups
+5. Register 52 MCP tools across 8 groups
 6. Start background monitors (staleness sweep + health checks)
 7. Open stdio transport → ready
 
@@ -76,7 +76,7 @@ flowchart LR
     Merge --> Results["Ranked results"]
 ```
 
-- **Lexical** — fast exact matches, powered by ripgrep (JS fallback if missing)
+- **Lexical** — fast exact matches, powered by ripgrep (TS fallback if missing)
 - **Semantic** — local vector similarity via `Xenova/all-MiniLM-L6-v2` (384-dim, no GPU needed)
 - **RRF** — Reciprocal Rank Fusion: combines both ranked lists into one score
 - **Reranker** — optional cross-encoder pass for higher precision (off by default)
@@ -134,9 +134,9 @@ Entries flow through several connected subsystems: **dedup** checks for semantic
 
 ## Knowledge Graph subsystem
 
-The knowledge graph (KG) is a first-class subsystem built on two tables — `kg_entities` and `kg_triples` — managed by `kg.js` and `graph.js`.
+The knowledge graph (KG) is a first-class subsystem built on two tables — `kg_entities` and `kg_triples` — managed by `kg.ts` and `graph.ts`.
 
-### Entity-Triple model (`kg.js`)
+### Entity-Triple model (`kg.ts`)
 
 Entities are named nodes with a slugified ID, a type (`concept`, `file`, `url`, etc.), an optional JSON properties bag, and an optional link back to a `memory_entries` row via `memory_id`.
 
@@ -162,7 +162,7 @@ Key operations:
 | `getEntityTimeline()` | Full chronological history of all triples (including invalidated) |
 | `getKgStats()` | Aggregate counts: entities, total triples, active triples, breakdown by predicate |
 
-### Graph traversal (`graph.js`)
+### Graph traversal (`graph.ts`)
 
 Deep traversal uses SQLite recursive CTEs with cycle prevention (path-based substring check).
 
@@ -181,13 +181,13 @@ flowchart TD
 
 ### Relationship to legacy relations
 
-The older `memory_relations` table (`relations.js`) still exists for simple bidirectional links between memory entries. The KG subsystem is the successor — it adds entity typing, predicates, temporal validity, confidence, provenance, and multi-hop traversal.
+The older `memory_relations` table (`relations.ts`) still exists for simple bidirectional links between memory entries. The KG subsystem is the successor — it adds entity typing, predicates, temporal validity, confidence, provenance, and multi-hop traversal.
 
 ---
 
 ## Nest/Branch taxonomy
 
-Memory entries are organized into a two-level hierarchy managed by `taxonomy.js`:
+Memory entries are organized into a two-level hierarchy managed by `taxonomy.ts`:
 
 - **Nest** — top-level domain or workspace (e.g. `project-alpha`, `devops`)
 - **Branch** — sub-topic within a nest (e.g. `auth`, `ci-pipeline`)
@@ -212,7 +212,7 @@ Taxonomy values are set at store time via the `nest` and `branch` fields on `loc
 
 ---
 
-## Agent isolation (`scopes.js`)
+## Agent isolation (`scopes.ts`)
 
 The agent diary provides private scratch space per agent. Each diary entry has an `agent_id`, `content`, optional `topic`, and a timestamp. Entries are stored in the `agent_diary` table and indexed by `(agent_id, created_at DESC)`.
 
@@ -227,7 +227,7 @@ Memory entries also carry an `agent_id` column (added in schema v8). When set, r
 
 ---
 
-## Semantic dedup (`dedup.js`)
+## Semantic dedup (`dedup.ts`)
 
 Before storing a new memory entry, the system can check for semantic duplicates using embedding cosine similarity.
 
@@ -250,7 +250,7 @@ The check scans up to 200 most-recently-updated entries that have embeddings, co
 
 ---
 
-## Conversation ingestion pipeline (`ingest.js`)
+## Conversation ingestion pipeline (`ingest.ts`)
 
 Ingestion converts conversation exports (Markdown or JSON) into memory entries and KG triples in a single pipeline.
 
@@ -282,7 +282,7 @@ Rule-based regex heuristics extract entities from turn content:
 |---------|------|---------|
 | Capitalized multi-word phrases | concept | "Knowledge Graph", "Machine Learning" |
 | Quoted terms | concept | "entity extraction" |
-| File paths | file | `src/services/memory/kg.js` |
+| File paths | file | `src/services/memory/kg.ts` |
 | URLs | url | `https://example.com` |
 | ALL_CAPS identifiers | concept | `SCHEMA_VERSION` |
 
@@ -300,7 +300,7 @@ The `conversation_sources` table records `(file_path, file_hash)` for each inges
 
 ---
 
-## Hooks system (`hooks.js`)
+## Hooks system (`hooks.ts`)
 
 The `MemoryHooks` class provides a pub-sub mechanism for memory and KG operations. External consumers (AI clients, plugins, automation) can register pre/post callbacks.
 
@@ -346,19 +346,19 @@ The CLI (`src/cli/`) provides a `localnest` command with noun-verb subcommands a
 
 ```
 src/cli/
-├── help.js          # Colored help renderer (raw ANSI, NO_COLOR/FORCE_COLOR aware)
-├── options.js       # Global flag parser (--json, --verbose, --quiet, --config)
-├── router.js        # Noun-verb routing + legacy fallback
+├── help.ts          # Colored help renderer (raw ANSI, NO_COLOR/FORCE_COLOR aware)
+├── options.ts       # Global flag parser (--json, --verbose, --quiet, --config)
+├── router.ts        # Noun-verb routing + legacy fallback
 └── commands/
-    ├── memory.js    # memory add|search|list|show|delete
-    ├── kg.js        # kg add|query|timeline|stats
-    ├── skill.js     # skill install|list|remove
-    ├── mcp.js       # mcp start|status|config
-    ├── ingest.js    # ingest <file>
-    └── completion.js # Shell completion generation
+    ├── memory.ts    # memory add|search|list|show|delete
+    ├── kg.ts        # kg add|query|timeline|stats
+    ├── skill.ts     # skill install|list|remove
+    ├── mcp.ts       # mcp start|status|config
+    ├── ingest.ts    # ingest <file>
+    └── completion.ts # Shell completion generation
 ```
 
-### Routing (`router.js`)
+### Routing (`router.ts`)
 
 The router uses two maps:
 
@@ -373,7 +373,7 @@ When `routeCommand(command, rest, globalOpts, binMetaUrl)` is called:
 ### Service bootstrap pattern
 
 Each command module follows the same pattern:
-1. Import `buildRuntimeConfig()` from `src/runtime/config.js`
+1. Import `buildRuntimeConfig()` from `src/runtime/config.ts`
 2. Create an `EmbeddingService` from runtime config
 3. Create a `MemoryService` passing runtime config + embedding service
 4. Call service methods, format output as human-readable or `--json`
@@ -445,7 +445,7 @@ Results are exposed via `localnest_health → background_health`.
 | `LOCALNEST_HEALTH_MONITOR_INTERVAL_MINUTES` | `30` | Health monitor cadence (0 = off) |
 | `LOCALNEST_INDEX_SWEEP_INTERVAL_MINUTES` | `0` | Staleness sweep cadence (0 = off) |
 
-Full config reference: `src/runtime/config.js`.
+Full config reference: `src/runtime/config.ts`.
 
 ---
 
@@ -455,9 +455,9 @@ Full config reference: `src/runtime/config.js`.
 src/
 ├── app/               # entry point, service factory, tool registration
 ├── cli/
-│   ├── help.js        # colored help renderer
-│   ├── options.js     # global flag parser
-│   ├── router.js      # noun-verb + legacy command routing
+│   ├── help.ts        # colored help renderer
+│   ├── options.ts     # global flag parser
+│   ├── router.ts      # noun-verb + legacy command routing
 │   └── commands/      # memory · kg · skill · mcp · ingest · completion
 ├── mcp/
 │   ├── common/        # health monitor, staleness monitor, schemas, status
@@ -465,25 +465,25 @@ src/
 ├── services/
 │   ├── retrieval/     # chunker · tokenizer · embedding · BM25 · search
 │   ├── memory/
-│   │   ├── schema.js    # table DDL + forward-only migrations (v1-v9)
-│   │   ├── store.js     # MemoryStore facade — wires all modules together
-│   │   ├── service.js   # MemoryService — backend detection, public API
-│   │   ├── entries.js   # CRUD for memory_entries
-│   │   ├── recall.js    # recall queries with filtering and ranking
-│   │   ├── relations.js # legacy bidirectional relations
-│   │   ├── kg.js        # knowledge graph entities + triples
-│   │   ├── graph.js     # recursive CTE traversal + bridge discovery
-│   │   ├── taxonomy.js  # nest/branch hierarchy queries
-│   │   ├── scopes.js    # agent diary + agent-scoped isolation
-│   │   ├── dedup.js     # semantic duplicate detection via cosine similarity
-│   │   ├── ingest.js    # conversation ingestion (markdown + JSON)
-│   │   ├── hooks.js     # MemoryHooks pub-sub system
-│   │   ├── event-capture.js  # event capture + signal scoring
-│   │   ├── event-heuristics.js # signal score computation
-│   │   ├── event-list.js # event listing
-│   │   ├── workflow.js  # high-level workflow helpers
-│   │   ├── adapter.js   # SQLite adapter abstraction
-│   │   └── utils.js     # shared helpers (nowIso, cleanString, stableJson)
+│   │   ├── schema.ts    # table DDL + forward-only migrations (v1-v9)
+│   │   ├── store.ts     # MemoryStore facade — wires all modules together
+│   │   ├── service.ts   # MemoryService — backend detection, public API
+│   │   ├── entries.ts   # CRUD for memory_entries
+│   │   ├── recall.ts    # recall queries with filtering and ranking
+│   │   ├── relations.ts # legacy bidirectional relations
+│   │   ├── kg.ts        # knowledge graph entities + triples
+│   │   ├── graph.ts     # recursive CTE traversal + bridge discovery
+│   │   ├── taxonomy.ts  # nest/branch hierarchy queries
+│   │   ├── scopes.ts    # agent diary + agent-scoped isolation
+│   │   ├── dedup.ts     # semantic duplicate detection via cosine similarity
+│   │   ├── ingest.ts    # conversation ingestion (markdown + JSON)
+│   │   ├── hooks.ts     # MemoryHooks pub-sub system
+│   │   ├── event-capture.ts  # event capture + signal scoring
+│   │   ├── event-heuristics.ts # signal score computation
+│   │   ├── event-list.ts # event listing
+│   │   ├── workflow.ts  # high-level workflow helpers
+│   │   ├── adapter.ts   # SQLite adapter abstraction
+│   │   └── utils.ts     # shared helpers (nowIso, cleanString, stableJson)
 │   ├── workspace/     # root detection, file reads, project tree
 │   └── update/        # version check, self-update
 └── runtime/           # config parsing, home layout, sqlite-vec detection
@@ -495,7 +495,7 @@ src/
 
 **stdio only** — no HTTP server, no attack surface beyond the MCP protocol itself.
 
-**Graceful degradation** — sqlite-vec missing → JSON fallback. ripgrep missing → JS fallback. Memory disabled → retrieval unaffected. Embeddings unavailable → dedup silently skipped. Every optional subsystem fails independently.
+**Graceful degradation** — sqlite-vec missing → JSON fallback. ripgrep missing → TypeScript fallback. Memory disabled → retrieval unaffected. Embeddings unavailable → dedup silently skipped. Every optional subsystem fails independently.
 
 **Local-first** — embeddings and reranking run via `@huggingface/transformers` with local ONNX/WASM runtime support. Nothing leaves the machine.
 

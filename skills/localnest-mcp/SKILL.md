@@ -48,7 +48,7 @@ npm install -g localnest-mcp
 
 2. Install/update bundled skill.
 ```bash
-localnest-mcp-install-skill
+localnest install skills
 ```
 
 3. Run setup + health check.

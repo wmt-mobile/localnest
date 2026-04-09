@@ -15,7 +15,7 @@ This page is for unreleased branch behavior merged on GitHub `main`.
 
 Use it when you are documenting features present in source but not yet part of the current npm release.
 
-Current main-branch differences include update-oriented tooling, expanded agent guidance, and the `0.0.6-beta.1` CLI deprecation pass.
+Current main-branch differences include update-oriented tooling, expanded agent guidance, and the TypeScript migration shipped in `0.1.0`.
 
 ## Current Main Additions
 

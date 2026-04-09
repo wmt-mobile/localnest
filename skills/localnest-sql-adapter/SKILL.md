@@ -9,7 +9,7 @@ user-invocable: false
 Use this skill when working on LocalNest database access in:
 - `src/services/retrieval/sqlite-vec/`
 - `src/services/memory/`
-- `src/app/create-services.js`
+- `src/app/create-services.ts`
 - runtime/setup code that selects SQLite backends
 
 ## Quick Start

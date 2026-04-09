@@ -6,7 +6,7 @@ title: Getting Started
 
 # Getting Started
 
-LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scoped access to your codebase — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory. **52 MCP tools, zero cloud dependencies.**
+LocalNest MCP is a local-first TypeScript MCP server and CLI tool that gives AI agents scoped access to your codebase — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory. **52 MCP tools, zero cloud dependencies.**
 
 <div className="docHero">
   <div className="docHero__lead">
@@ -19,8 +19,8 @@ LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scop
   </div>
   <div className="docPanel docPanel--compact">
     <div className="docStat">
-      <span className="docStat__label">Latest beta</span>
-      <strong>0.0.7-beta.2</strong>
+      <span className="docStat__label">Latest release</span>
+      <strong>0.1.0</strong>
     </div>
     <div className="docStat">
       <span className="docStat__label">MCP tools</span>
@@ -68,7 +68,7 @@ Upgrade paths:
 localnest upgrade
 localnest upgrade stable
 localnest upgrade beta
-localnest upgrade 0.0.7-beta.2
+localnest upgrade 0.1.0
 ```
 
 ## Choose your path
@@ -85,7 +85,7 @@ localnest upgrade 0.0.7-beta.2
   </a>
   <a className="docLinkCard" href="./releases/current">
     <strong>Current release</strong>
-    <span>See what changed in `0.0.7-beta.2` — temporal KG, CLI-first architecture, 52 tools.</span>
+    <span>See what changed in `0.1.0` — TypeScript migration, temporal KG, CLI-first architecture, 52 tools.</span>
   </a>
   <a className="docLinkCard" href="./versions/0.0.4-beta.8/overview">
     <strong>Archived beta.8</strong>
@@ -135,7 +135,7 @@ localnest upgrade 0.0.7-beta.2
   </a>
   <a className="docLinkCard" href="./releases/current">
     <strong>Current release</strong>
-    <span>See the latest release behavior — `0.0.7-beta.2` with temporal KG, CLI, hooks, and 52 MCP tools.</span>
+    <span>See the latest release behavior — `0.1.0` with TypeScript, temporal KG, CLI, hooks, and 52 MCP tools.</span>
   </a>
   <a className="docLinkCard" href="./releases/history">
     <strong>Release matrix</strong>

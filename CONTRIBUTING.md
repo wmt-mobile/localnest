@@ -12,9 +12,16 @@ npm run doctor
 
 ## Development
 
-**Syntax check all source files:**
+LocalNest is written in TypeScript. The runtime uses `tsx` for development execution and `tsc` for type checking and builds.
+
+**Type-check all source files:**
 ```bash
 npm run check
+```
+
+**Build TypeScript to JavaScript:**
+```bash
+npm run build
 ```
 
 **Run tests:**
@@ -27,7 +34,7 @@ npm test
 npm run quality
 ```
 
-**Start the MCP server locally:**
+**Start the MCP server locally (uses tsx):**
 ```bash
 npm start
 ```
@@ -48,7 +55,7 @@ Contributor references:
 
 ### Adding or modifying a tool
 
-Tools are registered in `src/localnest-mcp.js` using `registerJsonTool`. Each tool needs:
+Tools are registered in `src/localnest-mcp.ts` using `registerJsonTool`. Each tool needs:
 - A canonical name (`localnest_*`)
 - Zod input schema
 - `readOnlyHint` / `destructiveHint` annotations
@@ -68,12 +75,12 @@ cp skills/localnest-mcp/SKILL.md ~/.agents/skills/localnest-mcp/SKILL.md
 
 ### Index backends
 
-- `VectorIndexService` (`vector-index-service.js`) — JSON backend, works on all Node versions
-- `SqliteVecIndexService` (`sqlite-vec-index-service.js`) — sqlite-vec backend, requires Node 22+; uses `term_index` inverted index for fast semantic lookup
+- `VectorIndexService` (`vector-index-service.ts`) — JSON backend, works on all Node versions
+- `SqliteVecIndexService` (`sqlite-vec-index-service.ts`) — sqlite-vec backend, requires Node 22+; uses `term_index` inverted index for fast semantic lookup
 
-The server auto-falls back to JSON if sqlite-vec is unavailable. Both implement the same interface and share the tokenizer from `services/tokenizer.js`.
+The server auto-falls back to JSON if sqlite-vec is unavailable. Both implement the same interface and share the tokenizer from `services/tokenizer.ts`.
 
-Changing the tokenizer requires a `SCHEMA_VERSION` bump in `sqlite-vec-index-service.js` and a corresponding `_runMigrations()` branch that clears stale index data.
+Changing the tokenizer requires a `SCHEMA_VERSION` bump in `sqlite-vec-index-service.ts` and a corresponding `_runMigrations()` branch that clears stale index data.
 
 ## Pull Request Guidelines
 
@@ -87,7 +94,7 @@ Changing the tokenizer requires a `SCHEMA_VERSION` bump in `sqlite-vec-index-ser
 Open an issue with:
 - Node.js version (`node --version`)
 - Platform (macOS/Linux/Windows)
-- Output of `localnest-mcp-doctor`
+- Output of `localnest doctor --verbose`
 - Steps to reproduce
 
 ## Publishing (Maintainers Only)
