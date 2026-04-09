@@ -356,7 +356,7 @@ body {
 
 .docGrid {
   display: grid;
-  gap: 0.75rem;
+  gap: 1rem;
   margin: 1rem 0 1.5rem;
 }
 
@@ -371,11 +371,12 @@ body {
 .docLinkCard {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.4rem;
   text-decoration: none;
   color: inherit;
-  padding: 0.85rem 1rem;
+  padding: 1.1rem 1.25rem;
   transition: border-color 150ms ease;
+  min-height: 80px;
 }
 
 .docLinkCard:hover {
@@ -390,8 +391,8 @@ body {
 }
 
 .docLinkCard span {
-  font-size: 0.8125rem;
-  line-height: 1.55;
+  font-size: 0.8375rem;
+  line-height: 1.6;
   color: var(--ifm-font-color-secondary);
 }
 
@@ -595,19 +596,23 @@ body {
 .siteHome__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.75rem;
   justify-content: center;
 }
 
 .siteHome__actions .button {
+  min-width: 140px !important;
   min-height: 2.75rem !important;
   border-radius: 8px !important;
   font-weight: 600 !important;
   font-size: 0.9rem !important;
-  padding: 0 1.5rem !important;
+  padding: 0 1.75rem !important;
   transition: all 150ms ease !important;
   cursor: pointer;
   text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 .siteHome__actions .button--primary {
@@ -657,11 +662,11 @@ body {
 }
 
 .siteHome__section {
-  margin-top: 2.5rem;
+  margin-top: 3rem;
 }
 
 .siteHome__sectionHeader {
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .siteHome__sectionHeader h2 {
@@ -683,15 +688,17 @@ body {
 .siteHome__features {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .siteHome__feature {
   background: var(--ln-card-bg);
   border: var(--ln-border);
-  border-radius: 8px;
-  padding: 1rem;
+  border-radius: 10px;
+  padding: 1.25rem 1.25rem;
   transition: border-color 150ms ease;
+  display: flex;
+  flex-direction: column;
 }
 
 .siteHome__feature:hover {
@@ -706,14 +713,15 @@ body {
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--ifm-heading-color);
-  margin: 0 0 0.35rem;
+  margin: 0 0 0.4rem;
 }
 
 .siteHome__feature p {
-  font-size: 0.8375rem;
-  line-height: 1.6;
+  font-size: 0.875rem;
+  line-height: 1.65;
   color: var(--ifm-font-color-secondary);
   margin: 0;
+  flex: 1;
 }
 
 /* ── Stat pills ── */
@@ -753,9 +761,10 @@ body {
   background: #171717;
   border: 1px solid #262626;
   border-radius: 10px;
-  padding: 1rem 1.5rem;
-  margin: 1.5rem auto 2rem;
-  max-width: 400px;
+  padding: 1.1rem 1.75rem;
+  margin: 1.75rem auto 2.25rem;
+  max-width: 380px;
+  text-align: left;
 }
 
 [data-theme='dark'] .siteHome__install {
@@ -772,16 +781,12 @@ body {
 }
 
 .siteHome__install code {
-  color: #71717a !important;
+  color: #a1a1aa !important;
   font-size: 0.8125rem !important;
   background: transparent !important;
   border: 0 !important;
   padding: 0 !important;
-  line-height: 1.8 !important;
-}
-
-[data-theme='dark'] .siteHome__install code {
-  color: #a1a1aa !important;
+  line-height: 1.9 !important;
 }
 
 .siteHome__install pre {
@@ -887,7 +892,8 @@ body {
 .footer {
   border-top: var(--ln-border);
   background: var(--ifm-footer-background-color);
-  padding: 2rem 0;
+  padding: 2.5rem 0 1.5rem;
+  margin-top: 2rem;
 }
 
 .footer__title {
