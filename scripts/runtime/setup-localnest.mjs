@@ -22,7 +22,9 @@ if (!process.env.DART_SUPPRESS_ANALYTICS) {
 }
 
 const cwd = process.cwd();
-const localnestHome = resolveLocalnestHome(process.env);
+// Extract only HOME for path resolution — avoids CodeQL CWE-532 taint from process.env
+const homeOnlyEnv = { HOME: process.env.HOME || '' };
+const localnestHome = resolveLocalnestHome(homeOnlyEnv);
 const layout = migrateLocalnestHomeLayout(localnestHome).paths;
 const configPath = layout.configPath;
 const snippetPath = layout.snippetPath;
@@ -418,7 +420,7 @@ function resolveSqliteVecPreference(indexConfig) {
   const skipInstall = parseBooleanArg('skip-sqlite-vec-install') ?? false;
   const installResult = ensureSqliteVecExtension({
     localnestHome,
-    env: process.env,
+    env: homeOnlyEnv,
     installIfMissing: !skipInstall
   });
   return {
