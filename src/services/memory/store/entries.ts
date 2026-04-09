@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import {
   nowIso, clampInt, cleanString, normalizeScope, deriveSummary, deriveTitle,
   ensureArray, normalizeLinks, stableJson, makeFingerprint, generateMemoryId,
@@ -149,8 +150,10 @@ export async function getEntry(store: MemoryStoreLike, id: string): Promise<Memo
 export async function storeEntry(store: MemoryStoreLike, input: StoreEntryInput): Promise<StoreEntryResult> {
   await store.init();
   const scope = normalizeScope(input.scope);
-  const nest = cleanString(input.nest || scope.project_path || '', 200);
-  const branch = cleanString(input.branch || scope.topic || '', 200);
+  const rawNestFallback = scope.project_path ? path.basename(scope.project_path) : '';
+  const rawBranchFallback = (scope.branch_name || scope.topic || '').replace(/[/\\]/g, '-');
+  const nest = cleanString(input.nest || rawNestFallback, 200);
+  const branch = cleanString(input.branch || rawBranchFallback, 200);
   const agentId = cleanString(input.agent_id || '', 200);
   const kind = cleanString(input.kind || 'knowledge', 40) || 'knowledge';
   const content = cleanString(input.content, 20000);
