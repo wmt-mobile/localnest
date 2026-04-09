@@ -25,11 +25,15 @@ const asJson = argv.includes('--json');
 const safeEnv = {
   HOME: process.env.HOME || '',
   LOCALNEST_HOME: process.env.LOCALNEST_HOME || '',
+  LOCALNEST_CONFIG: process.env.LOCALNEST_CONFIG || '',
   LOCALNEST_INDEX_BACKEND: process.env.LOCALNEST_INDEX_BACKEND || '',
   LOCALNEST_SQLITE_VEC_EXTENSION: process.env.LOCALNEST_SQLITE_VEC_EXTENSION || '',
+  LOCALNEST_SQLITE_VEC_SEARCH_DIRS: process.env.LOCALNEST_SQLITE_VEC_SEARCH_DIRS || '',
   LOCALNEST_EMBED_CACHE_DIR: process.env.LOCALNEST_EMBED_CACHE_DIR || '',
   LOCALNEST_RERANKER_CACHE_DIR: process.env.LOCALNEST_RERANKER_CACHE_DIR || '',
   LOCALNEST_DOCTOR_STRICT: process.env.LOCALNEST_DOCTOR_STRICT || '',
+  USER: process.env.USER || '',
+  USERNAME: process.env.USERNAME || '',
 };
 
 function parseBoolean(value, fallback) {
