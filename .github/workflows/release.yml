@@ -1,45 +1,178 @@
 name: Release
 
+# Auto-publish to npm AND create GitHub release when package.json version
+# changes on main or beta branch.
+#
+# SAFETY GUARDS (in execution order):
+#  1. Only triggers on pushes to main/beta (NOT on PRs, NOT on tags)
+#  2. Only fires when package.json was modified in the push
+#  3. Skips if version hasn't changed vs previous commit
+#  4. Fails if version already exists on npm registry
+#  5. Runs full quality pipeline (test + lint + tsc + build) before publishing
+#  6. Verifies pack tarball is sane (file count + critical files)
+#  7. Uses npm provenance for supply chain attestation
+#  8. Auto-detects @beta/@alpha/@next/@latest tag from version string
+#  9. Concurrency lock prevents overlapping publishes
+# 10. Optional `npm-publish` environment for manual approval gate
+# 11. GitHub release created ONLY after npm publish succeeds
+#
+# REQUIRED SECRETS:
+#  - NPM_TOKEN: npm automation token with publish permission
+#               Generate at https://www.npmjs.com/settings/<user>/tokens
+#               Add at https://github.com/<owner>/<repo>/settings/secrets/actions
+
 on:
   push:
     branches:
       - main
       - beta
+    paths:
+      - 'package.json'
 
 permissions:
-  contents: write
+  contents: write     # required to create GitHub release
+  id-token: write     # required for npm provenance
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false  # never cancel a publish in flight
 
 jobs:
   release:
+    name: Publish to npm + GitHub Release
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
+    environment: npm-publish  # optional manual approval gate
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 2
 
-      - name: Read version
-        id: version
-        run: echo "tag=v$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+      - name: Setup Node
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
+        with:
+          node-version: 22
+          cache: npm
+          registry-url: 'https://registry.npmjs.org'
 
-      - name: Create release
+      - name: Read local version
+        id: local
+        run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      - name: Read previous version
+        id: previous
+        run: |
+          PREV=$(git show HEAD~1:package.json 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync(0, 'utf8')).version" 2>/dev/null || echo "none")
+          echo "version=$PREV" >> "$GITHUB_OUTPUT"
+
+      - name: Check if version changed
+        id: changed
+        run: |
+          if [ "${{ steps.local.outputs.version }}" = "${{ steps.previous.outputs.version }}" ]; then
+            echo "Version unchanged (${{ steps.local.outputs.version }}) — skipping release"
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Version changed: ${{ steps.previous.outputs.version }} -> ${{ steps.local.outputs.version }}"
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check npm registry for collision
+        if: steps.changed.outputs.should_release == 'true'
+        run: |
+          PKG=$(node -p "require('./package.json').name")
+          VER=${{ steps.local.outputs.version }}
+          if npm view "$PKG@$VER" version 2>/dev/null; then
+            echo "::error::Version $VER already exists on npm registry. Bump version before merging."
+            exit 1
+          fi
+          echo "Version $VER is available on npm registry"
+
+      - name: Install dependencies
+        if: steps.changed.outputs.should_release == 'true'
+        run: npm ci
+
+      - name: Run quality pipeline
+        if: steps.changed.outputs.should_release == 'true'
+        run: npm run quality
+
+      - name: Verify pack tarball
+        if: steps.changed.outputs.should_release == 'true'
+        run: |
+          npm pack --dry-run > pack-output.txt 2>&1
+          FILE_COUNT=$(grep -c "^npm notice" pack-output.txt || echo 0)
+          if [ "$FILE_COUNT" -lt 50 ]; then
+            echo "::error::Tarball has only $FILE_COUNT files — expected 100+. Check .npmignore and package.json files field."
+            cat pack-output.txt
+            exit 1
+          fi
+          for required in "bin/localnest.js" "bin/localnest-mcp.js" "src/app/mcp-server.ts" "package.json"; do
+            if ! grep -q "$required" pack-output.txt; then
+              echo "::error::Required file missing from tarball: $required"
+              exit 1
+            fi
+          done
+          echo "Tarball verified: $FILE_COUNT files, all required entries present"
+
+      - name: Determine npm tag
+        if: steps.changed.outputs.should_release == 'true'
+        id: tag
+        run: |
+          VER=${{ steps.local.outputs.version }}
+          if echo "$VER" | grep -q -- "-beta"; then
+            echo "tag=beta" >> "$GITHUB_OUTPUT"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          elif echo "$VER" | grep -q -- "-alpha"; then
+            echo "tag=alpha" >> "$GITHUB_OUTPUT"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          elif echo "$VER" | grep -q -- "-rc"; then
+            echo "tag=next" >> "$GITHUB_OUTPUT"
+            echo "prerelease=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=latest" >> "$GITHUB_OUTPUT"
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish to npm
+        if: steps.changed.outputs.should_release == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          npm publish --provenance --access public --tag ${{ steps.tag.outputs.tag }}
+          echo "Published ${{ steps.local.outputs.version }} as @${{ steps.tag.outputs.tag }}"
+
+      - name: Create GitHub Release
+        if: steps.changed.outputs.should_release == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.version.outputs.tag }}
+          TAG: v${{ steps.local.outputs.version }}
           BRANCH: ${{ github.ref_name }}
+          PRERELEASE: ${{ steps.tag.outputs.prerelease }}
         run: |
           if gh release view "$TAG" &>/dev/null; then
-            echo "Release $TAG already exists — skipping."
+            echo "Release $TAG already exists — skipping GitHub release creation"
             exit 0
           fi
-          if [ "$BRANCH" = "beta" ]; then
-            gh release create "$TAG" \
-              --title "$TAG" \
-              --target "$BRANCH" \
-              --prerelease \
-              --generate-notes
-          else
-            gh release create "$TAG" \
-              --title "$TAG" \
-              --target "$BRANCH" \
-              --generate-notes
+          PRERELEASE_FLAG=""
+          if [ "$PRERELEASE" = "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
           fi
+          gh release create "$TAG" \
+            --title "$TAG" \
+            --target "$BRANCH" \
+            $PRERELEASE_FLAG \
+            --generate-notes
+
+      - name: Summary
+        if: steps.changed.outputs.should_release == 'true'
+        run: |
+          {
+            echo "## Release Summary"
+            echo ""
+            echo "- **Package:** $(node -p "require('./package.json').name")"
+            echo "- **Version:** ${{ steps.local.outputs.version }}"
+            echo "- **Previous:** ${{ steps.previous.outputs.version }}"
+            echo "- **npm tag:** @${{ steps.tag.outputs.tag }}"
+            echo "- **GitHub release:** v${{ steps.local.outputs.version }}"
+            echo "- **Provenance:** enabled"
+          } >> "$GITHUB_STEP_SUMMARY"
