@@ -134,9 +134,9 @@ Entries flow through several connected subsystems: **dedup** checks for semantic
 
 ## Knowledge Graph subsystem
 
-The knowledge graph (KG) is a first-class subsystem built on two tables — `kg_entities` and `kg_triples` — managed by `kg.ts` and `graph.ts`.
+The knowledge graph (KG) is a first-class subsystem built on two tables — `kg_entities` and `kg_triples` — managed by `knowledge-graph/kg.ts` and `knowledge-graph/graph.ts`.
 
-### Entity-Triple model (`kg.ts`)
+### Entity-Triple model (`knowledge-graph/kg.ts`)
 
 Entities are named nodes with a slugified ID, a type (`concept`, `file`, `url`, etc.), an optional JSON properties bag, and an optional link back to a `memory_entries` row via `memory_id`.
 
@@ -162,7 +162,7 @@ Key operations:
 | `getEntityTimeline()` | Full chronological history of all triples (including invalidated) |
 | `getKgStats()` | Aggregate counts: entities, total triples, active triples, breakdown by predicate |
 
-### Graph traversal (`graph.ts`)
+### Graph traversal (`knowledge-graph/graph.ts`)
 
 Deep traversal uses SQLite recursive CTEs with cycle prevention (path-based substring check).
 
@@ -181,13 +181,13 @@ flowchart TD
 
 ### Relationship to legacy relations
 
-The older `memory_relations` table (`relations.ts`) still exists for simple bidirectional links between memory entries. The KG subsystem is the successor — it adds entity typing, predicates, temporal validity, confidence, provenance, and multi-hop traversal.
+The older `memory_relations` table (`knowledge-graph/relations.ts`) still exists for simple bidirectional links between memory entries. The KG subsystem is the successor — it adds entity typing, predicates, temporal validity, confidence, provenance, and multi-hop traversal.
 
 ---
 
 ## Nest/Branch taxonomy
 
-Memory entries are organized into a two-level hierarchy managed by `taxonomy.ts`:
+Memory entries are organized into a two-level hierarchy managed by `taxonomy/taxonomy.ts`:
 
 - **Nest** — top-level domain or workspace (e.g. `project-alpha`, `devops`)
 - **Branch** — sub-topic within a nest (e.g. `auth`, `ci-pipeline`)
@@ -212,7 +212,7 @@ Taxonomy values are set at store time via the `nest` and `branch` fields on `loc
 
 ---
 
-## Agent isolation (`scopes.ts`)
+## Agent isolation (`taxonomy/scopes.ts`)
 
 The agent diary provides private scratch space per agent. Each diary entry has an `agent_id`, `content`, optional `topic`, and a timestamp. Entries are stored in the `agent_diary` table and indexed by `(agent_id, created_at DESC)`.
 
@@ -227,7 +227,7 @@ Memory entries also carry an `agent_id` column (added in schema v8). When set, r
 
 ---
 
-## Semantic dedup (`dedup.ts`)
+## Semantic dedup (`store/dedup.ts`)
 
 Before storing a new memory entry, the system can check for semantic duplicates using embedding cosine similarity.
 
@@ -250,7 +250,7 @@ The check scans up to 200 most-recently-updated entries that have embeddings, co
 
 ---
 
-## Conversation ingestion pipeline (`ingest.ts`)
+## Conversation ingestion pipeline (`ingest/ingest.ts`)
 
 Ingestion converts conversation exports (Markdown or JSON) into memory entries and KG triples in a single pipeline.
 
@@ -282,7 +282,7 @@ Rule-based regex heuristics extract entities from turn content:
 |---------|------|---------|
 | Capitalized multi-word phrases | concept | "Knowledge Graph", "Machine Learning" |
 | Quoted terms | concept | "entity extraction" |
-| File paths | file | `src/services/memory/kg.ts` |
+| File paths | file | `src/services/memory/knowledge-graph/kg.ts` |
 | URLs | url | `https://example.com` |
 | ALL_CAPS identifiers | concept | `SCHEMA_VERSION` |
 
@@ -465,25 +465,30 @@ src/
 ├── services/
 │   ├── retrieval/     # chunker · tokenizer · embedding · BM25 · search
 │   ├── memory/
-│   │   ├── schema.ts    # table DDL + forward-only migrations (v1-v9)
-│   │   ├── store.ts     # MemoryStore facade — wires all modules together
-│   │   ├── service.ts   # MemoryService — backend detection, public API
-│   │   ├── entries.ts   # CRUD for memory_entries
-│   │   ├── recall.ts    # recall queries with filtering and ranking
-│   │   ├── relations.ts # legacy bidirectional relations
-│   │   ├── kg.ts        # knowledge graph entities + triples
-│   │   ├── graph.ts     # recursive CTE traversal + bridge discovery
-│   │   ├── taxonomy.ts  # nest/branch hierarchy queries
-│   │   ├── scopes.ts    # agent diary + agent-scoped isolation
-│   │   ├── dedup.ts     # semantic duplicate detection via cosine similarity
-│   │   ├── ingest.ts    # conversation ingestion (markdown + JSON)
-│   │   ├── hooks.ts     # MemoryHooks pub-sub system
-│   │   ├── event-capture.ts  # event capture + signal scoring
-│   │   ├── event-heuristics.ts # signal score computation
-│   │   ├── event-list.ts # event listing
-│   │   ├── workflow.ts  # high-level workflow helpers
-│   │   ├── adapter.ts   # SQLite adapter abstraction
-│   │   └── utils.ts     # shared helpers (nowIso, cleanString, stableJson)
+│   │   ├── schema.ts        # table DDL + forward-only migrations (v1-v9)
+│   │   ├── store.ts         # MemoryStore facade — wires all modules together
+│   │   ├── service.ts       # MemoryService — backend detection, public API
+│   │   ├── hooks.ts         # MemoryHooks pub-sub system
+│   │   ├── workflow.ts      # high-level workflow helpers
+│   │   ├── adapter.ts       # SQLite adapter abstraction
+│   │   ├── utils.ts         # shared helpers (nowIso, cleanString, stableJson)
+│   │   ├── events/
+│   │   │   ├── capture.ts   # event capture + signal scoring
+│   │   │   ├── heuristics.ts # signal score computation
+│   │   │   └── list.ts      # event listing
+│   │   ├── ingest/
+│   │   │   └── ingest.ts    # conversation ingestion (markdown + JSON)
+│   │   ├── knowledge-graph/
+│   │   │   ├── graph.ts     # recursive CTE traversal + bridge discovery
+│   │   │   ├── kg.ts        # knowledge graph entities + triples
+│   │   │   └── relations.ts # legacy bidirectional relations
+│   │   ├── store/
+│   │   │   ├── dedup.ts     # semantic duplicate detection via cosine similarity
+│   │   │   ├── entries.ts   # CRUD for memory_entries
+│   │   │   └── recall.ts    # recall queries with filtering and ranking
+│   │   └── taxonomy/
+│   │       ├── scopes.ts    # agent diary + agent-scoped isolation
+│   │       └── taxonomy.ts  # nest/branch hierarchy queries
 │   ├── workspace/     # root detection, file reads, project tree
 │   └── update/        # version check, self-update
 └── runtime/           # config parsing, home layout, sqlite-vec detection

@@ -47,8 +47,8 @@ npm run install:skill
 ## Project Structure
 
 Contributor references:
-- [`guides/architecture.md`](./guides/architecture.md) — module layout and design decisions
-- [`guides/future-retrieval-roadmap.md`](./guides/future-retrieval-roadmap.md) — planned retrieval improvements
+- [`localnest-docs/docs/guides/architecture.md`](./localnest-docs/docs/guides/architecture.md) — module layout and design decisions
+- [`localnest-docs/docs/guides/future-retrieval-roadmap.md`](./localnest-docs/docs/guides/future-retrieval-roadmap.md) — planned retrieval improvements
 - [`localnest-docs/docs/architecture.md`](./localnest-docs/docs/architecture.md) — public-facing architecture overview
 
 ## Making Changes

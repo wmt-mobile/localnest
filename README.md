@@ -10,19 +10,21 @@
 [![CodeQL](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml)
 [![Socket](https://badge.socket.dev/npm/package/localnest-mcp)](https://socket.dev/npm/package/localnest-mcp)
 
-**Your codebase. Your AI. Your machine — no cloud, no leaks, no surprises.**
+**Your AI's home base.**
 
-LocalNest is a local-first MCP server and CLI tool that gives AI agents safe, scoped access to your code — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory that never leaves your machine.
+LocalNest is a local-first MCP server where your AI builds its nest — right on your machine. It learns your codebase, remembers decisions across sessions, and protects your code with persistent AI memory and a temporal knowledge graph that never leaves home. No cloud subscriptions, no data leaks, no surprises. The nest grows with you, and it's entirely yours.
+
+A private AI coding assistant with semantic code search, offline AI code tools, and an AI knowledge graph — all running locally. No-cloud AI tools for local-first development.
 
 **52 MCP tools** | **TypeScript** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
 
-📖 [Full documentation](https://wmt-mobile.github.io/localnest/) · [Architecture deep dive](./guides/architecture.md)
+📖 [Full documentation](https://wmt-mobile.github.io/localnest/) · [Architecture deep dive](./localnest-docs/docs/guides/architecture.md)
 
 ## README Languages
 
-English · [العربية الفصحى](./readme/README.ar-001.md) · [বাংলা (বাংলাদেশ)](./readme/README.bn-BD.md) · [Deutsch (Deutschland)](./readme/README.de-DE.md) · [Español (Latinoamérica)](./readme/README.es-419.md) · [Français (France)](./readme/README.fr-FR.md) · [हिन्दी (भारत)](./readme/README.hi-IN.md) · [Bahasa Indonesia](./readme/README.id-ID.md) · [日本語](./readme/README.ja-JP.md) · [한국어](./readme/README.ko-KR.md) · [Português (Brasil)](./readme/README.pt-BR.md) · [Русский](./readme/README.ru-RU.md) · [Türkçe](./readme/README.tr-TR.md) · [简体中文](./readme/README.zh-CN.md)
+English · [العربية الفصحى](./localnest-docs/docs/i18n/README.ar-001.md) · [বাংলা (বাংলাদেশ)](./localnest-docs/docs/i18n/README.bn-BD.md) · [Deutsch (Deutschland)](./localnest-docs/docs/i18n/README.de-DE.md) · [Español (Latinoamérica)](./localnest-docs/docs/i18n/README.es-419.md) · [Français (France)](./localnest-docs/docs/i18n/README.fr-FR.md) · [हिन्दी (भारत)](./localnest-docs/docs/i18n/README.hi-IN.md) · [Bahasa Indonesia](./localnest-docs/docs/i18n/README.id-ID.md) · [日本語](./localnest-docs/docs/i18n/README.ja-JP.md) · [한국어](./localnest-docs/docs/i18n/README.ko-KR.md) · [Português (Brasil)](./localnest-docs/docs/i18n/README.pt-BR.md) · [Русский](./localnest-docs/docs/i18n/README.ru-RU.md) · [Türkçe](./localnest-docs/docs/i18n/README.tr-TR.md) · [简体中文](./localnest-docs/docs/i18n/README.zh-CN.md)
 
-These translated files are locale-specific full README translations. See [translation policy](./readme/TRANSLATION_POLICY.md) for the target locale matrix and terminology rules. The English [README.md](./README.md) remains the source of truth for the newest commands, release notes, and full details.
+These translated files are locale-specific full README translations. See [translation policy](./localnest-docs/docs/i18n/TRANSLATION_POLICY.md) for the target locale matrix and terminology rules. The English [README.md](./README.md) remains the source of truth for the newest commands, release notes, and full details.
 
 ---
 
@@ -45,9 +47,9 @@ These translated files are locale-specific full README translations. See [transl
 
 ## Why LocalNest?
 
-Most AI code tools phone home. LocalNest doesn't.
+Most AI code tools phone home. LocalNest doesn't — it's your private code assistant that stays local.
 
-Everything — file reads, vector embeddings, memory — runs in-process on your machine. No cloud subscription, no rate limits, no data leaving your box. And because it speaks MCP, any compatible client (Cursor, Windsurf, Codex, Kiro, Gemini CLI) can plug in with one config block.
+Everything — file reads, vector embeddings, persistent AI memory — runs in-process on your machine. No cloud subscription, no rate limits, no data leaving your box. LocalNest is built for local-first development: your AI nests where your code lives, learns what matters, and keeps it safe. And because it speaks MCP, any compatible client (Cursor, Windsurf, Codex, Kiro, Gemini CLI) can plug in with one config block.
 
 | What you get | How it works |
 |---|---|
@@ -350,7 +352,7 @@ LocalNest is the only local-first MCP server that combines code retrieval AND st
 
 ## Memory — Your AI Doesn't Forget
 
-Enable memory during `localnest setup` and LocalNest starts building a durable knowledge graph in a local SQLite database. Every bug fix, architectural decision, and preference your AI agent touches can be recalled on the next session.
+Enable persistent AI memory during `localnest setup` and LocalNest starts building a durable AI knowledge graph in a local SQLite database. Every bug fix, architectural decision, and preference your AI agent touches can be recalled on the next session — the nest remembers so your AI doesn't have to start over.
 
 - Requires **Node 22.13+** — search and file tools work fine on Node 18/20 without it
 - Memory failure never blocks other tools — everything degrades independently
@@ -491,7 +493,7 @@ LocalNest follows the OSS security pipeline pattern:
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) · [CHANGELOG.md](./CHANGELOG.md) · [SECURITY.md](./SECURITY.md)
 
-> **New to the codebase?** Start with the **[Architecture Overview](./guides/architecture.md)** — covers how the server boots, how search and memory work, and where everything lives.
+> **New to the codebase?** Start with the **[Architecture Overview](./localnest-docs/docs/guides/architecture.md)** — covers how the server boots, how search and memory work, and where everything lives.
 
 ---
 
