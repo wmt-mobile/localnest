@@ -1,0 +1,357 @@
+import { z } from 'zod';
+import {
+  normalizeDeleteResult,
+  normalizeMemoryEventsResult,
+  normalizeMemoryEntryPayload,
+  normalizeMemoryRecallResult,
+  normalizeMemorySuggestionResult,
+  normalizeRelatedMemoriesResult,
+  normalizeRelationRemovalResult,
+  normalizeRelationResult
+} from '../common/response-normalizers.js';
+import type { RegisterJsonToolFn } from '../common/tool-utils.js';
+import type {
+  MemoryKind,
+  MemoryStatus as MemoryStatusType,
+  MemoryScope,
+  MemoryLink,
+  MemoryEventType,
+  MemoryEventStatus
+} from '../common/schemas.js';
+
+interface MemoryService {
+  listEntries(opts: Record<string, unknown>): Promise<unknown>;
+  getEntry(id: string): Promise<unknown>;
+  storeEntry(args: Record<string, unknown>): Promise<{ memory?: unknown; created?: boolean; duplicate?: boolean } | null>;
+  updateEntry(id: string, patch: Record<string, unknown>): Promise<unknown>;
+  deleteEntry(id: string): Promise<unknown>;
+  captureEvent(args: Record<string, unknown>): Promise<unknown>;
+  listEvents(opts: Record<string, unknown>): Promise<unknown>;
+  suggestRelations(id: string, opts: { threshold: number; maxResults: number }): Promise<unknown>;
+  addRelation(sourceId: string, targetId: string, relationType: string): Promise<unknown>;
+  removeRelation(sourceId: string, targetId: string): Promise<unknown>;
+  getRelated(id: string): Promise<unknown>;
+}
+
+interface SharedSchemas {
+  MEMORY_KIND_SCHEMA: z.ZodType<MemoryKind>;
+  MEMORY_STATUS_SCHEMA: z.ZodType<MemoryStatusType>;
+  MEMORY_SCOPE_SCHEMA: z.ZodType<MemoryScope>;
+  MEMORY_LINK_SCHEMA: z.ZodType<MemoryLink>;
+  MEMORY_EVENT_TYPE_SCHEMA: z.ZodType<MemoryEventType>;
+  MEMORY_EVENT_STATUS_SCHEMA: z.ZodType<MemoryEventStatus>;
+}
+
+export interface RegisterMemoryStoreToolsOptions {
+  registerJsonTool: RegisterJsonToolFn;
+  schemas: SharedSchemas;
+  memory: MemoryService;
+}
+
+export function registerMemoryStoreTools({
+  registerJsonTool,
+  schemas,
+  memory
+}: RegisterMemoryStoreToolsOptions): void {
+  const {
+    MEMORY_KIND_SCHEMA,
+    MEMORY_STATUS_SCHEMA,
+    MEMORY_SCOPE_SCHEMA,
+    MEMORY_LINK_SCHEMA,
+    MEMORY_EVENT_TYPE_SCHEMA,
+    MEMORY_EVENT_STATUS_SCHEMA
+  } = schemas;
+
+  registerJsonTool(
+    ['localnest_memory_list'],
+    {
+      title: 'Memory List',
+      description: 'List stored memories with optional scope and kind filters.',
+      inputSchema: {
+        kind: MEMORY_KIND_SCHEMA.optional(),
+        status: MEMORY_STATUS_SCHEMA.optional(),
+        project_path: z.string().optional(),
+        topic: z.string().optional(),
+        limit: z.number().int().min(1).max(200).default(20),
+        offset: z.number().int().min(0).default(0)
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ kind, status, project_path, topic, limit, offset }: Record<string, unknown>) => normalizeMemoryRecallResult(
+      await memory.listEntries({
+        kind,
+        status,
+        projectPath: project_path,
+        topic,
+        limit,
+        offset
+      })
+    )
+  );
+
+  registerJsonTool(
+    ['localnest_memory_get'],
+    {
+      title: 'Memory Get',
+      description: 'Fetch one stored memory with revision history.',
+      inputSchema: {
+        id: z.string().min(1)
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ id }: Record<string, unknown>) => {
+      const item = await memory.getEntry(id as string);
+      if (!item) {
+        throw new Error(`memory not found: ${id}`);
+      }
+      return normalizeMemoryEntryPayload(item);
+    }
+  );
+
+  registerJsonTool(
+    ['localnest_memory_store'],
+    {
+      title: 'Memory Store',
+      description: 'Store a durable local memory entry.',
+      inputSchema: {
+        kind: MEMORY_KIND_SCHEMA,
+        title: z.string().min(1).max(400),
+        summary: z.string().max(4000).default(''),
+        content: z.string().min(1).max(20000),
+        status: MEMORY_STATUS_SCHEMA,
+        importance: z.number().int().min(0).max(100).default(50),
+        confidence: z.number().min(0).max(1).default(0.7),
+        tags: z.array(z.string()).max(50).default([]),
+        links: z.array(MEMORY_LINK_SCHEMA).max(50).default([]),
+        scope: MEMORY_SCOPE_SCHEMA,
+        source_type: z.string().max(60).default('manual'),
+        source_ref: z.string().max(1000).default(''),
+        change_note: z.string().max(400).default('Initial memory creation')
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+      }
+    },
+    async (args: Record<string, unknown>) => {
+      const result = await memory.storeEntry(args);
+      return normalizeMemoryEntryPayload(
+        (result as Record<string, unknown>)?.memory || null,
+        {
+          created: Boolean((result as Record<string, unknown>)?.created),
+          duplicate: Boolean((result as Record<string, unknown>)?.duplicate)
+        }
+      );
+    }
+  );
+
+  registerJsonTool(
+    ['localnest_memory_update'],
+    {
+      title: 'Memory Update',
+      description: 'Update a stored memory entry and append a revision.',
+      inputSchema: {
+        id: z.string().min(1),
+        kind: MEMORY_KIND_SCHEMA.optional(),
+        title: z.string().min(1).max(400).optional(),
+        summary: z.string().max(4000).optional(),
+        content: z.string().min(1).max(20000).optional(),
+        status: MEMORY_STATUS_SCHEMA.optional(),
+        importance: z.number().int().min(0).max(100).optional(),
+        confidence: z.number().min(0).max(1).optional(),
+        tags: z.array(z.string()).max(50).optional(),
+        links: z.array(MEMORY_LINK_SCHEMA).max(50).optional(),
+        scope: MEMORY_SCOPE_SCHEMA.optional(),
+        source_type: z.string().max(60).optional(),
+        source_ref: z.string().max(1000).optional(),
+        change_note: z.string().max(400).default('Memory updated')
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+      }
+    },
+    async ({ id, ...patch }: Record<string, unknown>) => {
+      const result = await memory.updateEntry(id as string, patch);
+      return normalizeMemoryEntryPayload(result, {
+        updated: true
+      });
+    }
+  );
+
+  registerJsonTool(
+    ['localnest_memory_delete'],
+    {
+      title: 'Memory Delete',
+      description: 'Delete a stored memory entry and all of its revisions.',
+      inputSchema: {
+        id: z.string().min(1)
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ id }: Record<string, unknown>) => normalizeDeleteResult(await memory.deleteEntry(id as string), { id: id as string })
+  );
+
+  registerJsonTool(
+    ['localnest_memory_capture_event'],
+    {
+      title: 'Memory Capture Event',
+      description: 'Ingest a background work event and auto-promote meaningful events into durable memory.',
+      inputSchema: {
+        event_type: MEMORY_EVENT_TYPE_SCHEMA,
+        status: MEMORY_EVENT_STATUS_SCHEMA,
+        title: z.string().min(1).max(400),
+        summary: z.string().max(4000).default(''),
+        content: z.string().max(20000).default(''),
+        kind: MEMORY_KIND_SCHEMA.optional(),
+        importance: z.number().int().min(0).max(100).optional(),
+        confidence: z.number().min(0).max(1).optional(),
+        files_changed: z.number().int().min(0).max(10000).default(0),
+        has_tests: z.boolean().default(false),
+        tags: z.array(z.string()).max(50).default([]),
+        links: z.array(MEMORY_LINK_SCHEMA).max(50).default([]),
+        scope: MEMORY_SCOPE_SCHEMA,
+        source_ref: z.string().max(1000).default('')
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+      }
+    },
+    async (args: Record<string, unknown>) => memory.captureEvent(args)
+  );
+
+  registerJsonTool(
+    ['localnest_memory_events'],
+    {
+      title: 'Memory Events',
+      description: 'List recently captured memory events and whether they were promoted into durable memory.',
+      inputSchema: {
+        project_path: z.string().optional(),
+        limit: z.number().int().min(1).max(200).default(20),
+        offset: z.number().int().min(0).default(0)
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ project_path, limit, offset }: Record<string, unknown>) => normalizeMemoryEventsResult(
+      await memory.listEvents({
+        projectPath: project_path,
+        limit,
+        offset
+      })
+    )
+  );
+
+  registerJsonTool(
+    ['localnest_memory_suggest_relations'],
+    {
+      title: 'Memory Suggest Relations',
+      description: 'Find semantically similar memory entries that could be linked to a given memory. Uses dense embeddings (all-MiniLM-L6-v2) when available, falls back to token overlap. Returns candidates ranked by similarity without creating any relations — use localnest_memory_add_relation to confirm.',
+      inputSchema: {
+        id: z.string().min(1),
+        threshold: z.number().min(0).max(1).default(0.55),
+        max_results: z.number().int().min(1).max(50).default(10)
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ id, threshold, max_results }: Record<string, unknown>) => normalizeMemorySuggestionResult(
+      await memory.suggestRelations(id as string, { threshold: threshold as number, maxResults: max_results as number }),
+      id as string,
+      threshold as number
+    )
+  );
+
+  registerJsonTool(
+    ['localnest_memory_add_relation'],
+    {
+      title: 'Memory Add Relation',
+      description: 'Link two memory entries with a named relation. Use to build a traversable knowledge graph (e.g. "depends_on", "contradicts", "supersedes", "related").',
+      inputSchema: {
+        source_id: z.string().min(1),
+        target_id: z.string().min(1),
+        relation_type: z.string().min(1).max(60).default('related')
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ source_id, target_id, relation_type }: Record<string, unknown>) => {
+      const result = await memory.addRelation(source_id as string, target_id as string, relation_type as string);
+      return normalizeRelationResult(result, { source_id: source_id as string, target_id: target_id as string, relation_type: relation_type as string });
+    }
+  );
+
+  registerJsonTool(
+    ['localnest_memory_remove_relation'],
+    {
+      title: 'Memory Remove Relation',
+      description: 'Remove a relation between two memory entries.',
+      inputSchema: {
+        source_id: z.string().min(1),
+        target_id: z.string().min(1)
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ source_id, target_id }: Record<string, unknown>) => {
+      const result = await memory.removeRelation(source_id as string, target_id as string);
+      return normalizeRelationRemovalResult(result, { source_id: source_id as string, target_id: target_id as string });
+    }
+  );
+
+  registerJsonTool(
+    ['localnest_memory_related'],
+    {
+      title: 'Memory Related',
+      description: 'Return all memory entries linked to a given memory ID, traversing the knowledge graph one hop in both directions.',
+      inputSchema: {
+        id: z.string().min(1)
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ id }: Record<string, unknown>) => normalizeRelatedMemoriesResult(await memory.getRelated(id as string), id as string)
+  );
+}

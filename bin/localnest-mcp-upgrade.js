@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S node --import tsx/esm
 import { forwardDeprecatedCommand } from './_shared.js';
 
 await forwardDeprecatedCommand({
