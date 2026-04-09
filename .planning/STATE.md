@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CLI-First Architecture
-status: complete
-stopped_at: Completed 18-1 (Binary Deprecation)
-last_updated: "2026-04-08T09:18:45Z"
-last_activity: 2026-04-09
+status: completed
+stopped_at: "Completed quick task 260409-nyr: Update cache version-drift fix"
+last_updated: "2026-04-09T11:55:33.191Z"
+last_activity: "2026-04-09 - Completed quick task 260409-kaa: Brand identity + docs update for restructuring"
 progress:
-  total_phases: 9
-  completed_phases: 9
-  total_plans: 9
-  completed_plans: 9
+  total_phases: 26
+  completed_phases: 10
+  total_plans: 13
+  completed_plans: 17
   percent: 100
 ---
 
@@ -35,6 +35,7 @@ Progress: [##########] 100%
 ## Performance Metrics
 
 **Velocity:**
+
 - Total plans completed: 1
 - Average duration: 4m25s
 - Total execution time: ~5 minutes
@@ -54,6 +55,7 @@ Progress: [##########] 100%
 | 18 | 1 | 1m46s | 1m46s |
 
 **Recent Trend:**
+
 - Plan 10-1: 4m25s (6 tasks, 11 files)
 - Plan 11-1: 2m30s (1 task, 1 file)
 - Plan 12-1: 3m00s (1 task, 1 file)
@@ -99,6 +101,7 @@ Recent decisions affecting current work:
 - [Phase 18-1]: Yellow ANSI codes for deprecation warning color, consistent with Phase 10 raw ANSI approach
 - [Phase 18-1]: Fixed broken command forwarding by adding commandArgs to all 4 legacy binaries
 - [Phase 18-1]: Changed localnest-mcp-install-skill replacement from 'localnest install skills' to 'localnest skill install' per DEP-04
+- [Phase quick-260409-nyr]: Fixed update cache version-drift bug: shouldRefresh now invalidates on current_version mismatch, getCachedStatus neutralizes stale latest_version, TTL default 120->60min; readCache preserves on-disk current_version so drift detection actually works
 
 ### Pending Todos
 
@@ -113,9 +116,10 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260409-kaa | Brand identity + docs update for restructuring | 2026-04-09 | f55da7e | [260409-kaa](./quick/260409-kaa-create-localnest-brand-identity-and-upda/) |
+| 260409-nyr | Fix update cache version-drift bug + TTL default 60m + compareVersions regression guard | 2026-04-09 | acfbd85 | [260409-nyr](./quick/260409-nyr-fix-update-cache-semver-comparison-and-t/) |
 
 ## Session Continuity
 
-Last session: 2026-04-08T09:18:45Z
-Stopped at: Completed 18-1 (Binary Deprecation) -- v2.0 milestone COMPLETE
+Last session: 2026-04-09T11:55:27.824Z
+Stopped at: Completed quick task 260409-nyr: Update cache version-drift fix
 Resume file: None
