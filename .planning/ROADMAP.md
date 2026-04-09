@@ -186,7 +186,9 @@
   2. User can call `localnest_kg_add_triples_batch` with up to 500 triples and receive `{created, duplicates, errors}`; duplicates on `(subject_id, predicate, object_id)` where `valid_to IS NULL` return the existing id instead of inserting a new row
   3. User can call `localnest_memory_store_batch` with up to 100 memories and receive `{created, duplicates, errors}`; any item failure reports `{row_index, error}` while the rest still succeed inside a single transaction (or all roll back if configured strict)
   4. User can query `kg_as_of(timestamp)` on a triple written via batch and get a result back because `valid_from` is auto-stamped to NOW when the caller omits it
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 26-01-PLAN.md — KG entity/triple batch tools + valid_from auto-stamp + dedup (BATCH-01, 02, 04, 05, 06)
+- [ ] 26-02-PLAN.md — Memory store batch tool with fingerprint + semantic dedup + nest/branch pass-through (BATCH-03, 04)
 
 ### Phase 27: Terse Response Format
 **Goal**: Every write tool can return a minimal response shape, read tools drop empty/duplicate fields, and a measured benchmark shows at least 70% fewer tokens on common write workflows
@@ -360,7 +362,7 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
 | 23. TypeScript Infrastructure | v0.1.0 | 0/0 | Deferred (release/0.1.0) | - |
 | 24. TypeScript Migration | v0.1.0 | 0/0 | Deferred (release/0.1.0) | - |
 | 25. Library Updates + Ship | v0.1.0 | 0/0 | Deferred (release/0.1.0) | - |
-| 26. Batch Writes + Dedup + valid_from | v0.2.0 | 0/0 | Not started | - |
+| 26. Batch Writes + Dedup + valid_from | v0.2.0 | 0/2 | Planned | - |
 | 27. Terse Response Format | v0.2.0 | 0/0 | Not started | - |
 | 28. Predicate Cardinality & Contradiction Fix | v0.2.0 | 0/0 | Not started | - |
 | 29. Memory <-> KG Auto-Linking | v0.2.0 | 0/0 | Not started | - |
