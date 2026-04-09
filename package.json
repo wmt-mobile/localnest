@@ -74,8 +74,8 @@
   },
   "dependencies": {
     "@huggingface/transformers": "^4.0.1",
-    "@modelcontextprotocol/sdk": "^1.17.4",
-    "ora": "^8.2.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "ora": "^9.3.0",
     "zod": "^4.3.6"
   },
   "optionalDependencies": {
@@ -97,10 +97,10 @@
     "@eslint/js": "^10.0.1",
     "@types/node": "^25.5.2",
     "depcheck": "^1.4.7",
-    "eslint": "^10.0.2",
-    "globals": "^17.3.0",
+    "eslint": "^10.2.0",
+    "globals": "^17.4.0",
     "madge": "^8.0.0",
-    "publint": "^0.3.7",
+    "publint": "^0.3.18",
     "tsx": "^4.21.0",
     "typescript": "^6.0.2"
   }
