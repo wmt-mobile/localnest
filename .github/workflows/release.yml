@@ -138,7 +138,8 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          npm publish --provenance --access public --tag ${{ steps.tag.outputs.tag }}
+          npm publish --provenance --access public --tag ${{ steps.tag.outputs.tag }} || \
+          npm publish --access public --tag ${{ steps.tag.outputs.tag }}
           echo "Published ${{ steps.local.outputs.version }} as @${{ steps.tag.outputs.tag }}"
 
       - name: Create GitHub Release
