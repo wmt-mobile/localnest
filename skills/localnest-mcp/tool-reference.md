@@ -154,13 +154,13 @@ Checks whether content is a semantic duplicate of an existing memory entry. Para
 Creates or updates an entity. Entity IDs are auto-generated as normalized slugs (lowercase, underscored). Params: `name` (required), `entity_type` (default "concept"), `properties` (JSON object), `memory_id` (optional FK to memory entry).
 
 ### `localnest_kg_add_triple`
-Adds a subject-predicate-object triple. Entities are auto-created on first reference. Detects contradictions (same subject+predicate with different valid object) and warns without blocking. Params: `subject` (required), `predicate` (required), `object` (required), `valid_from` (ISO date), `confidence` (0-1, default 1.0), `source_memory_id`.
+Adds a subject-predicate-object triple. Entities are auto-created on first reference. Detects contradictions (same subject+predicate with different valid object) and warns without blocking. Params: `subject` (required), `predicate` (required), `object` (required), `valid_from` (ISO date or null), `confidence` (0-1, default 1.0), `source_memory_id` (nullable). All of `valid_from`, `valid_to`, and `source_memory_id` accept `null` and may be omitted.
 
 ### `localnest_kg_query`
 Queries all relationships for an entity. Params: `entity` (required), `direction` (outgoing/incoming/both, default both).
 
 ### `localnest_kg_invalidate`
-Sets valid_to on a triple to mark it as no longer current. Params: `subject` (required), `predicate` (required), `object` (required), `ended` (ISO date, default today).
+Sets valid_to on a triple to mark it as no longer current. Params: `subject` (required), `predicate` (required), `object` (required), `ended` (ISO date or null, default today).
 
 ### `localnest_kg_as_of`
 Queries triples for an entity at a specific point in time. Params: `entity` (required), `as_of` (required, ISO date), `direction` (default both).

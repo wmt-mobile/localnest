@@ -400,12 +400,16 @@ async function runInteractive(svc) {
     process.stdout.write(lines.join('\n') + '\n');
   }
 
+  let refreshLock = false;
   async function refresh() {
+    if (refreshLock) return; // prevent overlapping refreshes
+    refreshLock = true;
     refreshing = true;
     render();
     try { data = await collectData(svc); } catch { /* keep stale data */ }
     lastRefresh = timestamp();
     refreshing = false;
+    refreshLock = false;
     if (running) render();
   }
 
@@ -432,16 +436,19 @@ async function runInteractive(svc) {
     if (!running) return;
     // Ctrl+C
     if (key === '\x03') { cleanup(); process.exit(0); }
-    switch (key.toLowerCase()) {
-      case 'q':  cleanup(); process.exit(0); break;
-      case 'r':  refresh(); break;
-      case '0':  // fall through
-      case 'h':  view = VIEWS.OVERVIEW; render(); break;
-      case '1':  view = VIEWS.MEMORY;   render(); break;
-      case '2':  view = VIEWS.KG;       render(); break;
-      case '3':  view = VIEWS.RECENT;   render(); break;
-      case '?':  view = view === VIEWS.HELP ? VIEWS.OVERVIEW : VIEWS.HELP; render(); break;
+    const k = key.toLowerCase();
+    if (k === 'q') { cleanup(); process.exit(0); return; }
+    if (k === 'r') { refresh(); return; }
+    // View switches — update view and render only if not mid-refresh
+    const viewMap = { '0': VIEWS.OVERVIEW, h: VIEWS.OVERVIEW, '1': VIEWS.MEMORY, '2': VIEWS.KG, '3': VIEWS.RECENT };
+    if (k === '?') {
+      view = view === VIEWS.HELP ? VIEWS.OVERVIEW : VIEWS.HELP;
+    } else if (viewMap[k]) {
+      view = viewMap[k];
+    } else {
+      return; // unrecognized key
     }
+    if (!refreshLock) render();
   });
 
   // Handle SIGINT gracefully

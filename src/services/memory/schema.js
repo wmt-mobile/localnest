@@ -97,10 +97,6 @@ export async function ensureSchema(adapter) {
       ON memory_entries(scope_project_path, status, importance DESC);
     CREATE INDEX IF NOT EXISTS idx_memory_entries_kind_status
       ON memory_entries(kind, status);
-    CREATE INDEX IF NOT EXISTS idx_memory_entries_nest_branch
-      ON memory_entries(nest, branch);
-    CREATE INDEX IF NOT EXISTS idx_memory_entries_agent_id
-      ON memory_entries(agent_id);
 
     CREATE TABLE IF NOT EXISTS agent_diary (
       id TEXT PRIMARY KEY,

@@ -40,10 +40,10 @@ export function registerGraphTools({
         object_name: z.string().min(1).max(400),
         subject_id: z.string().max(400).optional(),
         object_id: z.string().max(400).optional(),
-        valid_from: z.string().optional(),
-        valid_to: z.string().optional(),
+        valid_from: z.string().nullable().optional(),
+        valid_to: z.string().nullable().optional(),
         confidence: z.number().min(0).max(1).default(1.0),
-        source_memory_id: z.string().optional(),
+        source_memory_id: z.string().nullable().optional(),
         source_type: z.string().max(100).default('manual')
       },
       annotations: {
@@ -96,7 +96,7 @@ export function registerGraphTools({
       description: 'Set valid_to on a triple to mark it as no longer current. The triple remains in history but is excluded from current-state queries.',
       inputSchema: {
         triple_id: z.string().min(1),
-        valid_to: z.string().optional()
+        valid_to: z.string().nullable().optional()
       },
       annotations: {
         readOnlyHint: false,

@@ -4,6 +4,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.0.7-beta.3] - 2026-04-09
+
+### Fixed
+
+- Fixed `.nullable()` missing on `valid_from`, `valid_to`, and `source_memory_id` in `kg_add_triple` and `kg_invalidate` — AI clients sending null now accepted.
+- Removed redundant index creation in `schema.js` already handled by migrations.
+
+### Changed
+
+- Skill installer now syncs slash commands even when skill is already up-to-date, auto-installs Claude Code hooks, and fixes duplicate log message on noop.
+
 ## [0.0.7-beta.2] - 2026-04-08
 
 ### Interactive CLI
