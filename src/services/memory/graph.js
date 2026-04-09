@@ -34,7 +34,7 @@ export async function traverseGraph(adapter, { startEntityId, maxHops, direction
         JOIN reachable r ON t.subject_id = r.entity_id
         WHERE r.depth < ?
           AND t.valid_to IS NULL
-          AND (',' || r.path || ',') NOT LIKE ('%,' || t.object_id || ',%')
+          AND INSTR(',' || r.path || ',', ',' || t.object_id || ',') = 0
       )
       SELECT DISTINCT r.entity_id, r.depth, r.path,
              e.name, e.entity_type
@@ -55,7 +55,7 @@ export async function traverseGraph(adapter, { startEntityId, maxHops, direction
         JOIN reachable r ON t.object_id = r.entity_id
         WHERE r.depth < ?
           AND t.valid_to IS NULL
-          AND (',' || r.path || ',') NOT LIKE ('%,' || t.subject_id || ',%')
+          AND INSTR(',' || r.path || ',', ',' || t.subject_id || ',') = 0
       )
       SELECT DISTINCT r.entity_id, r.depth, r.path,
              e.name, e.entity_type
@@ -76,7 +76,10 @@ export async function traverseGraph(adapter, { startEntityId, maxHops, direction
         JOIN reachable r ON (t.subject_id = r.entity_id OR t.object_id = r.entity_id)
         WHERE r.depth < ?
           AND t.valid_to IS NULL
-          AND r.path NOT LIKE '%' || CASE WHEN t.subject_id = r.entity_id THEN t.object_id ELSE t.subject_id END || '%'
+          AND INSTR(
+            ',' || r.path || ',',
+            ',' || CASE WHEN t.subject_id = r.entity_id THEN t.object_id ELSE t.subject_id END || ','
+          ) = 0
       )
       SELECT DISTINCT r.entity_id, r.depth, r.path,
              e.name, e.entity_type

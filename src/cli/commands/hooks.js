@@ -4,6 +4,8 @@ import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 import { green, red, yellow } from '../ansi.js';
+import { writeError } from '../output.js';
+import { startSpinner } from '../spinner.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // CLI lives at <root>/src/cli/commands/ — hooks at <root>/scripts/hooks/
@@ -33,15 +35,22 @@ export async function run(args, opts) {
 async function handleInstall() {
   const installerPath = path.join(HOOKS_DIR, 'install-hooks.cjs');
   if (!fs.existsSync(installerPath)) {
-    process.stderr.write(`[localnest] Hook installer not found at ${installerPath}\n`);
-    process.stderr.write('[localnest] Package may be corrupted. Reinstall with: npm install -g localnest-mcp\n');
+    writeError(`Hook installer not found at ${installerPath}`);
+    writeError('Package may be corrupted. Reinstall with: npm install -g localnest-mcp');
     process.exitCode = 1;
     return;
   }
+  const spinner = startSpinner('Installing Claude Code hooks...');
   const result = spawnSync(process.execPath, [installerPath], {
-    stdio: 'inherit',
+    stdio: 'pipe',
     encoding: 'utf8',
   });
+  if (result.status === 0) {
+    spinner.succeed('Claude Code hooks installed');
+  } else {
+    spinner.fail('Hook installation failed');
+    if (result.stderr) process.stderr.write(result.stderr);
+  }
   process.exitCode = result.status || 0;
 }
 

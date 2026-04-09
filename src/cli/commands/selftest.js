@@ -23,6 +23,7 @@ import {
   bold, dim, green, red, yellow,
   boxTop, boxBottom, boxLine, separator,
 } from '../ansi.js';
+import { startSpinner } from '../spinner.js';
 
 /* ------------------------------------------------------------------ */
 /*  Result tracking                                                    */
@@ -480,10 +481,13 @@ export async function run(args, opts) {
 
   /** @type {CheckResult[]} */
   const results = [];
+  const useSpinners = !jsonOutput;
 
   // 1. Runtime
+  let sp = useSpinners ? startSpinner('Checking runtime config...') : null;
   const runtimeResult = await checkRuntime();
   results.push(runtimeResult);
+  if (sp) { runtimeResult.status === 'pass' ? sp.succeed('Runtime config') : sp.fail('Runtime config'); }
 
   const runtime = runtimeResult.runtime;
   let memoryService = null;
@@ -498,55 +502,73 @@ export async function run(args, opts) {
   }
 
   // 2. Memory backend
+  sp = useSpinners ? startSpinner('Checking memory backend...') : null;
   if (memoryService) {
     results.push(await checkMemoryBackend(memoryService));
   } else {
     results.push({ name: 'Memory backend', status: 'fail', detail: 'runtime config failed' });
   }
+  if (sp) { results[1].status === 'pass' ? sp.succeed('Memory backend') : sp.fail('Memory backend'); }
 
   // 3. Memory CRUD
+  sp = useSpinners ? startSpinner('Testing memory CRUD...') : null;
   if (memoryService && results[1].status === 'pass') {
     results.push(await checkMemoryCrud(memoryService));
   } else {
     results.push({ name: 'Memory CRUD', status: 'fail', detail: 'database not available' });
   }
+  if (sp) { results[2].status === 'pass' ? sp.succeed('Memory CRUD') : sp.fail('Memory CRUD'); }
 
   // 4. Knowledge Graph
+  sp = useSpinners ? startSpinner('Testing knowledge graph...') : null;
   if (memoryService && results[1].status === 'pass') {
     results.push(await checkKnowledgeGraph(memoryService));
   } else {
     results.push({ name: 'Knowledge Graph', status: 'fail', detail: 'database not available' });
   }
+  if (sp) { results[3].status === 'pass' ? sp.succeed('Knowledge Graph') : sp.fail('Knowledge Graph'); }
 
   // 5. Taxonomy
+  sp = useSpinners ? startSpinner('Testing taxonomy...') : null;
   if (memoryService && results[1].status === 'pass') {
     results.push(await checkTaxonomy(memoryService));
   } else {
     results.push({ name: 'Taxonomy', status: 'fail', detail: 'database not available' });
   }
+  if (sp) { results[4].status === 'pass' ? sp.succeed('Taxonomy') : sp.fail('Taxonomy'); }
 
   // 6. Dedup
+  sp = useSpinners ? startSpinner('Testing deduplication...') : null;
   if (memoryService && results[1].status === 'pass') {
     results.push(await checkDedup(memoryService));
   } else {
     results.push({ name: 'Dedup', status: 'fail', detail: 'database not available' });
   }
+  if (sp) { results[5].status === 'pass' ? sp.succeed('Dedup') : (results[5].status === 'warn' ? sp.warn('Dedup') : sp.fail('Dedup')); }
 
   // 7. Embeddings
+  sp = useSpinners ? startSpinner('Testing embeddings...') : null;
   if (embeddingService) {
     results.push(await checkEmbeddings(embeddingService));
   } else {
     results.push({ name: 'Embeddings', status: 'warn', detail: 'embedding service not available' });
   }
+  if (sp) { results[6].status === 'pass' ? sp.succeed('Embeddings') : sp.warn('Embeddings'); }
 
   // 8. File search
+  sp = useSpinners ? startSpinner('Checking file search...') : null;
   results.push(checkFileSearch());
+  if (sp) { results[7].status === 'pass' ? sp.succeed('File search') : sp.warn('File search'); }
 
   // 9. Skills
+  sp = useSpinners ? startSpinner('Checking skills...') : null;
   results.push(checkSkills());
+  if (sp) { results[8].status === 'pass' ? sp.succeed('Skills') : sp.warn('Skills'); }
 
   // 10. Hooks
+  sp = useSpinners ? startSpinner('Checking hooks...') : null;
   results.push(checkHooks());
+  if (sp) { results[9].status === 'pass' ? sp.succeed('Hooks') : sp.fail('Hooks'); }
 
   // -- Output --
   if (jsonOutput) {

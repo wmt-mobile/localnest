@@ -32,27 +32,33 @@ export async function suggestRelations(adapter, memoryId, { threshold = 0.55, ma
     [id]
   );
 
+  // Pre-filter candidates: remove already-linked entries up-front
+  const eligible = candidates.filter(row => !linkedSet.has(row.id));
+
   const scored = [];
 
   if (sourceEmbedding) {
-    for (const row of candidates) {
-      if (linkedSet.has(row.id)) continue;
+    // Batch-parse all embeddings once, then score in a single pass
+    const parsed = [];
+    for (const row of eligible) {
       if (!row.embedding_json) continue;
       try {
-        const emb = JSON.parse(row.embedding_json);
-        const cosine = cosineSimilarity(sourceEmbedding, emb);
-        const score = (cosine + 1) / 2;
-        if (score >= threshold) {
-          scored.push({ memory_id: row.id, title: row.title, similarity: Number(score.toFixed(3)) });
-        }
+        parsed.push({ id: row.id, title: row.title, emb: JSON.parse(row.embedding_json) });
       } catch {
-        // Ignore malformed candidate embeddings.
+        // Skip malformed embedding payloads
+      }
+    }
+    for (const { id: rowId, title, emb } of parsed) {
+      if (!Array.isArray(emb) || emb.length === 0) continue;
+      const cosine = cosineSimilarity(sourceEmbedding, emb);
+      const score = (cosine + 1) / 2;
+      if (score >= threshold) {
+        scored.push({ memory_id: rowId, title, similarity: Number(score.toFixed(3)) });
       }
     }
   } else {
     const sourceTerms = splitTerms(`${source.title} ${source.summary}`);
-    for (const row of candidates) {
-      if (linkedSet.has(row.id)) continue;
+    for (const row of eligible) {
       const rowTerms = splitTerms(`${row.title} ${row.summary}`);
       const score = scoreTokenOverlap(sourceTerms, rowTerms);
       if (score >= threshold) {

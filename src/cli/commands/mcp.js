@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { printSubcommandHelp } from '../help.js';
+import { writeError as sharedWriteError } from '../output.js';
 import { buildRuntimeConfig } from '../../runtime/config.js';
 import {
   resolveLocalnestHome,
@@ -39,7 +40,7 @@ function writeError(msg, json) {
   if (json) {
     writeJson({ error: msg });
   } else {
-    process.stderr.write(`Error: ${msg}\n`);
+    sharedWriteError(msg);
   }
   process.exitCode = 1;
 }
@@ -288,7 +289,7 @@ export async function run(args, opts) {
 
   const handler = HANDLERS[verb];
   if (!handler) {
-    process.stderr.write(`Unknown mcp command: ${verb}\n`);
+    sharedWriteError(`Unknown mcp command: ${verb}`);
     printSubcommandHelp('mcp', VERBS);
     process.exitCode = 1;
     return;

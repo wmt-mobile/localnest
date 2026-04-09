@@ -14,6 +14,7 @@ import path from 'node:path';
 import os from 'node:os';
 import { createInterface } from 'node:readline';
 import { printSubcommandHelp } from '../help.js';
+import { writeError as sharedWriteError } from '../output.js';
 import {
   listBundledSkillDirs,
   getKnownToolSkillDirs,
@@ -52,7 +53,7 @@ function writeError(msg, json) {
   if (json) {
     writeJson({ error: msg });
   } else {
-    process.stderr.write(`Error: ${msg}\n`);
+    sharedWriteError(msg);
   }
   process.exitCode = 1;
 }
@@ -275,7 +276,7 @@ async function handleRemove(args, opts) {
     process.stdout.write(`Removed: ${p}\n`);
   }
   for (const e of errors) {
-    process.stderr.write(`Failed to remove ${e.path}: ${e.error}\n`);
+    sharedWriteError(`Failed to remove ${e.path}: ${e.error}`);
   }
 
   if (errors.length > 0) {
@@ -309,7 +310,7 @@ export async function run(args, opts) {
 
   const handler = HANDLERS[verb];
   if (!handler) {
-    process.stderr.write(`Unknown skill command: ${verb}\n`);
+    sharedWriteError(`Unknown skill command: ${verb}`);
     printSubcommandHelp('skill', VERBS);
     process.exitCode = 1;
     return;

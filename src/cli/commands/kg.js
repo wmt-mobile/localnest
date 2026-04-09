@@ -11,6 +11,7 @@ import { parseFlags } from '../parse-flags.js';
  */
 
 import { printSubcommandHelp } from '../help.js';
+import { writeError as sharedWriteError } from '../output.js';
 import { buildRuntimeConfig } from '../../runtime/config.js';
 import { EmbeddingService } from '../../services/retrieval/embedding/service.js';
 import { MemoryService } from '../../services/memory/service.js';
@@ -73,7 +74,7 @@ function writeError(msg, json) {
   if (json) {
     writeJson({ error: msg });
   } else {
-    process.stderr.write(`Error: ${msg}\n`);
+    sharedWriteError(msg);
   }
   process.exitCode = 1;
 }
@@ -300,7 +301,7 @@ export async function run(args, opts) {
 
   const handler = HANDLERS[verb];
   if (!handler) {
-    process.stderr.write(`Unknown kg command: ${verb}\n`);
+    sharedWriteError(`Unknown kg command: ${verb}`);
     printSubcommandHelp('kg', VERBS);
     process.exitCode = 1;
     return;

@@ -69,22 +69,27 @@ export async function checkDuplicate(adapter, embeddingService, content, opts = 
     return { isDuplicate: false };
   }
 
+  // Batch-parse all embedding JSON once, then score in a single pass
+  const parsed = [];
+  for (const row of rows) {
+    try {
+      const emb = JSON.parse(row.embedding_json);
+      if (Array.isArray(emb) && emb.length > 0) {
+        parsed.push({ id: row.id, title: row.title, emb });
+      }
+    } catch {
+      // Skip malformed embedding payloads
+    }
+  }
+
   let bestMatch = null;
   let bestSimilarity = -1;
 
-  for (const row of rows) {
-    let stored;
-    try {
-      stored = JSON.parse(row.embedding_json);
-    } catch {
-      continue;
-    }
-    if (!Array.isArray(stored) || stored.length === 0) continue;
-
-    const similarity = cosineSimilarity(queryEmbedding, stored);
+  for (const { id, title, emb } of parsed) {
+    const similarity = cosineSimilarity(queryEmbedding, emb);
     if (similarity >= threshold && similarity > bestSimilarity) {
       bestSimilarity = similarity;
-      bestMatch = { id: row.id, title: row.title, similarity: Number(similarity.toFixed(4)) };
+      bestMatch = { id, title, similarity: Number(similarity.toFixed(4)) };
     }
   }
 

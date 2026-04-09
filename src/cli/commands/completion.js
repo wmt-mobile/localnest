@@ -14,6 +14,7 @@
  */
 
 import { printSubcommandHelp } from '../help.js';
+import { writeError } from '../output.js';
 
 const VERBS = [
   { name: 'bash', desc: 'Output bash completion script' },
@@ -371,7 +372,7 @@ export async function run(args, opts) {
 
   const known = VERBS.find((v) => v.name === verb);
   if (!known) {
-    process.stderr.write(`Unknown completion target: ${verb}\n`);
+    writeError(`Unknown completion target: ${verb}`);
     printSubcommandHelp('completion', VERBS);
     process.exitCode = 1;
     return;

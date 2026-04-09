@@ -13,6 +13,7 @@ import {
   bold, dim, italic, cyan, green, yellow, magenta, blue, gray, badge,
   B as BOX, boxTop, boxBottom, boxLine, separator,
 } from './ansi.js';
+import { TOOL_COUNT } from './tool-count.js';
 
 /* ------------------------------------------------------------------ */
 /*  Command definitions by category                                    */
@@ -97,11 +98,13 @@ export function printHelp() {
   const lines = [];
 
   lines.push('');
+  lines.push(`  ${bold('LocalNest')} ${cyan(`v${SERVER_VERSION}`)} ${gray(BOX.h.repeat(2))} ${dim('local-first MCP memory server')}`);
+  lines.push('');
   lines.push(boxTop(W));
   lines.push(boxLine(`${bold('LocalNest')}  ${gray(`v${SERVER_VERSION}`)}  ${badge('MCP')}`, W));
   lines.push(boxLine(`${italic(gray('Local-first AI memory, code retrieval & knowledge graph'))}`, W));
   lines.push(boxLine('', W));
-  lines.push(boxLine(`${green(BOX.check)} ${dim('52 MCP tools')}  ${cyan(BOX.dot)} ${dim('Zero cloud deps')}  ${magenta('◇')} ${dim('Temporal KG')}`, W));
+  lines.push(boxLine(`${green(BOX.check)} ${dim(`${TOOL_COUNT} MCP tools`)}  ${cyan(BOX.dot)} ${dim('Zero cloud deps')}  ${magenta('◇')} ${dim('Temporal KG')}`, W));
   lines.push(boxBottom(W));
   lines.push('');
 
@@ -131,6 +134,16 @@ export function printHelp() {
   lines.push(`    ${green('--config')} ${gray('<path>')}       ${dim('Custom config file path')}`);
   lines.push(`    ${green('--version')}, ${green('-v')}        ${dim('Print version')}`);
   lines.push(`    ${green('--help')}, ${green('-h')}           ${dim('Show this help')}`);
+  lines.push('');
+
+  lines.push(separator());
+  lines.push('');
+  lines.push(`  ${bold('EXAMPLES')}`);
+  lines.push(`    ${cyan('localnest memory add')} ${gray('--content "JWT with refresh tokens" --kind decision')}`);
+  lines.push(`    ${cyan('localnest memory search')} ${gray('--query "authentication"')}`);
+  lines.push(`    ${cyan('localnest kg add')} ${gray('--subject "AuthService" --predicate "uses" --object "JWT"')}`);
+  lines.push(`    ${cyan('localnest selftest')} ${gray('--json')}`);
+  lines.push(`    ${cyan('localnest dashboard')}`);
   lines.push('');
 
   lines.push(separator());

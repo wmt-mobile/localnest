@@ -1,4 +1,5 @@
 import fs from 'node:fs';
+import fsp from 'node:fs/promises';
 import path from 'node:path';
 import {
   makeFileSignature,
@@ -33,6 +34,10 @@ export class VectorIndexService {
     this.bm25K1 = bm25K1;
     this.bm25B = bm25B;
     this.data = null;
+    /** @private Write coalescing: true while an async persist is in-flight */
+    this._persistPending = false;
+    /** @private When true, another persist is requested while one is already running */
+    this._persistQueued = false;
   }
 
   ensureLoaded() {
@@ -59,10 +64,32 @@ export class VectorIndexService {
     }
   }
 
-  persist() {
-    const dir = path.dirname(this.indexPath);
-    fs.mkdirSync(dir, { recursive: true });
-    fs.writeFileSync(this.indexPath, `${JSON.stringify(this.data, null, 2)}\n`, 'utf8');
+  /**
+   * Async persist with write coalescing.
+   * If a write is already in-flight, the request is queued and only one
+   * additional write will run after the current one finishes — this prevents
+   * overlapping writes and excessive I/O when many index updates happen in
+   * rapid succession.
+   */
+  async persist() {
+    if (this._persistPending) {
+      this._persistQueued = true;
+      return;
+    }
+
+    this._persistPending = true;
+    try {
+      const dir = path.dirname(this.indexPath);
+      await fsp.mkdir(dir, { recursive: true });
+      const json = `${JSON.stringify(this.data, null, 2)}\n`;
+      await fsp.writeFile(this.indexPath, json, 'utf8');
+    } finally {
+      this._persistPending = false;
+      if (this._persistQueued) {
+        this._persistQueued = false;
+        await this.persist();
+      }
+    }
   }
 
   getStatus() {
@@ -98,7 +125,7 @@ export class VectorIndexService {
     };
   }
 
-  checkStaleness() {
+  async checkStaleness() {
     this.ensureLoaded();
     const docs = this.data?.documents || {};
     let staleCount = 0;
@@ -106,7 +133,7 @@ export class VectorIndexService {
     const entries = Object.entries(docs);
     for (const [filePath, doc] of entries) {
       try {
-        const st = fs.statSync(filePath);
+        const st = await fsp.stat(filePath);
         if (makeFileSignature(st) !== doc.signature) staleCount += 1;
       } catch {
         deletedCount += 1;
@@ -167,7 +194,7 @@ export class VectorIndexService {
     if (typeof onProgress === 'function') {
       await onProgress({ scanned: total, total, phase: 'rebuilding_stats' });
     }
-    this.persist();
+    await this.persist();
 
     return {
       bases,

@@ -8,7 +8,7 @@ export function startStalenessMonitor(vectorIndex, intervalMinutes, log = proces
     if (running) return;
     running = true;
     try {
-      const staleness = vectorIndex.checkStaleness();
+      const staleness = await vectorIndex.checkStaleness();
       if (!staleness.stale) return;
       log(
         `[localnest-sweep] index stale (${staleness.stale_count}/${staleness.total_indexed} files changed) — re-indexing\n`

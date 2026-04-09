@@ -19,6 +19,8 @@ import {
   bold, dim, italic, cyan, green, yellow, red, gray,
   B as BOX, boxTop, boxBottom, boxLine, boxEmpty,
 } from '../ansi.js';
+import { startSpinner } from '../spinner.js';
+import { TOOL_COUNT } from '../tool-count.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
@@ -182,9 +184,10 @@ async function runOnboard() {
 
   // ── Step 1: Detect environment ─────────────────────────────────
   stepHeader(1, totalSteps, 'Detecting environment...');
-  write('');
-
+  const envSpinner = startSpinner('Scanning for runtimes and AI clients...');
   const env = detectEnvironment();
+  envSpinner.succeed('Environment detected');
+  write('');
 
   resultLine(env.nodeOk,
     `Node.js ${cyan(env.nodeVersion)} ${dim('(memory support available)')}`);
@@ -215,14 +218,20 @@ async function runOnboard() {
 
   // ── Step 2: Run setup ──────────────────────────────────────────
   stepHeader(2, totalSteps, 'Running setup...');
+  const setupSpinner = startSpinner('Initializing configuration and databases...');
   const setupOk = runSetup(true);
+  if (setupOk) setupSpinner.succeed('Configuration and databases initialized');
+  else setupSpinner.fail('Setup encountered issues');
   resultLine(setupOk, setupOk
     ? 'Configuration and databases initialized'
     : red('Setup encountered issues — run `localnest setup` manually'));
 
   // ── Step 3: Install skills ─────────────────────────────────────
   stepHeader(3, totalSteps, 'Installing skills to AI clients...');
+  const skillSpinner = startSpinner('Writing skill files to AI clients...');
   const skillsOk = runSkillInstall();
+  if (skillsOk) skillSpinner.succeed('Skills installed');
+  else skillSpinner.warn('Skill install had warnings');
   if (skillsOk) {
     resultLine(true, env.clientCount > 0
       ? `Skills installed to ${cyan(String(env.clientCount))} AI client(s)`
@@ -234,7 +243,10 @@ async function runOnboard() {
   // ── Step 4: Install hooks ─────────────────────────────────────
   stepHeader(4, totalSteps, 'Installing Claude Code hooks...');
   if (env.claudeCode) {
+    const hookSpinner = startSpinner('Wiring memory hooks into Claude Code...');
     const hooksOk = runHooksInstall();
+    if (hooksOk) hookSpinner.succeed('Memory hooks active');
+    else hookSpinner.fail('Hook install had issues');
     resultLine(hooksOk, hooksOk
       ? 'Memory hooks active in Claude Code'
       : yellow('Hook install had issues — run `localnest hooks install`'));
@@ -244,7 +256,10 @@ async function runOnboard() {
 
   // ── Step 5: Doctor ─────────────────────────────────────────────
   stepHeader(5, totalSteps, 'Verifying installation...');
+  const doctorSpinner = startSpinner('Running health checks...');
   const doctorOk = runDoctor();
+  if (doctorOk) doctorSpinner.succeed('All health checks passed');
+  else doctorSpinner.warn('Some checks need attention');
   resultLine(doctorOk, doctorOk
     ? 'All health checks passed'
     : yellow('Some checks failed — run `localnest doctor` for details'));
@@ -259,7 +274,7 @@ async function runOnboard() {
       ? `${green(BOX.check)} ${bold('LocalNest is ready!')}`
       : `${yellow('!')} ${bold('LocalNest is partially configured')}`),
     boxEmpty(),
-    boxLine(`${green(BOX.check)} ${dim('52 MCP tools available')}`),
+    boxLine(`${green(BOX.check)} ${dim(`${TOOL_COUNT} MCP tools available`)}`),
     boxLine(env.clientCount > 0
       ? `${green(BOX.check)} ${dim(`Skills installed in ${env.clientCount} AI client(s)`)}`
       : `${yellow(BOX.circle)} ${dim('No AI clients detected for skill install')}`),

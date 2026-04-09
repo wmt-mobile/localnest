@@ -13,6 +13,8 @@ import {
   bold, dim, cyan, green, yellow, magenta, red, gray, inverse,
   B, padRight, panel, progressBar, truncate,
 } from '../ansi.js';
+import { writeError } from '../output.js';
+import { TOOL_COUNT } from '../tool-count.js';
 
 /* -- Helpers --------------------------------------------------------- */
 
@@ -87,7 +89,7 @@ function renderHeader(W, view, refreshing) {
   const title = bold('LocalNest Dashboard');
   const ver = dim(`v${SERVER_VERSION}`);
   const refreshLabel = refreshing ? green('refreshing...') : dim(`\u21bb every 5s`);
-  const meta = `${ver}  ${gray(B.v)}  ${dim('52 tools')}  ${gray(B.v)}  ${refreshLabel}`;
+  const meta = `${ver}  ${gray(B.v)}  ${dim(`${TOOL_COUNT} tools`)}  ${gray(B.v)}  ${refreshLabel}`;
   const content = `${title}  ${gray(B.v)}  ${meta}`;
   return [
     `  ${gray(B.tl + B.h.repeat(W - 2) + B.tr)}`,
@@ -140,7 +142,7 @@ function renderServerRow(data, W) {
   const indexStr = store.initialized ? green('Fresh') : dim('N/A');
   const rows = [
     `${dim('Status:')} ${statusStr}  ${gray(B.v)}  ${dim('Backend:')} ${bold(backendStr)}  ${gray(B.v)}  ${dim('Index:')} ${indexStr}`,
-    `${dim('Memory:')} ${st.enabled ? green('Enabled') : red('Disabled')}  ${gray(B.v)}  ${dim('Hooks:')} ${bold(String(hookCount))}  ${gray(B.v)}  ${dim('Tools:')} ${bold('52')}`,
+    `${dim('Memory:')} ${st.enabled ? green('Enabled') : red('Disabled')}  ${gray(B.v)}  ${dim('Hooks:')} ${bold(String(hookCount))}  ${gray(B.v)}  ${dim('Tools:')} ${bold(String(TOOL_COUNT))}`,
   ];
   return panel('Server', rows, W, green);
 }
@@ -417,7 +419,7 @@ export async function run(args, opts) {
     if (isJson) {
       process.stdout.write(JSON.stringify({ error: err.message }, null, 2) + '\n');
     } else {
-      process.stderr.write(`Error: ${err.message}\n`);
+      writeError(err.message);
     }
     process.exitCode = 1;
     return;

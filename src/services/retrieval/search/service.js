@@ -211,7 +211,7 @@ export class SearchService {
     let indexStaleness = null;
     if (this.vectorIndex) {
       try {
-        indexStaleness = this.vectorIndex.checkStaleness();
+        indexStaleness = await this.vectorIndex.checkStaleness();
       } catch {
         // non-fatal
       }
