@@ -4,6 +4,10 @@ description: Check LocalNest server health, memory, and KG status
 allowed-tools:
   - Read
   - Bash
+  - mcp__localnest__localnest_server_status
+  - mcp__localnest__localnest_memory_status
+  - mcp__localnest__localnest_kg_stats
+  - mcp__localnest__localnest_hooks_stats
 ---
 
 <objective>

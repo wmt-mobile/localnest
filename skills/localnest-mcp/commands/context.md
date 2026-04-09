@@ -4,6 +4,7 @@ description: Get full task context — runtime status + recalled memories in one
 allowed-tools:
   - Read
   - Bash
+  - mcp__localnest__localnest_task_context
 ---
 
 <objective>
