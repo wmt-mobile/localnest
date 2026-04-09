@@ -111,7 +111,16 @@ export class UpdateService {
       if (!fs.existsSync(this.cachePath)) return null;
       const parsed = JSON.parse(fs.readFileSync(this.cachePath, 'utf8'));
       if (!parsed || typeof parsed !== 'object') return null;
-      return this.normalizeStatusRecord(parsed as Partial<UpdateStatus>);
+      // Preserve the on-disk current_version so version-drift detection in
+      // shouldRefresh / getCachedStatus can see whether the running binary
+      // has advanced past what the cache knew about. normalizeStatusRecord
+      // would otherwise stomp current_version to this.currentVersion.
+      const input = parsed as Partial<UpdateStatus>;
+      const normalized = this.normalizeStatusRecord(input);
+      if (typeof input.current_version === 'string' && input.current_version) {
+        normalized.current_version = input.current_version;
+      }
+      return normalized;
     } catch {
       return null;
     }

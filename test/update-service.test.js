@@ -15,6 +15,11 @@ test('compareVersions handles stable and prerelease ordering', () => {
   assert.equal(compareVersions('0.0.3', '0.0.3'), 0);
   assert.equal(compareVersions('0.0.3-beta.1', '0.0.3'), -1);
   assert.equal(compareVersions('0.0.3-beta.2', '0.0.3-beta.1'), 1);
+  // Regression guard: a future refactor must NOT regress to lexicographic
+  // string compare ("0.1.0" < "0.0.3" lexicographically, which is wrong).
+  assert.equal(compareVersions('0.1.0', '0.0.3'), 1);
+  assert.equal(compareVersions('0.0.3', '0.1.0'), -1);
+  assert.equal(compareVersions('0.10.0', '0.2.0'), 1);
 });
 
 test('getStatus fetches npm live result and then serves cache while fresh', async () => {
@@ -171,8 +176,13 @@ test('getCachedStatus overrides stale cached current_version with installed runt
   });
 
   const out = service.getCachedStatus();
+  // current_version always reflects the running binary
   assert.equal(out.current_version, '0.0.4-beta.8');
-  assert.equal(out.latest_version, '0.0.3');
+  // Version drift detected -> neutralize stale latest_version to the running
+  // binary and flag stale so the next refresh cycle can update it.
+  assert.equal(out.latest_version, '0.0.4-beta.8');
+  assert.equal(out.is_outdated, false);
+  assert.equal(out.stale, true);
 });
 
 test('selfUpdate requires explicit approval', async () => {
@@ -367,4 +377,77 @@ test('selfUpdate reports skill sync failure after successful install', async () 
   assert.equal(out.step, 'skill_sync');
   assert.equal(calls.length, 2);
   assert.match(out.skill_sync.stderr, /sync failed/);
+});
+
+test('getStatus invalidates cache when current_version advances past cached latest_version', async () => {
+  const home = makeTempHome();
+  const cachePath = buildLocalnestPaths(home).updateStatusPath;
+  fs.mkdirSync(path.dirname(cachePath), { recursive: true });
+  // Simulate: 30 days ago, the user was running 0.0.3 and latest was 0.0.3.
+  fs.writeFileSync(cachePath, `${JSON.stringify({
+    package_name: 'localnest-mcp',
+    current_version: '0.0.3',
+    latest_version: '0.0.3',
+    update_channel: 'stable',
+    is_outdated: false,
+    last_checked_at: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+    last_check_ok: true
+  }, null, 2)}\n`, 'utf8');
+
+  let npmCalls = 0;
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.1.0', // user has since upgraded locally
+    checkIntervalMinutes: 60,
+    failureBackoffMinutes: 15,
+    commandRunner: () => {
+      npmCalls += 1;
+      return { status: 0, stdout: '"0.1.0"\n', stderr: '' };
+    }
+  });
+
+  // force:false must STILL trigger a refresh because current_version drifted,
+  // even though the cache TTL alone would not be enough (cache is 30 days old
+  // but the old bug treated age-based staleness as the only signal to refresh).
+  const out = await service.getStatus({ force: false });
+  assert.equal(npmCalls, 1, 'version drift must force a refresh even when time-fresh');
+  assert.equal(out.current_version, '0.1.0');
+  assert.equal(out.latest_version, '0.1.0');
+  assert.equal(out.is_outdated, false);
+  assert.equal(out.source, 'live');
+});
+
+test('getCachedStatus neutralizes stale latest_version when current_version drifted', () => {
+  const home = makeTempHome();
+  const cachePath = buildLocalnestPaths(home).updateStatusPath;
+  fs.mkdirSync(path.dirname(cachePath), { recursive: true });
+  // Fresh timestamp so the ONLY stale signal is the current_version drift.
+  fs.writeFileSync(cachePath, `${JSON.stringify({
+    package_name: 'localnest-mcp',
+    current_version: '0.0.3',
+    latest_version: '0.0.3',
+    update_channel: 'stable',
+    is_outdated: false,
+    last_checked_at: new Date().toISOString(),
+    last_check_ok: true
+  }, null, 2)}\n`, 'utf8');
+
+  const service = new UpdateService({
+    localnestHome: home,
+    packageName: 'localnest-mcp',
+    currentVersion: '0.1.0',
+    checkIntervalMinutes: 60,
+    failureBackoffMinutes: 15,
+    commandRunner: () => {
+      throw new Error('getCachedStatus must not invoke npm');
+    }
+  });
+
+  const snapshot = service.getCachedStatus();
+  assert.equal(snapshot.current_version, '0.1.0');
+  assert.equal(snapshot.latest_version, '0.1.0', 'must not surface pre-upgrade latest_version');
+  assert.equal(snapshot.is_outdated, false);
+  assert.equal(snapshot.stale, true, 'must flag as stale so warmCheck refreshes');
+  assert.equal(snapshot.source, 'cache');
 });
