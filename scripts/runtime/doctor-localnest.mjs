@@ -311,13 +311,7 @@ function checkModelCacheWritable() {
     id: 'model_cache',
     ok: true,
     detail: fallbackUsed
-      ? [
-        'Model cache writable (informational fallback active)',
-        `embed preferred=${embedResolved.preferredPath}`,
-        `embed resolved=${embedResolved.path}`,
-        `reranker preferred=${rerankerResolved.preferredPath}`,
-        `reranker resolved=${rerankerResolved.path}`
-      ].join('; ')
+      ? 'Model cache writable (fallback location active — run with --json for details)'
       : 'Model cache writable'
   };
 }

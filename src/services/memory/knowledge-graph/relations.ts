@@ -1,9 +1,9 @@
-import { cosineSimilarity } from '../retrieval/core/relevance.js';
-import { nowIso, splitTerms, scoreTokenOverlap, deserializeEntry } from './utils.js';
+import { cosineSimilarity } from '../../retrieval/core/relevance.js';
+import { nowIso, splitTerms, scoreTokenOverlap, deserializeEntry } from '../utils.js';
 import type {
   Adapter, MemoryEntryRow, SuggestRelationsResult, RelationSuggestion,
   AddRelationResult, RemoveRelationResult, GetRelatedResult, RelatedItem, MemoryEntry
-} from './types.js';
+} from '../types.js';
 
 interface CandidateRow {
   id: string;

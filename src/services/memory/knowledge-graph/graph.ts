@@ -1,5 +1,5 @@
-import { cleanString, clampInt } from './utils.js';
-import type { Adapter, TraverseGraphOpts, TraverseGraphResult, DiscoverBridgesOpts, DiscoverBridgesResult, BridgeEntry } from './types.js';
+import { cleanString, clampInt } from '../utils.js';
+import type { Adapter, TraverseGraphOpts, TraverseGraphResult, DiscoverBridgesOpts, DiscoverBridgesResult, BridgeEntry } from '../types.js';
 
 interface TraversalRow {
   entity_id: string;

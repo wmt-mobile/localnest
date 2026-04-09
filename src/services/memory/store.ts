@@ -12,27 +12,27 @@ import {
   storeEntry as storeMemoryEntry,
   updateEntry as updateMemoryEntry,
   deleteEntry as deleteMemoryEntry
-} from './entries.js';
+} from './store/entries.js';
 import {
   recall as recallFn,
   captureEvent as captureEventFn,
   listEvents as listEventsFn
-} from './event-capture.js';
+} from './events/capture.js';
 import {
   suggestRelations as suggestRelationsFn,
   addRelation as addRelationFn,
   removeRelation as removeRelationFn,
   getRelated as getRelatedFn
-} from './relations.js';
+} from './knowledge-graph/relations.js';
 import {
   listNests as listNestsFn,
   listBranches as listBranchesFn,
   getTaxonomyTree as getTaxonomyTreeFn
-} from './taxonomy.js';
-import { traverseGraph as traverseGraphFn, discoverBridges as discoverBridgesFn } from './graph.js';
-import { writeDiaryEntry as writeDiaryEntryFn, readDiaryEntries as readDiaryEntriesFn } from './scopes.js';
-import { checkDuplicate as checkDuplicateFn } from './dedup.js';
-import { ingestMarkdown as ingestMarkdownFn, ingestJson as ingestJsonFn } from './ingest.js';
+} from './taxonomy/taxonomy.js';
+import { traverseGraph as traverseGraphFn, discoverBridges as discoverBridgesFn } from './knowledge-graph/graph.js';
+import { writeDiaryEntry as writeDiaryEntryFn, readDiaryEntries as readDiaryEntriesFn } from './taxonomy/scopes.js';
+import { checkDuplicate as checkDuplicateFn } from './store/dedup.js';
+import { ingestMarkdown as ingestMarkdownFn, ingestJson as ingestJsonFn } from './ingest/ingest.js';
 import { MemoryHooks } from './hooks.js';
 import {
   addEntity as addEntityFn,
@@ -43,7 +43,7 @@ import {
   queryTriplesAsOf as queryTriplesAsOfFn,
   getEntityTimeline as getEntityTimelineFn,
   getKgStats as getKgStatsFn
-} from './kg.js';
+} from './knowledge-graph/kg.js';
 import type {
   Adapter, EmbeddingService, ListEntriesOpts, StoreEntryInput, UpdateEntryPatch,
   RecallInput, CaptureEventInput, AddEntityInput, AddTripleInput,

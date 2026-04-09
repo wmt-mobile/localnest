@@ -1,5 +1,5 @@
-import { cosineSimilarity } from '../retrieval/core/relevance.js';
-import type { Adapter, EmbeddingService, DuplicateCheckResult, DuplicateCheckOpts } from './types.js';
+import { cosineSimilarity } from '../../retrieval/core/relevance.js';
+import type { Adapter, EmbeddingService, DuplicateCheckResult, DuplicateCheckOpts } from '../types.js';
 
 const DEFAULT_THRESHOLD = 0.92;
 const MAX_CANDIDATES = 200;

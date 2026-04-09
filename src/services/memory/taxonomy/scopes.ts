@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
-import { nowIso, cleanString, clampInt } from './utils.js';
-import type { Adapter, DiaryEntry, WriteDiaryInput, ReadDiaryInput, ReadDiaryResult } from './types.js';
+import { nowIso, cleanString, clampInt } from '../utils.js';
+import type { Adapter, DiaryEntry, WriteDiaryInput, ReadDiaryInput, ReadDiaryResult } from '../types.js';
 
 /**
  * Write a private diary entry for an agent.

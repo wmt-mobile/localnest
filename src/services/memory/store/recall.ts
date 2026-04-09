@@ -7,8 +7,8 @@ import {
   normalizeRecallScore,
   scoreScopeMatch,
   deserializeEntry
-} from './utils.js';
-import type { Adapter, MemoryEntryRow, RecallInput, RecallResult, RecallResultItem, MemoryEntry } from './types.js';
+} from '../utils.js';
+import type { Adapter, MemoryEntryRow, RecallInput, RecallResult, RecallResultItem, MemoryEntry } from '../types.js';
 
 export async function recall(adapter: Adapter, {
   query,

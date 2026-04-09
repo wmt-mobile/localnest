@@ -1,13 +1,13 @@
 import crypto from 'node:crypto';
 import fs from 'node:fs';
-import { nowIso, cleanString } from './utils.js';
-import { storeEntry } from './entries.js';
-import { addTriple } from './kg.js';
-import { checkDuplicate } from './dedup.js';
+import { nowIso, cleanString } from '../utils.js';
+import { storeEntry } from '../store/entries.js';
+import { addTriple } from '../knowledge-graph/kg.js';
+import { checkDuplicate } from '../store/dedup.js';
 import type {
   Adapter, EmbeddingService, ConversationTurn, ExtractedEntity, TripleDef,
   IngestOpts, IngestResult
-} from './types.js';
+} from '../types.js';
 
 /**
  * Compute SHA-256 hash of a string.

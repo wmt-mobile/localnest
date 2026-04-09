@@ -1,10 +1,10 @@
 import crypto from 'node:crypto';
-import { nowIso, cleanString, stableJson } from './utils.js';
+import { nowIso, cleanString, stableJson } from '../utils.js';
 import type {
   Adapter, AddEntityInput, AddEntityResult, AddTripleInput, AddTripleResult,
   InvalidateTripleResult, QueryRelationshipsResult, KgTripleWithNames, KgTriple,
   KgEntityWithRelations, KgStats
-} from './types.js';
+} from '../types.js';
 
 function toSlug(name: string): string {
   return cleanString(name, 200)

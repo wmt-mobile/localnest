@@ -1,4 +1,4 @@
-import type { Adapter, NestListItem, BranchListItem, TaxonomyNest, TaxonomyTree } from './types.js';
+import type { Adapter, NestListItem, BranchListItem, TaxonomyNest, TaxonomyTree } from '../types.js';
 
 export async function listNests(adapter: Adapter): Promise<{ nests: NestListItem[] }> {
   const rows = await adapter.all<NestListItem>(

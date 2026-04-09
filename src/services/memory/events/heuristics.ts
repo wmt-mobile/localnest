@@ -4,8 +4,8 @@ import {
   looksExploratory,
   computeMemorySimilarity,
   deserializeEntry
-} from './utils.js';
-import type { Adapter, MemoryEntry, MemoryEntryRow, Scope, SignalScoreInput, PromotionThresholdInput, MergeCandidateInput } from './types.js';
+} from '../utils.js';
+import type { Adapter, MemoryEntry, MemoryEntryRow, Scope, SignalScoreInput, PromotionThresholdInput, MergeCandidateInput } from '../types.js';
 
 export function computeSignalScore({
   eventType,

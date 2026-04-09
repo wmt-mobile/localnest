@@ -1,20 +1,20 @@
 import {
   nowIso, cleanString, normalizeScope, deriveSummary, deriveTitle,
   ensureArray, normalizeLinks, stableJson
-} from './utils.js';
+} from '../utils.js';
 import {
   computeSignalScore,
   getPromotionThreshold,
   mergeText,
   findMergeCandidate
-} from './event-heuristics.js';
-import { checkDuplicate } from './dedup.js';
+} from './heuristics.js';
+import { checkDuplicate } from '../store/dedup.js';
 import type {
   Adapter, EmbeddingService, CaptureEventInput, CaptureEventResult,
   StoreEntryInput, MemoryEntryWithRevisions, Link
-} from './types.js';
-export { recall } from './recall.js';
-export { listEvents } from './event-list.js';
+} from '../types.js';
+export { recall } from '../store/recall.js';
+export { listEvents } from './list.js';
 
 interface CaptureHelpers {
   storeEntry: (input: StoreEntryInput) => Promise<{ created: boolean; duplicate: boolean; memory: MemoryEntryWithRevisions | null }>;

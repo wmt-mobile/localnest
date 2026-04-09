@@ -3,13 +3,13 @@ import {
   nowIso, clampInt, cleanString, normalizeScope, deriveSummary, deriveTitle,
   ensureArray, normalizeLinks, stableJson, makeFingerprint, generateMemoryId,
   buildSearchTerms, deserializeEntry
-} from './utils.js';
+} from '../utils.js';
 import { checkDuplicate } from './dedup.js';
 import type {
   Adapter, EmbeddingService, MemoryEntry, MemoryEntryRow, MemoryRevisionRow,
   MemoryEntryWithRevisions, MemoryRevision, StoreEntryInput, StoreEntryResult,
   UpdateEntryPatch, DeleteEntryResult, ListEntriesOpts, ListEntriesResult, StoreStatusResult
-} from './types.js';
+} from '../types.js';
 
 interface MemoryStoreLike {
   enabled: boolean;
