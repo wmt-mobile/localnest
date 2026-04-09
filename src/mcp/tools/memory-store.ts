@@ -134,6 +134,8 @@ export function registerMemoryStoreTools({
         tags: z.array(z.string()).max(50).default([]),
         links: z.array(MEMORY_LINK_SCHEMA).max(50).default([]),
         scope: MEMORY_SCOPE_SCHEMA,
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional(),
         source_type: z.string().max(60).default('manual'),
         source_ref: z.string().max(1000).default(''),
         change_note: z.string().max(400).default('Initial memory creation')
@@ -230,6 +232,8 @@ export function registerMemoryStoreTools({
         tags: z.array(z.string()).max(50).default([]),
         links: z.array(MEMORY_LINK_SCHEMA).max(50).default([]),
         scope: MEMORY_SCOPE_SCHEMA,
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional(),
         source_ref: z.string().max(1000).default('')
       },
       annotations: {

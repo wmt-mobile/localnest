@@ -154,6 +154,8 @@ export function registerMemoryWorkflowTools({
         branch_name: z.string().optional(),
         topic: z.string().optional(),
         feature: z.string().optional(),
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional(),
         source_ref: z.string().max(1000).default('')
       },
       annotations: {
