@@ -2,15 +2,15 @@ import type { Config } from '@docusaurus/types'
 import type * as Preset from '@docusaurus/preset-classic'
 
 const config: Config = {
-  title: 'LocalNest MCP',
-  tagline: 'Local-first MCP server with temporal knowledge graph, 52 tools, and zero cloud dependencies',
+  title: 'LocalNest',
+  tagline: 'Your AI\'s home base — local memory and code search for AI agents',
   favicon: 'img/logo-mark.svg',
   url: 'https://wmt-mobile.github.io',
   baseUrl: '/localnest/',
   organizationName: 'wmt-mobile',
   projectName: 'localnest',
   trailingSlash: false,
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   markdown: {
     mermaid: true,
     hooks: {
@@ -39,28 +39,6 @@ const config: Config = {
   },
   headTags: [
     {
-      tagName: 'link',
-      attributes: {
-        rel: 'preconnect',
-        href: 'https://fonts.googleapis.com',
-      },
-    },
-    {
-      tagName: 'link',
-      attributes: {
-        rel: 'preconnect',
-        href: 'https://fonts.gstatic.com',
-        crossorigin: 'anonymous',
-      },
-    },
-    {
-      tagName: 'link',
-      attributes: {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap',
-      },
-    },
-    {
       tagName: 'script',
       attributes: {
         type: 'application/ld+json'
@@ -70,7 +48,7 @@ const config: Config = {
         '@graph': [
           {
             '@type': 'WebSite',
-            name: 'LocalNest MCP Docs',
+            name: 'LocalNest Docs',
             url: 'https://wmt-mobile.github.io/localnest/',
             inLanguage: 'en',
             publisher: {
@@ -109,9 +87,9 @@ const config: Config = {
   themeConfig: {
     image: 'img/social-card.svg',
     navbar: {
-      title: 'LocalNest MCP',
+      title: 'LocalNest',
       logo: {
-        alt: 'LocalNest MCP',
+        alt: 'LocalNest',
         src: 'img/logo-mark.svg'
       },
       items: [
@@ -128,7 +106,7 @@ const config: Config = {
         },
         {
           href: 'https://www.npmjs.com/package/localnest-mcp',
-          label: 'v0.0.7-beta',
+          label: 'v0.1.0',
           position: 'right'
         },
         {
@@ -157,7 +135,7 @@ const config: Config = {
         {
           title: 'Versions',
           items: [
-            { label: 'Current (0.0.7-beta.2)', to: '/docs/releases/current' },
+            { label: 'Current (0.1.0)', to: '/docs/releases/current' },
             { label: 'Release matrix', to: '/docs/releases/history' }
           ]
         },
@@ -175,15 +153,15 @@ const config: Config = {
       additionalLanguages: ['bash', 'json', 'typescript', 'python', 'diff', 'sql', 'yaml', 'toml'],
       theme: {
         plain: {
-          color: '#d6e9ff',
-          backgroundColor: '#08111e'
+          color: '#e5e5e5',
+          backgroundColor: '#0a0a0a'
         },
         styles: []
       },
       darkTheme: {
         plain: {
-          color: '#d6e9ff',
-          backgroundColor: '#08111e'
+          color: '#e5e5e5',
+          backgroundColor: '#0a0a0a'
         },
         styles: []
       }

@@ -321,18 +321,18 @@ If this work resumes later, start with these questions:
 
 ## Research Links
 
-- Qdrant docs: <https://qdrant.tech/documentation/>
-- Qdrant JS client: <https://github.com/qdrant/qdrant-js>
-- LanceDB docs: <https://docs.lancedb.com/>
-- DuckDB VSS docs: <https://duckdb.org/docs/stable/core_extensions/vss.html>
-- Milvus Lite docs: <https://milvus.io/docs/milvus_lite.md>
-- Weaviate docs: <https://docs.weaviate.io/>
-- Typesense docs: <https://typesense.org/docs/>
-- SQLite-Vector: <https://github.com/sqliteai/sqlite-vector>
-- SQLite-AI: <https://github.com/sqliteai/sqlite-ai>
-- vectorlite: <https://github.com/1yefuwang1/vectorlite>
-- SQLite vec1: <https://sqlite.org/vec1>
-- Qwen2.5-Coder-1.5B-Instruct: <https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct>
-- Qwen2.5-1.5B-Instruct: <https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct>
-- Qwen2.5-Coder-1.5B-Instruct ONNX: <https://huggingface.co/onnx-community/Qwen2.5-Coder-1.5B-Instruct>
-- Qwen2.5-Coder-1.5B-Instruct GGUF: <https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF>
+- Qdrant docs: [qdrant.tech/documentation](https://qdrant.tech/documentation/)
+- Qdrant JS client: [github.com/qdrant/qdrant-js](https://github.com/qdrant/qdrant-js)
+- LanceDB docs: [docs.lancedb.com](https://docs.lancedb.com/)
+- DuckDB VSS docs: [duckdb.org/docs/vss](https://duckdb.org/docs/stable/core_extensions/vss.html)
+- Milvus Lite docs: [milvus.io/docs/milvus_lite](https://milvus.io/docs/milvus_lite.md)
+- Weaviate docs: [docs.weaviate.io](https://docs.weaviate.io/)
+- Typesense docs: [typesense.org/docs](https://typesense.org/docs/)
+- SQLite-Vector: [github.com/sqliteai/sqlite-vector](https://github.com/sqliteai/sqlite-vector)
+- SQLite-AI: [github.com/sqliteai/sqlite-ai](https://github.com/sqliteai/sqlite-ai)
+- vectorlite: [github.com/1yefuwang1/vectorlite](https://github.com/1yefuwang1/vectorlite)
+- SQLite vec1: [sqlite.org/vec1](https://sqlite.org/vec1)
+- Qwen2.5-Coder-1.5B-Instruct: [huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct)
+- Qwen2.5-1.5B-Instruct: [huggingface.co/Qwen/Qwen2.5-1.5B-Instruct](https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct)
+- Qwen2.5-Coder-1.5B-Instruct ONNX: [huggingface.co/onnx-community/Qwen2.5-Coder-1.5B-Instruct](https://huggingface.co/onnx-community/Qwen2.5-Coder-1.5B-Instruct)
+- Qwen2.5-Coder-1.5B-Instruct GGUF: [huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF](https://huggingface.co/Qwen/Qwen2.5-Coder-1.5B-Instruct-GGUF)
