@@ -39,6 +39,41 @@ const config: Config = {
   },
   headTags: [
     {
+      tagName: 'meta',
+      attributes: {
+        name: 'description',
+        content: 'LocalNest is a local-first MCP server with 52 tools, temporal knowledge graph, persistent AI memory, and semantic code search. No cloud, no leaks.'
+      }
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'keywords',
+        content: 'MCP server, local AI tools, knowledge graph, AI memory, semantic code search, offline AI, local-first development'
+      }
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        property: 'og:description',
+        content: 'Local-first MCP server with 52 tools, temporal knowledge graph, and persistent AI memory that never leaves your machine.'
+      }
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        property: 'og:type',
+        content: 'website'
+      }
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'twitter:card',
+        content: 'summary_large_image'
+      }
+    },
+    {
       tagName: 'script',
       attributes: {
         type: 'application/ld+json'
@@ -50,11 +85,25 @@ const config: Config = {
             '@type': 'WebSite',
             name: 'LocalNest Docs',
             url: 'https://wmt-mobile.github.io/localnest/',
+            description: 'Documentation for LocalNest — a local-first MCP server with 52 tools, temporal knowledge graph, and persistent AI memory.',
             inLanguage: 'en',
             publisher: {
               '@type': 'Organization',
               name: 'LocalNest'
             }
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'LocalNest MCP',
+            applicationCategory: 'DeveloperApplication',
+            operatingSystem: 'macOS, Linux, Windows',
+            offers: {
+              '@type': 'Offer',
+              price: '0',
+              priceCurrency: 'USD'
+            },
+            url: 'https://www.npmjs.com/package/localnest-mcp',
+            description: 'Local-first MCP server with 52 tools, temporal knowledge graph, and persistent AI memory for AI coding agents.'
           },
           {
             '@type': 'Organization',
@@ -72,12 +121,18 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           routeBasePath: '/docs',
+          editUrl: 'https://github.com/wmt-mobile/localnest/edit/main/localnest-docs/',
           showLastUpdateAuthor: false,
-          showLastUpdateTime: false,
+          showLastUpdateTime: true,
           sidebarCollapsible: true,
           sidebarCollapsed: false
         },
         blog: false,
+        sitemap: {
+          lastmod: 'date',
+          changefreq: 'weekly',
+          priority: 0.5,
+        },
         theme: {
           customCss: './src/css/custom.css'
         }
@@ -86,6 +141,10 @@ const config: Config = {
   ],
   themeConfig: {
     image: 'img/social-card.svg',
+    metadata: [
+      { name: 'og:title', content: 'LocalNest — Your AI\'s home base' },
+      { name: 'og:site_name', content: 'LocalNest Docs' },
+    ],
     navbar: {
       title: 'LocalNest',
       logo: {
@@ -105,18 +164,13 @@ const config: Config = {
           position: 'left'
         },
         {
-          href: 'https://www.npmjs.com/package/localnest-mcp',
-          label: 'v0.1.0',
-          position: 'right'
-        },
-        {
           href: 'https://github.com/wmt-mobile/localnest',
           label: 'GitHub',
           position: 'right'
         },
         {
           href: 'https://www.npmjs.com/package/localnest-mcp',
-          label: 'npm',
+          label: 'v0.1.0',
           position: 'right'
         }
       ]
@@ -127,27 +181,29 @@ const config: Config = {
         {
           title: 'Docs',
           items: [
-            { label: 'Overview', to: '/docs' },
-            { label: 'Setup', to: '/docs/setup/install' },
-            { label: 'Tools', to: '/docs/tools/overview' }
+            { label: 'Getting Started', to: '/docs' },
+            { label: 'Install', to: '/docs/setup/install' },
+            { label: 'Tools', to: '/docs/tools/overview' },
+            { label: 'Architecture', to: '/docs/architecture' }
           ]
         },
         {
-          title: 'Versions',
+          title: 'Releases',
           items: [
             { label: 'Current (0.1.0)', to: '/docs/releases/current' },
-            { label: 'Release matrix', to: '/docs/releases/history' }
+            { label: 'Release History', to: '/docs/releases/history' }
           ]
         },
         {
-          title: 'Project',
+          title: 'Community',
           items: [
             { label: 'GitHub', href: 'https://github.com/wmt-mobile/localnest' },
-            { label: 'npm', href: 'https://www.npmjs.com/package/localnest-mcp' }
+            { label: 'npm', href: 'https://www.npmjs.com/package/localnest-mcp' },
+            { label: 'Issues', href: 'https://github.com/wmt-mobile/localnest/issues' }
           ]
         }
       ],
-      copyright: `Copyright ${new Date().getFullYear()} LocalNest`
+      copyright: `Copyright ${new Date().getFullYear()} LocalNest. MIT License.`
     },
     prism: {
       additionalLanguages: ['bash', 'json', 'typescript', 'python', 'diff', 'sql', 'yaml', 'toml'],
