@@ -200,6 +200,8 @@ export class MemoryWorkflowService {
         topic: input.topic as string,
         feature: input.feature as string
       },
+      nest: input.nest as string | undefined,
+      branch: input.branch as string | undefined,
       source_ref: cleanText(input.source_ref || input.sourceRef, 1000)
     };
 
