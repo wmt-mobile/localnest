@@ -60,9 +60,7 @@ export default function Home(): React.JSX.Element {
     >
       <main className="siteHome">
         <section className="siteHome__hero">
-          <p style={{ color: 'var(--ln-accent)', fontWeight: 600, fontSize: '0.8125rem', letterSpacing: '0.08em', textTransform: 'uppercase' as const, marginBottom: '0.75rem' }}>
-            Your AI's home base
-          </p>
+          <p className="siteHome__eyebrow">Your AI's home base</p>
           <h1>Local memory and code search for AI agents.</h1>
           <p>
             52 MCP tools, temporal knowledge graph, and persistent memory — running entirely on your machine.
@@ -79,7 +77,7 @@ export default function Home(): React.JSX.Element {
         </section>
 
         <div className="siteHome__install">
-          <pre><code>npm install -g localnest-mcp && localnest setup</code></pre>
+          <pre><code>npm install -g localnest-mcp{'\n'}localnest setup{'\n'}localnest doctor</code></pre>
         </div>
 
         <div className="siteHome__stats">
@@ -88,7 +86,7 @@ export default function Home(): React.JSX.Element {
             <span>MCP Tools</span>
           </div>
           <div className="siteHome__stat">
-            <strong>0</strong>
+            <strong>Zero</strong>
             <span>Cloud deps</span>
           </div>
           <div className="siteHome__stat">
