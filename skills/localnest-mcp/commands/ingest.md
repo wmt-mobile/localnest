@@ -5,6 +5,8 @@ argument-hint: "<file-path>"
 allowed-tools:
   - Read
   - Bash
+  - mcp__localnest__localnest_ingest_markdown
+  - mcp__localnest__localnest_ingest_json
 ---
 
 <objective>

@@ -5,6 +5,7 @@ argument-hint: "<subject> <predicate> <object>"
 allowed-tools:
   - Read
   - Bash
+  - mcp__localnest__localnest_kg_add_triple
 ---
 
 <objective>
