@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: CLI-First Architecture
 status: completed
-stopped_at: "Completed quick task 260409-nyr: Update cache version-drift fix"
-last_updated: "2026-04-09T11:55:33.191Z"
-last_activity: "2026-04-09 - Completed quick task 260409-kaa: Brand identity + docs update for restructuring"
+stopped_at: "Completed quick task 260409-o8i: Pre-approve MCP KG/memory write tools in LocalNest skill command permissions"
+last_updated: "2026-04-09T12:04:48Z"
+last_activity: "2026-04-09 - Completed quick task 260409-o8i: Pre-approve MCP KG/memory write tools in LocalNest skill command permissions"
 progress:
   total_phases: 26
   completed_phases: 10
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-08)
 Phase: 18 of 18 (Binary Deprecation)
 Plan: 1 of 1 in current phase (complete)
 Status: All v2.0 phases complete
-Last activity: 2026-04-09 - Completed quick task 260409-kaa: Brand identity + docs update for restructuring
+Last activity: 2026-04-09 - Completed quick task 260409-o8i: Pre-approve MCP KG/memory write tools in LocalNest skill command permissions
 
 Progress: [##########] 100%
 
@@ -102,6 +102,7 @@ Recent decisions affecting current work:
 - [Phase 18-1]: Fixed broken command forwarding by adding commandArgs to all 4 legacy binaries
 - [Phase 18-1]: Changed localnest-mcp-install-skill replacement from 'localnest install skills' to 'localnest skill install' per DEP-04
 - [Phase quick-260409-nyr]: Fixed update cache version-drift bug: shouldRefresh now invalidates on current_version mismatch, getCachedStatus neutralizes stale latest_version, TTL default 120->60min; readCache preserves on-disk current_version so drift detection actually works
+- [Phase quick-260409-o8i]: Added per-command mcp__localnest__* pre-approvals to 7 LocalNest skill command manifests (fact/remember/ingest write commands + search/recall/context/status read commands); destructive tools explicitly excluded; CLI-only commands and internal-dev skills untouched
 
 ### Pending Todos
 
@@ -117,9 +118,10 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260409-kaa | Brand identity + docs update for restructuring | 2026-04-09 | f55da7e | [260409-kaa](./quick/260409-kaa-create-localnest-brand-identity-and-upda/) |
 | 260409-nyr | Fix update cache version-drift bug + TTL default 60m + compareVersions regression guard | 2026-04-09 | acfbd85 | [260409-nyr](./quick/260409-nyr-fix-update-cache-semver-comparison-and-t/) |
+| 260409-o8i | Pre-approve MCP KG/memory write tools in LocalNest skill command permissions | 2026-04-09 | 0ad9ba0, ff6f2e8 | [260409-o8i](./quick/260409-o8i-pre-approve-kg-write-tools-in-skill-perm/) |
 
 ## Session Continuity
 
-Last session: 2026-04-09T11:55:27.824Z
-Stopped at: Completed quick task 260409-nyr: Update cache version-drift fix
+Last session: 2026-04-09T12:04:48Z
+Stopped at: Completed quick task 260409-o8i: Pre-approve MCP KG/memory write tools in LocalNest skill command permissions
 Resume file: None
