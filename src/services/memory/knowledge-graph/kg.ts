@@ -13,6 +13,60 @@ function toSlug(name: string): string {
     .replace(/^_|_$/g, '');
 }
 
+// Functional predicates: entities can have exactly one valid object at a time.
+// Adding a triple with a different object flags the existing one as a contradiction.
+// Multi-valued predicates (explores, uses, depends_on, mentioned_by, co_occurs_with, etc.)
+// are the default -- they skip the contradiction query entirely.
+//
+// VERIFIED against src/services/memory/ingest/ingest.ts buildTriples():
+//   ingestion emits `mentioned_by` and `co_occurs_with` -- neither appears below,
+//   so conversation ingestion never triggers false-positive contradictions.
+//
+// Users can override via the kg_predicate_cardinality table (see migration v11).
+const FUNCTIONAL_PREDICATES: Set<string> = new Set([
+  'status_is',
+  'version_is',
+  'owned_by',
+  'located_at',
+  'assigned_to',
+  'current_state',
+  'has_type',
+  'parent_of',
+  'rooted_at',
+  'primary_language',
+  'license_is',
+  'created_by'
+]);
+
+// Per-process cache: DB overrides win, then hardcoded set, then 'multi' fallback.
+// Cleared only on process restart. Bounded by the user's predicate vocabulary.
+const cardinalityCache: Map<string, 'functional' | 'multi'> = new Map();
+
+interface CardinalityRow {
+  cardinality: string;
+}
+
+async function isPredicateFunctional(adapter: Adapter, predicate: string): Promise<boolean> {
+  const cached = cardinalityCache.get(predicate);
+  if (cached !== undefined) {
+    return cached === 'functional';
+  }
+  // Check DB override table first (populated only if users add explicit rows)
+  const row = await adapter.get<CardinalityRow>(
+    'SELECT cardinality FROM kg_predicate_cardinality WHERE predicate = ?',
+    [predicate]
+  );
+  if (row) {
+    const value: 'functional' | 'multi' = row.cardinality === 'functional' ? 'functional' : 'multi';
+    cardinalityCache.set(predicate, value);
+    return value === 'functional';
+  }
+  // Fall back to hardcoded set. Unknown predicates default to 'multi' (permissive).
+  const isFunctional = FUNCTIONAL_PREDICATES.has(predicate);
+  cardinalityCache.set(predicate, isFunctional ? 'functional' : 'multi');
+  return isFunctional;
+}
+
 export async function addEntity(adapter: Adapter, { name, type, properties, memoryId }: AddEntityInput = {} as AddEntityInput): Promise<AddEntityResult> {
   const cleanName = cleanString(name, 400);
   if (!cleanName) throw new Error('entity name is required');
@@ -145,17 +199,23 @@ export async function addTriple(adapter: Adapter, {
       objId = await ensureEntity(ad, objectName);
     }
 
-    // Contradiction detection: same subject + predicate, different object, still valid
-    const conflicting = await ad.all<ConflictRow>(
-      `SELECT t.id, t.object_id, e.name AS object_name
-         FROM kg_triples t
-         JOIN kg_entities e ON e.id = t.object_id
-        WHERE t.subject_id = ?
-          AND t.predicate = ?
-          AND t.object_id != ?
-          AND t.valid_to IS NULL`,
-      [subId, pred, objId]
-    );
+    // Contradiction detection: only run for FUNCTIONAL predicates (entity can have
+    // exactly one valid object at a time). Multi-valued predicates (explores, uses,
+    // mentioned_by, co_occurs_with, etc.) permit multiple concurrent objects --
+    // running this query for them produced false positives (see task 260409-ohq).
+    let conflicting: ConflictRow[] = [];
+    if (await isPredicateFunctional(ad, pred)) {
+      conflicting = await ad.all<ConflictRow>(
+        `SELECT t.id, t.object_id, e.name AS object_name
+           FROM kg_triples t
+           JOIN kg_entities e ON e.id = t.object_id
+          WHERE t.subject_id = ?
+            AND t.predicate = ?
+            AND t.object_id != ?
+            AND t.valid_to IS NULL`,
+        [subId, pred, objId]
+      );
+    }
 
     await ad.run(
       `INSERT INTO kg_triples (id, subject_id, predicate, object_id, valid_from, valid_to, confidence, source_memory_id, source_type, created_at)
