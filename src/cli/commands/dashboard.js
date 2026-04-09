@@ -9,66 +9,10 @@ import { SERVER_VERSION } from '../../runtime/version.js';
 import { buildRuntimeConfig } from '../../runtime/config.js';
 import { EmbeddingService } from '../../services/retrieval/embedding/service.js';
 import { MemoryService } from '../../services/memory/service.js';
-
-/* -- ANSI helpers ---------------------------------------------------- */
-
-function useColor() {
-  if (process.env.NO_COLOR !== undefined) return false;
-  if (process.env.FORCE_COLOR !== undefined) return true;
-  return process.stdout.isTTY === true;
-}
-
-const ESC = '\x1b[';
-const RESET = `${ESC}0m`;
-const BOLD = `${ESC}1m`;
-const DIM = `${ESC}2m`;
-const CYAN = `${ESC}36m`;
-const GREEN = `${ESC}32m`;
-const YELLOW = `${ESC}33m`;
-const MAGENTA = `${ESC}35m`;
-const RED = `${ESC}31m`;
-const GRAY = `${ESC}90m`;
-const INVERSE = `${ESC}7m`;
-
-function c(code, text) { return useColor() ? `${code}${text}${RESET}` : text; }
-function bold(t) { return c(BOLD, t); }
-function dim(t) { return c(DIM, t); }
-function cyan(t) { return c(CYAN, t); }
-function green(t) { return c(GREEN, t); }
-function yellow(t) { return c(YELLOW, t); }
-function magenta(t) { return c(MAGENTA, t); }
-function red(t) { return c(RED, t); }
-function gray(t) { return c(GRAY, t); }
-function inverse(t) { return c(INVERSE, t); }
-
-/* -- Box drawing + layout ------------------------------------------- */
-
-const B = {
-  tl: '\u256d', tr: '\u256e', bl: '\u2570', br: '\u256f',
-  h: '\u2500', v: '\u2502',
-  stl: '\u250c', str: '\u2510', sbl: '\u2514', sbr: '\u2518',
-  full: '\u2588', light: '\u2591',
-};
-
-// eslint-disable-next-line no-control-regex
-function visLen(s) { return s.replace(/\x1b\[[0-9;]*m/g, '').length; }
-function padRight(s, w) { const d = w - visLen(s); return d > 0 ? s + ' '.repeat(d) : s; }
-
-function panel(title, rows, width, titleColor = cyan) {
-  const inner = width - 4;
-  const titleStr = ` ${titleColor(title)} `;
-  const titleVis = visLen(titleStr);
-  const top = B.stl + B.h + titleStr + B.h.repeat(Math.max(0, width - 3 - titleVis)) + B.str;
-  const lines = [`  ${gray(top)}`];
-  for (const row of rows) lines.push(`  ${gray(B.v)} ${padRight(row, inner)} ${gray(B.v)}`);
-  lines.push(`  ${gray(B.sbl + B.h.repeat(width - 2) + B.sbr)}`);
-  return lines;
-}
-
-function progressBar(ratio, barWidth = 20) {
-  const filled = Math.round(ratio * barWidth);
-  return green(B.full.repeat(filled)) + gray(B.light.repeat(barWidth - filled));
-}
+import {
+  bold, dim, cyan, green, yellow, magenta, red, gray, inverse,
+  B, padRight, panel, progressBar, truncate,
+} from '../ansi.js';
 
 /* -- Helpers --------------------------------------------------------- */
 
@@ -85,8 +29,6 @@ function timeAgo(iso) {
   if (days < 30) return `${days}d ago`;
   return `${Math.floor(days / 30)}mo ago`;
 }
-
-function truncate(s, max) { return !s ? '' : s.length > max ? s.slice(0, max - 3) + '...' : s; }
 
 function timestamp() {
   const d = new Date();

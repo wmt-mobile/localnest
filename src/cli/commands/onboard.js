@@ -15,72 +15,13 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { SERVER_VERSION } from '../../runtime/version.js';
+import {
+  bold, dim, italic, cyan, green, yellow, red, gray,
+  B as BOX, boxTop, boxBottom, boxLine, boxEmpty,
+} from '../ansi.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..', '..');
-
-/* ------------------------------------------------------------------ */
-/*  ANSI helpers (mirrored from help.js — zero deps)                   */
-/* ------------------------------------------------------------------ */
-
-function useColor() {
-  if (process.env.NO_COLOR !== undefined) return false;
-  if (process.env.FORCE_COLOR !== undefined) return true;
-  return process.stdout.isTTY === true;
-}
-
-const ESC = '\x1b[';
-const RESET = `${ESC}0m`;
-const BOLD = `${ESC}1m`;
-const DIM = `${ESC}2m`;
-const CYAN = `${ESC}36m`;
-const GREEN = `${ESC}32m`;
-const YELLOW = `${ESC}33m`;
-const RED = `${ESC}31m`;
-const GRAY = `${ESC}90m`;
-
-function c(code, text) {
-  return useColor() ? `${code}${text}${RESET}` : text;
-}
-
-function bold(t)    { return c(BOLD, t); }
-function dim(t)     { return c(DIM, t); }
-function italic(t)  { return c(`${ESC}3m`, t); }
-function cyan(t)    { return c(CYAN, t); }
-function green(t)   { return c(GREEN, t); }
-function yellow(t)  { return c(YELLOW, t); }
-function red(t)     { return c(RED, t); }
-function gray(t)    { return c(GRAY, t); }
-
-const BOX = {
-  tl: '╭', tr: '╮', bl: '╰', br: '╯',
-  h: '─', v: '│', arrow: '→',
-};
-
-function stripAnsi(s) {
-  // eslint-disable-next-line no-control-regex
-  return s.replace(/\x1b\[[0-9;]*m/g, '');
-}
-
-const W = 60;
-
-function boxLine(content) {
-  const visible = stripAnsi(content);
-  const pad = Math.max(0, W - visible.length - 4);
-  return `  ${gray(BOX.v)} ${content}${' '.repeat(pad)} ${gray(BOX.v)}`;
-}
-
-function boxTop() {
-  return `  ${gray(BOX.tl + BOX.h.repeat(W - 2) + BOX.tr)}`;
-}
-
-function boxBottom() {
-  return `  ${gray(BOX.bl + BOX.h.repeat(W - 2) + BOX.br)}`;
-}
-
-function boxEmpty() {
-  return boxLine('');
-}
 
 /* ------------------------------------------------------------------ */
 /*  Output helpers                                                     */

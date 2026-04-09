@@ -9,74 +9,10 @@
  */
 
 import { SERVER_VERSION } from '../runtime/version.js';
-
-/* ------------------------------------------------------------------ */
-/*  ANSI helpers                                                       */
-/* ------------------------------------------------------------------ */
-
-function useColor() {
-  if (process.env.NO_COLOR !== undefined) return false;
-  if (process.env.FORCE_COLOR !== undefined) return true;
-  return process.stdout.isTTY === true;
-}
-
-const ESC = '\x1b[';
-const RESET = `${ESC}0m`;
-const BOLD = `${ESC}1m`;
-const DIM = `${ESC}2m`;
-const ITALIC = `${ESC}3m`;
-const CYAN = `${ESC}36m`;
-const GREEN = `${ESC}32m`;
-const YELLOW = `${ESC}33m`;
-const MAGENTA = `${ESC}35m`;
-const BLUE = `${ESC}34m`;
-const GRAY = `${ESC}90m`;
-const BG_BLUE = `${ESC}44m`;
-const WHITE = `${ESC}37m`;
-
-function c(code, text) {
-  return useColor() ? `${code}${text}${RESET}` : text;
-}
-
-function bold(t) { return c(BOLD, t); }
-function dim(t) { return c(DIM, t); }
-function cyan(t) { return c(CYAN, t); }
-function green(t) { return c(GREEN, t); }
-function yellow(t) { return c(YELLOW, t); }
-function magenta(t) { return c(MAGENTA, t); }
-function blue(t) { return c(BLUE, t); }
-function gray(t) { return c(GRAY, t); }
-function italic(t) { return c(ITALIC, t); }
-function badge(t) { return c(`${BG_BLUE}${WHITE}${BOLD}`, ` ${t} `); }
-
-/* ------------------------------------------------------------------ */
-/*  Box drawing                                                        */
-/* ------------------------------------------------------------------ */
-
-const BOX = {
-  tl: '╭', tr: '╮', bl: '╰', br: '╯',
-  h: '─', v: '│',
-  dot: '●', arrow: '→', check: '✓',
-};
-
-function boxLine(content, width = 60) {
-  // eslint-disable-next-line no-control-regex
-  const visible = content.replace(/\x1b\[[0-9;]*m/g, '');
-  const pad = Math.max(0, width - visible.length - 4);
-  return `  ${gray(BOX.v)} ${content}${' '.repeat(pad)} ${gray(BOX.v)}`;
-}
-
-function boxTop(width = 60) {
-  return `  ${gray(BOX.tl + BOX.h.repeat(width - 2) + BOX.tr)}`;
-}
-
-function boxBottom(width = 60) {
-  return `  ${gray(BOX.bl + BOX.h.repeat(width - 2) + BOX.br)}`;
-}
-
-function separator() {
-  return `  ${gray(BOX.h.repeat(60))}`;
-}
+import {
+  bold, dim, italic, cyan, green, yellow, magenta, blue, gray, badge,
+  B as BOX, boxTop, boxBottom, boxLine, separator,
+} from './ansi.js';
 
 /* ------------------------------------------------------------------ */
 /*  Command definitions by category                                    */

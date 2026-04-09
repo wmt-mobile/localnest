@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
+import { green, red, yellow } from '../ansi.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 // CLI lives at <root>/src/cli/commands/ — hooks at <root>/scripts/hooks/
@@ -57,8 +58,8 @@ async function handleStatus() {
     const postInstalled = postHooks.length > 0;
 
     process.stdout.write(`\n  LocalNest Claude Code Hooks\n\n`);
-    process.stdout.write(`  Pre-tool (memory retrieval):  ${preInstalled ? '\x1b[32mINSTALLED\x1b[0m' : '\x1b[31mNOT INSTALLED\x1b[0m'}\n`);
-    process.stdout.write(`  Post-tool (outcome capture):  ${postInstalled ? '\x1b[32mINSTALLED\x1b[0m' : '\x1b[31mNOT INSTALLED\x1b[0m'}\n`);
+    process.stdout.write(`  Pre-tool (memory retrieval):  ${preInstalled ? green('INSTALLED') : red('NOT INSTALLED')}\n`);
+    process.stdout.write(`  Post-tool (outcome capture):  ${postInstalled ? green('INSTALLED') : red('NOT INSTALLED')}\n`);
     process.stdout.write(`  Settings file: ${settingsPath}\n\n`);
 
     if (!preInstalled || !postInstalled) {
@@ -73,7 +74,7 @@ async function handleStatus() {
           const scriptPath = cmdMatch[1];
           const exists = fs.existsSync(scriptPath);
           if (!exists) {
-            process.stdout.write(`  \x1b[33mWARNING\x1b[0m: Hook script missing: ${scriptPath}\n`);
+            process.stdout.write(`  ${yellow('WARNING')}: Hook script missing: ${scriptPath}\n`);
             process.stdout.write('  Re-run: localnest hooks install\n\n');
           }
         }

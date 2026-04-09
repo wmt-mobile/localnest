@@ -19,66 +19,10 @@ import { EmbeddingService } from '../../services/retrieval/embedding/service.js'
 import { MemoryService } from '../../services/memory/service.js';
 import { SCHEMA_VERSION } from '../../services/memory/schema.js';
 import { SERVER_VERSION } from '../../runtime/version.js';
-
-/* ------------------------------------------------------------------ */
-/*  ANSI helpers                                                       */
-/* ------------------------------------------------------------------ */
-
-function useColor() {
-  if (process.env.NO_COLOR !== undefined) return false;
-  if (process.env.FORCE_COLOR !== undefined) return true;
-  return process.stdout.isTTY === true;
-}
-
-const ESC = '\x1b[';
-const RESET = `${ESC}0m`;
-const BOLD = `${ESC}1m`;
-const DIM = `${ESC}2m`;
-const GREEN = `${ESC}32m`;
-const RED = `${ESC}31m`;
-const YELLOW = `${ESC}33m`;
-const GRAY = `${ESC}90m`;
-
-function c(code, text) {
-  return useColor() ? `${code}${text}${RESET}` : text;
-}
-
-function bold(t) { return c(BOLD, t); }
-function dim(t) { return c(DIM, t); }
-function green(t) { return c(GREEN, t); }
-function red(t) { return c(RED, t); }
-function yellow(t) { return c(YELLOW, t); }
-function gray(t) { return c(GRAY, t); }
-
-/* ------------------------------------------------------------------ */
-/*  Box drawing                                                        */
-/* ------------------------------------------------------------------ */
-
-const BOX_TL = '\u256D';
-const BOX_TR = '\u256E';
-const BOX_BL = '\u2570';
-const BOX_BR = '\u256F';
-const BOX_H = '\u2500';
-const BOX_V = '\u2502';
-
-function boxTop(width = 60) {
-  return `  ${gray(BOX_TL + BOX_H.repeat(width - 2) + BOX_TR)}`;
-}
-
-function boxBottom(width = 60) {
-  return `  ${gray(BOX_BL + BOX_H.repeat(width - 2) + BOX_BR)}`;
-}
-
-function boxLine(content, width = 60) {
-  // eslint-disable-next-line no-control-regex
-  const visible = content.replace(/\x1b\[[0-9;]*m/g, '');
-  const pad = Math.max(0, width - visible.length - 4);
-  return `  ${gray(BOX_V)} ${content}${' '.repeat(pad)} ${gray(BOX_V)}`;
-}
-
-function separator() {
-  return `  ${gray(BOX_H.repeat(60))}`;
-}
+import {
+  bold, dim, green, red, yellow,
+  boxTop, boxBottom, boxLine, separator,
+} from '../ansi.js';
 
 /* ------------------------------------------------------------------ */
 /*  Result tracking                                                    */

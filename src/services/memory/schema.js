@@ -1,6 +1,6 @@
 import { buildSearchTerms, stableJson } from './utils.js';
 
-export const SCHEMA_VERSION = 9;
+export const SCHEMA_VERSION = 10;
 
 export async function ensureSchema(adapter) {
   await adapter.exec(`
@@ -289,13 +289,24 @@ export async function runMigrations({ adapter, getMeta }) {
         `);
         await ad.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_conv_sources_path_hash ON conversation_sources(file_path, file_hash)`);
       }
+    },
+    {
+      version: 10,
+      migrate: async (ad) => {
+        // Composite indexes for performance quick wins
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_subject_valid ON kg_triples(subject_id, valid_to, object_id)`);
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_memory_entries_status_embedding ON memory_entries(status) WHERE embedding_json IS NOT NULL`);
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_pred_subject ON kg_triples(predicate, subject_id)`);
+      }
     }
   ];
 
+  let migrated = false;
   for (const { version, migrate } of migrations) {
     if (currentVersion >= version) {
       continue;
     }
+    migrated = true;
     await adapter.transaction(async (ad) => {
       await migrate(ad);
       await ad.run(
@@ -303,5 +314,14 @@ export async function runMigrations({ adapter, getMeta }) {
         [String(version)]
       );
     });
+  }
+
+  // Update SQLite query planner statistics after schema changes
+  if (migrated) {
+    try {
+      await adapter.exec('PRAGMA optimize');
+    } catch {
+      // PRAGMA optimize may not be supported on all SQLite builds
+    }
   }
 }

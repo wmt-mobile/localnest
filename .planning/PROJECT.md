@@ -4,20 +4,23 @@
 
 LocalNest is a local-first MCP server that gives AI agents safe, scoped access to code — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory that never leaves your machine. 50 MCP tools, zero cloud dependencies, pure SQLite.
 
-## Current Milestone: v2.0 CLI-First Architecture
+## Current Milestone: v0.1.0 — The Big Upgrade
 
-**Goal:** Consolidate all commands into a unified noun-verb CLI and polish hooks/MCP for universal AI interoperability.
+**Goal:** TypeScript migration, CLI visual refresh, search/memory performance, latest libraries.
 
-**Target features:**
-- Commander.js CLI framework with `localnest <noun> <verb>` subcommands
-- Memory CLI commands (add/search/list/show/delete)
-- Knowledge Graph CLI commands (kg add/query/timeline/stats)
-- Skill CLI commands (skill install/list/remove/search)
-- MCP lifecycle CLI (mcp start/status/config)
-- Ingest CLI (ingest markdown/json)
-- Hook MCP tools + polish for AI discoverability
-- Shell completions + --json flag + colored help formatting
-- Deprecate old localnest-mcp-* fragmented binaries
+**Phases:**
+1. CLI Foundation — extract shared ANSI/output module (deduplicate 5 files)
+2. CLI Visual Refresh — add spinners, modernize help/dashboard, consistent formatting
+3. Performance Quick Wins — composite indexes, embedding cache, prepared statements
+4. Performance Deep — async vector index, sqlite-vec, batch embeddings
+5. TypeScript Infrastructure — tsconfig, build pipeline, CI changes
+6. TypeScript Migration — convert 94 source files + 3 test files
+7. Library Updates + Ship — update all deps, final verification, release
+
+**Parallel lanes:**
+- Lane A (CLI): Phase 1 → 2
+- Lane B (Perf): Phase 3 → 4
+- Lane C (TS): Phase 5 → 6 → 7
 
 ## Core Value
 
@@ -70,11 +73,12 @@ A single local MCP server that handles both code retrieval AND rich structured m
 
 ## Constraints
 
-- **Tech stack**: Node.js, SQLite via node:sqlite, no new runtime dependencies
+- **Tech stack**: Node.js 22+, TypeScript, SQLite via node:sqlite
 - **Backwards compat**: Existing tables/tools must not break — additive migrations only
 - **File size**: Keep files under 500 lines per CLAUDE.md rules
-- **Dependencies**: Minimize — reuse existing HuggingFace embeddings, no ChromaDB
-- **Schema**: Must migrate from v5 cleanly with rollback safety
+- **Dependencies**: Minimal new deps — ora (spinner), typescript, @types/node as devDeps
+- **Schema**: Must migrate cleanly with rollback safety
+- **Build**: Must compile TS → JS for npm publish (ship compiled JS)
 
 ## Key Decisions
 
@@ -104,4 +108,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-08 after milestone v2.0 initialization*
+*Last updated: 2026-04-09 after milestone v0.1.0 initialization*
