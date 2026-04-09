@@ -22,9 +22,10 @@ The local git tags currently available in this repository are:
 
 Those do **not** match the package/changelog release line currently documented here:
 
-- `0.0.7-beta.1` (current beta package — temporal KG, CLI-first, 52 tools)
-- `0.0.6-beta.1` (previous beta)
-- `0.0.5` (current stable package)
+- `0.1.0` (current stable package — TypeScript migration, temporal KG, CLI-first, 52 tools)
+- `0.0.7-beta.2` (archived beta — temporal KG, CLI-first, 52 tools)
+- `0.0.6-beta.1` (archived beta)
+- `0.0.5` (previous stable package)
 - `0.0.4-beta.9`
 - `0.0.4-beta.8`
 - `0.0.4-beta.7`
@@ -40,9 +41,10 @@ Those do **not** match the package/changelog release line currently documented h
 
 | Version | Basis | Page |
 | --- | --- | --- |
-| `0.0.7-beta.1` | beta package + changelog `0.0.7-beta.1` | [Beta Release Notes](./0.0.7-beta.1), [Version Archive](/docs/versions/0.0.7-beta.1/overview) |
-| `0.0.6-beta.1` | beta package + changelog `0.0.6-beta.1` | [Release Notes](./0.0.6-beta.1), [Version Archive](/docs/versions/0.0.6-beta.1/overview) |
-| `0.0.5` | current stable package + changelog `0.0.5` | [Current Release](./current) |
+| `0.1.0` | current stable package + changelog `0.1.0` | [Current Release](./current) |
+| `0.0.7-beta.2` | archived beta package + changelog `0.0.7-beta.2` | [Beta Release Notes](./0.0.7-beta.2), [Version Archive](/docs/versions/0.0.7-beta.2/overview) |
+| `0.0.6-beta.1` | archived beta package + changelog `0.0.6-beta.1` | [Release Notes](./0.0.6-beta.1), [Version Archive](/docs/versions/0.0.6-beta.1/overview) |
+| `0.0.5` | previous stable package + changelog `0.0.5` | [0.0.5](./0.0.5) |
 | `0.0.4-beta.9` | archived beta package + changelog `0.0.4-beta.9` | [Archived Release Notes](./0.0.4-beta.9), [Version Archive: 0.0.4-beta.9](/docs/versions/0.0.4-beta.9/overview) |
 | `0.0.4-beta.8` | archived beta package + changelog `0.0.4-beta.8` | [0.0.4-beta.8](./0.0.4-beta.8), [Version Archive: 0.0.4-beta.8](/docs/versions/0.0.4-beta.8/overview) |
 | `0.0.4-beta.7` | archived beta package + changelog `0.0.4-beta.7` | [0.0.4-beta.7](./0.0.4-beta.7) |
@@ -59,13 +61,13 @@ Use the per-version pages below for release-specific summaries.
 ## Fast Navigation
 
 <div className="docGrid docGrid--3">
-  <a className="docLinkCard" href="./0.0.7-beta.1">
-    <strong>Current beta</strong>
-    <span>Use the beta release page for `0.0.7-beta.1` — temporal KG, CLI-first, 52 tools.</span>
-  </a>
   <a className="docLinkCard" href="./current">
     <strong>Current stable</strong>
-    <span>Use the current release page for the stable `0.0.5` contract.</span>
+    <span>Use the current release page for the stable `0.1.0` contract — TypeScript, temporal KG, 52 tools.</span>
+  </a>
+  <a className="docLinkCard" href="./0.0.7-beta.2">
+    <strong>Archived beta</strong>
+    <span>Use the beta release page for `0.0.7-beta.2` — temporal KG, CLI-first, 52 tools.</span>
   </a>
   <a className="docLinkCard" href="./0.0.4-beta.9">
     <strong>Previous beta</strong>

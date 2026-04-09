@@ -6,186 +6,35 @@ title: Getting Started
 
 # Getting Started
 
-LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scoped access to your codebase — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory. **52 MCP tools, zero cloud dependencies.**
+LocalNest is a local-first MCP server that gives AI agents safe, scoped access to your codebase — with hybrid search, semantic indexing, a temporal knowledge graph, and persistent memory that never leaves your machine.
 
-<div className="docHero">
-  <div className="docHero__lead">
-    <span className="docEyebrow">Documentation</span>
-    <h2>Reference-first docs for installing, indexing, searching, and operating LocalNest.</h2>
-    <p>
-      This site is structured for implementation work. Start with setup, then move into search and
-      indexing, and use release notes only when you need version-specific behavior.
-    </p>
-  </div>
-  <div className="docPanel docPanel--compact">
-    <div className="docStat">
-      <span className="docStat__label">Latest beta</span>
-      <strong>0.0.7-beta.1</strong>
-    </div>
-    <div className="docStat">
-      <span className="docStat__label">MCP tools</span>
-      <strong>52</strong>
-    </div>
-    <div className="docStat">
-      <span className="docStat__label">Preferred backend</span>
-      <strong>`sqlite-vec`</strong>
-    </div>
-    <div className="docStat">
-      <span className="docStat__label">Minimum runtime</span>
-      <strong>Node.js 18+</strong>
-    </div>
-  </div>
-</div>
+**52 MCP tools. Zero cloud dependencies. Pure SQLite.**
 
 ## Quick start
 
-If you want the shortest path:
-
-1. Install globally.
-2. Run setup.
-3. Run doctor.
-4. Paste the generated MCP block into your client.
-
-Recommended global install:
-
 ```bash
 npm install -g localnest-mcp
-localnest install skills
 localnest setup
 localnest doctor
 ```
 
-Fallback:
-
-```bash
-npx -y localnest-mcp-setup   # deprecated compatibility wrapper
-npx -y localnest-mcp-doctor  # deprecated compatibility wrapper
-```
-
-Upgrade paths:
-
-```bash
-localnest upgrade
-localnest upgrade stable
-localnest upgrade beta
-localnest upgrade 0.0.7-beta.1
-```
-
-## Choose your path
-
-- New install: start with [Install](/docs/setup/install), then [Configuration](/docs/setup/configuration).
-- Architecture and internal flow: use [Architecture](/docs/architecture).
-- Daily coding workflow: jump to [Tools](/docs/tools/overview) and [Search](/docs/tools/search).
-- Version-specific behavior: use [Current release](/docs/releases/current) and [Release matrix](/docs/releases/history).
-
-<div className="docGrid docGrid--3">
-  <a className="docLinkCard" href="./setup/install">
-    <strong>New machine</strong>
-    <span>Install the package, skill, and generated MCP config with the current stable defaults.</span>
-  </a>
-  <a className="docLinkCard" href="./releases/current">
-    <strong>Current release</strong>
-    <span>See what changed in `0.0.7-beta.1` — temporal KG, CLI-first architecture, 52 tools.</span>
-  </a>
-  <a className="docLinkCard" href="./versions/0.0.4-beta.8/overview">
-    <strong>Archived beta.8</strong>
-    <span>Open the full archived doc set when you need the previous-beta behavior.</span>
-  </a>
-</div>
+Then paste the generated `mcpServers.localnest` block into your MCP client config (Cursor, Windsurf, Codex, Kiro, Gemini CLI, or any MCP-compatible client).
 
 ## What you get
 
-<div className="docGrid docGrid--3">
-  <div className="docPanel">
-    <h3>Scoped workspace access</h3>
-    <p>Browse roots, inspect project trees, and read bounded file ranges without exposing unrelated files.</p>
-  </div>
-  <div className="docPanel">
-    <h3>Fast lexical search</h3>
-    <p>Use `localnest_search_files` and `localnest_search_code` for modules, exact symbols, and regex patterns.</p>
-  </div>
-  <div className="docPanel">
-    <h3>Local semantic retrieval</h3>
-    <p>Index a project locally, then use hybrid retrieval to answer concept-level questions with better recall.</p>
-  </div>
-  <div className="docPanel">
-    <h3>Durable local memory</h3>
-    <p>Enable opt-in memory capture to persist decisions, preferences, and prior fixes on your machine.</p>
-  </div>
-</div>
+| Capability | What it does |
+|---|---|
+| **Hybrid search** | Lexical + semantic fused with RRF ranking |
+| **Knowledge graph** | Temporal triples with `as_of` queries and multi-hop traversal |
+| **Agent memory** | Durable, queryable knowledge that persists across sessions |
+| **Semantic dedup** | Embedding similarity gate prevents near-duplicate pollution |
+| **Conversation ingestion** | Import Markdown/JSON chat exports with entity extraction |
+| **Hooks** | Pre/post operation callbacks for memory, KG, traversal |
 
-## Suggested reading order
+## Next steps
 
-<div className="docGrid docGrid--2">
-  <a className="docLinkCard" href="./setup/install">
-    <strong>Install</strong>
-    <span>Set up the package, skill, doctor checks, sync option, and MCP client block.</span>
-  </a>
-  <a className="docLinkCard" href="./setup/configuration">
-    <strong>Configuration</strong>
-    <span>Review root resolution, environment variables, and backend settings.</span>
-  </a>
-  <a className="docLinkCard" href="./architecture">
-    <strong>Architecture</strong>
-    <span>See boot flow, retrieval diagrams, indexing, and memory graph behavior.</span>
-  </a>
-  <a className="docLinkCard" href="./tools/overview">
-    <strong>Tools</strong>
-    <span>See the full tool surface and the intended retrieval workflow.</span>
-  </a>
-  <a className="docLinkCard" href="./releases/current">
-    <strong>Current release</strong>
-    <span>See the latest release behavior — `0.0.7-beta.1` with temporal KG, CLI, hooks, and 52 MCP tools.</span>
-  </a>
-  <a className="docLinkCard" href="./releases/history">
-    <strong>Release matrix</strong>
-    <span>Compare stable and beta docs when you are working across versions.</span>
-  </a>
-</div>
-
-## Typical workflow
-
-<div className="docSteps">
-  <div className="docStep">
-    <span>1</span>
-    <div>
-      <strong>Bootstrap the environment</strong>
-      <p>Install the package, run `localnest setup`, opt into memory if needed, then verify with `localnest doctor`.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>2</span>
-    <div>
-      <strong>Wire the MCP client</strong>
-      <p>Add the generated `mcpServers.localnest` block and restart the client.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>3</span>
-    <div>
-      <strong>Discover scope</strong>
-      <p>Use `localnest_search_files` first when locating a feature, module, or directory.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>4</span>
-    <div>
-      <strong>Recall prior context</strong>
-      <p>If memory is enabled, run `localnest_task_context` before deeper analysis so runtime status and relevant memory come back together.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>5</span>
-    <div>
-      <strong>Search with intent</strong>
-      <p>Use `localnest_search_code` for exact identifiers and `localnest_search_hybrid` for concept retrieval.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>6</span>
-    <div>
-      <strong>Validate with exact lines</strong>
-      <p>Read the relevant file window with `localnest_read_file` before making changes or conclusions.</p>
-    </div>
-  </div>
-</div>
+- **[Install](/docs/setup/install)** — full install walkthrough with skill setup and doctor checks
+- **[Configuration](/docs/setup/configuration)** — roots, env vars, index backends, memory toggle
+- **[Architecture](/docs/architecture)** — boot flow, retrieval pipeline, memory graph internals
+- **[Tools](/docs/tools/overview)** — all 52 MCP tools across 11 groups
+- **[Current Release](/docs/releases/current)** — what changed in 0.1.0

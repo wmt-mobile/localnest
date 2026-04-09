@@ -2,15 +2,15 @@ import type { Config } from '@docusaurus/types'
 import type * as Preset from '@docusaurus/preset-classic'
 
 const config: Config = {
-  title: 'LocalNest MCP',
-  tagline: 'Local-first MCP server with temporal knowledge graph, 52 tools, and zero cloud dependencies',
+  title: 'LocalNest',
+  tagline: 'Your AI\'s home base — local memory and code search for AI agents',
   favicon: 'img/logo-mark.svg',
   url: 'https://wmt-mobile.github.io',
   baseUrl: '/localnest/',
   organizationName: 'wmt-mobile',
   projectName: 'localnest',
   trailingSlash: false,
-  onBrokenLinks: 'throw',
+  onBrokenLinks: 'warn',
   markdown: {
     mermaid: true,
     hooks: {
@@ -39,26 +39,39 @@ const config: Config = {
   },
   headTags: [
     {
-      tagName: 'link',
+      tagName: 'meta',
       attributes: {
-        rel: 'preconnect',
-        href: 'https://fonts.googleapis.com',
-      },
+        name: 'description',
+        content: 'LocalNest is a local-first MCP server with 52 tools, temporal knowledge graph, persistent AI memory, and semantic code search. No cloud, no leaks.'
+      }
     },
     {
-      tagName: 'link',
+      tagName: 'meta',
       attributes: {
-        rel: 'preconnect',
-        href: 'https://fonts.gstatic.com',
-        crossorigin: 'anonymous',
-      },
+        name: 'keywords',
+        content: 'MCP server, local AI tools, knowledge graph, AI memory, semantic code search, offline AI, local-first development'
+      }
     },
     {
-      tagName: 'link',
+      tagName: 'meta',
       attributes: {
-        rel: 'stylesheet',
-        href: 'https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Source+Sans+3:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap',
-      },
+        property: 'og:description',
+        content: 'Local-first MCP server with 52 tools, temporal knowledge graph, and persistent AI memory that never leaves your machine.'
+      }
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        property: 'og:type',
+        content: 'website'
+      }
+    },
+    {
+      tagName: 'meta',
+      attributes: {
+        name: 'twitter:card',
+        content: 'summary_large_image'
+      }
     },
     {
       tagName: 'script',
@@ -70,13 +83,27 @@ const config: Config = {
         '@graph': [
           {
             '@type': 'WebSite',
-            name: 'LocalNest MCP Docs',
+            name: 'LocalNest Docs',
             url: 'https://wmt-mobile.github.io/localnest/',
+            description: 'Documentation for LocalNest — a local-first MCP server with 52 tools, temporal knowledge graph, and persistent AI memory.',
             inLanguage: 'en',
             publisher: {
               '@type': 'Organization',
               name: 'LocalNest'
             }
+          },
+          {
+            '@type': 'SoftwareApplication',
+            name: 'LocalNest MCP',
+            applicationCategory: 'DeveloperApplication',
+            operatingSystem: 'macOS, Linux, Windows',
+            offers: {
+              '@type': 'Offer',
+              price: '0',
+              priceCurrency: 'USD'
+            },
+            url: 'https://www.npmjs.com/package/localnest-mcp',
+            description: 'Local-first MCP server with 52 tools, temporal knowledge graph, and persistent AI memory for AI coding agents.'
           },
           {
             '@type': 'Organization',
@@ -94,12 +121,18 @@ const config: Config = {
         docs: {
           sidebarPath: './sidebars.ts',
           routeBasePath: '/docs',
+          editUrl: 'https://github.com/wmt-mobile/localnest/edit/main/localnest-docs/',
           showLastUpdateAuthor: false,
-          showLastUpdateTime: false,
+          showLastUpdateTime: true,
           sidebarCollapsible: true,
           sidebarCollapsed: false
         },
         blog: false,
+        sitemap: {
+          lastmod: 'date',
+          changefreq: 'weekly',
+          priority: 0.5,
+        },
         theme: {
           customCss: './src/css/custom.css'
         }
@@ -108,10 +141,14 @@ const config: Config = {
   ],
   themeConfig: {
     image: 'img/social-card.svg',
+    metadata: [
+      { name: 'og:title', content: 'LocalNest — Your AI\'s home base' },
+      { name: 'og:site_name', content: 'LocalNest Docs' },
+    ],
     navbar: {
-      title: 'LocalNest MCP',
+      title: 'LocalNest',
       logo: {
-        alt: 'LocalNest MCP',
+        alt: 'LocalNest',
         src: 'img/logo-mark.svg'
       },
       items: [
@@ -127,18 +164,13 @@ const config: Config = {
           position: 'left'
         },
         {
-          href: 'https://www.npmjs.com/package/localnest-mcp',
-          label: 'v0.0.7-beta',
-          position: 'right'
-        },
-        {
           href: 'https://github.com/wmt-mobile/localnest',
           label: 'GitHub',
           position: 'right'
         },
         {
           href: 'https://www.npmjs.com/package/localnest-mcp',
-          label: 'npm',
+          label: 'v0.1.0',
           position: 'right'
         }
       ]
@@ -149,41 +181,43 @@ const config: Config = {
         {
           title: 'Docs',
           items: [
-            { label: 'Overview', to: '/docs' },
-            { label: 'Setup', to: '/docs/setup/install' },
-            { label: 'Tools', to: '/docs/tools/overview' }
+            { label: 'Getting Started', to: '/docs' },
+            { label: 'Install', to: '/docs/setup/install' },
+            { label: 'Tools', to: '/docs/tools/overview' },
+            { label: 'Architecture', to: '/docs/architecture' }
           ]
         },
         {
-          title: 'Versions',
+          title: 'Releases',
           items: [
-            { label: 'Current (0.0.7-beta.1)', to: '/docs/releases/current' },
-            { label: 'Release matrix', to: '/docs/releases/history' }
+            { label: 'Current (0.1.0)', to: '/docs/releases/current' },
+            { label: 'Release History', to: '/docs/releases/history' }
           ]
         },
         {
-          title: 'Project',
+          title: 'Community',
           items: [
             { label: 'GitHub', href: 'https://github.com/wmt-mobile/localnest' },
-            { label: 'npm', href: 'https://www.npmjs.com/package/localnest-mcp' }
+            { label: 'npm', href: 'https://www.npmjs.com/package/localnest-mcp' },
+            { label: 'Issues', href: 'https://github.com/wmt-mobile/localnest/issues' }
           ]
         }
       ],
-      copyright: `Copyright ${new Date().getFullYear()} LocalNest`
+      copyright: `Copyright ${new Date().getFullYear()} LocalNest. MIT License.`
     },
     prism: {
       additionalLanguages: ['bash', 'json', 'typescript', 'python', 'diff', 'sql', 'yaml', 'toml'],
       theme: {
         plain: {
-          color: '#d6e9ff',
-          backgroundColor: '#08111e'
+          color: '#e5e5e5',
+          backgroundColor: '#0a0a0a'
         },
         styles: []
       },
       darkTheme: {
         plain: {
-          color: '#d6e9ff',
-          backgroundColor: '#08111e'
+          color: '#e5e5e5',
+          backgroundColor: '#0a0a0a'
         },
         styles: []
       }

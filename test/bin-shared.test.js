@@ -10,7 +10,7 @@ import {
 import { SERVER_VERSION } from '../src/runtime/version.js';
 
 function assertVersionCommand(t, scriptPath) {
-  const result = spawnSync(process.execPath, [scriptPath, '--version'], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['--import', 'tsx/esm', scriptPath, '--version'], { encoding: 'utf8' });
   if (result.error?.code === 'EPERM') {
     t.skip('process spawning is blocked in this environment');
     return;

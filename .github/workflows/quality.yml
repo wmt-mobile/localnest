@@ -2,16 +2,31 @@ name: Quality
 
 on:
   pull_request:
+    paths-ignore:
+      - 'localnest-docs/**'
+      - 'readme/**'
+      - '**/*.md'
+      - '.github/workflows/docs.yml'
   push:
     branches:
       - main
       - beta
+    paths-ignore:
+      - 'localnest-docs/**'
+      - 'readme/**'
+      - '**/*.md'
+      - '.github/workflows/docs.yml'
 
 permissions:
   contents: read
 
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   quality:
+    name: Quality Pipeline
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:

@@ -5,9 +5,17 @@ on:
     branches:
       - main
       - beta
+    paths-ignore:
+      - 'localnest-docs/**'
+      - 'readme/**'
+      - '**/*.md'
   pull_request:
     branches:
       - main
+    paths-ignore:
+      - 'localnest-docs/**'
+      - 'readme/**'
+      - '**/*.md'
   schedule:
     - cron: '18 3 * * 1'
 
@@ -16,9 +24,13 @@ permissions:
   contents: read
   security-events: write
 
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   analyze:
-    name: Analyze (JavaScript)
+    name: Analyze (JavaScript/TypeScript)
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:

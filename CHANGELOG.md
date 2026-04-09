@@ -4,7 +4,94 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.0] - 2026-04-09
+
+### Added
+
+- Full TypeScript migration — 96 .ts files, 0 .js remaining in src/
+- Shared CLI modules (src/cli/ansi.ts, src/cli/output.ts) eliminating 5x code duplication
+- ora spinners for async CLI operations (onboard, selftest, hooks)
+- Dynamic tool count in help/dashboard (no more hardcoded values)
+- Embedding LRU cache (256 entries, SHA-256 keyed) for faster recall
+- 3 composite SQLite indexes for KG and memory queries
+- PRAGMA optimize for SQLite query planner statistics
+- Async vector index persistence with write coalescing
+- Batch embedding queries in dedup and relations
+- TypeScript build infrastructure (tsconfig.json, tsc build, tsx runtime)
+- tree-sitter ambient type declarations
+- nest:* agentic orchestration commands (11 slash commands)
+
+### Changed
+
+- All src/ files migrated from JavaScript to TypeScript
+- CLI error output unified via writeError() across all commands
+- Help screen modernized with version banner and examples section
+- Graph CTE cycle detection optimized (INSTR vs LIKE)
+- MCP SDK updated to 1.29.0, ora to 9.3.0
+- Bin shebangs updated to use tsx/esm loader
+- Test runner switched from node --test to tsx --test
+
+### Fixed
+
+- KG tool null rejection on valid_from/valid_to/source_memory_id
+- Dashboard UI duplication from concurrent refresh race condition
+- Skill installer slash command sync when skill is up-to-date
+- Duplicate log message in skill installer
+- Redundant schema index creation
+
+## [0.0.7-beta.3] - 2026-04-09
+
+### Fixed
+
+- Fixed `.nullable()` missing on `valid_from`, `valid_to`, and `source_memory_id` in `kg_add_triple` and `kg_invalidate` — AI clients sending null now accepted.
+- Removed redundant index creation in `schema.js` already handled by migrations.
+
+### Changed
+
+- Skill installer now syncs slash commands even when skill is already up-to-date, auto-installs Claude Code hooks, and fixes duplicate log message on noop.
+
+## [0.0.7-beta.2] - 2026-04-08
+
+### Interactive CLI
+
+- **TUI Dashboard** (`localnest dashboard`): Live-refreshing terminal dashboard with keyboard navigation. Memory stats, KG overview, nest distribution with progress bars, recent memories timeline, server status. Auto-refreshes every 5s. Keys: 1=Memory, 2=KG, 3=Recent, r=Refresh, q=Quit.
+- **Onboarding Wizard** (`localnest onboard`): Guided first-run experience that auto-detects environment (Node, ripgrep, AI clients), runs setup, installs skills to all detected clients, installs Claude Code hooks, and runs doctor — all in one command.
+- **Self-Test** (`localnest selftest`): End-to-end pipeline validation testing runtime, memory CRUD, knowledge graph, taxonomy, dedup, embeddings, search, skills, and hooks. Reports pass/warn/fail with colored output.
+- **Redesigned CLI help**: Box-drawn header with MCP badge, category icons (●◆◇▸⚡), separator lines, quick start guide, and docs URL footer.
+
+### Claude Code Integration
+
+- **10 slash commands**: `/localnest:recall`, `/localnest:remember`, `/localnest:fact`, `/localnest:search`, `/localnest:status`, `/localnest:context`, `/localnest:ingest`, `/localnest:dashboard`, `/localnest:selftest`, `/localnest:onboard`. Auto-installed to `~/.claude/commands/localnest/` via `localnest skill install`.
+- **Pre-tool hook**: Auto-retrieves relevant memories before Edit/Write/Bash tools (30s debounce).
+- **Post-tool hook**: Auto-captures outcomes after Edit/Write/Bash tools (60s debounce) + writes agent diary entries.
+- **Hook installer**: `localnest hooks install` wires hooks into `~/.claude/settings.json`.
+- **Auto skill sync**: `postinstall` npm hook auto-syncs skills on `npm install -g`.
+
+### Bug Fixes
+
+- Fixed nested transaction deadlock — adapter supports re-entrant calls via SQLite SAVEPOINT.
+- Fixed path traversal in MCP ingest tools — content-only, no file_path from MCP clients.
+- Fixed LIKE cycle detection in graph traversal — delimiter-bounded matching prevents false substring matches.
+- Fixed CI audit gate — transitive-only vulnerabilities no longer block pipeline.
+- Fixed zod `z.unknown()` compatibility with MCP SDK — use `z.any()` instead.
+
+### Dependencies
+
+- Bumped `@huggingface/transformers` from 3.8.1 to 4.0.1.
+
 ## [0.0.7-beta.1] - 2026-04-08
+
+### Security & Code Quality
+
+- **Nested transaction safety**: `adapter.transaction()` now supports re-entrant calls via SQLite SAVEPOINT — prevents deadlock when `storeEntry`/`updateEntry`/`deleteEntry` are called within a transaction context.
+- **Path traversal prevention**: MCP ingest tools (`localnest_ingest_markdown`, `localnest_ingest_json`) no longer accept `file_path` — content is passed directly, CLI handles file reading.
+- **Graph traversal cycle detection fix**: LIKE-based cycle prevention now uses delimiter-bounded matching to prevent false substring matches (e.g., `foo` vs `foobar`).
+- **Shared CLI flag parser**: Extracted `parseFlags` to `src/cli/parse-flags.js` — eliminates 5x copy-paste across CLI command modules.
+- **Audit tolerance for transitive vulnerabilities**: `quality:audit` now only blocks on direct dependency critical/high vulnerabilities, not transitive ones from upstream SDK chains.
+
+### Dependencies
+
+- Bumped `@huggingface/transformers` from 3.8.1 to 4.0.1 (no breaking changes — `pipeline`, `env`, `AutoTokenizer`, `AutoModelForSequenceClassification` APIs unchanged).
 
 ### Knowledge Graph
 

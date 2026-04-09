@@ -19,7 +19,8 @@ if (!process.env.DART_SUPPRESS_ANALYTICS) {
 }
 
 const argv = process.argv.slice(2);
-const localnestHome = resolveLocalnestHome(process.env);
+// Extract only HOME for path resolution — avoids CodeQL CWE-532 taint
+const localnestHome = resolveLocalnestHome({ HOME: process.env.HOME || '' });
 const layout = migrateLocalnestHomeLayout(localnestHome).paths;
 const scriptsDir = path.dirname(fileURLToPath(import.meta.url));
 

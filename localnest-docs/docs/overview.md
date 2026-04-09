@@ -12,7 +12,7 @@ LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scop
 - [Browse tool documentation](./tools/overview)
 - [See the current stable package and behavior](./releases/current)
 - [See the release matrix](./releases/history)
-- [Preview 0.0.7-beta.1 features](./releases/0.0.7-beta.1)
+- [Preview 0.1.0 features](./releases/0.1.0)
 
 ## Core ideas
 
@@ -22,10 +22,11 @@ LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scop
 - The fastest workflow is usually: find files first, search within them second, read exact lines last.
 - Memory results are guidance, not final evidence. Verify with file tools before concluding.
 
-## What's new in the beta
+## What's new in v0.1.0
 
-The `0.0.7-beta.1` beta adds significant new capabilities:
+The `0.1.0` release migrates the entire codebase to TypeScript and includes all capabilities from the beta series:
 
+- **TypeScript migration** -- full codebase migrated from JavaScript to TypeScript for type safety and developer experience.
 - **Temporal knowledge graph** -- store structured facts as subject-predicate-object triples with time validity. Query what was true at any point in time with `as_of`.
 - **Multi-hop graph traversal** -- walk relationships 2-5 hops deep via recursive CTEs. No other local-first tool offers this.
 - **Nest/Branch hierarchy** -- two-level memory taxonomy for organized retrieval. Nests are top-level domains, branches are topics within nests.
@@ -34,4 +35,4 @@ The `0.0.7-beta.1` beta adds significant new capabilities:
 - **Conversation ingestion** -- import Markdown/JSON chat exports with automatic entity extraction and KG triple creation.
 - **Hooks system** -- pre/post operation callbacks for memory, KG, traversal, ingestion. Build custom pipelines without modifying core code.
 - **CLI-first architecture** -- unified `localnest <noun> <verb>` commands for everything. Shell completions for bash, zsh, fish.
-- **17 new MCP tools** (52 total) covering KG, nests, traversal, diary, ingest, dedup, and hooks.
+- **52 MCP tools** covering KG, nests, traversal, diary, ingest, dedup, and hooks.

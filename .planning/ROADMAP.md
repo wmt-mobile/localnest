@@ -40,6 +40,20 @@
 - [x] **Phase 17: Shell Completions and Polish** - Tab completions for bash, zsh, and fish
 - [x] **Phase 18: Binary Deprecation** - Redirect old fragmented binaries to unified CLI with warnings
 
+### v0.1.0 — The Big Upgrade
+
+**Milestone Goal:** TypeScript migration, CLI visual refresh, search/memory performance, latest libraries.
+
+**Parallel Lanes:** A (CLI: 19-20), B (Perf: 21-22), C (TS: 23-24-25)
+
+- [ ] **Phase 19: CLI Foundation** - Extract shared ANSI/output module, deduplicate 5 CLI files (~150 lines)
+- [ ] **Phase 20: CLI Visual Refresh** - Add ora spinners, modernize help/dashboard, consistent error formatting
+- [ ] **Phase 21: Performance Quick Wins** - Composite indexes, embedding LRU cache, prepared statement reuse
+- [ ] **Phase 22: Performance Deep** - Async vector index, sqlite-vec integration, batch embedding queries
+- [ ] **Phase 23: TypeScript Infrastructure** - tsconfig.json, build pipeline, CI changes, @types/node
+- [ ] **Phase 24: TypeScript Migration** - Convert 94 source files + 3 test files from JS to TS
+- [ ] **Phase 25: Library Updates + Ship** - Update all deps to latest, final verification, release v0.1.0
+
 ## Phase Details
 
 ### Phase 10: CLI Framework Setup

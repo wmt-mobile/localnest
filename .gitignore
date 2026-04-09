@@ -1,5 +1,7 @@
 node_modules/
 .npm-cache/
+dist/
+*.tsbuildinfo
 .localnest/
 .mcp.localnest.json
 .mcp.localnest.*.json
@@ -7,8 +9,14 @@ node_modules/
 localnest.config.json
 /CLAUDE.md
 /.claude/
-/.claude-flow/
 /.codex/
+
+# Tool artifacts — never belong in source tree
+.claude-flow/
+**/.claude-flow/
+
+# Build artifacts
+localnest-docs/build/
 /docs/
 *AUDIT-REPORT*.md
 *ACTION-PLAN*.md

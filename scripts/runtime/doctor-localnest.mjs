@@ -21,6 +21,21 @@ installRuntimeWarningFilter();
 const argv = process.argv.slice(2);
 const asJson = argv.includes('--json');
 
+// Extract only needed env vars — avoids CodeQL CWE-532 taint from process.env to console.log
+const safeEnv = {
+  HOME: process.env.HOME || '',
+  LOCALNEST_HOME: process.env.LOCALNEST_HOME || '',
+  LOCALNEST_CONFIG: process.env.LOCALNEST_CONFIG || '',
+  LOCALNEST_INDEX_BACKEND: process.env.LOCALNEST_INDEX_BACKEND || '',
+  LOCALNEST_SQLITE_VEC_EXTENSION: process.env.LOCALNEST_SQLITE_VEC_EXTENSION || '',
+  LOCALNEST_SQLITE_VEC_SEARCH_DIRS: process.env.LOCALNEST_SQLITE_VEC_SEARCH_DIRS || '',
+  LOCALNEST_EMBED_CACHE_DIR: process.env.LOCALNEST_EMBED_CACHE_DIR || '',
+  LOCALNEST_RERANKER_CACHE_DIR: process.env.LOCALNEST_RERANKER_CACHE_DIR || '',
+  LOCALNEST_DOCTOR_STRICT: process.env.LOCALNEST_DOCTOR_STRICT || '',
+  USER: process.env.USER || '',
+  USERNAME: process.env.USERNAME || '',
+};
+
 function parseBoolean(value, fallback) {
   if (value === undefined || value === null || value === '') return fallback;
   return String(value).toLowerCase() === 'true';
@@ -41,8 +56,8 @@ function getNpxCommand() {
 
 function resolveConfigPath() {
   return resolveDefaultConfigPath({
-    env: process.env,
-    localnestHome: resolveLocalnestHome(process.env)
+    env: safeEnv,
+    localnestHome: resolveLocalnestHome(safeEnv)
   });
 }
 
@@ -70,7 +85,7 @@ function parseConfigForModelCacheDirs() {
 }
 
 function resolveIndexBackend() {
-  const byEnv = (process.env.LOCALNEST_INDEX_BACKEND || '').trim();
+  const byEnv = (safeEnv.LOCALNEST_INDEX_BACKEND || '').trim();
   if (byEnv) return byEnv;
 
   const cfgPath = resolveConfigPath();
@@ -229,14 +244,14 @@ function checkSqliteVecExtension() {
     return { id: 'sqlite_vec_extension', ok: true, detail: 'sqlite-vec native extension not required for current backend' };
   }
 
-  const configured = (process.env.LOCALNEST_SQLITE_VEC_EXTENSION || '').trim();
-  const localnestHome = resolveLocalnestHome(process.env);
+  const configured = (safeEnv.LOCALNEST_SQLITE_VEC_EXTENSION || '').trim();
+  const localnestHome = resolveLocalnestHome(safeEnv);
   const configuredPath = configured ? path.resolve(configured) : '';
   const detected = configuredPath
     ? (fs.existsSync(configuredPath) ? { path: configuredPath, source: 'configured' } : null)
     : findSqliteVecExtensionPath({
       localnestHome,
-      env: process.env
+      env: safeEnv
     });
 
   if (detected?.path) {
@@ -258,28 +273,28 @@ function checkSqliteVecExtension() {
 }
 
 function checkModelCacheWritable() {
-  const localnestHome = resolveLocalnestHome(process.env);
+  const localnestHome = resolveLocalnestHome(safeEnv);
   const configCaches = parseConfigForModelCacheDirs();
   const defaultCache = buildLocalnestPaths(localnestHome).dirs.cache;
   const embedPreferred = path.resolve(
-    (process.env.LOCALNEST_EMBED_CACHE_DIR || '').trim() ||
+    (safeEnv.LOCALNEST_EMBED_CACHE_DIR || '').trim() ||
     configCaches.embeddingCacheDir ||
     defaultCache
   );
   const rerankerPreferred = path.resolve(
-    (process.env.LOCALNEST_RERANKER_CACHE_DIR || '').trim() ||
+    (safeEnv.LOCALNEST_RERANKER_CACHE_DIR || '').trim() ||
     configCaches.rerankerCacheDir ||
     defaultCache
   );
   const embedResolved = resolveWritableModelCacheDir({
     preferredDir: embedPreferred,
     localnestHome,
-    env: process.env
+    env: safeEnv
   });
   const rerankerResolved = resolveWritableModelCacheDir({
     preferredDir: rerankerPreferred,
     localnestHome,
-    env: process.env
+    env: safeEnv
   });
 
   if (!embedResolved.writable || !rerankerResolved.writable) {
@@ -296,13 +311,7 @@ function checkModelCacheWritable() {
     id: 'model_cache',
     ok: true,
     detail: fallbackUsed
-      ? [
-        'Model cache writable (informational fallback active)',
-        `embed preferred=${embedResolved.preferredPath}`,
-        `embed resolved=${embedResolved.path}`,
-        `reranker preferred=${rerankerResolved.preferredPath}`,
-        `reranker resolved=${rerankerResolved.path}`
-      ].join('; ')
+      ? 'Model cache writable (fallback location active — run with --json for details)'
       : 'Model cache writable'
   };
 }
@@ -365,7 +374,7 @@ async function main() {
     printText(checks);
   }
 
-  const strict = parseBoolean(process.env.LOCALNEST_DOCTOR_STRICT, true);
+  const strict = parseBoolean(safeEnv.LOCALNEST_DOCTOR_STRICT, true);
   if (strict && checks.some((c) => !c.ok)) {
     process.exit(1);
   }

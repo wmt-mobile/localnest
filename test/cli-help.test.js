@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 
 function runHelp(t, relativeScriptPath) {
   const scriptPath = path.resolve(relativeScriptPath);
-  const result = spawnSync(process.execPath, [scriptPath, '--help'], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['--import', 'tsx/esm', scriptPath, '--help'], { encoding: 'utf8' });
   if (result.error?.code === 'EPERM') {
     t.skip('process spawning is blocked in this environment');
     return null;
@@ -42,7 +42,7 @@ test('localnest start --help prints usage without starting server', (t) => {
 
 test('localnest start subcommand help prints start usage without runtime noise', (t) => {
   const scriptPath = path.resolve('bin/localnest.js');
-  const result = spawnSync(process.execPath, [scriptPath, 'start', '--help'], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['--import', 'tsx/esm', scriptPath, 'start', '--help'], { encoding: 'utf8' });
   if (result.error?.code === 'EPERM') {
     t.skip('process spawning is blocked in this environment');
     return;
@@ -55,7 +55,7 @@ test('localnest start subcommand help prints start usage without runtime noise',
 
 test('localnest task-context help prints canonical usage without executing workflow', (t) => {
   const scriptPath = path.resolve('bin/localnest.js');
-  const result = spawnSync(process.execPath, [scriptPath, 'task-context', '--help'], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['--import', 'tsx/esm', scriptPath, 'task-context', '--help'], { encoding: 'utf8' });
   if (result.error?.code === 'EPERM') {
     t.skip('process spawning is blocked in this environment');
     return;
@@ -68,7 +68,7 @@ test('localnest task-context help prints canonical usage without executing workf
 
 test('legacy setup wrapper prints deprecation warning and forwards to canonical help', (t) => {
   const scriptPath = path.resolve('bin/localnest-mcp-setup.js');
-  const result = spawnSync(process.execPath, [scriptPath, '--help'], { encoding: 'utf8' });
+  const result = spawnSync(process.execPath, ['--import', 'tsx/esm', scriptPath, '--help'], { encoding: 'utf8' });
   if (result.error?.code === 'EPERM') {
     t.skip('process spawning is blocked in this environment');
     return;

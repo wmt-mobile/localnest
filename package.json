@@ -1,6 +1,6 @@
 {
   "name": "localnest-mcp",
-  "version": "0.0.7-beta.1",
+  "version": "0.1.0",
   "license": "MIT",
   "author": "LocalNest",
   "repository": {
@@ -44,34 +44,39 @@
     "CHANGELOG.md"
   ],
   "engines": {
-    "node": ">=18"
+    "node": ">=22.6.0"
   },
   "scripts": {
+    "postinstall": "node scripts/runtime/install-localnest-skill.mjs --quiet 2>/dev/null || true",
     "setup": "node scripts/runtime/setup-localnest.mjs",
     "upgrade": "node scripts/runtime/upgrade-localnest.mjs",
     "doctor": "node scripts/runtime/doctor-localnest.mjs",
     "install:skill": "node scripts/runtime/install-localnest-skill.mjs",
     "task-context": "node scripts/memory/task-context-localnest.mjs",
     "capture-outcome": "node scripts/memory/capture-outcome-localnest.mjs",
-    "start": "node src/app/mcp-server.js",
+    "start": "tsx src/app/mcp-server.ts",
     "stress:localnest": "node scripts/quality/stress-localnest.mjs",
-    "test": "node --test",
-    "test:coverage": "node --test --experimental-test-coverage",
+    "test": "tsx --test",
+    "test:coverage": "node --import tsx/esm --test --experimental-test-coverage",
     "lint": "eslint . --max-warnings=0",
-    "quality:cycles": "madge --circular --extensions js,mjs src",
+    "quality:cycles": "madge --circular --extensions js,mjs,ts src",
     "quality:deps": "depcheck --json --ignores=publint",
     "quality:package": "node scripts/quality/quality-package.mjs",
     "quality:audit": "node scripts/quality/quality-audit.mjs",
     "quality": "npm run check && npm run lint && npm run test:coverage && npm run quality:cycles && npm run quality:deps && npm run quality:package && npm run quality:audit",
-    "check": "node --check src/app/index.js && node --check src/app/mcp-server.js && node --check src/runtime/index.js && node --check src/runtime/config.js && node --check src/runtime/home-layout.js && node --check src/runtime/sqlite-vec-extension.js && node --check src/runtime/version.js && node --check src/runtime/warning-filter.js && node --check src/migrations/config-migrator.js && node --check src/setup/client-installer.js && node --check src/mcp/index.js && node --check src/mcp/common/index.js && node --check src/mcp/common/response-normalizers.js && node --check src/mcp/common/schemas.js && node --check src/mcp/common/tool-utils.js && node --check src/mcp/common/status.js && node --check src/mcp/common/staleness-monitor.js && node --check src/mcp/common/health-monitor.js && node --check src/mcp/tools/index.js && node --check src/mcp/tools/core.js && node --check src/mcp/tools/memory-workflow.js && node --check src/mcp/tools/memory-store.js && node --check src/mcp/tools/retrieval.js && node --check src/services/workspace/index.js && node --check src/services/workspace/service.js && node --check src/services/retrieval/index.js && node --check src/services/retrieval/core/tokenizer.js && node --check src/services/retrieval/core/relevance.js && node --check src/services/retrieval/embedding/service.js && node --check src/services/retrieval/chunker/languages.js && node --check src/services/retrieval/chunker/ast-utils.js && node --check src/services/retrieval/chunker/service.js && node --check src/services/retrieval/reranker/service.js && node --check src/services/retrieval/core/symbol-search.js && node --check src/services/retrieval/search/query-utils.js && node --check src/services/retrieval/search/lexical-search.js && node --check src/services/retrieval/search/hybrid-ranking.js && node --check src/services/retrieval/search/auto-index.js && node --check src/services/retrieval/search/service.js && node --check src/services/retrieval/vector-index/service.js && node --check src/services/retrieval/vector-index/helpers.js && node --check src/services/retrieval/sqlite-vec/helpers.js && node --check src/services/retrieval/sqlite-vec/schema.js && node --check src/services/retrieval/sqlite-vec/bm25.js && node --check src/services/retrieval/sqlite-vec/indexer.js && node --check src/services/retrieval/sqlite-vec/semantic-search.js && node --check src/services/retrieval/sqlite-vec/runtime.js && node --check src/services/retrieval/sqlite-vec/service.js && node --check src/services/update/index.js && node --check src/services/update/service.js && node --check src/services/update/upgrade-assistant.js && node --check src/services/memory/index.js && node --check src/services/memory/service.js && node --check src/services/memory/utils.js && node --check src/services/memory/event-capture.js && node --check src/services/memory/relations.js && node --check src/services/memory/store.js && node --check src/services/memory/workflow.js && node --check scripts/runtime/setup-localnest.mjs && node --check scripts/runtime/upgrade-localnest.mjs && node --check scripts/runtime/doctor-localnest.mjs && node --check scripts/runtime/install-localnest-skill.mjs && node --check scripts/memory/task-context-localnest.mjs && node --check scripts/memory/capture-outcome-localnest.mjs && node --check scripts/memory/memory-workflow-cli-utils.mjs && node --check scripts/quality/quality-audit.mjs && node --check scripts/quality/quality-package.mjs && node --check scripts/quality/stress-localnest.mjs && node --check scripts/release/release-test-installed-runtime.mjs && node --check scripts/release/release-exit-criteria.mjs && node --check src/cli/options.js && node --check src/cli/help.js && node --check src/cli/router.js && node --check src/cli/commands/memory.js && node --check src/cli/commands/kg.js && node --check src/cli/commands/skill.js && node --check src/cli/commands/mcp.js && node --check src/cli/commands/ingest.js && node --check src/cli/commands/completion.js && node --check bin/_shared.js && node --check bin/localnest.js && node --check bin/localnest-mcp.js && node --check bin/localnest-mcp-upgrade.js && node --check bin/localnest-mcp-setup.js && node --check bin/localnest-mcp-doctor.js && node --check bin/localnest-mcp-install-skill.js && node --check bin/localnest-mcp-task-context.js && node --check bin/localnest-mcp-capture-outcome.js",
+    "check": "tsc --noEmit && node --check bin/_shared.js && node --check bin/localnest.js && node --check bin/localnest-mcp.js && node --check bin/localnest-mcp-upgrade.js && node --check bin/localnest-mcp-setup.js && node --check bin/localnest-mcp-doctor.js && node --check bin/localnest-mcp-install-skill.js && node --check bin/localnest-mcp-task-context.js && node --check bin/localnest-mcp-capture-outcome.js && node --check scripts/runtime/setup-localnest.mjs && node --check scripts/runtime/upgrade-localnest.mjs && node --check scripts/runtime/doctor-localnest.mjs && node --check scripts/runtime/install-localnest-skill.mjs && node --check scripts/memory/task-context-localnest.mjs && node --check scripts/memory/capture-outcome-localnest.mjs && node --check scripts/memory/memory-workflow-cli-utils.mjs && node --check scripts/quality/quality-audit.mjs && node --check scripts/quality/quality-package.mjs && node --check scripts/quality/stress-localnest.mjs && node --check scripts/release/release-test-installed-runtime.mjs && node --check scripts/release/release-exit-criteria.mjs",
+    "build": "tsc",
+    "build:check": "tsc --noEmit",
     "prepublishOnly": "npm run check",
     "release:beta": "npm publish --tag beta",
     "release:latest": "npm publish",
     "bump:beta": "npm version prerelease --preid=beta --no-git-tag-version"
   },
   "dependencies": {
-    "@huggingface/transformers": "^3.8.1",
-    "@modelcontextprotocol/sdk": "^1.17.4",
+    "@huggingface/transformers": "^4.0.1",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "ora": "^9.3.0",
+    "tsx": "^4.21.0",
     "zod": "^4.3.6"
   },
   "optionalDependencies": {
@@ -91,10 +96,12 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@types/node": "^25.5.2",
     "depcheck": "^1.4.7",
-    "eslint": "^10.0.2",
-    "globals": "^17.3.0",
+    "eslint": "^10.2.0",
+    "globals": "^17.4.0",
     "madge": "^8.0.0",
-    "publint": "^0.3.7"
+    "publint": "^0.3.18",
+    "typescript": "^6.0.2"
   }
 }

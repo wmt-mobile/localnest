@@ -1,4 +1,4 @@
-name: docs
+name: Docs
 
 on:
   push:
@@ -20,7 +20,9 @@ concurrency:
 
 jobs:
   build:
+    name: Build Docusaurus site
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     defaults:
       run:
         working-directory: localnest-docs
@@ -31,7 +33,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: localnest-docs/package-lock.json
 
@@ -50,11 +52,13 @@ jobs:
           path: localnest-docs/build
 
   deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-    needs: build
-    runs-on: ubuntu-latest
     steps:
       - name: Deploy to GitHub Pages
         id: deployment

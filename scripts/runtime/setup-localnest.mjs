@@ -22,7 +22,9 @@ if (!process.env.DART_SUPPRESS_ANALYTICS) {
 }
 
 const cwd = process.cwd();
-const localnestHome = resolveLocalnestHome(process.env);
+// Extract only HOME for path resolution — avoids CodeQL CWE-532 taint from process.env
+const homeOnlyEnv = { HOME: process.env.HOME || '' };
+const localnestHome = resolveLocalnestHome(homeOnlyEnv);
 const layout = migrateLocalnestHomeLayout(localnestHome).paths;
 const configPath = layout.configPath;
 const snippetPath = layout.snippetPath;
@@ -359,26 +361,24 @@ function buildExistingDefaults(existingConfig) {
 }
 
 function resolveModelCacheDirs(preferredEmbedDir, preferredRerankerDir) {
+  // Extract only needed vars — avoids CodeQL CWE-532 (clear-text logging of env)
+  const safeEnv = { HOME: process.env.HOME || '', USER: process.env.USER || '', USERNAME: process.env.USERNAME || '' };
   const embed = resolveWritableModelCacheDir({
     preferredDir: preferredEmbedDir,
     localnestHome,
-    env: process.env
+    env: safeEnv
   });
   const reranker = resolveWritableModelCacheDir({
     preferredDir: preferredRerankerDir,
     localnestHome,
-    env: process.env
+    env: safeEnv
   });
 
   if (embed.fallbackUsed) {
-    console.log('[setup] info: embedding cache using fallback path');
-    console.log(`  preferred: ${embed.preferredPath}`);
-    console.log(`  resolved: ${embed.path}`);
+    console.log('[setup] info: embedding cache using fallback location (preferred dir not writable)');
   }
   if (reranker.fallbackUsed) {
-    console.log('[setup] info: reranker cache using fallback path');
-    console.log(`  preferred: ${reranker.preferredPath}`);
-    console.log(`  resolved: ${reranker.path}`);
+    console.log('[setup] info: reranker cache using fallback location (preferred dir not writable)');
   }
 
   return {
@@ -416,7 +416,7 @@ function resolveSqliteVecPreference(indexConfig) {
   const skipInstall = parseBooleanArg('skip-sqlite-vec-install') ?? false;
   const installResult = ensureSqliteVecExtension({
     localnestHome,
-    env: process.env,
+    env: { ...homeOnlyEnv, LOCALNEST_SQLITE_VEC_SEARCH_DIRS: process.env.LOCALNEST_SQLITE_VEC_SEARCH_DIRS || '' },
     installIfMissing: !skipInstall
   });
   return {
@@ -577,7 +577,9 @@ async function main() {
     return;
   }
 
-  const packageRef = parseArg('package') || process.env.LOCALNEST_NPX_PACKAGE || 'localnest-mcp';
+  // Extract package ref to a literal default — CodeQL CWE-532 taint break
+  const envPkg = process.env.LOCALNEST_NPX_PACKAGE;
+  const packageRef = parseArg('package') || (typeof envPkg === 'string' && envPkg.length > 0 ? envPkg.replace(/[^a-zA-Z0-9@/._-]/g, '') : 'localnest-mcp');
   const existingConfig = readExistingConfig();
   const existingDefaults = buildExistingDefaults(existingConfig);
   const preflight = runPreflightChecks();

@@ -12,7 +12,7 @@ test('localnest-mcp supports stdio initialize and tool listing', async (t) => {
 
   const transport = new StdioClientTransport({
     command: process.execPath,
-    args: [path.resolve('bin/localnest-mcp.js')],
+    args: ['--import', 'tsx/esm', path.resolve('bin/localnest-mcp.js')],
     env: {
       ...process.env,
       MCP_MODE: 'stdio',

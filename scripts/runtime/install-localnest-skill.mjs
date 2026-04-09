@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
+import { spawnSync } from 'node:child_process';
 
 const argv = process.argv.slice(2);
 const SKILL_METADATA_FILE = '.localnest-skill.json';
@@ -387,6 +388,14 @@ export function resolveInstallTarget({
 
 function installOrUpdateSkill(sourceSkillDir, targetSkillDir, { quiet, force } = {}) {
   const state = determineSyncState(sourceSkillDir, targetSkillDir);
+  const toolFamily = detectSkillToolFamily(targetSkillDir);
+
+  // Always sync slash commands for Claude targets — they live outside the skill dir
+  // and may be missing even when the skill itself is up-to-date
+  if (toolFamily === 'claude') {
+    ensureSlashCommands(sourceSkillDir, targetSkillDir, quiet);
+  }
+
   if (state.action === 'noop' && !force) {
     return {
       changed: false,
@@ -398,7 +407,6 @@ function installOrUpdateSkill(sourceSkillDir, targetSkillDir, { quiet, force } =
   if (state.exists) {
     fs.rmSync(targetSkillDir, { recursive: true, force: true });
   }
-  const toolFamily = detectSkillToolFamily(targetSkillDir);
   copyDirWithVariant(sourceSkillDir, targetSkillDir, toolFamily);
 
   // Generate client-native instruction files (rules, AGENTS.md, etc.)
@@ -424,6 +432,76 @@ function installOrUpdateSkill(sourceSkillDir, targetSkillDir, { quiet, force } =
     state,
     targetSkillDir
   };
+}
+
+/**
+ * Ensure Claude Code slash commands are installed.
+ * These live at ~/.claude/commands/localnest/, separate from the skill dir,
+ * so they can be missing even when the skill itself is current.
+ */
+function ensureSlashCommands(sourceSkillDir, targetSkillDir, quiet) {
+  try {
+    const commandsSource = path.join(sourceSkillDir, 'commands');
+    if (!fs.existsSync(commandsSource)) return;
+
+    const commandsDest = path.join(path.dirname(targetSkillDir), '..', 'commands', 'localnest');
+
+    // Check if all commands already exist
+    const sourceFiles = fs.readdirSync(commandsSource).filter(f => f.endsWith('.md'));
+    const allExist = sourceFiles.every(f => fs.existsSync(path.join(commandsDest, f)));
+    if (allExist && sourceFiles.length > 0) return; // All present, skip
+
+    fs.mkdirSync(commandsDest, { recursive: true });
+    for (const entry of sourceFiles) {
+      fs.copyFileSync(path.join(commandsSource, entry), path.join(commandsDest, entry));
+    }
+    if (!quiet) {
+      console.log(`[localnest-skill] installed slash commands → ${commandsDest}`);
+    }
+  } catch {
+    // Non-fatal — commands are best-effort
+  }
+}
+
+/**
+ * Install Claude Code hooks for auto memory retrieval/capture.
+ * Only installs if hooks are not already present in ~/.claude/settings.json.
+ */
+function ensureHooksInstalled(quiet) {
+  try {
+    const __dir = path.dirname(fileURLToPath(import.meta.url));
+    const hooksInstaller = path.resolve(__dir, '..', 'hooks', 'install-hooks.cjs');
+    if (!fs.existsSync(hooksInstaller)) return;
+
+    // Check if hooks are already installed
+    const settingsPath = path.join(os.homedir(), '.claude', 'settings.json');
+    if (fs.existsSync(settingsPath)) {
+      try {
+        const settings = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
+        const hooks = settings.hooks || {};
+        const hasPreHook = (hooks.PreToolUse || []).some(e =>
+          e.hooks?.some(h => h.command?.includes('localnest-pre-tool'))
+        );
+        const hasPostHook = (hooks.PostToolUse || []).some(e =>
+          e.hooks?.some(h => h.command?.includes('localnest-post-tool'))
+        );
+        if (hasPreHook && hasPostHook) return; // Already installed
+      } catch {
+        // Corrupt settings — installer will handle it
+      }
+    }
+
+    const result = spawnSync(process.execPath, [hooksInstaller], {
+      stdio: quiet ? 'ignore' : 'inherit',
+      encoding: 'utf8',
+      timeout: 15000,
+    });
+    if (result.status !== 0 && !quiet) {
+      console.warn('[localnest-skill] hooks installation returned non-zero status');
+    }
+  } catch {
+    // Non-fatal — hooks are best-effort
+  }
 }
 
 function syncSkillToDirs(sourceSkillDir, targetDirs, { quiet, force, createMissingParents = false } = {}) {
@@ -528,6 +606,9 @@ export function main() {
       syncSkillToDirs(sourceSkillDir, projectTargets, { quiet, force, createMissingParents: project });
     }
   }
+
+  // Install Claude Code hooks (pre/post tool for auto memory retrieval/capture)
+  ensureHooksInstalled(quiet);
 
   if (!quiet) {
     console.log('[localnest-skill] restart your AI tool to load the updated skill');

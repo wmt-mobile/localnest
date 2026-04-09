@@ -7,7 +7,7 @@
   </p>
 </div>
 
-`main` keeps the `0.0.3` configuration surface and adds update-specific environment variables.
+`main` keeps the `0.1.0` configuration surface and adds update-specific environment variables.
 
 | Variable | Default | Description |
 | --- | --- | --- |
@@ -15,4 +15,4 @@
 | `LOCALNEST_UPDATE_CHECK_INTERVAL_MINUTES` | `120` | cached update interval |
 | `LOCALNEST_UPDATE_FAILURE_BACKOFF_MINUTES` | `15` | retry interval after failures |
 
-All indexing and root settings from `0.0.3` still apply.
+All indexing and root settings from `0.1.0` still apply.

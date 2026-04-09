@@ -365,34 +365,64 @@ Handlers validate with Zod and delegate the real behavior to services.
 
 ## Source layout
 
+All source files are TypeScript (96 `.ts` files, 0 `.js`). Runtime uses `tsx`; production builds use `tsc`.
+
 ```text
 src/
 ├── app/                          # Application bootstrap
+│   ├── index.ts
+│   ├── create-services.ts
+│   ├── mcp-server.ts
+│   └── register-tools.ts
+├── types/
+│   └── tree-sitter.d.ts          # Shared type declarations
 ├── mcp/
 │   └── tools/
-│       └── graph-tools.js        # MCP registration for KG, traversal, diary, ingest, hooks
+│       ├── graph-tools.ts        # MCP registration for KG, traversal, diary, ingest, hooks
+│       ├── core.ts               # Core MCP tool handlers
+│       ├── retrieval.ts          # Retrieval tool handlers
+│       ├── memory-store.ts       # Memory store tool handlers
+│       └── memory-workflow.ts    # Memory workflow tool handlers
 ├── services/
 │   ├── memory/
-│   │   ├── kg.js                 # Knowledge graph entity and triple CRUD
-│   │   ├── graph.js              # Recursive CTE traversal and bridge discovery
-│   │   ├── taxonomy.js           # Nest/branch hierarchy helpers
-│   │   ├── scopes.js             # Agent diary CRUD and scope isolation
-│   │   ├── dedup.js              # Embedding similarity gate
-│   │   ├── ingest.js             # Conversation parsing and ingestion pipeline
-│   │   └── hooks.js              # Pre/post operation hook system
-│   └── ...                       # Existing retrieval, indexing, workspace services
+│   │   ├── kg.ts                 # Knowledge graph entity and triple CRUD
+│   │   ├── graph.ts              # Recursive CTE traversal and bridge discovery
+│   │   ├── taxonomy.ts           # Nest/branch hierarchy helpers
+│   │   ├── scopes.ts             # Agent diary CRUD and scope isolation
+│   │   ├── dedup.ts              # Embedding similarity gate
+│   │   ├── ingest.ts             # Conversation parsing and ingestion pipeline
+│   │   ├── hooks.ts              # Pre/post operation hook system
+│   │   ├── schema.ts             # SQLite schema and migrations
+│   │   ├── recall.ts             # Memory recall with embedding search
+│   │   ├── store.ts              # Memory storage logic
+│   │   ├── relations.ts          # Memory relation management
+│   │   └── types.ts              # Memory type definitions
+│   ├── retrieval/                # Retrieval pipeline (chunker, embedding, search, reranker, vector-index, sqlite-vec)
+│   ├── update/                   # Self-update service
+│   └── workspace/                # Workspace and project detection
 ├── cli/
-│   ├── options.js                # Global CLI flag parser
-│   ├── help.js                   # Colored help renderer
-│   ├── router.js                 # Noun-verb subcommand dispatcher
+│   ├── ansi.ts                   # ANSI color and formatting utilities (shared)
+│   ├── output.ts                 # Structured output helpers (shared)
+│   ├── spinner.ts                # ora spinner wrapper (shared)
+│   ├── options.ts                # Global CLI flag parser
+│   ├── help.ts                   # Colored help renderer
+│   ├── router.ts                 # Noun-verb subcommand dispatcher
+│   ├── parse-flags.ts            # Flag parsing utilities
+│   ├── tool-count.ts             # MCP tool count helper
 │   └── commands/
-│       ├── memory.js             # Memory CLI (add, search, list, show, delete)
-│       ├── kg.js                 # Knowledge Graph CLI (add, query, timeline, stats)
-│       ├── skill.js              # Skill management CLI (install, list, remove)
-│       ├── mcp.js                # MCP lifecycle CLI (start, status, config)
-│       ├── ingest.js             # Conversation ingestion CLI
-│       └── completion.js         # Shell completion generators (bash, zsh, fish)
-├── runtime/
+│       ├── memory.ts             # Memory CLI (add, search, list, show, delete)
+│       ├── kg.ts                 # Knowledge Graph CLI (add, query, timeline, stats)
+│       ├── skill.ts              # Skill management CLI (install, list, remove)
+│       ├── mcp.ts                # MCP lifecycle CLI (start, status, config)
+│       ├── ingest.ts             # Conversation ingestion CLI
+│       ├── completion.ts         # Shell completion generators (bash, zsh, fish)
+│       ├── dashboard.ts          # Interactive terminal dashboard
+│       ├── onboard.ts            # Guided first-run setup wizard
+│       ├── selftest.ts           # End-to-end pipeline validation
+│       └── hooks.ts              # Hook management CLI
+├── runtime/                      # Config, home layout, sqlite-vec extension, version, warning filter
+├── migrations/                   # Config migration scripts
+└── setup/                        # Client installer for AI tools
 ```
 
 ## Design decisions

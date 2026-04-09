@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env -S node --import tsx/esm
 import { SERVER_VERSION } from '../src/runtime/version.js';
 import { hasVersionFlag, importRelative } from './_shared.js';
 
