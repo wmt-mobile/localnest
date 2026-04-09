@@ -558,12 +558,16 @@ body {
 }
 
 .siteHome__eyebrow {
-  color: var(--ln-accent);
-  font-weight: 600;
+  color: var(--ln-accent-light);
+  font-weight: 700;
   font-size: 0.8125rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   margin: 0 0 0.75rem;
+}
+
+[data-theme='dark'] .siteHome__eyebrow {
+  color: #60a5fa;
 }
 
 .siteHome__hero h1 {
@@ -596,53 +600,60 @@ body {
 }
 
 .siteHome__actions .button {
-  min-height: 2.75rem;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  padding: 0 1.5rem;
-  border: none;
-  transition: all 150ms ease;
+  min-height: 2.75rem !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  font-size: 0.9rem !important;
+  padding: 0 1.5rem !important;
+  transition: all 150ms ease !important;
   cursor: pointer;
+  text-decoration: none !important;
 }
 
 .siteHome__actions .button--primary {
-  background: #171717;
-  color: #ffffff;
+  background: #171717 !important;
+  color: #ffffff !important;
+  border: 1px solid #171717 !important;
 }
 
 .siteHome__actions .button--primary:hover {
-  background: #333333;
+  background: #333333 !important;
+  border-color: #333333 !important;
 }
 
 [data-theme='dark'] .siteHome__actions .button--primary {
-  background: #fafafa;
-  color: #0a0a0a;
+  background: #fafafa !important;
+  color: #0a0a0a !important;
+  border-color: #fafafa !important;
 }
 
 [data-theme='dark'] .siteHome__actions .button--primary:hover {
-  background: #d4d4d4;
+  background: #d4d4d4 !important;
+  border-color: #d4d4d4 !important;
 }
 
 .siteHome__actions .button--secondary {
-  background: transparent;
-  color: var(--ifm-font-color-base);
-  border: 1px solid #d4d4d4;
+  background: transparent !important;
+  color: #525252 !important;
+  border: 1px solid #d4d4d4 !important;
 }
 
 .siteHome__actions .button--secondary:hover {
-  background: #f5f5f5;
-  border-color: #a3a3a3;
+  background: #f5f5f5 !important;
+  border-color: #a3a3a3 !important;
+  color: #171717 !important;
 }
 
 [data-theme='dark'] .siteHome__actions .button--secondary {
-  border-color: #404040;
-  color: #d4d4d4;
+  background: transparent !important;
+  border-color: #404040 !important;
+  color: #a3a3a3 !important;
 }
 
 [data-theme='dark'] .siteHome__actions .button--secondary:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: #737373;
+  background: rgba(255, 255, 255, 0.06) !important;
+  border-color: #737373 !important;
+  color: #d4d4d4 !important;
 }
 
 .siteHome__section {
@@ -739,26 +750,38 @@ body {
 /* ── Quick install (homepage) ── */
 
 .siteHome__install {
-  background: #18181b;
-  border: 1px solid #27272a;
+  background: #171717;
+  border: 1px solid #262626;
   border-radius: 10px;
-  padding: 0.875rem 1.25rem;
-  margin: 2rem auto 2.5rem;
-  max-width: 420px;
+  padding: 1rem 1.5rem;
+  margin: 1.5rem auto 2rem;
+  max-width: 400px;
 }
 
 [data-theme='dark'] .siteHome__install {
-  background: #18181b;
-  border-color: #27272a;
+  background: #141414;
+  border-color: #262626;
+}
+
+.siteHome__install pre {
+  margin: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  box-shadow: none !important;
 }
 
 .siteHome__install code {
-  color: #a1a1aa;
-  font-size: 0.8125rem;
-  background: transparent;
-  border: 0;
-  padding: 0;
-  line-height: 1.7;
+  color: #71717a !important;
+  font-size: 0.8125rem !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  line-height: 1.8 !important;
+}
+
+[data-theme='dark'] .siteHome__install code {
+  color: #a1a1aa !important;
 }
 
 .siteHome__install pre {
