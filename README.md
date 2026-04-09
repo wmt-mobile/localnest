@@ -14,7 +14,7 @@
 
 LocalNest is a local-first MCP server and CLI tool that gives AI agents safe, scoped access to your code — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory that never leaves your machine.
 
-**52 MCP tools** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
+**52 MCP tools** | **TypeScript** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
 
 📖 [Full documentation](https://wmt-mobile.github.io/localnest/) · [Architecture deep dive](./guides/architecture.md)
 
@@ -26,7 +26,7 @@ These translated files are locale-specific full README translations. See [transl
 
 ---
 
-## What's New in 0.0.7
+## What's New in 0.1.0
 
 > Full changelog: [CHANGELOG.md](./CHANGELOG.md)
 
@@ -112,7 +112,7 @@ Restart your MCP client. If it times out, set `startup_timeout_sec: 30` in your 
 
 **Requirements:** Node.js `>=18` · ripgrep recommended but optional
 
-AST-aware chunking ships by default for `JavaScript`, `Python`, `Go`, `Bash`, `Lua`, and `Dart`. Other languages still index cleanly with line-based fallback chunking.
+AST-aware chunking ships by default for `TypeScript`, `JavaScript`, `Python`, `Go`, `Bash`, `Lua`, and `Dart`. Other languages still index cleanly with line-based fallback chunking.
 
 The current stable runtime uses `@huggingface/transformers` for local embeddings and reranking. New setup defaults use `huggingface`, and older `xenova` configs remain accepted as a compatibility alias.
 
@@ -318,7 +318,7 @@ localnest completion bash           # shell completions
 | `localnest_update_status` | Check npm for latest version (cached) |
 | `localnest_update_self` | Update globally and sync bundled skill (approval required) |
 
-**50 tools total.** All support `response_format: "json"` (default) or `"markdown"`. List tools return `total_count`, `has_more`, `next_offset` for pagination.
+**52 tools total.** All support `response_format: "json"` (default) or `"markdown"`. List tools return `total_count`, `has_more`, `next_offset` for pagination.
 
 ---
 
@@ -329,7 +329,7 @@ LocalNest is the only local-first MCP server that combines code retrieval AND st
 | Capability | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
 |---|---|---|---|---|---|
 | **Local-first (no cloud)** | Yes | Yes | No ($25+/mo) | No (Neo4j) | No ($20-200/mo) |
-| **Code retrieval** | 50 MCP tools, AST-aware, hybrid search | None | None | None | None |
+| **Code retrieval** | 52 MCP tools, AST-aware, hybrid search | None | None | None | None |
 | **Knowledge graph** | SQLite triples with temporal validity | SQLite triples | Neo4j | Neo4j | Key-value |
 | **Multi-hop traversal** | Yes (recursive CTEs, 2-5 hops) | No (flat lookup only) | No | Yes (requires Neo4j) | No |
 | **Temporal queries (as_of)** | Yes | Yes | Yes | Yes | No |
@@ -339,9 +339,9 @@ LocalNest is the only local-first MCP server that combines code retrieval AND st
 | **Semantic dedup** | 0.92 cosine gate on all writes | 0.9 threshold | No | No | No |
 | **Memory hierarchy** | Nest/Branch (original) | Wing/Room/Hall (palace) | Flat | Flat | Flat |
 | **Hooks system** | Pre/post operation hooks | None | Webhooks | None | None |
-| **Runtime** | Node.js (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
+| **Runtime** | Node.js + TypeScript (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
 | **Dependencies** | 0 new (pure SQLite) | ChromaDB (heavy) | Neo4j ($25+/mo) | Neo4j | Cloud API |
-| **MCP tools** | 50 | 19 | 0 | 0 | 0 |
+| **MCP tools** | 52 | 19 | 0 | 0 | 0 |
 | **Cost** | Free | Free | $25+/mo | $25+/mo | $20-200/mo |
 
 **LocalNest's unique position:** The only tool that gives your AI both deep code understanding AND structured persistent memory — entirely local, zero cloud, zero cost.
@@ -435,7 +435,7 @@ Setup writes everything to `~/.localnest/`:
 
 ## Install Note
 
-`0.0.7-beta.2` is a major feature release adding temporal knowledge graph, multi-hop traversal, nest/branch hierarchy, agent-scoped memory, semantic dedup, conversation ingestion, hooks system, CLI-first architecture with 52 MCP tools, 10 Claude Code slash commands, interactive TUI dashboard, guided onboarding wizard, and end-to-end selftest. Schema migrations v5 through v9 are all additive and backward-compatible — existing databases upgrade automatically on first run.
+`0.1.0` is a major release — fully rewritten in TypeScript — adding temporal knowledge graph, multi-hop traversal, nest/branch hierarchy, agent-scoped memory, semantic dedup, conversation ingestion, hooks system, CLI-first architecture with 52 MCP tools, 10 Claude Code slash commands, interactive TUI dashboard, guided onboarding wizard, and end-to-end selftest. Schema migrations are all additive and backward-compatible — existing databases upgrade automatically on first run.
 
 **Performance tips:**
 - Scope queries with `project_path` + a narrow `glob` whenever possible

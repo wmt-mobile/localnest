@@ -26,7 +26,7 @@ Estos archivos traducidos son traducciones completas del README para cada config
 
 ---
 
-## Novedades en 0.0.7
+## Novedades en 0.1.0
 
 > Changelog completo: [CHANGELOG.md](../CHANGELOG.md)
 
@@ -112,7 +112,7 @@ Reinicia tu cliente MCP. Si entra en timeout, define `startup_timeout_sec: 30` e
 
 **Requisitos:** Node.js `>=18` · `ripgrep` recomendado, pero opcional
 
-El chunking con soporte AST viene por defecto para `JavaScript`, `Python`, `Go`, `Bash`, `Lua` y `Dart`. Los demas lenguajes siguen indexandose correctamente con chunking de respaldo basado en lineas.
+El chunking con soporte AST viene por defecto para `TypeScript`, `JavaScript`, `Python`, `Go`, `Bash`, `Lua` y `Dart`. Los demas lenguajes siguen indexandose correctamente con chunking de respaldo basado en lineas.
 
 El runtime estable actual usa `@huggingface/transformers` para embeddings y reranking locales. Las nuevas configuraciones de setup usan `huggingface`, y las configuraciones antiguas de `xenova` siguen aceptandose como alias de compatibilidad.
 
@@ -318,7 +318,7 @@ localnest completion bash           # shell completions
 | `localnest_update_status` | Revisa npm por la version mas reciente (con cache) |
 | `localnest_update_self` | Actualiza globalmente y sincroniza el skill incluido (requiere aprobacion) |
 
-**50 tools en total.** Todos los tools soportan `response_format: "json"` (por defecto) o `"markdown"`. Los tools de lista devuelven `total_count`, `has_more` y `next_offset` para paginacion.
+**52 tools en total.** Todos los tools soportan `response_format: "json"` (por defecto) o `"markdown"`. Los tools de lista devuelven `total_count`, `has_more` y `next_offset` para paginacion.
 
 ---
 
@@ -329,7 +329,7 @@ LocalNest es el unico servidor MCP local-first que combina recuperacion de codig
 | Capacidad | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
 |---|---|---|---|---|---|
 | **Local-first (sin nube)** | Si | Si | No ($25+/mes) | No (Neo4j) | No ($20-200/mes) |
-| **Recuperacion de codigo** | 50 tools MCP, AST-aware, busqueda hibrida | Ninguna | Ninguna | Ninguna | Ninguna |
+| **Recuperacion de codigo** | 52 tools MCP, AST-aware, busqueda hibrida | Ninguna | Ninguna | Ninguna | Ninguna |
 | **Grafo de conocimiento** | Tripletas SQLite con validez temporal | Tripletas SQLite | Neo4j | Neo4j | Key-value |
 | **Recorrido multi-hop** | Si (CTEs recursivas, 2-5 saltos) | No (solo lookup plano) | No | Si (requiere Neo4j) | No |
 | **Consultas temporales (as_of)** | Si | Si | Si | Si | No |
@@ -339,9 +339,9 @@ LocalNest es el unico servidor MCP local-first que combina recuperacion de codig
 | **Dedup semantico** | Gate cosine 0.92 en todas las escrituras | Umbral 0.9 | No | No | No |
 | **Jerarquia de memoria** | Nest/Branch (original) | Wing/Room/Hall (palace) | Plano | Plano | Plano |
 | **Sistema de hooks** | Hooks pre/post operacion | Ninguno | Webhooks | Ninguno | Ninguno |
-| **Runtime** | Node.js (ligero) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (nube) |
+| **Runtime** | Node.js + TypeScript (ligero) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (nube) |
 | **Dependencias** | 0 nuevas (SQLite puro) | ChromaDB (pesado) | Neo4j ($25+/mes) | Neo4j | Cloud API |
-| **Tools MCP** | 50 | 19 | 0 | 0 | 0 |
+| **Tools MCP** | 52 | 19 | 0 | 0 | 0 |
 | **Costo** | Gratis | Gratis | $25+/mes | $25+/mes | $20-200/mes |
 
 **La posicion unica de LocalNest:** La unica herramienta que le da a tu IA comprension profunda del codigo Y memoria persistente estructurada -- totalmente local, cero nube, cero costo.
@@ -435,7 +435,7 @@ Revisa `localnest_server_status` -> `upgrade_recommended` para saber cuando conv
 
 ## Nota de instalacion
 
-`0.0.6-beta.1` mantiene `0.0.5` como la linea estable actual mientras adelanta la fase de deprecacion de CLI: comandos canonicos `localnest task-context` / `localnest capture-outcome`, wrappers de compatibilidad deprecados para helpers antiguos `localnest-mcp-*`, y sin cambios en el binario `localnest-mcp` que usan los clientes MCP. Algunos entornos npm todavia pueden mostrar una advertencia de deprecacion upstream desde la cadena de dependencias de ONNX runtime; la funcionalidad de LocalNest no se ve afectada.
+`0.1.0` es un lanzamiento mayor -- completamente reescrito en TypeScript -- con grafo de conocimiento temporal, recorrido multi-hop, jerarquia Nest/Branch, memoria por agente, dedup semantico, ingesta de conversaciones, sistema de hooks, arquitectura CLI-first con 52 herramientas MCP, 10 comandos slash de Claude Code, dashboard TUI interactivo, asistente de onboarding guiado y selftest de extremo a extremo. Las migraciones de esquema son aditivas y compatibles hacia atras -- las bases de datos existentes se actualizan automaticamente en el primer inicio.
 
 **Consejos de rendimiento:**
 - Delimita las consultas con `project_path` + un `glob` estrecho siempre que sea posible

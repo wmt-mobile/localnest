@@ -4,6 +4,41 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.0] - 2026-04-09
+
+### Added
+
+- Full TypeScript migration — 96 .ts files, 0 .js remaining in src/
+- Shared CLI modules (src/cli/ansi.ts, src/cli/output.ts) eliminating 5x code duplication
+- ora spinners for async CLI operations (onboard, selftest, hooks)
+- Dynamic tool count in help/dashboard (no more hardcoded values)
+- Embedding LRU cache (256 entries, SHA-256 keyed) for faster recall
+- 3 composite SQLite indexes for KG and memory queries
+- PRAGMA optimize for SQLite query planner statistics
+- Async vector index persistence with write coalescing
+- Batch embedding queries in dedup and relations
+- TypeScript build infrastructure (tsconfig.json, tsc build, tsx runtime)
+- tree-sitter ambient type declarations
+- nest:* agentic orchestration commands (11 slash commands)
+
+### Changed
+
+- All src/ files migrated from JavaScript to TypeScript
+- CLI error output unified via writeError() across all commands
+- Help screen modernized with version banner and examples section
+- Graph CTE cycle detection optimized (INSTR vs LIKE)
+- MCP SDK updated to 1.29.0, ora to 9.3.0
+- Bin shebangs updated to use tsx/esm loader
+- Test runner switched from node --test to tsx --test
+
+### Fixed
+
+- KG tool null rejection on valid_from/valid_to/source_memory_id
+- Dashboard UI duplication from concurrent refresh race condition
+- Skill installer slash command sync when skill is up-to-date
+- Duplicate log message in skill installer
+- Redundant schema index creation
+
 ## [0.0.7-beta.3] - 2026-04-09
 
 ### Fixed

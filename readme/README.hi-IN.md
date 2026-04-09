@@ -26,7 +26,7 @@ LocalNest एक local-first MCP server और CLI tool है, जो AI agent 
 
 ---
 
-## 0.0.7 में क्या नया है
+## 0.1.0 में क्या नया है
 
 > पूरा changelog: [CHANGELOG.md](../CHANGELOG.md)
 
@@ -112,7 +112,7 @@ localnest doctor
 
 **आवश्यकताएँ:** Node.js `>=18` · `ripgrep` अनुशंसित है, पर वैकल्पिक
 
-AST-aware chunking डिफ़ॉल्ट रूप से `JavaScript`, `Python`, `Go`, `Bash`, `Lua`, और `Dart` के लिए आती है। दूसरी भाषाएँ भी line-based fallback chunking के साथ ठीक से index होती हैं।
+AST-aware chunking डिफ़ॉल्ट रूप से `TypeScript`, `JavaScript`, `Python`, `Go`, `Bash`, `Lua`, और `Dart` के लिए आती है। दूसरी भाषाएँ भी line-based fallback chunking के साथ ठीक से index होती हैं।
 
 मौजूदा stable runtime local embedding और reranking के लिए `@huggingface/transformers` का उपयोग करती है। नए setup defaults में `huggingface` होता है, और पुराने `xenova` config अभी भी compatibility alias के रूप में मान्य हैं।
 
@@ -318,7 +318,7 @@ localnest completion bash           # shell completions
 | `localnest_update_status` | npm पर latest version check करता है (cached) |
 | `localnest_update_self` | globally update करता है और bundled skill sync करता है (approval required) |
 
-**कुल 50 tools।** सभी tools `response_format: "json"` (default) या `"markdown"` को support करते हैं। list tools pagination के लिए `total_count`, `has_more`, `next_offset` लौटाते हैं।
+**कुल 52 tools।** सभी tools `response_format: "json"` (default) या `"markdown"` को support करते हैं। list tools pagination के लिए `total_count`, `has_more`, `next_offset` लौटाते हैं।
 
 ---
 
@@ -329,7 +329,7 @@ LocalNest एकमात्र local-first MCP server है जो code retrie
 | क्षमता | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
 |---|---|---|---|---|---|
 | **Local-first (no cloud)** | हाँ | हाँ | नहीं ($25+/mo) | नहीं (Neo4j) | नहीं ($20-200/mo) |
-| **Code retrieval** | 50 MCP tools, AST-aware, hybrid search | कोई नहीं | कोई नहीं | कोई नहीं | कोई नहीं |
+| **Code retrieval** | 52 MCP tools, AST-aware, hybrid search | कोई नहीं | कोई नहीं | कोई नहीं | कोई नहीं |
 | **Knowledge graph** | temporal validity वाले SQLite triple | SQLite triple | Neo4j | Neo4j | Key-value |
 | **Multi-hop traversal** | हाँ (recursive CTE, 2-5 hop) | नहीं (flat lookup only) | नहीं | हाँ (Neo4j ज़रूरी) | नहीं |
 | **Temporal queries (as_of)** | हाँ | हाँ | हाँ | हाँ | नहीं |
@@ -339,9 +339,9 @@ LocalNest एकमात्र local-first MCP server है जो code retrie
 | **Semantic dedup** | 0.92 cosine gate on all writes | 0.9 threshold | नहीं | नहीं | नहीं |
 | **Memory hierarchy** | Nest/Branch (original) | Wing/Room/Hall (palace) | Flat | Flat | Flat |
 | **Hooks system** | Pre/post operation hooks | कोई नहीं | Webhooks | कोई नहीं | कोई नहीं |
-| **Runtime** | Node.js (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
+| **Runtime** | Node.js + TypeScript (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
 | **Dependencies** | 0 new (pure SQLite) | ChromaDB (heavy) | Neo4j ($25+/mo) | Neo4j | Cloud API |
-| **MCP tools** | 50 | 19 | 0 | 0 | 0 |
+| **MCP tools** | 52 | 19 | 0 | 0 | 0 |
 | **लागत** | मुफ़्त | मुफ़्त | $25+/mo | $25+/mo | $20-200/mo |
 
 **LocalNest की अनूठी स्थिति:** एकमात्र tool जो आपकी AI को deep code understanding और structured persistent memory दोनों देता है — पूरी तरह local, शून्य cloud, शून्य लागत।
@@ -435,7 +435,7 @@ LocalNest एकमात्र local-first MCP server है जो code retrie
 
 ## इंस्टॉल नोट
 
-`0.0.6-beta.1` मौजूदा stable line के रूप में `0.0.5` को बनाए रखता है, जबकि CLI deprecation pass का preview देता है: canonical `localnest task-context` / `localnest capture-outcome` command, पुराने `localnest-mcp-*` helper के लिए deprecated compatibility wrapper, और MCP client द्वारा इस्तेमाल किए जाने वाले `localnest-mcp` server binary में कोई बदलाव नहीं। कुछ npm environment अब भी ONNX runtime dependency chain से एक upstream deprecation warning दिखा सकते हैं; LocalNest की functionality प्रभावित नहीं होती।
+`0.1.0` एक बड़ा release है -- पूरी तरह TypeScript में rewrite किया गया -- temporal knowledge graph, multi-hop traversal, Nest/Branch hierarchy, agent-scoped memory, semantic dedup, conversation ingestion, hooks system, CLI-first architecture के साथ 52 MCP tools, 10 Claude Code slash commands, interactive TUI dashboard, guided onboarding wizard, और end-to-end selftest के साथ। Schema migration additive और backward-compatible हैं -- मौजूदा database पहले run पर अपने-आप upgrade हो जाते हैं।
 
 **परफ़ॉर्मेंस टिप्स:**
 - जहाँ संभव हो, query को `project_path` और एक संकरे `glob` के साथ scope करें

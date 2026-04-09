@@ -26,7 +26,7 @@ Berkas terjemahan ini adalah terjemahan README lengkap yang ditargetkan per loca
 
 ---
 
-## Yang Baru di 0.0.7
+## Yang Baru di 0.1.0
 
 > Changelog lengkap: [CHANGELOG.md](../CHANGELOG.md)
 
@@ -112,7 +112,7 @@ Mulai ulang klien MCP Anda. Jika klien timeout, setel `startup_timeout_sec: 30` 
 
 **Persyaratan:** Node.js `>=18` · `ripgrep` disarankan tetapi opsional
 
-Chunking berbasis AST dikirim secara default untuk `JavaScript`, `Python`, `Go`, `Bash`, `Lua`, dan `Dart`. Bahasa lain tetap dapat diindeks dengan baik menggunakan chunking fallback berbasis baris.
+Chunking berbasis AST dikirim secara default untuk `TypeScript`, `JavaScript`, `Python`, `Go`, `Bash`, `Lua`, dan `Dart`. Bahasa lain tetap dapat diindeks dengan baik menggunakan chunking fallback berbasis baris.
 
 Runtime stabil saat ini menggunakan `@huggingface/transformers` untuk embedding lokal dan reranking. Default setup baru menggunakan `huggingface`, dan konfigurasi lama berbasis `xenova` tetap diterima sebagai alias kompatibilitas.
 
@@ -320,7 +320,7 @@ localnest completion bash           # shell completions
 | `localnest_update_status` | Memeriksa npm untuk versi terbaru (cached) |
 | `localnest_update_self` | Memperbarui secara global dan menyinkronkan skill bawaan (memerlukan persetujuan) |
 
-**Total 50 tool.** Semua tool mendukung `response_format: "json"` (default) atau `"markdown"`. Tool daftar mengembalikan `total_count`, `has_more`, dan `next_offset` untuk pagination.
+**Total 52 tool.** Semua tool mendukung `response_format: "json"` (default) atau `"markdown"`. Tool daftar mengembalikan `total_count`, `has_more`, dan `next_offset` untuk pagination.
 
 ---
 
@@ -331,7 +331,7 @@ LocalNest adalah satu-satunya server MCP local-first yang menggabungkan code ret
 | Kemampuan | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
 |---|---|---|---|---|---|
 | **Local-first (tanpa cloud)** | Ya | Ya | Tidak ($25+/bln) | Tidak (Neo4j) | Tidak ($20-200/bln) |
-| **Code retrieval** | 50 MCP tool, AST-aware, hybrid search | Tidak ada | Tidak ada | Tidak ada | Tidak ada |
+| **Code retrieval** | 52 MCP tool, AST-aware, hybrid search | Tidak ada | Tidak ada | Tidak ada | Tidak ada |
 | **Knowledge graph** | Tripel SQLite dengan validitas temporal | Tripel SQLite | Neo4j | Neo4j | Key-value |
 | **Multi-hop traversal** | Ya (recursive CTE, 2-5 hop) | Tidak (flat lookup saja) | Tidak | Ya (perlu Neo4j) | Tidak |
 | **Temporal queries (as_of)** | Ya | Ya | Ya | Ya | Tidak |
@@ -341,9 +341,9 @@ LocalNest adalah satu-satunya server MCP local-first yang menggabungkan code ret
 | **Semantic dedup** | 0.92 cosine gate pada semua penulisan | 0.9 threshold | Tidak | Tidak | Tidak |
 | **Hierarki memori** | Nest/Branch (original) | Wing/Room/Hall (palace) | Flat | Flat | Flat |
 | **Hooks system** | Hook pre/post operasi | Tidak ada | Webhooks | Tidak ada | Tidak ada |
-| **Runtime** | Node.js (ringan) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
+| **Runtime** | Node.js + TypeScript (ringan) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
 | **Dependencies** | 0 baru (SQLite murni) | ChromaDB (berat) | Neo4j ($25+/bln) | Neo4j | Cloud API |
-| **MCP tools** | 50 | 19 | 0 | 0 | 0 |
+| **MCP tools** | 52 | 19 | 0 | 0 | 0 |
 | **Biaya** | Gratis | Gratis | $25+/bln | $25+/bln | $20-200/bln |
 
 **Posisi unik LocalNest:** Satu-satunya tool yang memberikan AI Anda pemahaman kode mendalam DAN memori persisten terstruktur -- sepenuhnya lokal, nol cloud, nol biaya.
@@ -437,7 +437,7 @@ Periksa `localnest_server_status` → `upgrade_recommended` untuk mengetahui kap
 
 ## Catatan Instalasi
 
-`0.0.6-beta.1` mempertahankan `0.0.5` sebagai jalur stable saat ini sambil mempratinjau pass deprecasi CLI: perintah kanonis `localnest task-context` / `localnest capture-outcome`, wrapper kompatibilitas yang deprecated untuk helper `localnest-mcp-*` lama, dan tanpa perubahan pada biner server `localnest-mcp` yang digunakan oleh klien MCP. Beberapa environment npm mungkin masih menampilkan satu peringatan deprecasi dari rantai dependensi runtime ONNX; fungsi LocalNest tidak terpengaruh.
+`0.1.0` adalah rilis besar -- ditulis ulang sepenuhnya dalam TypeScript -- dengan temporal knowledge graph, multi-hop traversal, hierarki Nest/Branch, agent-scoped memory, semantic dedup, conversation ingestion, hooks system, arsitektur CLI-first dengan 52 MCP tool, 10 slash command Claude Code, dashboard TUI interaktif, wizard onboarding terpandu, dan selftest end-to-end. Migrasi skema bersifat aditif dan backward-compatible -- database yang ada di-upgrade otomatis saat pertama kali dijalankan.
 
 **Tips performa:**
 - Scope query dengan `project_path` + `glob` sempit bila memungkinkan
