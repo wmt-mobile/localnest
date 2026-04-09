@@ -1,36 +1,36 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: CLI-First Architecture
-status: completed
-stopped_at: "Completed quick task 260409-o8i: Pre-approve MCP KG/memory write tools in LocalNest skill command permissions"
-last_updated: "2026-04-09T12:04:48Z"
-last_activity: "2026-04-09 - Completed quick task 260409-o8i: Pre-approve MCP KG/memory write tools in LocalNest skill command permissions"
+milestone: v0.2.0
+milestone_name: Memory-KG Fusion & Agent-First Surface
+status: active
+stopped_at: "Milestone v0.2.0 initialized on release/0.2.0 branch — defining requirements"
+last_updated: "2026-04-09T12:30:00Z"
+last_activity: "2026-04-09 - Started milestone v0.2.0 on release/0.2.0 branch"
 progress:
-  total_phases: 26
-  completed_phases: 10
-  total_plans: 13
-  completed_plans: 17
-  percent: 100
+  total_phases: 13
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-08)
+See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
-**Core value:** A unified, premium CLI that makes LocalNest feel like a standalone product -- not just an MCP server.
-**Current focus:** v2.0 CLI-First Architecture milestone COMPLETE
+**Core value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
+**Current focus:** v0.2.0 Memory-KG Fusion — batch writes, terse responses, auto-linked memory-KG, unified retrieval, symbol-aware code intelligence. Branch: release/0.2.0.
 
 ## Current Position
 
-Phase: 18 of 18 (Binary Deprecation)
-Plan: 1 of 1 in current phase (complete)
-Status: All v2.0 phases complete
-Last activity: 2026-04-09 - Completed quick task 260409-o8i: Pre-approve MCP KG/memory write tools in LocalNest skill command permissions
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-09 - Milestone v0.2.0 started on release/0.2.0 branch
 
-Progress: [##########] 100%
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
