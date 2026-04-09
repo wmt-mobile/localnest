@@ -16,7 +16,7 @@ import { writeError as sharedWriteError } from '../output.js';
 import { buildRuntimeConfig } from '../../runtime/config.js';
 import { EmbeddingService } from '../../services/retrieval/embedding/service.js';
 import { MemoryService } from '../../services/memory/service.js';
-import { normalizeEntityId } from '../../services/memory/kg.js';
+import { normalizeEntityId } from '../../services/memory/knowledge-graph/kg.js';
 import type { GlobalOptions } from '../options.js';
 
 const VERBS: VerbDef[] = [
