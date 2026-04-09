@@ -185,14 +185,41 @@
 
 ## Traceability
 
+### v2.0 (shipped)
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| v2.0 requirements (CLI-01 through DEP-04, 32 total) | Phases 10-18 | Complete |
-| v0.2.0 requirements (BATCH, TERSE, CARD, FUSE, PRIME, FIND, SYM, TEMPO, SLIM, BRIDGE, HOOK-07-09, TEACH, AUDIT) | Phases 26-38 (TBD by roadmapper) | Pending |
+| CLI-01, CLI-02, CLI-03, CLI-04 | Phase 10 | Complete |
+| MCLI-01, MCLI-02, MCLI-03, MCLI-04, MCLI-05 | Phase 11 | Complete |
+| KGCLI-01, KGCLI-02, KGCLI-03, KGCLI-04 | Phase 12 | Complete |
+| SKILL-01, SKILL-02, SKILL-03 | Phase 13 | Complete |
+| MCP-01, MCP-02, MCP-03 | Phase 14 | Complete |
+| ING-01, ING-02, ING-03 | Phase 15 | Complete |
+| HOOK-01, HOOK-02, HOOK-03 | Phase 16 | Complete |
+| COMP-01, COMP-02, COMP-03 | Phase 17 | Complete |
+| DEP-01, DEP-02, DEP-03, DEP-04 | Phase 18 | Complete |
+
+### v0.2.0 (active)
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| BATCH-01, BATCH-02, BATCH-03, BATCH-04, BATCH-05, BATCH-06 | Phase 26 | Pending |
+| TERSE-01, TERSE-02, TERSE-03, TERSE-04, TERSE-05 | Phase 27 | Pending |
+| CARD-01, CARD-02, CARD-03, CARD-04, CARD-05, CARD-06 | Phase 28 | Pending |
+| FUSE-01, FUSE-02, FUSE-03, FUSE-04, FUSE-05, FUSE-06 | Phase 29 | Pending |
+| PRIME-01, PRIME-02, PRIME-03, PRIME-04, PRIME-05, PRIME-06 | Phase 30 | Pending |
+| FIND-01, FIND-02, FIND-03, FIND-04 | Phase 31 | Pending |
+| SYM-01, SYM-02, SYM-03, SYM-04, SYM-05, SYM-06 | Phase 32 | Pending |
+| TEMPO-01, TEMPO-02, TEMPO-03, TEMPO-04 | Phase 33 | Pending |
+| SLIM-01, SLIM-02, SLIM-03, SLIM-04, SLIM-05, SLIM-06, SLIM-07 | Phase 34 | Pending |
+| BRIDGE-01, BRIDGE-02, BRIDGE-03 | Phase 35 | Pending |
+| HOOK-07, HOOK-08, HOOK-09 | Phase 36 | Pending |
+| TEACH-01, TEACH-02, TEACH-03 | Phase 37 | Pending |
+| AUDIT-01, AUDIT-02, AUDIT-03, AUDIT-04 | Phase 38 | Pending |
 
 **Coverage:**
 - v2.0: 32/32 mapped, shipped
-- v0.2.0: ~60 requirements, phase mapping pending roadmapper
+- v0.2.0: 63/63 mapped across 13 phases (26-38), pending execution
 
 ---
 *Requirements defined: 2026-04-08 (v2.0), updated 2026-04-09 (v0.2.0)*
