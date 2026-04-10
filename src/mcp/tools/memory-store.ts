@@ -23,6 +23,7 @@ interface MemoryService {
   listEntries(opts: Record<string, unknown>): Promise<unknown>;
   getEntry(id: string): Promise<unknown>;
   storeEntry(args: Record<string, unknown>): Promise<{ memory?: unknown; created?: boolean; duplicate?: boolean } | null>;
+  storeEntryBatch(args: { memories: Array<Record<string, unknown>>; response_format?: 'minimal' | 'verbose' }): Promise<{ created: number; duplicates: number; errors: Array<{ index: number; message: string }>; ids?: (string | null)[] }>;
   updateEntry(id: string, patch: Record<string, unknown>): Promise<unknown>;
   deleteEntry(id: string): Promise<unknown>;
   captureEvent(args: Record<string, unknown>): Promise<unknown>;
@@ -357,5 +358,47 @@ export function registerMemoryStoreTools({
       }
     },
     async ({ id }: Record<string, unknown>) => normalizeRelatedMemoriesResult(await memory.getRelated(id as string), id as string)
+  );
+
+  registerJsonTool(
+    ['localnest_memory_store_batch'],
+    {
+      title: 'Memory Store Batch',
+      description: 'Store up to 100 memory entries in a single atomic transaction. Deduplicates via fingerprint and optional semantic similarity. Returns created/duplicate counts and per-row validation errors.',
+      inputSchema: {
+        memories: z.array(z.object({
+          kind: MEMORY_KIND_SCHEMA.optional(),
+          title: z.string().max(400).optional(),
+          summary: z.string().max(4000).optional(),
+          content: z.string().min(1).max(20000),
+          status: MEMORY_STATUS_SCHEMA.optional(),
+          importance: z.number().int().min(0).max(100).optional(),
+          confidence: z.number().min(0).max(1).optional(),
+          tags: z.array(z.string()).max(50).optional(),
+          links: z.array(MEMORY_LINK_SCHEMA).max(50).optional(),
+          scope: MEMORY_SCOPE_SCHEMA.optional(),
+          nest: z.string().max(200).optional(),
+          branch: z.string().max(200).optional(),
+          agent_id: z.string().max(200).optional(),
+          source_type: z.string().max(60).optional(),
+          source_ref: z.string().max(1000).optional(),
+          change_note: z.string().max(400).optional(),
+          dedup_threshold: z.number().min(0).max(1).optional()
+        })).min(1).max(100),
+        response_format: z.enum(['minimal', 'verbose']).default('minimal')
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+      }
+    },
+    async ({ memories, response_format }: Record<string, unknown>) => {
+      return memory.storeEntryBatch({
+        memories: memories as Array<Record<string, unknown>>,
+        response_format: response_format as 'minimal' | 'verbose'
+      });
+    }
   );
 }

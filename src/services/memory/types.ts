@@ -369,10 +369,10 @@ export interface AddTripleInput {
   predicate: string;
   objectId?: string;
   objectName?: string;
-  validFrom?: string;
-  validTo?: string;
+  validFrom?: string | null;
+  validTo?: string | null;
   confidence?: number;
-  sourceMemoryId?: string;
+  sourceMemoryId?: string | null;
   sourceType?: string;
 }
 

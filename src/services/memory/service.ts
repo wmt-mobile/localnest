@@ -147,6 +147,11 @@ export class MemoryService {
     return this.store.storeEntry(input);
   }
 
+  async storeEntryBatch(args: { memories: Array<Record<string, unknown>>; response_format?: 'minimal' | 'verbose' }) {
+    this.assertEnabled();
+    return this.store.storeEntryBatch(args as any);
+  }
+
   async updateEntry(id: string, patch: UpdateEntryPatch) {
     this.assertEnabled();
     return this.store.updateEntry(id, patch);
@@ -230,6 +235,16 @@ export class MemoryService {
   async getKgStats() {
     this.assertEnabled();
     return this.store.getKgStats();
+  }
+
+  async addEntityBatch(args: { entities: Array<Record<string, unknown>>; response_format?: string }) {
+    this.assertEnabled();
+    return this.store.addEntityBatch(args as any);
+  }
+
+  async addTripleBatch(args: { triples: Array<Record<string, unknown>>; response_format?: string }) {
+    this.assertEnabled();
+    return this.store.addTripleBatch(args as any);
   }
 
   async listNests() {

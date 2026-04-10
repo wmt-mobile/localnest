@@ -13,6 +13,8 @@ import {
   updateEntry as updateMemoryEntry,
   deleteEntry as deleteMemoryEntry
 } from './store/entries.js';
+import { storeEntryBatch as storeEntryBatchFn } from './store/entries-batch.js';
+import type { StoreEntryBatchInput } from './store/entries-batch.js';
 import {
   recall as recallFn,
   captureEvent as captureEventFn,
@@ -44,6 +46,11 @@ import {
   getEntityTimeline as getEntityTimelineFn,
   getKgStats as getKgStatsFn
 } from './knowledge-graph/kg.js';
+import {
+  addEntityBatch as addEntityBatchFn,
+  addTripleBatch as addTripleBatchFn
+} from './knowledge-graph/kg-batch.js';
+import type { AddEntityBatchInput, AddTripleBatchInput } from './knowledge-graph/kg-batch.js';
 import type {
   Adapter, EmbeddingService, ListEntriesOpts, StoreEntryInput, UpdateEntryPatch,
   RecallInput, CaptureEventInput, AddEntityInput, AddTripleInput,
@@ -185,6 +192,14 @@ export class MemoryStore {
     return result;
   }
 
+  async storeEntryBatch(input: StoreEntryBatchInput) {
+    const hookResult = await this.hooks.emit('before:store:batch', input);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await storeEntryBatchFn(this as never, hookResult.payload as StoreEntryBatchInput);
+    await this.hooks.emit('after:store:batch', result);
+    return result;
+  }
+
   async updateEntry(id: string, patch: UpdateEntryPatch = {}) {
     const hookResult = await this.hooks.emit('before:update', { id, patch });
     if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
@@ -297,6 +312,24 @@ export class MemoryStore {
   async getKgStats() {
     await this.init();
     return getKgStatsFn(this.adapter!);
+  }
+
+  async addEntityBatch(args: AddEntityBatchInput) {
+    await this.init();
+    const hookResult = await this.hooks.emit('before:kg:addEntity', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await addEntityBatchFn(this.adapter!, hookResult.payload as AddEntityBatchInput);
+    await this.hooks.emit('after:kg:addEntity', result);
+    return result;
+  }
+
+  async addTripleBatch(args: AddTripleBatchInput) {
+    await this.init();
+    const hookResult = await this.hooks.emit('before:kg:addTriple', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await addTripleBatchFn(this.adapter!, hookResult.payload as AddTripleBatchInput);
+    await this.hooks.emit('after:kg:addTriple', result);
+    return result;
   }
 
   async listNests() {

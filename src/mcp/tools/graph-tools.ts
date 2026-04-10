@@ -5,6 +5,8 @@ import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 interface MemoryService {
   addEntity(opts: Record<string, unknown>): Promise<unknown>;
   addTriple(opts: Record<string, unknown>): Promise<unknown>;
+  addEntityBatch(opts: Record<string, unknown>): Promise<unknown>;
+  addTripleBatch(opts: Record<string, unknown>): Promise<unknown>;
   queryEntityRelationships(entityId: string, opts: Record<string, unknown>): Promise<unknown>;
   invalidateTriple(tripleId: string, validTo?: string | null): Promise<unknown>;
   queryTriplesAsOf(entityId: string, asOfDate: string): Promise<unknown>;
@@ -95,6 +97,58 @@ export function registerGraphTools({
         confidence,
         sourceMemoryId: source_memory_id,
         sourceType: source_type
+      })
+  );
+
+  registerJsonTool(
+    ['localnest_kg_add_entities_batch'],
+    {
+      title: 'KG Add Entities Batch',
+      description: 'Create up to 500 entities in a single transactional batch. Returns created/duplicate counts and per-row errors. Use response_format "verbose" to get back an ids[] array.',
+      inputSchema: {
+        entities: z.array(z.object({
+          name: z.string().min(1).max(400), type: z.string().max(100).default('concept'),
+          properties: z.record(z.string(), z.any()).default({}), memory_id: z.string().optional()
+        })).min(1).max(500),
+        response_format: z.enum(['minimal', 'verbose']).default('minimal')
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false }
+    },
+    async ({ entities, response_format }: Record<string, unknown>) =>
+      memory.addEntityBatch({
+        entities: (entities as Array<Record<string, unknown>>).map(e => ({
+          name: e.name, type: e.type, properties: e.properties, memoryId: e.memory_id
+        })),
+        response_format
+      })
+  );
+
+  registerJsonTool(
+    ['localnest_kg_add_triples_batch'],
+    {
+      title: 'KG Add Triples Batch',
+      description: 'Add up to 500 triples in a single transactional batch. Entities auto-created on first reference. Deduplicates against active triples.',
+      inputSchema: {
+        triples: z.array(z.object({
+          subject_name: z.string().min(1).max(400), predicate: z.string().min(1).max(400),
+          object_name: z.string().min(1).max(400), subject_id: z.string().max(400).optional(),
+          object_id: z.string().max(400).optional(), valid_from: z.string().nullable().optional(),
+          valid_to: z.string().nullable().optional(), confidence: z.number().min(0).max(1).default(1.0),
+          source_memory_id: z.string().nullable().optional(), source_type: z.string().max(100).default('manual')
+        })).min(1).max(500),
+        response_format: z.enum(['minimal', 'verbose']).default('minimal')
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false }
+    },
+    async ({ triples, response_format }: Record<string, unknown>) =>
+      memory.addTripleBatch({
+        triples: (triples as Array<Record<string, unknown>>).map(t => ({
+          subjectName: t.subject_name, subjectId: t.subject_id, predicate: t.predicate,
+          objectName: t.object_name, objectId: t.object_id, validFrom: t.valid_from,
+          validTo: t.valid_to, confidence: t.confidence,
+          sourceMemoryId: t.source_memory_id, sourceType: t.source_type
+        })),
+        response_format
       })
   );
 

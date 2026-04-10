@@ -176,7 +176,7 @@ export async function addTriple(adapter: Adapter, {
   if (!objId && !objectName) throw new Error('object is required (provide objectId or objectName)');
 
   const id = `triple_${crypto.randomUUID()}`;
-  const vFrom = validFrom || null;
+  const vFrom = validFrom === null ? null : (validFrom ?? nowIso());
   const vTo = validTo || null;
   let conf = confidence !== undefined && confidence !== null ? Number(confidence) : 1.0;
   if (!Number.isFinite(conf)) conf = 1.0;
