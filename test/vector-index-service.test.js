@@ -168,7 +168,10 @@ test('ast chunker reports only bundled tree-sitter grammars as supported', () =>
     'go',
     'bash',
     'lua',
-    'dart'
+    'dart',
+    'typescript',
+    'tsx',
+    'rust'
   ]);
   assert.equal(chunker.resolveLanguageId('src/example.ts'), 'typescript');
   assert.equal(chunker.resolveLanguageId('src/example.rs'), 'rust');
