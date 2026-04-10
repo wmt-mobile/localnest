@@ -20,7 +20,7 @@ Current stable package documentation for `localnest-mcp@0.1.0`, covering the Typ
   <div className="docPanel">
     <span className="docEyebrow">Current</span>
     <h3>0.1.0 — TypeScript migration</h3>
-    <p>Full codebase migration from JavaScript to TypeScript with temporal knowledge graph, multi-hop traversal, agent isolation, and 52 MCP tools.</p>
+    <p>Full codebase migration from JavaScript to TypeScript with temporal knowledge graph, multi-hop traversal, agent isolation, and 68 MCP tools.</p>
   </div>
 </div>
 
@@ -43,7 +43,7 @@ Current stable package documentation for `localnest-mcp@0.1.0`, covering the Typ
 
 - Full TypeScript codebase (migrated from JavaScript)
 - canonical `localnest_*` tool names
-- 52 MCP tools
+- 68 MCP tools
 - lexical, semantic, and hybrid retrieval
 - temporal knowledge graph with multi-hop traversal
 - nest/branch hierarchy for organized memory
@@ -60,7 +60,7 @@ Current stable package documentation for `localnest-mcp@0.1.0`, covering the Typ
 
 - Migrated the entire codebase from JavaScript to TypeScript for type safety and improved developer experience.
 - Promoted all beta features (temporal KG, graph traversal, agent isolation, hooks, CLI-first architecture) into the stable line.
-- 52 MCP tools across KG, nests, traversal, diary, ingest, dedup, and hooks.
+- 68 MCP tools across KG, nests, traversal, diary, ingest, dedup, and hooks.
 - Schema migrations v5-v9 are additive and backward-compatible.
 
 ## Upgrade Snapshot

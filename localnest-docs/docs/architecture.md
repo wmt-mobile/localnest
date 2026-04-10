@@ -73,7 +73,7 @@ flowchart LR
     <span>4</span>
     <div>
       <strong>Register tools</strong>
-      <p>52 MCP handlers are bound to the service layer with schema validation and response normalization.</p>
+      <p>68 MCP handlers are bound to the service layer with schema validation and response normalization.</p>
     </div>
   </div>
   <div className="docStep">
