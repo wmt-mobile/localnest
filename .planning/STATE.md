@@ -1,18 +1,18 @@
 ---
 gsd_state_version: 1.0
-milestone: v0.2.0
-milestone_name: Memory-KG Fusion & Agent-First Surface
+milestone: v0.3.0
+milestone_name: MCP Spec Compliance & Production Hardening
 status: active
-stopped_at: "All 13 phases complete — v0.2.0 milestone ready for audit"
-last_updated: "2026-04-10T09:00:00Z"
-last_activity: "2026-04-10 - All 13 phases (26-38) implemented and committed"
+stopped_at: "v0.3.0 milestone initialized — 7 phases (39-45), ready to research and plan"
+last_updated: "2026-04-10T12:30:00Z"
+last_activity: "2026-04-10 - v0.3.0 milestone created on release/0.3.0 branch"
 progress:
-  total_phases: 13
-  completed_phases: 13
-  total_plans: 13
-  completed_plans: 13
-  percent: 100
-  next_phase: null
+  total_phases: 7
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
+  next_phase: 39
 ---
 
 # Project State
