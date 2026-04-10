@@ -175,6 +175,8 @@ export interface StoreEntryResult {
   memory: MemoryEntryWithRevisions | null;
   cancelled?: boolean;
   reason?: string;
+  auto_linked_entities?: AutoLinkedEntity[];
+  auto_triples?: AutoLinkedTriple[];
 }
 
 export interface UpdateEntryPatch {
@@ -397,6 +399,31 @@ export interface AddTripleResult {
   has_contradiction: boolean;
 }
 
+export interface AutoLinkedEntity {
+  entity_id: string;
+  name: string;
+  entity_type: string;
+}
+
+export interface AutoLinkedTriple {
+  triple_id: string;
+  subject: string;
+  predicate: string;
+  object: string;
+}
+
+export interface AutoLinkResult {
+  auto_linked_entities: AutoLinkedEntity[];
+  auto_triples: AutoLinkedTriple[];
+}
+
+export interface BackfillResult {
+  memories_scanned: number;
+  memories_linked: number;
+  triples_created: number;
+  errors: number;
+}
+
 export interface InvalidateTripleResult {
   id: string;
   valid_to: string;
@@ -571,6 +598,8 @@ export interface TaxonomyTree {
   total_nests: number;
   total_branches: number;
   total_memories: number;
+  total_kg_entities?: number;
+  total_kg_triples?: number;
   nests: TaxonomyNest[];
 }
 
@@ -592,10 +621,20 @@ export interface RecallInput {
   limit?: number;
 }
 
+export interface RelatedFact {
+  entity_id: string;
+  entity_name: string;
+  predicate: string;
+  related_entity_id: string;
+  related_entity_name: string;
+  direction: 'outgoing' | 'incoming';
+}
+
 export interface RecallResultItem {
   score: number;
   raw_score: number;
   memory: MemoryEntry;
+  related_facts?: RelatedFact[];
 }
 
 export interface RecallResult {

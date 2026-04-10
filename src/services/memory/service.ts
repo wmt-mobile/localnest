@@ -247,6 +247,11 @@ export class MemoryService {
     return this.store.addTripleBatch(args as any);
   }
 
+  async backfillMemoryKgLinks(opts: { limit?: number; offset?: number; nest?: string; branch?: string } = {}) {
+    this.assertEnabled();
+    return this.store.backfillMemoryKgLinks(opts);
+  }
+
   async listNests() {
     this.assertEnabled();
     return this.store.listNests();

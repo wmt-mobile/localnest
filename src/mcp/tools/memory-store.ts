@@ -152,14 +152,23 @@ export function registerMemoryStoreTools({
     },
     async ({ terse, ...args }: Record<string, unknown>) => {
       const result = await memory.storeEntry(args);
+      const r = result as Record<string, unknown>;
       const normalized = normalizeMemoryEntryPayload(
-        (result as Record<string, unknown>)?.memory || null,
+        r?.memory || null,
         {
-          created: Boolean((result as Record<string, unknown>)?.created),
-          duplicate: Boolean((result as Record<string, unknown>)?.duplicate)
+          created: Boolean(r?.created),
+          duplicate: Boolean(r?.duplicate)
         }
       );
-      return toMinimalWriteResponse(normalized, terse as string);
+      const response = toMinimalWriteResponse(normalized, terse as string);
+      // FUSE-03: Attach auto-link results when present
+      if (r?.auto_linked_entities) {
+        (response as Record<string, unknown>).auto_linked_entities = r.auto_linked_entities;
+      }
+      if (r?.auto_triples) {
+        (response as Record<string, unknown>).auto_triples = r.auto_triples;
+      }
+      return response;
     }
   );
 

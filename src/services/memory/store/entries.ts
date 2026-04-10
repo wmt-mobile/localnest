@@ -6,10 +6,12 @@ import {
   buildSearchTerms, deserializeEntry
 } from '../utils.js';
 import { checkDuplicate } from './dedup.js';
+import { extractAndLink } from '../knowledge-graph/auto-link.js';
 import type {
   Adapter, EmbeddingService, MemoryEntry, MemoryEntryRow, MemoryRevisionRow,
   MemoryEntryWithRevisions, MemoryRevision, StoreEntryInput, StoreEntryResult,
-  UpdateEntryPatch, DeleteEntryResult, ListEntriesOpts, ListEntriesResult, StoreStatusResult
+  UpdateEntryPatch, DeleteEntryResult, ListEntriesOpts, ListEntriesResult, StoreStatusResult,
+  AutoLinkResult
 } from '../types.js';
 
 interface MemoryStoreLike {
@@ -245,7 +247,21 @@ export async function storeEntry(store: MemoryStoreLike, input: StoreEntryInput)
     );
   }
 
-  return { created: true, duplicate: false, memory: await getEntry(store, id) };
+  // FUSE-01/02: Auto-link memory content to existing KG entities
+  let autoLinkResult: AutoLinkResult = { auto_linked_entities: [], auto_triples: [] };
+  try {
+    autoLinkResult = await extractAndLink(store.adapter, id, content);
+  } catch {
+    // Non-blocking: auto-link failure does not prevent memory creation
+  }
+
+  return {
+    created: true,
+    duplicate: false,
+    memory: await getEntry(store, id),
+    auto_linked_entities: autoLinkResult.auto_linked_entities,
+    auto_triples: autoLinkResult.auto_triples
+  };
 }
 
 export async function updateEntry(store: MemoryStoreLike, id: string, patch: UpdateEntryPatch = {}): Promise<MemoryEntryWithRevisions | null> {

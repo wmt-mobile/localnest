@@ -50,12 +50,13 @@ import {
   addEntityBatch as addEntityBatchFn,
   addTripleBatch as addTripleBatchFn
 } from './knowledge-graph/kg-batch.js';
+import { backfillMemoryKgLinks as backfillMemoryKgLinksFn } from './knowledge-graph/auto-link.js';
 import type { AddEntityBatchInput, AddTripleBatchInput } from './knowledge-graph/kg-batch.js';
 import type {
   Adapter, EmbeddingService, ListEntriesOpts, StoreEntryInput, UpdateEntryPatch,
   RecallInput, CaptureEventInput, AddEntityInput, AddTripleInput,
   TraverseGraphOpts, DiscoverBridgesOpts, WriteDiaryInput, ReadDiaryInput,
-  DuplicateCheckOpts, IngestOpts, HookEmitResult
+  DuplicateCheckOpts, IngestOpts, HookEmitResult, BackfillResult
 } from './types.js';
 
 interface MemoryStoreConfig {
@@ -329,6 +330,15 @@ export class MemoryStore {
     if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
     const result = await addTripleBatchFn(this.adapter!, hookResult.payload as AddTripleBatchInput);
     await this.hooks.emit('after:kg:addTriple', result);
+    return result;
+  }
+
+  async backfillMemoryKgLinks(opts: { limit?: number; offset?: number; nest?: string; branch?: string } = {}): Promise<BackfillResult> {
+    await this.init();
+    const hookResult = await this.hooks.emit('before:kg:backfill', opts);
+    if (hookResult.cancelled) return { memories_scanned: 0, memories_linked: 0, triples_created: 0, errors: 0 };
+    const result = await backfillMemoryKgLinksFn(this.adapter!, hookResult.payload as typeof opts);
+    await this.hooks.emit('after:kg:backfill', result);
     return result;
   }
 

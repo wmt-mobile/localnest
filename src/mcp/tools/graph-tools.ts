@@ -23,6 +23,7 @@ interface MemoryService {
   ingestMarkdown(opts: Record<string, unknown>): Promise<unknown>;
   ingestJson(opts: Record<string, unknown>): Promise<unknown>;
   checkDuplicate(content: string, opts: Record<string, unknown>): Promise<unknown>;
+  backfillMemoryKgLinks(opts: Record<string, unknown>): Promise<unknown>;
   store: {
     hooks: MemoryHooks;
   };
@@ -38,6 +39,8 @@ export function registerGraphTools({
   registerJsonTool,
   memory
 }: RegisterGraphToolsOptions): void {
+  const readOnlyAnnotations = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
+
   // --- KG Tools (localnest_kg_*) ---
 
   registerJsonTool(
@@ -159,12 +162,7 @@ export function registerGraphTools({
         direction: z.enum(['outgoing', 'incoming', 'both']).default('both'),
         include_invalid: z.boolean().default(false)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: readOnlyAnnotations
     },
     async ({ entity_id, direction, include_invalid }: Record<string, unknown>) =>
       memory.queryEntityRelationships(entity_id as string, { direction, includeInvalid: include_invalid })
@@ -200,12 +198,7 @@ export function registerGraphTools({
         entity_id: z.string().min(1).max(400),
         as_of_date: z.string().min(1)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: readOnlyAnnotations
     },
     async ({ entity_id, as_of_date }: Record<string, unknown>) =>
       memory.queryTriplesAsOf(entity_id as string, as_of_date as string)
@@ -244,6 +237,23 @@ export function registerGraphTools({
       }
     },
     async () => memory.getKgStats()
+  );
+
+  registerJsonTool(
+    ['localnest_kg_backfill_links'],
+    {
+      title: 'KG Backfill Memory Links',
+      description: 'Retroactively scan existing memories and create KG triples linking them to matching entities. Processes memories in batches. Use limit/offset for pagination.',
+      inputSchema: {
+        limit: z.number().int().min(1).max(500).default(200),
+        offset: z.number().int().min(0).default(0),
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional()
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false }
+    },
+    async ({ limit, offset, nest, branch }: Record<string, unknown>) =>
+      memory.backfillMemoryKgLinks({ limit, offset, nest, branch })
   );
 
   // --- Nest/Branch Tools (localnest_nest_*) ---
@@ -449,12 +459,7 @@ export function registerGraphTools({
         branch: z.string().max(200).optional(),
         project_path: z.string().max(1000).optional()
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: readOnlyAnnotations
     },
     async ({ content, threshold, nest, branch, project_path }: Record<string, unknown>) =>
       memory.checkDuplicate(content as string, { threshold, nest, branch, projectPath: project_path })
@@ -468,12 +473,7 @@ export function registerGraphTools({
       title: 'Hooks Stats',
       description: 'Returns hook system statistics: whether hooks are enabled, total registered listener count, and a breakdown of listener counts per event type.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: readOnlyAnnotations
     },
     async () => memory.store.hooks.getStats()
   );
@@ -484,12 +484,7 @@ export function registerGraphTools({
       title: 'Hooks List Events',
       description: 'Returns all valid hook event names that listeners can subscribe to. Covers memory lifecycle (store, update, delete, recall), knowledge graph operations (addEntity, addTriple, invalidate), graph traversal, diary, ingestion, dedup, taxonomy, and catch-all wildcards.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: readOnlyAnnotations
     },
     async () => ({ events: MemoryHooks.validEvents() })
   );
