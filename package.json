@@ -16,13 +16,25 @@
     "model-context-protocol",
     "localnest",
     "ai",
-    "agents"
+    "agents",
+    "knowledge-graph",
+    "memory",
+    "code-search",
+    "code-intelligence",
+    "sqlite",
+    "local-first",
+    "embeddings",
+    "semantic-search",
+    "ai-memory",
+    "code-assistant",
+    "temporal-graph",
+    "offline-ai"
   ],
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "description": "LocalNest read-only MCP server for exposing project context from local machine",
+  "description": "Local-first MCP server with 68 tools — code search, persistent AI memory, temporal knowledge graph, and semantic retrieval. Zero cloud, pure SQLite.",
   "bin": {
     "localnest": "bin/_boot.cjs",
     "localnest-mcp": "bin/_boot.cjs",

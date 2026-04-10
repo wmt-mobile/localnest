@@ -44,7 +44,7 @@ These translated files are locale-specific full README translations. See [transl
 - **Self-audit** — `localnest_audit` reports health score, coverage, density, orphans, stale memories
 - **Proactive hooks** — `localnest_file_changed` surfaces memory hints on file edits
 - **Cross-session deltas** — `localnest_whats_new` shows new memories, triples, files since last session
-- **15 new MCP tools** (67 total)
+- **16 new MCP tools** (68 total)
 
 ---
 
@@ -384,7 +384,7 @@ LocalNest is the only local-first MCP server that combines code retrieval AND st
 | **Hooks system** | Pre/post operation hooks | None | Webhooks | None | None |
 | **Runtime** | Node.js + TypeScript (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
 | **Dependencies** | 0 new (pure SQLite) | ChromaDB (heavy) | Neo4j ($25+/mo) | Neo4j | Cloud API |
-| **MCP tools** | 67 | 19 | 0 | 0 | 0 |
+| **MCP tools** | 68 | 19 | 0 | 0 | 0 |
 | **Cost** | Free | Free | $25+/mo | $25+/mo | $20-200/mo |
 
 **LocalNest's unique position:** The only tool that gives your AI both deep code understanding AND structured persistent memory — entirely local, zero cloud, zero cost.
@@ -478,7 +478,7 @@ Setup writes everything to `~/.localnest/`:
 
 ## Install Note
 
-`0.2.0` adds 15 new MCP tools (67 total): batch operations for entities/triples/memories, fused cross-domain search, unified agent context, symbol-aware code intelligence, teach memories, self-audit, proactive file-change hooks, and cross-session deltas. Terse responses on all write tools cut token usage by 70%+. Auto-inference on memory_store means only {title, content} is required. Memory-KG fusion auto-extracts entities and creates triples on every write. Schema migrations remain additive and backward-compatible.
+`0.2.0` adds 16 new MCP tools (68 total): batch operations for entities/triples/memories, fused cross-domain search, unified agent context, symbol-aware code intelligence, teach memories, self-audit, proactive file-change hooks, and cross-session deltas. Terse responses on all write tools cut token usage by 70%+. Auto-inference on memory_store means only {title, content} is required. Memory-KG fusion auto-extracts entities and creates triples on every write. Schema migrations remain additive and backward-compatible.
 
 **Performance tips:**
 - Scope queries with `project_path` + a narrow `glob` whenever possible
