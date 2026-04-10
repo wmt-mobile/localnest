@@ -261,18 +261,26 @@ test('MCP tools register and execute across all tool groups', async () => {
   });
 
   const expected = [
+    // Core tools
     'localnest_server_status',
     'localnest_health',
     'localnest_usage_guide',
+    'localnest_help',
     'localnest_update_status',
     'localnest_update_self',
+    // Memory workflow tools
     'localnest_task_context',
     'localnest_memory_status',
     'localnest_memory_recall',
     'localnest_capture_outcome',
+    'localnest_agent_prime',
+    'localnest_whats_new',
+    'localnest_teach',
+    // Memory store tools
     'localnest_memory_list',
     'localnest_memory_get',
     'localnest_memory_store',
+    'localnest_memory_store_batch',
     'localnest_memory_update',
     'localnest_memory_delete',
     'localnest_memory_capture_event',
@@ -281,6 +289,7 @@ test('MCP tools register and execute across all tool groups', async () => {
     'localnest_memory_add_relation',
     'localnest_memory_remove_relation',
     'localnest_memory_related',
+    // Retrieval tools
     'localnest_list_roots',
     'localnest_list_projects',
     'localnest_project_tree',
@@ -293,6 +302,7 @@ test('MCP tools register and execute across all tool groups', async () => {
     'localnest_get_symbol',
     'localnest_find_usages',
     'localnest_read_file',
+    'localnest_file_changed',
     'localnest_summarize_project'
   ];
 

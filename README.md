@@ -62,9 +62,18 @@ Everything — file reads, vector embeddings, persistent AI memory — runs in-p
 | **Hybrid retrieval** | Lexical + semantic fused with RRF ranking for best-of-both results |
 | **Project awareness** | Auto-detects projects from marker files, scopes every tool call |
 | **Agent memory** | Durable, queryable knowledge graph — your AI remembers what it learned |
+| **Batch operations** | 300 API calls become 3 — bulk write entities, triples, and memories |
+| **One-call context** | `agent_prime` returns memories + entities + files + changes in a single call |
+| **Fused search** | `find` searches memory, code, and KG together with RRF cross-ranking |
+| **Teach your AI** | `teach("always use snake_case")` — durable behavior modifiers that persist |
+| **Terse responses** | 70%+ token reduction on write tools with `terse: 'minimal'` |
+| **Auto-inference** | `memory_store` needs only `{title, content}` — scope, tags, topic auto-derived |
+| **Symbol intelligence** | Find callers, definitions, implementations, and rename preview across files |
 | **Temporal knowledge graph** | Subject-predicate-object triples with time validity — query what was true when |
 | **Multi-hop graph traversal** | Walk relationships 2-5 hops deep via recursive CTEs — no other local tool does this |
-| **Nest/Branch hierarchy** | Two-level memory taxonomy for organized retrieval with metadata-filtered boost |
+| **Memory-KG fusion** | Memories auto-extract entities and create KG triples with provenance links |
+| **Proactive hints** | File-linked memory hints surface automatically when reading related code |
+| **Self-audit** | Health score with coverage, density, orphan, and stale memory detection |
 | **Conversation ingestion** | Import Markdown/JSON chat exports into structured memory + KG triples |
 | **Agent isolation** | Per-agent diary and memory scoping — multiple agents, zero cross-contamination |
 | **Hooks system** | Pre/post operation hooks for memory, KG, traversal, ingestion — plug in your own logic |
@@ -391,12 +400,19 @@ LocalNest is the only local-first MCP server that combines code retrieval AND st
 | **Knowledge graph** | SQLite triples with temporal validity | SQLite triples | Neo4j | Neo4j | Key-value |
 | **Multi-hop traversal** | Yes (recursive CTEs, 2-5 hops) | No (flat lookup only) | No | Yes (requires Neo4j) | No |
 | **Temporal queries (as_of)** | Yes | Yes | Yes | Yes | No |
-| **Contradiction detection** | Yes (write-time warnings) | Exists but not wired in | No | No | No |
+| **Contradiction detection** | Yes (cardinality-aware, functional vs multi-valued) | Exists but not wired in | No | No | No |
+| **Batch operations** | Yes (500 entities/triples, 100 memories per call) | No | No | No | No |
+| **Memory-KG fusion** | Auto-link memories to KG entities on write | No | No | No | No |
+| **Behavior modifiers** | `teach` — durable instructions that persist across sessions | No | No | No | No |
+| **Terse responses** | 70%+ token reduction on write tools | No | No | No | No |
+| **Fused cross-domain search** | Memory + code + KG in one call with RRF ranking | No | No | No | No |
+| **Symbol intelligence** | Find callers, definitions, implementations, rename preview | No | No | No | No |
+| **Self-audit** | Coverage, density, orphan, stale memory health scoring | No | No | No | No |
 | **Conversation ingestion** | Markdown + JSON | Markdown + JSON + Slack | No | No | No |
 | **Agent isolation** | Per-agent scoping + private diary | Wing-per-agent | User/session scoping | No | User/agent/run/session |
 | **Semantic dedup** | 0.92 cosine gate on all writes | 0.9 threshold | No | No | No |
 | **Memory hierarchy** | Nest/Branch (original) | Wing/Room/Hall (palace) | Flat | Flat | Flat |
-| **Hooks system** | Pre/post operation hooks | None | Webhooks | None | None |
+| **Hooks system** | Pre/post + proactive file-change hints | None | Webhooks | None | None |
 | **Runtime** | Node.js + TypeScript (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
 | **Dependencies** | 0 new (pure SQLite) | ChromaDB (heavy) | Neo4j ($25+/mo) | Neo4j | Cloud API |
 | **MCP tools** | 68 | 19 | 0 | 0 | 0 |
