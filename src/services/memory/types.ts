@@ -481,12 +481,43 @@ export interface BridgeEntry {
   object_name: string;
   subject_nest: string;
   object_nest: string;
+  subject_type?: string;
+  object_type?: string;
 }
 
 export interface DiscoverBridgesResult {
   filter_nest: string | null;
   bridge_count: number;
   bridges: BridgeEntry[];
+  insights: string[];
+  summary: string;
+}
+
+// ---------------------------------------------------------------------------
+// Project backfill
+// ---------------------------------------------------------------------------
+
+export interface ProjectBackfillOpts {
+  rootPath: string;
+  dryRun?: boolean;
+}
+
+export interface ProjectBackfillProject {
+  path: string;
+  name: string;
+  language: string;
+  marker: string;
+  status: 'backfilled' | 'would_backfill' | 'skipped_has_memories' | 'error';
+  error?: string;
+}
+
+export interface ProjectBackfillResult {
+  root_path: string;
+  projects_found: number;
+  projects_backfilled: number;
+  projects_skipped: number;
+  dry_run: boolean;
+  projects: ProjectBackfillProject[];
 }
 
 // ---------------------------------------------------------------------------

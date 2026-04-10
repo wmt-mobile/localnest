@@ -59,7 +59,7 @@ import type {
   RecallInput, CaptureEventInput, AddEntityInput, AddTripleInput,
   TraverseGraphOpts, DiscoverBridgesOpts, WriteDiaryInput, ReadDiaryInput,
   DuplicateCheckOpts, IngestOpts, HookEmitResult, BackfillResult,
-  ProactiveHintResult, WhatsNewInput
+  ProactiveHintResult, WhatsNewInput, ProjectBackfillOpts, ProjectBackfillResult
 } from './types.js';
 
 interface MemoryStoreConfig {
@@ -432,5 +432,17 @@ export class MemoryStore {
   async whatsNew(args: WhatsNewInput) {
     await this.init();
     return whatsNewFn(this.adapter!, args);
+  }
+
+  async scanAndBackfillProjects(opts: ProjectBackfillOpts): Promise<ProjectBackfillResult> {
+    await this.init();
+    const hookResult = await this.hooks.emit('before:graph:backfill_projects', opts);
+    if (hookResult.cancelled) {
+      return { root_path: opts.rootPath, projects_found: 0, projects_backfilled: 0, projects_skipped: 0, dry_run: !!opts.dryRun, projects: [] };
+    }
+    const { scanAndBackfillProjects: scanFn } = await import('./backfill/project-scan.js');
+    const result = await scanFn(this as never, hookResult.payload as ProjectBackfillOpts);
+    await this.hooks.emit('after:graph:backfill_projects', result);
+    return result;
   }
 }

@@ -21,7 +21,8 @@ import {
   registerMemoryWorkflowTools,
   registerMemoryStoreTools,
   registerRetrievalTools,
-  registerGraphTools
+  registerGraphTools,
+  registerBackfillTools
 } from '../mcp/index.js';
 import { MemoryWorkflowService } from '../services/memory/index.js';
 import type { AppServices } from './create-services.js';
@@ -87,6 +88,11 @@ export function registerAppTools(server: any, runtime: any, services: any): void
   registerGraphTools({
     registerJsonTool,
     schemas: sharedSchemas,
+    memory: services.memory
+  });
+
+  registerBackfillTools({
+    registerJsonTool,
     memory: services.memory
   });
 }
