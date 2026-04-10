@@ -431,17 +431,31 @@ Enable persistent AI memory during `localnest setup` and LocalNest starts buildi
 
 **How auto-promotion works:** events captured via `localnest_memory_capture_event` are scored for signal strength. High-signal events — bug fixes, decisions, preferences — get promoted into durable memories. Weak exploratory events are recorded and quietly discarded after 30 days.
 
-**Knowledge graph:** Store structured facts as subject-predicate-object triples with temporal validity. Query what was true at any point in time with `as_of`. Walk relationships 2-5 hops deep with recursive CTE traversal. Detect contradictions at write time.
+**One-call context:** `localnest_agent_prime({ task })` returns recalled memories, matched KG entities, relevant files, recent git changes, and suggested next actions — everything an agent needs to start work, in a single call.
 
-**Nest/Branch hierarchy:** Organize memories into nests (top-level domains) and branches (topics). Metadata-filtered recall narrows candidates before scoring for faster, more precise results.
+**Teach your AI:** `localnest_teach({ instruction: "always use snake_case" })` stores durable behavior modifiers that surface automatically in future sessions via `agent_prime`. Your AI remembers your preferences.
 
-**Agent isolation:** Each agent gets its own memory scope and private diary. Recall returns own + global memories, never another agent's private data.
+**Batch operations:** `memory_store_batch` (100/call), `kg_add_triples_batch` (500/call), `kg_add_entities_batch` (500/call). Turn 300 API calls into 3.
+
+**Auto-inference:** `localnest_memory_store` needs only `{title, content}`. Project path, branch, topic, tags, nest, and branch are all auto-derived.
+
+**Memory-KG fusion:** Every memory write auto-extracts entities and creates KG triples with `source_memory_id` provenance. Recall includes 1-hop KG neighbors as `related_facts`.
+
+**Knowledge graph:** Store structured facts as subject-predicate-object triples with temporal validity. Contradiction detection is cardinality-aware — only functional predicates (e.g. `status_is`) trigger warnings, multi-valued predicates (e.g. `uses`) coexist freely.
+
+**Cross-session deltas:** `localnest_whats_new({ since: "last_session" })` returns new memories, triples, changed files, and commits since your last session.
+
+**Self-audit:** `localnest_audit()` scores memory health (0-100) with per-domain coverage, KG density, orphan detection, stale memory flagging, and actionable suggestions.
+
+**Terse responses:** Pass `terse: "minimal"` to any write tool for `{id, ok}` instead of full payloads — 70%+ token reduction. Batch tools default to minimal.
 
 **Semantic dedup:** Every write passes through an embedding similarity gate (default 0.92 cosine threshold). Near-duplicates are caught before storage — your memory stays clean.
 
-**Conversation ingestion:** Import Markdown or JSON chat exports. Each turn becomes a memory entry with automatic entity extraction and KG triple creation. Re-ingestion of the same file is skipped by content hash.
+**Proactive hints:** When you read or edit a file linked to high-importance memories, LocalNest surfaces memory hints automatically — push, don't pull.
 
-**Hooks:** Register pre/post callbacks on any memory operation — store, recall, KG writes, traversal, ingestion. Build custom pipelines without modifying core code.
+**Agent isolation:** Each agent gets its own memory scope and private diary. Recall returns own + global memories, never another agent's private data.
+
+**Hooks:** Register pre/post callbacks on any memory operation — store, recall, KG writes, traversal, ingestion, file reads. Build custom pipelines without modifying core code.
 
 ---
 
