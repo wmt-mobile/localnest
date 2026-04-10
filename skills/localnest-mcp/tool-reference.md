@@ -267,3 +267,17 @@ Find implementations of an interface, trait, or abstract class. Params: `symbol`
 
 ### `localnest_rename_preview`
 Preview all references that would change when renaming a symbol. Params: `symbol`, `new_name`, `project_path?`.
+
+## Batch delete (v0.2.0)
+
+### `localnest_memory_delete_batch`
+Delete up to 100 memory entries in a single transactional call. Cascades to revisions and relations. Params: `ids` (array of memory IDs, max 100). Returns `{ deleted, errors }`.
+
+### `localnest_kg_delete_entity`
+Delete a KG entity and cascade-remove all triples where it appears as subject or object. Params: `entity_id`. Returns `{ deleted, entity_id, triples_removed }`.
+
+### `localnest_kg_delete_entities_batch`
+Delete up to 100 KG entities with cascade in a single transaction. Params: `entity_ids` (array, max 100). Returns `{ deleted, triples_removed, errors }`.
+
+### `localnest_kg_delete_triples_batch`
+Hard-delete up to 100 KG triples by ID (not invalidate — permanent removal). Params: `triple_ids` (array, max 100). Returns `{ deleted, errors }`.

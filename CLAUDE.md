@@ -192,7 +192,7 @@ npx @claude-flow/cli@latest doctor --fix
 
 **LocalNest**
 
-LocalNest is a local-first TypeScript MCP server that gives AI agents safe, scoped access to code — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory that never leaves your machine. 68 MCP tools, zero cloud dependencies, pure SQLite.
+LocalNest is a local-first TypeScript MCP server that gives AI agents safe, scoped access to code — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory that never leaves your machine. 72 MCP tools, zero cloud dependencies, pure SQLite.
 
 **Core Value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
 
