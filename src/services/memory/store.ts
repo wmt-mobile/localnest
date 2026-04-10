@@ -51,12 +51,15 @@ import {
   addTripleBatch as addTripleBatchFn
 } from './knowledge-graph/kg-batch.js';
 import { backfillMemoryKgLinks as backfillMemoryKgLinksFn } from './knowledge-graph/auto-link.js';
+import { getFileMemoryHints as getFileMemoryHintsFn } from './proactive-hints.js';
+import { whatsNew as whatsNewFn } from './temporal/whats-new.js';
 import type { AddEntityBatchInput, AddTripleBatchInput } from './knowledge-graph/kg-batch.js';
 import type {
   Adapter, EmbeddingService, ListEntriesOpts, StoreEntryInput, UpdateEntryPatch,
   RecallInput, CaptureEventInput, AddEntityInput, AddTripleInput,
   TraverseGraphOpts, DiscoverBridgesOpts, WriteDiaryInput, ReadDiaryInput,
-  DuplicateCheckOpts, IngestOpts, HookEmitResult, BackfillResult
+  DuplicateCheckOpts, IngestOpts, HookEmitResult, BackfillResult,
+  ProactiveHintResult, WhatsNewInput
 } from './types.js';
 
 interface MemoryStoreConfig {
@@ -417,5 +420,17 @@ export class MemoryStore {
     const result = await ingestJsonFn(this.adapter!, this.embeddingService, payload.opts);
     await this.hooks.emit('after:ingest', result);
     return result;
+  }
+
+  async getFileMemoryHints(filePath: string, suggestUpdate: boolean = false): Promise<ProactiveHintResult> {
+    await this.init();
+    const result = await getFileMemoryHintsFn(this.adapter!, filePath, suggestUpdate);
+    await this.hooks.emit(suggestUpdate ? 'after:file:changed' : 'after:file:read', result);
+    return result;
+  }
+
+  async whatsNew(args: WhatsNewInput) {
+    await this.init();
+    return whatsNewFn(this.adapter!, args);
   }
 }

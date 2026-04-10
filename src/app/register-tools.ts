@@ -80,7 +80,8 @@ export function registerAppTools(server: any, runtime: any, services: any): void
     vectorIndex: services.vectorIndex,
     search: services.search,
     defaultMaxReadLines: DEFAULT_MAX_READ_LINES,
-    defaultMaxResults: DEFAULT_MAX_RESULTS
+    defaultMaxResults: DEFAULT_MAX_RESULTS,
+    memory: services.memory
   });
 
   registerGraphTools({

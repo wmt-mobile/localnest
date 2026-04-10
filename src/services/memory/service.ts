@@ -5,7 +5,7 @@ import type {
   EmbeddingService, ListEntriesOpts, StoreEntryInput, UpdateEntryPatch,
   RecallInput, CaptureEventInput, AddEntityInput, AddTripleInput,
   TraverseGraphOpts, DiscoverBridgesOpts, WriteDiaryInput, ReadDiaryInput,
-  DuplicateCheckOpts, IngestOpts
+  DuplicateCheckOpts, IngestOpts, WhatsNewInput
 } from './types.js';
 
 function parseNodeMajor(version: string | undefined): number {
@@ -300,6 +300,16 @@ export class MemoryService {
   async ingestJson(opts: IngestOpts = {}) {
     this.assertEnabled();
     return this.store.ingestJson(opts);
+  }
+
+  async whatsNew(args: WhatsNewInput) {
+    this.assertEnabled();
+    return this.store.whatsNew(args);
+  }
+
+  async getFileMemoryHints(filePath: string, suggestUpdate: boolean = false) {
+    this.assertEnabled();
+    return this.store.getFileMemoryHints(filePath, suggestUpdate);
   }
 
   assertEnabled(): void {

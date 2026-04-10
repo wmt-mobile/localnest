@@ -41,6 +41,20 @@ interface McpExtra {
   sendNotification?(notification: { method: string; params: Record<string, unknown> }): Promise<void>;
 }
 
+interface MemoryServiceForHints {
+  getFileMemoryHints(filePath: string, suggestUpdate?: boolean): Promise<{
+    file_path: string;
+    hints: Array<{
+      memory_id: string;
+      title: string;
+      importance: number;
+      kind: string;
+      summary_excerpt: string;
+      suggest_update: boolean;
+    }>;
+  }>;
+}
+
 export interface RegisterRetrievalToolsOptions {
   registerJsonTool: RegisterJsonToolFn;
   paginateItems: <T>(items: T[], limit: number | undefined, offset: number | undefined) => PaginatedResult<T>;
@@ -49,6 +63,7 @@ export interface RegisterRetrievalToolsOptions {
   search: SearchService;
   defaultMaxReadLines: number;
   defaultMaxResults: number;
+  memory?: MemoryServiceForHints | null;
 }
 
 export function registerRetrievalTools({
@@ -58,7 +73,8 @@ export function registerRetrievalTools({
   vectorIndex,
   search,
   defaultMaxReadLines,
-  defaultMaxResults
+  defaultMaxResults,
+  memory
 }: RegisterRetrievalToolsOptions): void {
   async function emitProgress(extra: unknown, progress: number, total: number, message: string): Promise<void> {
     const mcpExtra = extra as McpExtra | undefined;
@@ -491,12 +507,59 @@ export function registerRetrievalTools({
         openWorldHint: false
       }
     },
-    async ({ path: filePath, start_line, end_line }: Record<string, unknown>) => normalizeReadFileChunkResult(
-      await workspace.readFileChunk(filePath as string, start_line as number, end_line as number, 800),
-      filePath as string,
-      start_line as number,
-      end_line as number
-    )
+    async ({ path: filePath, start_line, end_line }: Record<string, unknown>) => {
+      const result = normalizeReadFileChunkResult(
+        await workspace.readFileChunk(filePath as string, start_line as number, end_line as number, 800),
+        filePath as string,
+        start_line as number,
+        end_line as number
+      );
+      // HOOK-07: Proactive memory hints for linked files
+      if (memory) {
+        try {
+          const hintResult = await memory.getFileMemoryHints(filePath as string, false);
+          if (hintResult.hints.length > 0) {
+            (result as Record<string, unknown>)._memory_hints = hintResult.hints;
+          }
+        } catch {
+          // HOOK-09: Non-blocking -- hint failure does not affect file read
+        }
+      }
+      return result;
+    }
+  );
+
+  // HOOK-08: Report file changes and receive proactive memory hints
+  registerJsonTool(
+    'localnest_file_changed',
+    {
+      title: 'File Changed',
+      description: 'Report that a file was edited and receive proactive hints about high-importance memories linked to it. Memories with importance >= 70 that reference the file are flagged with suggest_update=true, indicating the memory may need updating to reflect the file change.',
+      inputSchema: {
+        path: z.string()
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ path: filePath }: Record<string, unknown>) => {
+      if (!memory) {
+        return { file_path: filePath, hints: [] };
+      }
+      try {
+        return await memory.getFileMemoryHints(filePath as string, true);
+      } catch (err) {
+        // HOOK-09: Non-blocking -- return empty hints on failure
+        return {
+          file_path: filePath,
+          hints: [],
+          error: err instanceof Error ? err.message : 'hint lookup failed'
+        };
+      }
+    }
   );
 
   registerJsonTool(

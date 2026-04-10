@@ -725,6 +725,24 @@ export interface HookHandle {
 }
 
 // ---------------------------------------------------------------------------
+// Proactive hints
+// ---------------------------------------------------------------------------
+
+export interface ProactiveHint {
+  memory_id: string;
+  title: string;
+  importance: number;
+  kind: string;
+  summary_excerpt: string;
+  suggest_update: boolean;
+}
+
+export interface ProactiveHintResult {
+  file_path: string;
+  hints: ProactiveHint[];
+}
+
+// ---------------------------------------------------------------------------
 // Schema / Migrations
 // ---------------------------------------------------------------------------
 
@@ -807,4 +825,47 @@ export interface MergeCandidateInput {
   content: string;
   scope: Scope;
   tags: string[];
+}
+
+// ---------------------------------------------------------------------------
+// What's New (temporal awareness)
+// ---------------------------------------------------------------------------
+
+export interface WhatsNewInput {
+  since: string;
+  agentId?: string;
+  projectPath?: string;
+  limit?: number;
+}
+
+export interface WhatsNewMemoryItem {
+  id: string;
+  title: string;
+  kind: string;
+  created_at: string;
+}
+
+export interface WhatsNewTripleItem {
+  id: string;
+  subject_name: string;
+  predicate: string;
+  object_name: string;
+  created_at: string;
+}
+
+export interface WhatsNewCommitItem {
+  id: number;
+  title: string;
+  event_type: string;
+  created_at: string;
+}
+
+export interface WhatsNewResult {
+  since: string;
+  resolved_from: 'timestamp' | 'last_session' | 'epoch';
+  new_memories: { count: number; items: WhatsNewMemoryItem[] };
+  new_triples: { count: number; items: WhatsNewTripleItem[] };
+  files_changed: { count: number; paths: string[] };
+  recent_commits: { count: number; items: WhatsNewCommitItem[] };
+  summary: string;
 }
