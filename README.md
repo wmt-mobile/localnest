@@ -344,6 +344,10 @@ localnest completion bash           # shell completions
 | `localnest_kg_add_entities_batch` | Batch entity creation (up to 500 entities per call) |
 | `localnest_kg_add_triples_batch` | Batch triple creation with dedup |
 | `localnest_memory_store_batch` | Batch memory storage (up to 100 entries per call) |
+| `localnest_memory_delete_batch` | Batch delete up to 100 memories with cascade |
+| `localnest_kg_delete_entity` | Delete entity + cascade all its triples |
+| `localnest_kg_delete_entities_batch` | Batch delete up to 100 entities with cascade |
+| `localnest_kg_delete_triples_batch` | Hard-delete up to 100 triples by ID |
 
 ### Agentic Workflow
 

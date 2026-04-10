@@ -6,7 +6,7 @@ user-invocable: false
 
 # LocalNest MCP
 
-Local-first MCP server: code retrieval + persistent agent memory. 68 tools, pure SQLite, zero cloud.
+Local-first MCP server: code retrieval + persistent agent memory. 72 tools, pure SQLite, zero cloud.
 
 Philosophy: evidence-first, capture-always, minimal-ceremony (just `{title, content}` to store).
 

@@ -22,8 +22,8 @@ The local git tags currently available in this repository are:
 
 Those do **not** match the package/changelog release line currently documented here:
 
-- `0.1.0` (current stable package — TypeScript migration, temporal KG, CLI-first, 52 tools)
-- `0.0.7-beta.2` (archived beta — temporal KG, CLI-first, 52 tools)
+- `0.1.0` (current stable package — TypeScript migration, temporal KG, CLI-first, 72 tools)
+- `0.0.7-beta.2` (archived beta — temporal KG, CLI-first, 72 tools)
 - `0.0.6-beta.1` (archived beta)
 - `0.0.5` (previous stable package)
 - `0.0.4-beta.9`
@@ -63,11 +63,11 @@ Use the per-version pages below for release-specific summaries.
 <div className="docGrid docGrid--3">
   <a className="docLinkCard" href="./current">
     <strong>Current stable</strong>
-    <span>Use the current release page for the stable `0.1.0` contract — TypeScript, temporal KG, 52 tools.</span>
+    <span>Use the current release page for the stable `0.1.0` contract — TypeScript, temporal KG, 72 tools.</span>
   </a>
   <a className="docLinkCard" href="./0.0.7-beta.2">
     <strong>Archived beta</strong>
-    <span>Use the beta release page for `0.0.7-beta.2` — temporal KG, CLI-first, 52 tools.</span>
+    <span>Use the beta release page for `0.0.7-beta.2` — temporal KG, CLI-first, 72 tools.</span>
   </a>
   <a className="docLinkCard" href="./0.0.4-beta.9">
     <strong>Previous beta</strong>

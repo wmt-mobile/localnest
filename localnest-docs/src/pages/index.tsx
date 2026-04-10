@@ -56,7 +56,7 @@ export default function Home(): React.JSX.Element {
   return (
     <Layout
       title="LocalNest — Your AI's home base"
-      description="Local-first MCP server with 52 tools, temporal knowledge graph, persistent AI memory, and semantic code search. No cloud, no leaks."
+      description="Local-first MCP server with 72 tools, temporal knowledge graph, persistent AI memory, and semantic code search. No cloud, no leaks."
     >
       <main className="siteHome">
         <section className="siteHome__hero">
