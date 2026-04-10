@@ -2,7 +2,7 @@
 
 LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scoped access to your codebase with hybrid search, semantic indexing, temporal knowledge graph, agent-scoped memory, and persistent memory that never leaves your machine.
 
-**68 MCP tools** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
+**72 MCP tools** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
 
 ## Use this documentation by intent
 
@@ -35,4 +35,4 @@ The `0.1.0` release migrates the entire codebase to TypeScript and includes all 
 - **Conversation ingestion** -- import Markdown/JSON chat exports with automatic entity extraction and KG triple creation.
 - **Hooks system** -- pre/post operation callbacks for memory, KG, traversal, ingestion. Build custom pipelines without modifying core code.
 - **CLI-first architecture** -- unified `localnest <noun> <verb>` commands for everything. Shell completions for bash, zsh, fish.
-- **68 MCP tools** covering KG, nests, traversal, diary, ingest, dedup, and hooks.
+- **72 MCP tools** covering KG, nests, traversal, diary, ingest, dedup, and hooks.

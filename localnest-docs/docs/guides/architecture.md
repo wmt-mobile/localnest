@@ -26,7 +26,7 @@ flowchart LR
 2. Build services (workspace, search, index, memory, updates)
 3. Run forward-only schema migrations (v1 → v9)
 4. Initialize hooks system (`MemoryHooks` instance on the store)
-5. Register 68 MCP tools across 8 groups
+5. Register 72 MCP tools across 8 groups
 6. Start background monitors (staleness sweep + health checks)
 7. Open stdio transport → ready
 

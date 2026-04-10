@@ -162,6 +162,11 @@ export class MemoryService {
     return this.store.deleteEntry(id);
   }
 
+  async deleteEntryBatch(args: { ids: string[] }) {
+    this.assertEnabled();
+    return this.store.deleteEntryBatch(args);
+  }
+
   async recall(args: RecallInput) {
     this.assertEnabled();
     return this.store.recall(args);
@@ -250,6 +255,21 @@ export class MemoryService {
   async addTripleBatch(args: { triples: Array<Record<string, unknown>>; response_format?: string }) {
     this.assertEnabled();
     return this.store.addTripleBatch(args as any);
+  }
+
+  async deleteEntity(entityId: string) {
+    this.assertEnabled();
+    return this.store.deleteEntity(entityId);
+  }
+
+  async deleteEntityBatch(args: { entity_ids: string[] }) {
+    this.assertEnabled();
+    return this.store.deleteEntityBatch(args);
+  }
+
+  async deleteTripleBatch(args: { triple_ids: string[] }) {
+    this.assertEnabled();
+    return this.store.deleteTripleBatch(args);
   }
 
   async backfillMemoryKgLinks(opts: { limit?: number; offset?: number; nest?: string; branch?: string } = {}) {

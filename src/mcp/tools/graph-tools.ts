@@ -335,9 +335,10 @@ export function registerGraphTools({
     ['localnest_graph_bridges'],
     {
       title: 'Graph Bridges',
-      description: 'Discover cross-nest bridges: entities connected by triples that span different nests. Optionally filter to bridges involving a specific nest.',
+      description: 'Discover cross-nest bridges (default) or cross-branch bridges within a nest. Use mode="cross-branch" with a nest to find entities that span different branches within that nest.',
       inputSchema: {
-        nest: z.string().max(200).optional()
+        nest: z.string().max(200).optional(),
+        mode: z.enum(['cross-nest', 'cross-branch']).default('cross-nest')
       },
       annotations: {
         readOnlyHint: true,
@@ -346,7 +347,7 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ nest }: Record<string, unknown>) => memory.discoverBridges({ nest })
+    async ({ nest, mode }: Record<string, unknown>) => memory.discoverBridges({ nest, mode: mode as 'cross-nest' | 'cross-branch' | undefined })
   );
 
   // --- Diary Tools (localnest_diary_*) ---

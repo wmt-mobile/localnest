@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import { nowIso, cleanString, stableJson } from '../utils.js';
 import { ensureEntity } from './kg.js';
-import type { Adapter, AddEntityInput, AddTripleInput } from '../types.js';
+import type { Adapter, AddEntityInput, AddTripleInput, DeleteEntityBatchResult, DeleteTripleBatchResult } from '../types.js';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -231,5 +231,98 @@ export async function addTripleBatch(
     const summary: BatchSummary = { created, duplicates, errors };
     if (verbose) summary.ids = ids;
     return summary;
+  });
+}
+
+// ---------------------------------------------------------------------------
+// deleteEntityBatch
+// ---------------------------------------------------------------------------
+
+const MAX_DELETE_BATCH_SIZE = 100;
+
+export interface DeleteEntityBatchInput {
+  entity_ids: string[];
+}
+
+export async function deleteEntityBatch(
+  adapter: Adapter,
+  input: DeleteEntityBatchInput
+): Promise<DeleteEntityBatchResult> {
+  const { entity_ids } = input;
+
+  if (entity_ids.length > MAX_DELETE_BATCH_SIZE) {
+    throw new BatchSizeExceededError(MAX_DELETE_BATCH_SIZE, entity_ids.length);
+  }
+
+  return adapter.transaction(async (ad) => {
+    let deleted = 0;
+    let triplesRemoved = 0;
+    const errors: BatchError[] = [];
+
+    for (let i = 0; i < entity_ids.length; i++) {
+      const rawId = cleanString(entity_ids[i], 400);
+      if (!rawId) {
+        errors.push({ index: i, message: 'entity_id is required' });
+        continue;
+      }
+
+      const tripleResult = await ad.run(
+        'DELETE FROM kg_triples WHERE subject_id = ? OR object_id = ?',
+        [rawId, rawId]
+      );
+      triplesRemoved += tripleResult?.changes ?? 0;
+
+      const entityResult = await ad.run(
+        'DELETE FROM kg_entities WHERE id = ?',
+        [rawId]
+      );
+      if ((entityResult?.changes ?? 0) > 0) {
+        deleted += 1;
+      }
+    }
+
+    return { deleted, triples_removed: triplesRemoved, errors };
+  });
+}
+
+// ---------------------------------------------------------------------------
+// deleteTripleBatch
+// ---------------------------------------------------------------------------
+
+export interface DeleteTripleBatchInput {
+  triple_ids: string[];
+}
+
+export async function deleteTripleBatch(
+  adapter: Adapter,
+  input: DeleteTripleBatchInput
+): Promise<DeleteTripleBatchResult> {
+  const { triple_ids } = input;
+
+  if (triple_ids.length > MAX_DELETE_BATCH_SIZE) {
+    throw new BatchSizeExceededError(MAX_DELETE_BATCH_SIZE, triple_ids.length);
+  }
+
+  return adapter.transaction(async (ad) => {
+    let deleted = 0;
+    const errors: BatchError[] = [];
+
+    for (let i = 0; i < triple_ids.length; i++) {
+      const rawId = cleanString(triple_ids[i], 400);
+      if (!rawId) {
+        errors.push({ index: i, message: 'triple_id is required' });
+        continue;
+      }
+
+      const result = await ad.run(
+        'DELETE FROM kg_triples WHERE id = ?',
+        [rawId]
+      );
+      if ((result?.changes ?? 0) > 0) {
+        deleted += 1;
+      }
+    }
+
+    return { deleted, errors };
   });
 }

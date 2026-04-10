@@ -34,7 +34,7 @@
     "access": "public"
   },
   "type": "module",
-  "description": "Local-first MCP server with 68 tools — code search, persistent AI memory, temporal knowledge graph, and semantic retrieval. Zero cloud, pure SQLite.",
+  "description": "Local-first MCP server with 72 tools — code search, persistent AI memory, temporal knowledge graph, and semantic retrieval. Zero cloud, pure SQLite.",
   "bin": {
     "localnest": "bin/_boot.cjs",
     "localnest-mcp": "bin/_boot.cjs",

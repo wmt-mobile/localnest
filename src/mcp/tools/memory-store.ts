@@ -27,6 +27,7 @@ interface MemoryService {
   storeEntryBatch(args: { memories: Array<Record<string, unknown>>; response_format?: 'minimal' | 'verbose' }): Promise<{ created: number; duplicates: number; errors: Array<{ index: number; message: string }>; ids?: (string | null)[] }>;
   updateEntry(id: string, patch: Record<string, unknown>): Promise<unknown>;
   deleteEntry(id: string): Promise<unknown>;
+  deleteEntryBatch(args: { ids: string[] }): Promise<{ deleted: number; errors: Array<{ index: number; message: string }> }>;
   captureEvent(args: Record<string, unknown>): Promise<unknown>;
   listEvents(opts: Record<string, unknown>): Promise<unknown>;
   suggestRelations(id: string, opts: { threshold: number; maxResults: number }): Promise<unknown>;
@@ -68,12 +69,15 @@ export function registerMemoryStoreTools({
     ['localnest_memory_list'],
     {
       title: 'Memory List',
-      description: 'List stored memories with optional scope and kind filters.',
+      description: 'List stored memories with optional scope, kind, nest, branch, and tag filters.',
       inputSchema: {
         kind: MEMORY_KIND_SCHEMA.optional(),
         status: MEMORY_STATUS_SCHEMA.optional(),
         project_path: z.string().optional(),
         topic: z.string().optional(),
+        nest: z.string().optional(),
+        branch: z.string().optional(),
+        tags: z.array(z.string()).optional(),
         limit: z.number().int().min(1).max(200).default(20),
         offset: z.number().int().min(0).default(0)
       },
@@ -84,12 +88,15 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ kind, status, project_path, topic, limit, offset }: Record<string, unknown>) => normalizeMemoryRecallResult(
+    async ({ kind, status, project_path, topic, nest, branch, tags, limit, offset }: Record<string, unknown>) => normalizeMemoryRecallResult(
       await memory.listEntries({
         kind,
         status,
         projectPath: project_path,
         topic,
+        nest,
+        branch,
+        tags,
         limit,
         offset
       })
@@ -224,6 +231,26 @@ export function registerMemoryStoreTools({
       }
     },
     async ({ id, terse }: Record<string, unknown>) => toMinimalWriteResponse(normalizeDeleteResult(await memory.deleteEntry(id as string), { id: id as string }), terse as string)
+  );
+
+  registerJsonTool(
+    ['localnest_memory_delete_batch'],
+    {
+      title: 'Memory Delete Batch',
+      description: 'Delete up to 100 memory entries in a single call. Returns the count of deleted entries and per-row errors for IDs that were not found or failed.',
+      inputSchema: {
+        ids: z.array(z.string().min(1)).min(1).max(100)
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: true,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ ids }: Record<string, unknown>) => {
+      return memory.deleteEntryBatch({ ids: ids as string[] });
+    }
   );
 
   registerJsonTool(

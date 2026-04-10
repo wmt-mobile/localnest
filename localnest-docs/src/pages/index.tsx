@@ -43,7 +43,7 @@ const guides = [
   {
     title: 'Tools Reference',
     href: '/docs/tools/overview',
-    description: 'All 68 MCP tools across 11 groups.'
+    description: 'All 72 MCP tools across 11 groups.'
   },
   {
     title: 'Architecture',
@@ -56,14 +56,14 @@ export default function Home(): React.JSX.Element {
   return (
     <Layout
       title="LocalNest — Your AI's home base"
-      description="Local-first MCP server with 52 tools, temporal knowledge graph, persistent AI memory, and semantic code search. No cloud, no leaks."
+      description="Local-first MCP server with 72 tools, temporal knowledge graph, persistent AI memory, and semantic code search. No cloud, no leaks."
     >
       <main className="siteHome">
         <section className="siteHome__hero">
           <p className="siteHome__eyebrow">Your AI's home base</p>
           <h1>Local memory and code search for AI agents.</h1>
           <p>
-            68 MCP tools, temporal knowledge graph, and persistent memory — running entirely on your machine.
+            72 MCP tools, temporal knowledge graph, and persistent memory — running entirely on your machine.
             No cloud, no leaks, no surprises.
           </p>
           <div className="siteHome__actions">

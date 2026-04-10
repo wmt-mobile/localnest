@@ -3,7 +3,7 @@ import { nowIso, cleanString, stableJson } from '../utils.js';
 import type {
   Adapter, AddEntityInput, AddEntityResult, AddTripleInput, AddTripleResult,
   InvalidateTripleResult, QueryRelationshipsResult, KgTripleWithNames, KgTriple,
-  KgEntityWithRelations, KgStats
+  KgEntityWithRelations, KgStats, DeleteEntityResult
 } from '../types.js';
 
 function toSlug(name: string): string {
@@ -347,6 +347,10 @@ export async function queryTriplesAsOf(
   if (!id) throw new Error('entityId is required');
   if (!asOfDate) throw new Error('asOfDate is required');
 
+  // When the caller passes a date-only string like "2026-04-10", treat it as
+  // end-of-day so that triples created at any time during that day are included.
+  const resolvedDate = !asOfDate.includes('T') ? `${asOfDate}T23:59:59.999Z` : asOfDate;
+
   const triples = await adapter.all<KgTripleWithNames>(
     `SELECT t.*, s.name AS subject_name, o.name AS object_name
        FROM kg_triples t
@@ -356,7 +360,7 @@ export async function queryTriplesAsOf(
         AND (t.valid_from IS NULL OR t.valid_from <= ?)
         AND (t.valid_to IS NULL OR t.valid_to > ?)
       ORDER BY t.valid_from ASC`,
-    [id, id, asOfDate, asOfDate]
+    [id, id, resolvedDate, resolvedDate]
   );
 
   return {
@@ -418,6 +422,31 @@ export async function getKgStats(adapter: Adapter): Promise<KgStats> {
     active_triples: activeTripleCount?.count ?? 0,
     by_predicate: byPredicate
   };
+}
+
+export async function deleteEntity(adapter: Adapter, entityId: string): Promise<DeleteEntityResult> {
+  const id = cleanString(entityId, 400);
+  if (!id) throw new Error('entityId is required');
+
+  return adapter.transaction(async (ad) => {
+    const tripleResult = await ad.run(
+      'DELETE FROM kg_triples WHERE subject_id = ? OR object_id = ?',
+      [id, id]
+    );
+    const triplesRemoved = tripleResult?.changes ?? 0;
+
+    const entityResult = await ad.run(
+      'DELETE FROM kg_entities WHERE id = ?',
+      [id]
+    );
+    const deleted = (entityResult?.changes ?? 0) > 0;
+
+    return {
+      deleted,
+      entity_id: id,
+      triples_removed: triplesRemoved
+    };
+  });
 }
 
 export { toSlug as normalizeEntityId };

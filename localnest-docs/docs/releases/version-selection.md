@@ -8,7 +8,7 @@ Use this page to choose a LocalNest version line and install it explicitly.
 
 ## Recommended defaults
 
-- Want the current stable release: use `0.1.0` (TypeScript, temporal KG, CLI-first, 52 tools)
+- Want the current stable release: use `0.1.0` (TypeScript, temporal KG, CLI-first, 72 tools)
 - Want the previous stable: use `0.0.5`
 - Want an archived beta: use `0.0.7-beta.2` or `0.0.6-beta.1`
 - Want older stable behavior: use `0.0.3`
