@@ -213,3 +213,57 @@ Returns hook system statistics: whether hooks are enabled, total registered list
 
 ### `localnest_hooks_list_events`
 Returns all valid hook event names that listeners can subscribe to. No params. Covers memory lifecycle, knowledge graph, graph traversal, diary, ingestion, dedup, taxonomy, wildcards, and the error event.
+
+## Batch operations (v0.2.0)
+
+### `localnest_kg_add_entities_batch`
+Create up to 500 KG entities in a single transactional call. Returns `{created, duplicates, errors}` summary. Use instead of looping `kg_add_entity`. Params: `entities[]` (name, type, properties), `response_format`.
+
+### `localnest_kg_add_triples_batch`
+Add up to 500 KG triples in a single transactional call with write-time dedup on `(subject_id, predicate, object_id)` where `valid_to IS NULL`. Auto-stamps `valid_from`. Params: `triples[]`, `response_format`.
+
+### `localnest_memory_store_batch`
+Store up to 100 memory entries in a single transactional call. Fingerprint + semantic dedup. Returns `{created, duplicates, errors}`. Params: `memories[]` (title, content + optional fields), `response_format`.
+
+## Agentic workflow (v0.2.0)
+
+### `localnest_agent_prime`
+One-call context: returns recalled memories, matched KG entities, relevant files, recent git changes, and suggested next actions for a task. Replaces the 4+ tool cold-start pattern. Params: `task`, `project_path?`, `nest?`, `branch?`.
+
+### `localnest_find`
+Fused search across memory, code, and KG with Reciprocal Rank Fusion cross-source re-ranking. Params: `query`, `limit?`, `sources?` (array of `memory`/`code`/`triple`).
+
+### `localnest_whats_new`
+Cross-session delta: new memories, new triples, files changed, and recent commits since a timestamp or `"last_session"`. Params: `since`, `project_path?`, `agent_id?`, `limit?`.
+
+### `localnest_teach`
+Store a durable behavior modifier as a high-importance feedback memory. Surfaces automatically in future `agent_prime` calls. Params: `instruction`, `importance?` (70-100), `tags?`, `nest?`, `branch?`.
+
+### `localnest_help`
+Task-scoped tool guidance. Describe what you want to do and get recommended tools, workflow steps, and tips. Params: `task`.
+
+### `localnest_audit`
+Self-audit dashboard: project coverage, KG density, nest health, stale memories, health score (0-100), and actionable suggestions. No params.
+
+### `localnest_file_changed`
+Report a file edit to get proactive memory hints. Returns linked high-importance memories with `suggest_update: true`. Params: `file_path`.
+
+### `localnest_kg_backfill_links`
+Retroactively link existing memories to matching KG entities. Scans memories and creates `mentioned_in` triples for content matching entity names. Params: `limit?`, `offset?`, `nest?`, `branch?`.
+
+### `localnest_project_backfill`
+Scan a directory for projects (package.json, Cargo.toml, go.mod, etc.) and create seed memories for untracked ones. Params: `root_path`, `dry_run?`.
+
+## Code intelligence (v0.2.0)
+
+### `localnest_find_callers`
+Find all call sites of a symbol across the codebase. Uses symbol index with regex extraction. Params: `symbol`, `project_path?`, `language?`.
+
+### `localnest_find_definition`
+Find the definition location of a symbol. Params: `symbol`, `project_path?`, `language?`.
+
+### `localnest_find_implementations`
+Find implementations of an interface, trait, or abstract class. Params: `symbol`, `project_path?`, `language?`.
+
+### `localnest_rename_preview`
+Preview all references that would change when renaming a symbol. Params: `symbol`, `new_name`, `project_path?`.
