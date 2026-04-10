@@ -113,6 +113,13 @@ export async function recall(adapter: Adapter, {
       if (row.kind === 'preference') score += 0.25;
       if (row.kind === 'feedback') score += 2.0;
 
+      // Feature 12: auto-decay based on age and recall frequency
+      const ageDays = (Date.now() - new Date(row.created_at).getTime()) / (1000 * 60 * 60 * 24);
+      const recallFactor = Math.min(1, ((row.recall_count || 0) + 1) / 3);
+      const recencyFactor = 1 / (1 + ageDays / 90);
+      const decay = 0.3 + 0.7 * recallFactor * recencyFactor;
+      score *= decay;
+
       return {
         score,
         entry: deserializeEntry(row)

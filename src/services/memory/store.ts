@@ -44,18 +44,21 @@ import {
   queryEntityRelationships as queryEntityRelationshipsFn,
   queryTriplesAsOf as queryTriplesAsOfFn,
   getEntityTimeline as getEntityTimelineFn,
-  getKgStats as getKgStatsFn
+  getKgStats as getKgStatsFn,
+  deleteEntity as deleteEntityFn
 } from './knowledge-graph/kg.js';
 import {
   addEntityBatch as addEntityBatchFn,
-  addTripleBatch as addTripleBatchFn
+  addTripleBatch as addTripleBatchFn,
+  deleteEntityBatch as deleteEntityBatchFn,
+  deleteTripleBatch as deleteTripleBatchFn
 } from './knowledge-graph/kg-batch.js';
 import { searchTriples as searchTriplesFn } from './knowledge-graph/kg-search.js';
 import { backfillMemoryKgLinks as backfillMemoryKgLinksFn } from './knowledge-graph/auto-link.js';
 import { getFileMemoryHints as getFileMemoryHintsFn } from './proactive-hints.js';
 import { whatsNew as whatsNewFn } from './temporal/whats-new.js';
 import { runAudit as runAuditFn } from './audit/dashboard.js';
-import type { AddEntityBatchInput, AddTripleBatchInput } from './knowledge-graph/kg-batch.js';
+import type { AddEntityBatchInput, AddTripleBatchInput, DeleteEntityBatchInput, DeleteTripleBatchInput } from './knowledge-graph/kg-batch.js';
 import type {
   Adapter, EmbeddingService, ListEntriesOpts, StoreEntryInput, UpdateEntryPatch,
   RecallInput, CaptureEventInput, AddEntityInput, AddTripleInput,
@@ -349,6 +352,34 @@ export class MemoryStore {
     if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
     const result = await addTripleBatchFn(this.adapter!, hookResult.payload as AddTripleBatchInput);
     await this.hooks.emit('after:kg:addTriple', result);
+    return result;
+  }
+
+  async deleteEntity(entityId: string) {
+    await this.init();
+    const hookResult = await this.hooks.emit('before:kg:deleteEntity', { entityId });
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const payload = hookResult.payload as { entityId: string };
+    const result = await deleteEntityFn(this.adapter!, payload.entityId);
+    await this.hooks.emit('after:kg:deleteEntity', result);
+    return result;
+  }
+
+  async deleteEntityBatch(args: DeleteEntityBatchInput) {
+    await this.init();
+    const hookResult = await this.hooks.emit('before:kg:deleteEntity', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await deleteEntityBatchFn(this.adapter!, hookResult.payload as DeleteEntityBatchInput);
+    await this.hooks.emit('after:kg:deleteEntity', result);
+    return result;
+  }
+
+  async deleteTripleBatch(args: DeleteTripleBatchInput) {
+    await this.init();
+    const hookResult = await this.hooks.emit('before:kg:deleteTriple', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await deleteTripleBatchFn(this.adapter!, hookResult.payload as DeleteTripleBatchInput);
+    await this.hooks.emit('after:kg:deleteTriple', result);
     return result;
   }
 

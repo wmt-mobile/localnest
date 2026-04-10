@@ -430,6 +430,23 @@ export interface InvalidateTripleResult {
   invalidated: boolean;
 }
 
+export interface DeleteEntityResult {
+  deleted: boolean;
+  entity_id: string;
+  triples_removed: number;
+}
+
+export interface DeleteEntityBatchResult {
+  deleted: number;
+  triples_removed: number;
+  errors: Array<{ index: number; message: string }>;
+}
+
+export interface DeleteTripleBatchResult {
+  deleted: number;
+  errors: Array<{ index: number; message: string }>;
+}
+
 export interface QueryRelationshipsResult {
   entity_id: string;
   direction: string;
@@ -470,6 +487,8 @@ export interface TraverseGraphResult {
 
 export interface DiscoverBridgesOpts {
   nest?: string;
+  /** When 'cross-branch', find bridges across branches within the given nest instead of across nests. */
+  mode?: 'cross-nest' | 'cross-branch';
 }
 
 export interface BridgeEntry {
@@ -483,6 +502,8 @@ export interface BridgeEntry {
   object_nest: string;
   subject_type?: string;
   object_type?: string;
+  subject_branch?: string;
+  object_branch?: string;
 }
 
 export interface DiscoverBridgesResult {

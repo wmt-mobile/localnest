@@ -3,7 +3,7 @@ import { nowIso, cleanString, stableJson } from '../utils.js';
 import type {
   Adapter, AddEntityInput, AddEntityResult, AddTripleInput, AddTripleResult,
   InvalidateTripleResult, QueryRelationshipsResult, KgTripleWithNames, KgTriple,
-  KgEntityWithRelations, KgStats
+  KgEntityWithRelations, KgStats, DeleteEntityResult
 } from '../types.js';
 
 function toSlug(name: string): string {
@@ -422,6 +422,31 @@ export async function getKgStats(adapter: Adapter): Promise<KgStats> {
     active_triples: activeTripleCount?.count ?? 0,
     by_predicate: byPredicate
   };
+}
+
+export async function deleteEntity(adapter: Adapter, entityId: string): Promise<DeleteEntityResult> {
+  const id = cleanString(entityId, 400);
+  if (!id) throw new Error('entityId is required');
+
+  return adapter.transaction(async (ad) => {
+    const tripleResult = await ad.run(
+      'DELETE FROM kg_triples WHERE subject_id = ? OR object_id = ?',
+      [id, id]
+    );
+    const triplesRemoved = tripleResult?.changes ?? 0;
+
+    const entityResult = await ad.run(
+      'DELETE FROM kg_entities WHERE id = ?',
+      [id]
+    );
+    const deleted = (entityResult?.changes ?? 0) > 0;
+
+    return {
+      deleted,
+      entity_id: id,
+      triples_removed: triplesRemoved
+    };
+  });
 }
 
 export { toSlug as normalizeEntityId };

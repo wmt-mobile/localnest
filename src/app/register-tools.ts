@@ -22,6 +22,7 @@ import {
   registerMemoryStoreTools,
   registerRetrievalTools,
   registerGraphTools,
+  registerKgDeleteTools,
   registerBackfillTools,
   registerFindTools,
   registerAuditTools,
@@ -91,6 +92,11 @@ export function registerAppTools(server: any, runtime: any, services: any): void
   registerGraphTools({
     registerJsonTool,
     schemas: sharedSchemas,
+    memory: services.memory
+  });
+
+  registerKgDeleteTools({
+    registerJsonTool,
     memory: services.memory
   });
 
