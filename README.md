@@ -102,7 +102,7 @@ Setup auto-writes the config for detected tools. You'll also find a ready-to-pas
         "LOCALNEST_RERANKER_PROVIDER": "huggingface",
         "LOCALNEST_RERANKER_MODEL": "cross-encoder/ms-marco-MiniLM-L-6-v2",
         "LOCALNEST_RERANKER_CACHE_DIR": "~/.localnest/cache",
-        "LOCALNEST_MEMORY_ENABLED": "false",
+        "LOCALNEST_MEMORY_ENABLED": "true",
         "LOCALNEST_MEMORY_BACKEND": "auto",
         "LOCALNEST_MEMORY_DB_PATH": "~/.localnest/data/localnest.memory.db"
       }
@@ -148,20 +148,26 @@ localnest version              # check current
 
 ## How Agents Use It
 
-Four workflows cover almost everything:
+Six workflows cover almost everything:
+
+### Cold start — one call to get everything
+
+```
+localnest_agent_prime     → memories + entities + files + changes + actions in 1 call
+```
 
 ### Fast lookup — find it, read it, done
 
 ```
-localnest_search_files   → find the module by path/name
-localnest_search_code    → find the exact symbol or identifier
-localnest_read_file      → read the relevant lines
+localnest_find            → fused search across memory, code, and KG
+localnest_search_files    → find the module by path/name
+localnest_read_file       → read the relevant lines
 ```
 
 ### Deep task — debug, refactor, review with context
 
 ```
-localnest_task_context    → one call: runtime status + recalled memories
+localnest_agent_prime     → one call: everything needed to start work
 localnest_search_hybrid   → concept-level search across your codebase
 localnest_read_file       → read the relevant sections
 localnest_capture_outcome → persist what you learned for next time
@@ -170,10 +176,19 @@ localnest_capture_outcome → persist what you learned for next time
 ### Knowledge graph — structured facts about the project
 
 ```
-localnest_kg_add_triple   → store a fact: "auth-service" uses "JWT"
-localnest_kg_query        → what does "auth-service" relate to?
-localnest_kg_as_of        → what was true about this on March 1st?
-localnest_graph_traverse  → walk 2-3 hops to discover connections
+localnest_kg_add_triples_batch → bulk import facts in one call
+localnest_kg_query             → what does "auth-service" relate to?
+localnest_kg_as_of             → what was true about this on March 1st?
+localnest_graph_traverse       → walk 2-3 hops to discover connections
+```
+
+### Teach and recall — your AI learns your preferences
+
+```
+localnest_teach           → "always use snake_case in this repo"
+localnest_memory_store    → just {title, content} — everything else auto-inferred
+localnest_whats_new       → what changed since my last session?
+localnest_audit           → health check: coverage, orphans, stale memories
 ```
 
 ### Conversation memory — learn from past chats
