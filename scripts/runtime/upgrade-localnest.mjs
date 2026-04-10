@@ -348,11 +348,19 @@ async function main() {
   if (!skipSkill) {
     runCommand(skillCmd, ['install', 'skills', '--force'], 'sync skill');
   }
-  runCommand(process.execPath, setupArgs, 'migrate setup');
+  // Use --import tsx/esm so setup can import .ts source files
+  let tsxImportArgs = [];
+  try {
+    const { createRequire } = await import('node:module');
+    const { pathToFileURL } = await import('node:url');
+    const req = createRequire(path.resolve(scriptsDir, '..', '..', 'package.json'));
+    tsxImportArgs = ['--import', pathToFileURL(req.resolve('tsx/esm')).href];
+  } catch { /* tsx unavailable — try without */ }
+  runCommand(process.execPath, [...tsxImportArgs, ...setupArgs], 'migrate setup');
 
   const doctorScript = path.resolve(scriptsDir, 'doctor-localnest.mjs');
   try {
-    runCommand(process.execPath, [doctorScript], 'post-upgrade doctor');
+    runCommand(process.execPath, [...tsxImportArgs, doctorScript], 'post-upgrade doctor');
   } catch (error) {
     process.stderr.write(`[upgrade] warning: ${error.message}\n`);
   }
