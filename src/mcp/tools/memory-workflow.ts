@@ -18,6 +18,7 @@ import type {
 interface MemoryService {
   getStatus(): Promise<unknown>;
   recall(opts: Record<string, unknown>): Promise<unknown>;
+  whatsNew(args: Record<string, unknown>): Promise<unknown>;
 }
 
 interface MemoryWorkflowService {
@@ -196,5 +197,34 @@ export function registerMemoryWorkflowTools({
     async (args: Record<string, unknown>) => normalizeAgentPrimeResult(
       await memoryWorkflow.agentPrime(args as any)
     )
+  );
+
+  registerJsonTool(
+    ['localnest_whats_new'],
+    {
+      title: "What's New",
+      description: 'Cross-session delta: new memories, KG triples, file changes, and commits since a given timestamp or last session.',
+      inputSchema: {
+        since: z.string().min(1),
+        agent_id: z.string().optional(),
+        project_path: z.string().optional(),
+        limit: z.number().int().min(1).max(50).default(10)
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+      }
+    },
+    async ({ since, agent_id, project_path, limit }: Record<string, unknown>) => {
+      const result = await memory.whatsNew({
+        since: since as string,
+        agentId: agent_id as string | undefined,
+        projectPath: project_path as string | undefined,
+        limit: limit as number | undefined
+      });
+      return result;
+    }
   );
 }
