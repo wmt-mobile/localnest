@@ -357,10 +357,10 @@ export function buildHelpGuide(task: string): HelpGuide {
 export function buildUsageGuide(): UsageGuide {
   return {
     quickstart: [
-      '1. Run localnest_server_status to confirm runtime health and active roots.',
-      '2. Use localnest_search_files to find a module, feature, or folder by name.',
-      '3. Use localnest_search_code for exact symbols, imports, and error strings.',
-      '4. Use localnest_read_file only after narrowing the target.'
+      '1. Call localnest_agent_prime({ task: "your task" }) to get memories, entities, files, and suggested actions in one call.',
+      '2. Use localnest_find({ query: "..." }) for fused search across memory, code, and KG.',
+      '3. Use localnest_read_file only after narrowing the target.',
+      '4. Call localnest_capture_outcome after meaningful work to persist learnings.'
     ],
     release_debug: [
       'If retrieval looks empty, validate project_path first, then retry with a broader query.',
@@ -369,30 +369,29 @@ export function buildUsageGuide(): UsageGuide {
     ],
     for_users: [
       'Run localnest_list_roots first to verify active roots.',
-      'Use localnest_list_projects to discover projects under a root.',
+      'Use localnest_agent_prime({ task: "..." }) for one-call context: memories, entities, files, and suggestions.',
+      'Use localnest_find({ query: "..." }) for fused search across memory, code, and KG.',
       'Run localnest_index_project for your active project/root before semantic search.',
-      'Use localnest_search_hybrid for low-noise retrieval.',
-      'Use localnest_read_file for targeted context windows.',
-      'Use localnest_task_context for one-call runtime + memory context before non-trivial work.',
+      'Use localnest_teach({ instruction: "..." }) to set persistent behavior rules for your AI.',
+      'Use localnest_memory_store with just {title, content} — everything else is auto-inferred.',
       'Use localnest_capture_outcome for one-call outcome capture after meaningful work.',
-      'Use localnest_memory_status to verify whether local memory is enabled and supported on this runtime.',
-      'Use localnest_memory_capture_event to preserve durable project decisions and preferences after meaningful work.',
+      'Use localnest_whats_new({ since: "last_session" }) to see what changed since your last session.',
+      'Use localnest_audit() to check memory health and get improvement suggestions.',
       'Use localnest_update_status when you need to verify whether a newer stable version is available.'
     ],
     for_ai_agents: [
-      'Call localnest_server_status first to understand runtime capabilities.',
-      'Prefer localnest_task_context for non-trivial debugging, implementation, review, and repeated repo work because it bundles runtime status, memory state, and recall in one call.',
-      'Treat localnest_capture_outcome as the default post-task memory path after meaningful work when memory is enabled.',
-      'To find a module or feature by name (e.g. "SSO", "payments"), use localnest_search_files first because it searches file paths and names.',
-      'Use localnest_search_code for exact symbol, keyword, or regex matches in file contents.',
-      'Call localnest_index_status, then localnest_index_project when the index is empty or stale.',
-      'For acronyms or domain terms (SSO, IAM, CRM), also try synonyms such as oauth, saml, passport, or auth.',
-      'Prefer localnest_search_hybrid with project_path for concept-level content retrieval.',
-      'If you need lower-level control, call localnest_memory_status only when the task is substantive or memory-specific.',
-      'Emit localnest_memory_capture_event only when you need lower-level event control.',
-      'Good capture events include: bug fixed, design decision made, review finding confirmed, user preference discovered, or reusable repo workflow learned.',
-      'Bad capture events include: browsing files, exploratory reading, dead-end investigation, or trivial one-shot lookups.',
-      'Use all_roots only when cross-project lookup is required.',
+      'Start every task with localnest_agent_prime({ task: "..." }) — it returns memories, entities, relevant files, recent changes, and suggested actions in one call.',
+      'Use localnest_find({ query: "..." }) for cross-domain search spanning memory, code, and KG with fused ranking.',
+      'Use localnest_teach({ instruction: "..." }) to store durable behavior modifiers (e.g. "always use snake_case in this repo").',
+      'Use localnest_whats_new({ since: "last_session" }) to see what changed across memories, triples, and files since your last session.',
+      'Prefer localnest_memory_store with just {title, content} — scope, tags, topic, nest, and branch are auto-inferred.',
+      'Use terse: "minimal" on write tools to get {id, ok} instead of full payloads — 70%+ token savings.',
+      'For bulk operations, use batch tools: localnest_kg_add_triples_batch (500/call), localnest_memory_store_batch (100/call).',
+      'Call localnest_help({ task: "describe what you need" }) for task-scoped tool recommendations.',
+      'Treat localnest_capture_outcome as the default post-task memory path after meaningful work.',
+      'Use localnest_audit() periodically to check memory health — coverage, density, orphans, stale entries.',
+      'To find a module or feature by name, use localnest_search_files. For exact symbols, use localnest_search_code.',
+      'For symbol intelligence, use localnest_find_callers, localnest_find_definition, localnest_find_implementations.',
       'After retrieval, call localnest_read_file with narrow line ranges.',
       'If updates.is_outdated=true in server status, ask user for approval and then call localnest_update_self with approved_by_user=true.'
     ],
@@ -403,24 +402,19 @@ export function buildUsageGuide(): UsageGuide {
       'Always cite concrete file paths and line ranges after localnest_read_file before conclusions.'
     ],
     tool_sequence: [
-      'localnest_server_status',
-      'localnest_list_roots',
-      'localnest_list_projects',
+      'localnest_agent_prime -> one call: memories + entities + files + changes + suggestions',
+      'localnest_find -> fused search across memory, code, and KG',
       'localnest_search_files -> for module or feature discovery by name',
       'localnest_search_code -> for exact identifiers and errors',
-      'localnest_index_status',
-      'localnest_index_project',
-      'localnest_search_hybrid -> for concept and content retrieval',
+      'localnest_find_definition -> jump to symbol definition',
+      'localnest_find_callers -> find all callers of a symbol',
       'localnest_read_file',
-      'localnest_task_context -> preferred one-call runtime + memory context for substantive tasks',
-      'localnest_capture_outcome -> preferred one-call outcome capture after meaningful work',
-      'localnest_memory_status -> only when memory is relevant',
-      'localnest_memory_recall -> only when memory is enabled and the task is substantive',
-      'localnest_memory_capture_event -> after meaningful work',
-      'localnest_update_status',
-      'localnest_update_self (only after user approval)',
-      'localnest_health'
+      'localnest_capture_outcome -> persist learnings after meaningful work',
+      'localnest_teach -> store durable behavior modifiers',
+      'localnest_whats_new -> cross-session delta summary',
+      'localnest_audit -> memory health check',
+      'localnest_help -> task-scoped tool guidance'
     ],
-    recommended_next_action: 'For most sessions: localnest_server_status, then localnest_search_files.'
+    recommended_next_action: 'For most sessions: localnest_agent_prime, then localnest_find.'
   };
 }
