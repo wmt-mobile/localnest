@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v0.2.0
 milestone_name: Memory-KG Fusion & Agent-First Surface
 status: active
-stopped_at: "Phase 28 complete (pre-implemented), moving to Phase 29"
-last_updated: "2026-04-10T06:35:00Z"
-last_activity: "2026-04-10 - Phase 28 absorbed from quick task 260409-ohq, all CARD-01..06 met"
+stopped_at: "Phase 29 complete — Lane A done, Lanes B/C/D/E unlocked"
+last_updated: "2026-04-10T07:15:00Z"
+last_activity: "2026-04-10 - Phase 29 complete: auto-linking, recall enrichment, backfill, nest_tree fix"
 progress:
   total_phases: 13
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
-  percent: 23
-  next_phase: 29
+  completed_phases: 4
+  total_plans: 4
+  completed_plans: 4
+  percent: 31
+  next_phase: 30
 ---
 
 # Project State
@@ -22,16 +22,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** v0.2.0 Memory-KG Fusion — Phase 28 done, now Phase 29 (Memory <-> KG Auto-Linking). Branch: release/0.2.0.
+**Current focus:** v0.2.0 Memory-KG Fusion — Lane A complete (26-29), now parallel lanes B/C/D/E. Branch: release/0.2.0.
 
 ## Current Position
 
-Phase: **Phase 29 (Memory <-> KG Auto-Linking)** — not yet started
+Phase: **Phases 30-36** — parallel execution unlocked
 Plan: —
-Status: Phase 28 complete (absorbed from quick task); ready to plan Phase 29
-Last activity: 2026-04-10 - Phase 28 absorbed from 260409-ohq; all CARD-01..06 already implemented
+Status: Lane A (26->27->28->29) complete; Lanes B (30,31), C (32), D (33,34), E (36) now runnable
+Last activity: 2026-04-10 - Phase 29 shipped: auto-link, recall enrichment, backfill, nest_tree fix
 
-Progress (v0.2.0 only): [██░░░░░░░░] 23% (3/13 phases)
+Progress (v0.2.0 only): [███░░░░░░░] 31% (4/13 phases)
 
 ## v0.2.0 Execution Plan
 
