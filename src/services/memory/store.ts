@@ -50,6 +50,7 @@ import {
   addEntityBatch as addEntityBatchFn,
   addTripleBatch as addTripleBatchFn
 } from './knowledge-graph/kg-batch.js';
+import { searchTriples as searchTriplesFn } from './knowledge-graph/kg-search.js';
 import { backfillMemoryKgLinks as backfillMemoryKgLinksFn } from './knowledge-graph/auto-link.js';
 import { getFileMemoryHints as getFileMemoryHintsFn } from './proactive-hints.js';
 import { whatsNew as whatsNewFn } from './temporal/whats-new.js';
@@ -316,6 +317,11 @@ export class MemoryStore {
   async getKgStats() {
     await this.init();
     return getKgStatsFn(this.adapter!);
+  }
+
+  async searchTriples(args: { query: string; limit?: number }) {
+    await this.init();
+    return searchTriplesFn(this.adapter!, args);
   }
 
   async addEntityBatch(args: AddEntityBatchInput) {

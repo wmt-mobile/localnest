@@ -237,6 +237,11 @@ export class MemoryService {
     return this.store.getKgStats();
   }
 
+  async searchTriples(args: { query: string; limit?: number }) {
+    this.assertEnabled();
+    return this.store.searchTriples(args);
+  }
+
   async addEntityBatch(args: { entities: Array<Record<string, unknown>>; response_format?: string }) {
     this.assertEnabled();
     return this.store.addEntityBatch(args as any);
