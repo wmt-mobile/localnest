@@ -101,6 +101,7 @@ export async function recall(adapter: Adapter, {
       });
       if (row.last_recalled_at) score += Math.min(row.recall_count || 0, 5) * 0.1;
       if (row.kind === 'preference') score += 0.25;
+      if (row.kind === 'feedback') score += 2.0;
 
       return {
         score,

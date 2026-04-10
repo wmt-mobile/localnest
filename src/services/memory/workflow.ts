@@ -1,6 +1,7 @@
 import type { MemoryService } from './service.js';
 import type { Link } from './types.js';
 import { agentPrime as agentPrimeFn, type AgentPrimeInput, type AgentPrimeResult } from './workflow/agent-prime.js';
+import { teach as teachFn, type TeachInput, type TeachResult } from './workflow/teach.js';
 
 function cleanText(value: unknown, maxLength = 0): string {
   if (typeof value !== 'string') return '';
@@ -224,5 +225,21 @@ export class MemoryWorkflowService {
       { memory: this.memory, search: this.search },
       input as unknown as AgentPrimeInput
     );
+  }
+
+  async teach(input: Record<string, unknown>): Promise<TeachResult> {
+    const result = await teachFn(
+      { storeEntry: (args) => this.memory.storeEntry(args) },
+      input as unknown as TeachInput
+    );
+    // Emit hook event for extensibility
+    if (this.memory.store?.hooks) {
+      try {
+        await this.memory.store.hooks.emit('after:teach', result);
+      } catch {
+        // Non-blocking
+      }
+    }
+    return result;
   }
 }

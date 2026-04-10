@@ -11,6 +11,7 @@ import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import type {
   MemoryKind,
   MemoryLink,
+  MemoryScope,
   MemoryEventType,
   MemoryEventStatus
 } from '../common/schemas.js';
@@ -25,10 +26,12 @@ interface MemoryWorkflowService {
   getTaskContext(args: Record<string, unknown>): Promise<unknown>;
   captureOutcome(args: Record<string, unknown>): Promise<unknown>;
   agentPrime(args: Record<string, unknown>): Promise<unknown>;
+  teach(args: Record<string, unknown>): Promise<unknown>;
 }
 
 interface SharedSchemas {
   MEMORY_KIND_SCHEMA: z.ZodType<MemoryKind>;
+  MEMORY_SCOPE_SCHEMA: z.ZodType<MemoryScope>;
   MEMORY_LINK_SCHEMA: z.ZodType<MemoryLink>;
   MEMORY_EVENT_TYPE_SCHEMA: z.ZodType<MemoryEventType>;
   MEMORY_EVENT_STATUS_SCHEMA: z.ZodType<MemoryEventStatus>;
@@ -49,6 +52,7 @@ export function registerMemoryWorkflowTools({
 }: RegisterMemoryWorkflowToolsOptions): void {
   const {
     MEMORY_KIND_SCHEMA,
+    MEMORY_SCOPE_SCHEMA,
     MEMORY_LINK_SCHEMA,
     MEMORY_EVENT_TYPE_SCHEMA,
     MEMORY_EVENT_STATUS_SCHEMA
@@ -225,6 +229,33 @@ export function registerMemoryWorkflowTools({
         limit: limit as number | undefined
       });
       return result;
+    }
+  );
+
+  registerJsonTool(
+    ['localnest_teach'],
+    {
+      title: 'Teach',
+      description: 'Teach the agent a durable behavior rule. Stores a high-importance feedback memory that auto-surfaces in agent_prime when future tasks match the instruction domain. Use this to set persistent preferences, coding standards, or workflow rules that should apply across sessions. Teach memories can be listed (kind=feedback), updated, or deleted via existing memory CRUD tools.',
+      inputSchema: {
+        instruction: z.string().min(1).max(4000),
+        importance: z.number().int().min(70).max(100).default(95),
+        tags: z.array(z.string()).max(50).default([]),
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional(),
+        scope: MEMORY_SCOPE_SCHEMA.optional(),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+      }
+    },
+    async ({ terse, ...args }: Record<string, unknown>) => {
+      const result = await memoryWorkflow.teach(args as any);
+      return toMinimalWriteResponse(result, terse as string);
     }
   );
 }

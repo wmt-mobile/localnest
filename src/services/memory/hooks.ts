@@ -25,6 +25,9 @@ const VALID_EVENTS = new Set([
   // File proactive hooks
   'after:file:read', 'after:file:changed',
 
+  // Teach
+  'after:teach',
+
   // Dedup
   'before:dedup', 'after:dedup',
 
