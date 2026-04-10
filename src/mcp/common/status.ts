@@ -226,6 +226,134 @@ export interface UsageGuide {
   recommended_next_action: string;
 }
 
+export interface HelpGuideTool {
+  name: string;
+  description: string;
+  example?: Record<string, unknown>;
+}
+
+export interface HelpGuide {
+  task_type: string;
+  tools: HelpGuideTool[];
+  workflow: string[];
+  tip: string;
+}
+
+interface TaskRule {
+  pattern: RegExp;
+  type: string;
+  tools: HelpGuideTool[];
+  workflow: string[];
+  tip: string;
+}
+
+/* eslint-disable @typescript-eslint/no-unused-vars -- data table */
+const t = (name: string, description: string, example?: Record<string, unknown>): HelpGuideTool => ({ name, description, ...(example ? { example } : {}) });
+const HELP_RULES: TaskRule[] = [
+  { pattern: /\b(store|save|remember|capture|log|record|preserve|decision|outcome)\b/i, type: 'memory_capture',
+    tools: [t('localnest_memory_store', 'Store a durable memory entry', { title: 'Auth uses JWT', content: 'Decided to use JWT with refresh tokens' }),
+      t('localnest_capture_outcome', 'One-call outcome capture after meaningful work'),
+      t('localnest_memory_suggest_relations', 'Find related memories to link after storing')],
+    workflow: ['1. Call memory_store with title + content (all other fields auto-inferred).', '2. Note the returned memory ID.', '3. Optionally call memory_suggest_relations to discover related prior knowledge.', '4. Link strong matches (>= 0.7) with memory_add_relation.'],
+    tip: 'After bug fixes, decisions, or review findings, always capture -- it costs nothing and pays compound interest.' },
+  { pattern: /\b(recall|find memory|what did|remember when|prior|previous|history|context)\b/i, type: 'memory_recall',
+    tools: [t('localnest_task_context', 'One-call runtime + memory context (preferred start)'),
+      t('localnest_memory_recall', 'Search memories by query with semantic ranking'),
+      t('localnest_memory_related', 'Traverse memory graph one hop from a known entry')],
+    workflow: ['1. Call task_context with a task_hint for bundled status + recall.', '2. If you need deeper recall, use memory_recall with a focused query.', '3. Follow up with memory_related on the most relevant result.'],
+    tip: 'Use task_context as your default entry point -- it bundles runtime status and memory recall in one call.' },
+  { pattern: /\b(search code|find function|symbol|import|identifier|definition|usage)\b/i, type: 'code_search',
+    tools: [t('localnest_search_code', 'Exact symbol/keyword/regex search in file contents'),
+      t('localnest_search_files', 'Find files by name/path pattern'),
+      t('localnest_read_file', 'Read exact lines from a known file')],
+    workflow: ['1. Use search_code for exact symbol matches.', '2. Use search_files to locate the module/file by name.', '3. Read targeted line ranges with read_file.'],
+    tip: 'Pass project_path when known -- scoped searches are 10x faster than root-wide.' },
+  { pattern: /\b(search|find|where is|locate|discover|module|feature|folder)\b/i, type: 'content_search',
+    tools: [t('localnest_search_files', 'Find files by name/path pattern'),
+      t('localnest_search_hybrid', 'Concept-level content retrieval (lexical + semantic)'),
+      t('localnest_project_tree', 'Directory structure overview')],
+    workflow: ['1. Start with search_files for module/directory discovery.', '2. Use search_hybrid for concept-level or fuzzy matches.', '3. Use project_tree for structural overview.'],
+    tip: 'For acronyms (SSO, IAM), also try synonyms (oauth, saml, passport, auth).' },
+  { pattern: /\b(graph|entity|triple|fact|knowledge graph|kg|structured fact)\b/i, type: 'knowledge_graph',
+    tools: [t('localnest_kg_add_entity', 'Create named entities (people, projects, concepts)'),
+      t('localnest_kg_add_triple', 'Add subject-predicate-object facts'),
+      t('localnest_kg_query', 'Query relationships for an entity'),
+      t('localnest_kg_stats', 'Entity/triple counts and predicate breakdown')],
+    workflow: ['1. Create entities with kg_add_entity.', '2. Link them with kg_add_triple (subject-predicate-object).', '3. Query relationships with kg_query.', '4. Use kg_timeline for chronological fact evolution.'],
+    tip: 'When facts change, invalidate the old triple with kg_invalidate and add the new one.' },
+  { pattern: /\b(relate|link|connect|suggest|similar|associated)\b/i, type: 'memory_relations',
+    tools: [t('localnest_memory_suggest_relations', 'Find semantically similar memories'),
+      t('localnest_memory_add_relation', 'Link two memories with a named relation'),
+      t('localnest_memory_related', 'Traverse memory links one hop')],
+    workflow: ['1. Call memory_suggest_relations on a memory ID.', '2. Review candidates (similarity >= 0.55).', '3. Confirm with memory_add_relation using an appropriate relation_type.', '4. Use memory_related to verify the graph.'],
+    tip: 'Relation types: related, depends_on, contradicts, supersedes, extends.' },
+  { pattern: /\b(debug|fix|investigate|error|crash|broken|failing|bug|issue|traceback)\b/i, type: 'debug',
+    tools: [t('localnest_task_context', 'Check prior fixes/context before diving in'),
+      t('localnest_search_code', 'Search for error strings and symbols'),
+      t('localnest_search_hybrid', 'Search for architectural context'),
+      t('localnest_read_file', 'Read exact code for confirmation'),
+      t('localnest_capture_outcome', 'Capture the fix for future reference')],
+    workflow: ['1. Call task_context for prior fixes and context.', '2. Search for the error with search_code (exact match).', '3. Search for architecture with search_hybrid (concept match).', '4. Read targeted lines with read_file.', '5. After fixing, capture the outcome.'],
+    tip: 'Run both search_code (exact) and search_hybrid (context) for thorough investigation.' },
+  { pattern: /\b(setup|install|configure|onboard|getting started)\b/i, type: 'setup',
+    tools: [t('localnest_server_status', 'Check runtime health and configuration'),
+      t('localnest_health', 'Compact health smoke check'),
+      t('localnest_usage_guide', 'Best-practice guidance from the server')],
+    workflow: ['1. Run server_status to check runtime health.', '2. If issues, run health for a compact diagnostic.', '3. Call usage_guide for embedded best practices.'],
+    tip: 'Most setup issues are resolved by: npm install -g localnest-mcp && localnest setup && localnest doctor.' },
+  { pattern: /\b(nest|branch|organize|taxonomy|hierarchy|tree)\b/i, type: 'taxonomy',
+    tools: [t('localnest_nest_tree', 'Full hierarchy view: nests -> branches -> counts'),
+      t('localnest_nest_list', 'List top-level nests with counts'),
+      t('localnest_nest_branches', 'List branches within a specific nest')],
+    workflow: ['1. Run nest_tree for the full overview.', '2. Use nest_branches to drill into a specific nest.', '3. Pass nest/branch params when storing memories for organized retrieval.'],
+    tip: 'Nests are auto-inferred from project_path. Branches from git branch or topic.' },
+];
+
+export function buildHelpGuide(task: string): HelpGuide {
+  if (!task || !task.trim()) {
+    return {
+      task_type: 'general',
+      tools: [
+        { name: 'localnest_server_status', description: 'Check runtime health' },
+        { name: 'localnest_usage_guide', description: 'Best-practice guidance' },
+        { name: 'localnest_search_files', description: 'Find files by name' },
+      ],
+      workflow: [
+        '1. Run server_status to confirm the runtime is healthy.',
+        '2. Call usage_guide for workflow guidance.',
+        '3. Start searching with search_files.',
+      ],
+      tip: 'Call localnest_help with a specific task description for tailored guidance.',
+    };
+  }
+
+  for (const rule of HELP_RULES) {
+    if (rule.pattern.test(task)) {
+      return {
+        task_type: rule.type,
+        tools: rule.tools,
+        workflow: rule.workflow,
+        tip: rule.tip,
+      };
+    }
+  }
+
+  return {
+    task_type: 'general',
+    tools: [
+      { name: 'localnest_server_status', description: 'Check runtime health' },
+      { name: 'localnest_search_files', description: 'Find files by name' },
+      { name: 'localnest_search_hybrid', description: 'Concept-level content retrieval' },
+    ],
+    workflow: [
+      '1. Run server_status to check runtime capabilities.',
+      '2. Use search_files for module/file discovery.',
+      '3. Use search_hybrid for concept-level search.',
+    ],
+    tip: 'Describe your task more specifically for better guidance (e.g. "debug auth crash", "store a decision").',
+  };
+}
+
 export function buildUsageGuide(): UsageGuide {
   return {
     quickstart: [

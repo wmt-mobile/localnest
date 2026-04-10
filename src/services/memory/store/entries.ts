@@ -3,7 +3,7 @@ import path from 'node:path';
 import {
   nowIso, clampInt, cleanString, normalizeScope, deriveSummary, deriveTitle,
   ensureArray, normalizeLinks, stableJson, makeFingerprint, generateMemoryId,
-  buildSearchTerms, deserializeEntry
+  buildSearchTerms, deserializeEntry, inferGitBranch, inferTopic, inferTags
 } from '../utils.js';
 import { checkDuplicate } from './dedup.js';
 import { extractAndLink } from '../knowledge-graph/auto-link.js';
@@ -152,6 +152,14 @@ export async function getEntry(store: MemoryStoreLike, id: string): Promise<Memo
 export async function storeEntry(store: MemoryStoreLike, input: StoreEntryInput): Promise<StoreEntryResult> {
   await store.init();
   const scope = normalizeScope(input.scope);
+  // SLIM-03: Auto-infer project_path from cwd when not provided
+  if (!scope.project_path) {
+    scope.project_path = process.cwd();
+  }
+  // SLIM-04: Auto-infer branch_name from git when not provided
+  if (!scope.branch_name) {
+    scope.branch_name = inferGitBranch();
+  }
   const rawNestFallback = scope.project_path ? path.basename(scope.project_path) : '';
   const rawBranchFallback = (scope.branch_name || scope.topic || '').replace(/[/\\]/g, '-');
   const nest = cleanString(input.nest || rawNestFallback, 200);
@@ -168,8 +176,13 @@ export async function storeEntry(store: MemoryStoreLike, input: StoreEntryInput)
     scope
   });
   const status = cleanString(input.status || 'active', 30) || 'active';
-  const tags = ensureArray(input.tags);
+  const rawTags = ensureArray(input.tags);
   const links = normalizeLinks(input.links);
+  // SLIM-05: Auto-infer topic and tags when not provided
+  if (!scope.topic) {
+    scope.topic = inferTopic(content);
+  }
+  const tags = rawTags.length > 0 ? rawTags : inferTags(title, content);
   const sourceType = cleanString(input.source_type || input.sourceType || 'manual', 60) || 'manual';
   const sourceRef = cleanString(input.source_ref || input.sourceRef, 1000);
   const importance = clampInt(input.importance, 50, 0, 100);

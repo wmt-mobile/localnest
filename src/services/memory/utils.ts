@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { execSync } from 'node:child_process';
 import { tokenize } from '../retrieval/core/tokenizer.js';
 import type { Scope, ScopeInput, Link, MemoryEntry, MemoryEntryRow } from './types.js';
 
@@ -85,6 +86,68 @@ export function ensureArray(value: unknown): string[] {
     .map((item: unknown) => (typeof item === 'string' ? item.trim() : ''))
     .filter(Boolean)
     .slice(0, 50);
+}
+
+/** Infer the current git branch name. Returns empty string on failure. */
+export function inferGitBranch(): string {
+  try {
+    return execSync('git rev-parse --abbrev-ref HEAD', {
+      encoding: 'utf8',
+      timeout: 3000,
+      stdio: ['ignore', 'pipe', 'ignore']
+    }).trim();
+  } catch {
+    return '';
+  }
+}
+
+const TOPIC_RULES: Array<[RegExp, string]> = [
+  [/\b(bug|fix|error|crash|exception|broken|failing|issue)\b/i, 'bugfix'],
+  [/\b(decid|decision|chose|pick|prefer|select|went with)\b/i, 'decision'],
+  [/\b(review|audit|check|inspect|feedback|finding)\b/i, 'review'],
+  [/\b(learn|pattern|convention|always|never|must|should|rule)\b/i, 'knowledge'],
+  [/\b(config|setup|install|deploy|ci|cd|pipeline)\b/i, 'configuration'],
+  [/\b(refactor|clean|extract|split|rename|restructure)\b/i, 'refactoring'],
+  [/\b(test|spec|assert|expect|coverage|unit|e2e)\b/i, 'testing'],
+];
+
+/** Classify content into a topic using keyword rules. */
+export function inferTopic(content: string): string {
+  if (!content) return 'general';
+  const text = content.slice(0, 1000).toLowerCase();
+  for (const [pattern, topic] of TOPIC_RULES) {
+    if (pattern.test(text)) return topic;
+  }
+  return 'general';
+}
+
+const TAG_STOP_WORDS = new Set([
+  'the', 'and', 'for', 'with', 'from', 'this', 'that', 'not', 'are', 'was',
+  'were', 'been', 'have', 'has', 'had', 'will', 'can', 'could', 'would',
+  'should', 'may', 'might', 'shall', 'its', 'use', 'used', 'using', 'new',
+  'also', 'but', 'when', 'then', 'than', 'all', 'each', 'any', 'some',
+  'into', 'over', 'after', 'before', 'between', 'under', 'about', 'such',
+  'only', 'other', 'more', 'most', 'very', 'just', 'like', 'well', 'back',
+]);
+
+/** Extract candidate tags from title + content using identifier patterns. */
+export function inferTags(title: string, content: string): string[] {
+  const text = `${title || ''} ${(content || '').slice(0, 300)}`.toLowerCase();
+  const identifiers = new Set<string>();
+
+  // camelCase and PascalCase words (split on case boundaries)
+  for (const m of text.matchAll(/[a-z][a-zA-Z0-9]{2,30}/g)) {
+    const word = m[0].toLowerCase();
+    if (!TAG_STOP_WORDS.has(word) && word.length >= 3) identifiers.add(word);
+  }
+
+  // snake_case and hyphenated terms
+  for (const m of text.matchAll(/[a-z][a-z0-9]*[-_][a-z0-9_-]{1,30}/g)) {
+    const word = m[0].toLowerCase();
+    if (word.length >= 4) identifiers.add(word);
+  }
+
+  return Array.from(identifiers).slice(0, 5);
 }
 
 export function stableJson(value: unknown): string {
