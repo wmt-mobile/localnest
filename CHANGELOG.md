@@ -4,6 +4,42 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] - 2026-04-10
+
+### Added
+
+- `localnest_kg_add_entities_batch` — Batch entity creation (up to 500)
+- `localnest_kg_add_triples_batch` — Batch triple creation with dedup
+- `localnest_memory_store_batch` — Batch memory storage (up to 100)
+- `localnest_agent_prime` — Unified context: memories + entities + files + changes + actions in 1 call
+- `localnest_find` — Fused search across memory, code, and KG with RRF ranking
+- `localnest_whats_new` — Cross-session delta: new memories, triples, files since timestamp
+- `localnest_help` — Just-in-time task-scoped tool guidance
+- `localnest_teach` — Durable behavior modifier via feedback memories
+- `localnest_audit` — Self-audit dashboard: coverage, density, orphans, stale memories
+- `localnest_file_changed` — Proactive memory hints when files are edited
+- `localnest_kg_backfill_links` — Retroactive memory-to-KG entity linking
+- `localnest_project_backfill` — Scan directory for projects, seed memories
+- `localnest_find_callers` — Find all callers of a symbol
+- `localnest_find_definition` — Find symbol definition
+- `localnest_find_implementations` — Find interface/trait implementations
+- `localnest_rename_preview` — Preview all references before renaming
+
+### Features
+
+- **Batch operations** — 300 API calls become 3 with batch write tools
+- **Terse responses** — `terse: 'minimal'` on all write tools, 70%+ token reduction
+- **Auto-inference** — memory_store needs only {title, content}, everything else inferred
+- **Memory-KG fusion** — Memories auto-extract entities and create KG triples
+- **Recall enrichment** — Top results include related_facts from 1-hop KG neighbors
+- **Predicate cardinality** — Contradiction detection only for functional predicates
+- **Symbol-aware code intel** — Regex-first with optional tree-sitter enhancement
+- **Proactive hooks** — File-linked memory hints on read/edit
+- **Teach memories** — Durable behavior modifiers surfaced through agent_prime
+- **Self-audit** — Health score, coverage, density, orphan, stale memory detection
+- **SKILL.md slim-down** — From ~360 to 46 lines
+- **Cross-project bridges** — Insight generation for entities spanning multiple nests
+
 ## [0.1.0] - 2026-04-09
 
 ### Added

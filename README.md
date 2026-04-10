@@ -16,7 +16,7 @@ LocalNest is a local-first MCP server where your AI builds its nest — right on
 
 A private AI coding assistant with semantic code search, offline AI code tools, and an AI knowledge graph — all running locally. No-cloud AI tools for local-first development.
 
-**52 MCP tools** | **TypeScript** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
+**67 MCP tools** | **TypeScript** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
 
 📖 [Full documentation](https://wmt-mobile.github.io/localnest/) · [Architecture deep dive](./localnest-docs/docs/guides/architecture.md)
 
@@ -28,20 +28,23 @@ These translated files are locale-specific full README translations. See [transl
 
 ---
 
-## What's New in 0.1.0
+## What's New in 0.2.0
 
 > Full changelog: [CHANGELOG.md](./CHANGELOG.md)
 
-- **Temporal knowledge graph** — entities, triples, as_of queries, timelines, contradiction detection
-- **Multi-hop graph traversal** — walk relationships 2-5 hops deep via recursive CTEs (unique to LocalNest)
-- **Nest/Branch hierarchy** — LocalNest's own two-level memory taxonomy for organized retrieval
-- **Agent-scoped memory** — per-agent isolation with private diary entries
-- **Semantic dedup** — embedding similarity gate prevents near-duplicate memory pollution
-- **Conversation ingestion** — import Markdown/JSON chat exports with entity extraction
-- **Hooks system** — pre/post operation callbacks for memory, KG, traversal, ingestion
-- **CLI-first architecture** — unified `localnest <noun> <verb>` commands for everything
-- **Shell completions** — bash, zsh, fish tab completion
-- **17 new MCP tools** (52 total) — KG, nests, traversal, diary, ingest, dedup, hooks
+- **Batch operations** — `kg_add_entities_batch`, `kg_add_triples_batch`, `memory_store_batch` turn 300 API calls into 3
+- **Fused search** — `localnest_find` searches memory, code, and KG in one call with RRF ranking
+- **Agent prime** — `localnest_agent_prime` returns memories + entities + files + changes + actions in a single call
+- **Terse responses** — `terse: 'minimal'` on all write tools, 70%+ token reduction
+- **Auto-inference** — `memory_store` needs only {title, content}, everything else inferred
+- **Memory-KG fusion** — memories auto-extract entities and create KG triples
+- **Recall enrichment** — top results include related_facts from 1-hop KG neighbors
+- **Symbol-aware code intel** — `find_callers`, `find_definition`, `find_implementations`, `rename_preview`
+- **Teach memories** — `localnest_teach` creates durable behavior modifiers surfaced through agent_prime
+- **Self-audit** — `localnest_audit` reports health score, coverage, density, orphans, stale memories
+- **Proactive hooks** — `localnest_file_changed` surfaces memory hints on file edits
+- **Cross-session deltas** — `localnest_whats_new` shows new memories, triples, files since last session
+- **15 new MCP tools** (67 total)
 
 ---
 
@@ -310,6 +313,37 @@ localnest completion bash           # shell completions
 | `localnest_ingest_json` | Import JSON conversation exports into memory + KG |
 | `localnest_memory_check_duplicate` | Semantic duplicate detection before filing |
 
+### Batch Operations
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_kg_add_entities_batch` | Batch entity creation (up to 500 entities per call) |
+| `localnest_kg_add_triples_batch` | Batch triple creation with dedup |
+| `localnest_memory_store_batch` | Batch memory storage (up to 100 entries per call) |
+
+### Agentic Workflow
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_agent_prime` | Unified context: memories + entities + files + changes + actions in 1 call |
+| `localnest_find` | Fused search across memory, code, and KG with RRF ranking |
+| `localnest_whats_new` | Cross-session delta: new memories, triples, files since timestamp |
+| `localnest_help` | Just-in-time task-scoped tool guidance |
+| `localnest_teach` | Durable behavior modifier via feedback memories |
+| `localnest_audit` | Self-audit dashboard: coverage, density, orphans, stale memories |
+| `localnest_file_changed` | Proactive memory hints when files are edited |
+| `localnest_kg_backfill_links` | Retroactive memory-to-KG entity linking |
+| `localnest_project_backfill` | Scan directory for projects, seed memories |
+
+### Code Intelligence
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_find_callers` | Find all callers of a symbol |
+| `localnest_find_definition` | Find symbol definition |
+| `localnest_find_implementations` | Find interface/trait implementations |
+| `localnest_rename_preview` | Preview all references before renaming |
+
 ### Server & Updates
 
 | Tool | What it does |
@@ -320,7 +354,7 @@ localnest completion bash           # shell completions
 | `localnest_update_status` | Check npm for latest version (cached) |
 | `localnest_update_self` | Update globally and sync bundled skill (approval required) |
 
-**52 tools total.** All support `response_format: "json"` (default) or `"markdown"`. List tools return `total_count`, `has_more`, `next_offset` for pagination.
+**67 tools total.** All support `response_format: "json"` (default) or `"markdown"`. List tools return `total_count`, `has_more`, `next_offset` for pagination.
 
 ---
 
@@ -331,7 +365,7 @@ LocalNest is the only local-first MCP server that combines code retrieval AND st
 | Capability | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
 |---|---|---|---|---|---|
 | **Local-first (no cloud)** | Yes | Yes | No ($25+/mo) | No (Neo4j) | No ($20-200/mo) |
-| **Code retrieval** | 52 MCP tools, AST-aware, hybrid search | None | None | None | None |
+| **Code retrieval** | 67 MCP tools, AST-aware, hybrid search | None | None | None | None |
 | **Knowledge graph** | SQLite triples with temporal validity | SQLite triples | Neo4j | Neo4j | Key-value |
 | **Multi-hop traversal** | Yes (recursive CTEs, 2-5 hops) | No (flat lookup only) | No | Yes (requires Neo4j) | No |
 | **Temporal queries (as_of)** | Yes | Yes | Yes | Yes | No |
@@ -343,7 +377,7 @@ LocalNest is the only local-first MCP server that combines code retrieval AND st
 | **Hooks system** | Pre/post operation hooks | None | Webhooks | None | None |
 | **Runtime** | Node.js + TypeScript (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
 | **Dependencies** | 0 new (pure SQLite) | ChromaDB (heavy) | Neo4j ($25+/mo) | Neo4j | Cloud API |
-| **MCP tools** | 52 | 19 | 0 | 0 | 0 |
+| **MCP tools** | 67 | 19 | 0 | 0 | 0 |
 | **Cost** | Free | Free | $25+/mo | $25+/mo | $20-200/mo |
 
 **LocalNest's unique position:** The only tool that gives your AI both deep code understanding AND structured persistent memory — entirely local, zero cloud, zero cost.
@@ -437,7 +471,7 @@ Setup writes everything to `~/.localnest/`:
 
 ## Install Note
 
-`0.1.0` is a major release — fully rewritten in TypeScript — adding temporal knowledge graph, multi-hop traversal, nest/branch hierarchy, agent-scoped memory, semantic dedup, conversation ingestion, hooks system, CLI-first architecture with 52 MCP tools, 10 Claude Code slash commands, interactive TUI dashboard, guided onboarding wizard, and end-to-end selftest. Schema migrations are all additive and backward-compatible — existing databases upgrade automatically on first run.
+`0.2.0` adds 15 new MCP tools (67 total): batch operations for entities/triples/memories, fused cross-domain search, unified agent context, symbol-aware code intelligence, teach memories, self-audit, proactive file-change hooks, and cross-session deltas. Terse responses on all write tools cut token usage by 70%+. Auto-inference on memory_store means only {title, content} is required. Memory-KG fusion auto-extracts entities and creates triples on every write. Schema migrations remain additive and backward-compatible.
 
 **Performance tips:**
 - Scope queries with `project_path` + a narrow `glob` whenever possible
