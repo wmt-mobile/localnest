@@ -578,3 +578,23 @@ export function normalizeProjectSummaryResult(result: any, projectPath: string):
     summary: result?.summary || ''
   };
 }
+
+export interface NormalizedAgentPrimeResult {
+  task: string;
+  memories: Array<{ id: string; title: string; summary: string; kind: string; score: number }>;
+  entities: Array<{ id: string; name: string; type: string; predicates: string[] }>;
+  files: Array<{ path: string; score: number }>;
+  recent_changes: string;
+  suggested_actions: string[];
+}
+
+export function normalizeAgentPrimeResult(result: any): NormalizedAgentPrimeResult {
+  return {
+    task: result?.task || '',
+    memories: Array.isArray(result?.memories) ? result.memories : [],
+    entities: Array.isArray(result?.entities) ? result.entities : [],
+    files: Array.isArray(result?.files) ? result.files : [],
+    recent_changes: result?.recent_changes || 'unavailable',
+    suggested_actions: Array.isArray(result?.suggested_actions) ? result.suggested_actions : []
+  };
+}

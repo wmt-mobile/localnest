@@ -3,7 +3,8 @@ import {
   normalizeCaptureOutcomeResult,
   normalizeMemoryRecallResult,
   normalizeMemoryStatus,
-  normalizeTaskContextResult
+  normalizeTaskContextResult,
+  normalizeAgentPrimeResult
 } from '../common/response-normalizers.js';
 import { toMinimalWriteResponse } from '../common/terse-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
@@ -22,6 +23,7 @@ interface MemoryService {
 interface MemoryWorkflowService {
   getTaskContext(args: Record<string, unknown>): Promise<unknown>;
   captureOutcome(args: Record<string, unknown>): Promise<unknown>;
+  agentPrime(args: Record<string, unknown>): Promise<unknown>;
 }
 
 interface SharedSchemas {
@@ -168,5 +170,31 @@ export function registerMemoryWorkflowTools({
       }
     },
     async ({ terse, ...args }: Record<string, unknown>) => toMinimalWriteResponse(normalizeCaptureOutcomeResult(await memoryWorkflow.captureOutcome(args)), terse as string)
+  );
+
+  registerJsonTool(
+    ['localnest_agent_prime'],
+    {
+      title: 'Agent Prime',
+      description: 'Get everything an agent needs to start a task in one call: recalled memories, KG entities, relevant files, recent changes, and suggested actions. Returns a compact <2KB context packet. Use this instead of calling task_context + memory_recall + search_hybrid separately.',
+      inputSchema: {
+        task: z.string().min(1).max(500),
+        project_path: z.string().optional(),
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional(),
+        max_memories: z.number().int().min(1).max(10).default(5),
+        max_entities: z.number().int().min(1).max(20).default(10),
+        max_files: z.number().int().min(1).max(10).default(5)
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+      }
+    },
+    async (args: Record<string, unknown>) => normalizeAgentPrimeResult(
+      await memoryWorkflow.agentPrime(args as any)
+    )
   );
 }

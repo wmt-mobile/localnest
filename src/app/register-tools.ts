@@ -40,7 +40,8 @@ export function registerAppTools(server: any, runtime: any, services: any): void
   });
   const memoryWorkflow = new MemoryWorkflowService({
     memory: services.memory,
-    getRuntimeSummary: async () => buildServerStatus()
+    getRuntimeSummary: async () => buildServerStatus(),
+    search: services.search
   });
   const sharedSchemas = {
     MEMORY_KIND_SCHEMA,
