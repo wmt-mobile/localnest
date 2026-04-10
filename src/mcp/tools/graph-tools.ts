@@ -1,10 +1,13 @@
 import { z } from 'zod';
 import { MemoryHooks } from '../../services/memory/hooks.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
+import { toMinimalWriteResponse } from '../common/terse-utils.js';
 
 interface MemoryService {
   addEntity(opts: Record<string, unknown>): Promise<unknown>;
   addTriple(opts: Record<string, unknown>): Promise<unknown>;
+  addEntityBatch(opts: Record<string, unknown>): Promise<unknown>;
+  addTripleBatch(opts: Record<string, unknown>): Promise<unknown>;
   queryEntityRelationships(entityId: string, opts: Record<string, unknown>): Promise<unknown>;
   invalidateTriple(tripleId: string, validTo?: string | null): Promise<unknown>;
   queryTriplesAsOf(entityId: string, asOfDate: string): Promise<unknown>;
@@ -20,6 +23,7 @@ interface MemoryService {
   ingestMarkdown(opts: Record<string, unknown>): Promise<unknown>;
   ingestJson(opts: Record<string, unknown>): Promise<unknown>;
   checkDuplicate(content: string, opts: Record<string, unknown>): Promise<unknown>;
+  backfillMemoryKgLinks(opts: Record<string, unknown>): Promise<unknown>;
   store: {
     hooks: MemoryHooks;
   };
@@ -35,6 +39,8 @@ export function registerGraphTools({
   registerJsonTool,
   memory
 }: RegisterGraphToolsOptions): void {
+  const readOnlyAnnotations = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
+
   // --- KG Tools (localnest_kg_*) ---
 
   registerJsonTool(
@@ -46,7 +52,8 @@ export function registerGraphTools({
         name: z.string().min(1).max(400),
         type: z.string().max(100).default('concept'),
         properties: z.record(z.string(), z.any()).default({}),
-        memory_id: z.string().optional()
+        memory_id: z.string().optional(),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -55,8 +62,8 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ name, type, properties, memory_id }: Record<string, unknown>) =>
-      memory.addEntity({ name, type, properties, memoryId: memory_id })
+    async ({ name, type, properties, memory_id, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.addEntity({ name, type, properties, memoryId: memory_id }), terse as string)
   );
 
   registerJsonTool(
@@ -74,7 +81,8 @@ export function registerGraphTools({
         valid_to: z.string().nullable().optional(),
         confidence: z.number().min(0).max(1).default(1.0),
         source_memory_id: z.string().nullable().optional(),
-        source_type: z.string().max(100).default('manual')
+        source_type: z.string().max(100).default('manual'),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -83,18 +91,64 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ subject_name, predicate, object_name, subject_id, object_id, valid_from, valid_to, confidence, source_memory_id, source_type }: Record<string, unknown>) =>
-      memory.addTriple({
-        subjectName: subject_name,
-        subjectId: subject_id,
-        predicate,
-        objectName: object_name,
-        objectId: object_id,
-        validFrom: valid_from,
-        validTo: valid_to,
-        confidence,
-        sourceMemoryId: source_memory_id,
-        sourceType: source_type
+    async ({ subject_name, predicate, object_name, subject_id, object_id, valid_from, valid_to, confidence, source_memory_id, source_type, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.addTriple({
+        subjectName: subject_name, subjectId: subject_id, predicate,
+        objectName: object_name, objectId: object_id,
+        validFrom: valid_from, validTo: valid_to, confidence,
+        sourceMemoryId: source_memory_id, sourceType: source_type
+      }), terse as string)
+  );
+
+  registerJsonTool(
+    ['localnest_kg_add_entities_batch'],
+    {
+      title: 'KG Add Entities Batch',
+      description: 'Create up to 500 entities in a single transactional batch. Returns created/duplicate counts and per-row errors. Use response_format "verbose" to get back an ids[] array.',
+      inputSchema: {
+        entities: z.array(z.object({
+          name: z.string().min(1).max(400), type: z.string().max(100).default('concept'),
+          properties: z.record(z.string(), z.any()).default({}), memory_id: z.string().optional()
+        })).min(1).max(500),
+        response_format: z.enum(['minimal', 'verbose']).default('minimal')
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false }
+    },
+    async ({ entities, response_format }: Record<string, unknown>) =>
+      memory.addEntityBatch({
+        entities: (entities as Array<Record<string, unknown>>).map(e => ({
+          name: e.name, type: e.type, properties: e.properties, memoryId: e.memory_id
+        })),
+        response_format
+      })
+  );
+
+  registerJsonTool(
+    ['localnest_kg_add_triples_batch'],
+    {
+      title: 'KG Add Triples Batch',
+      description: 'Add up to 500 triples in a single transactional batch. Entities auto-created on first reference. Deduplicates against active triples.',
+      inputSchema: {
+        triples: z.array(z.object({
+          subject_name: z.string().min(1).max(400), predicate: z.string().min(1).max(400),
+          object_name: z.string().min(1).max(400), subject_id: z.string().max(400).optional(),
+          object_id: z.string().max(400).optional(), valid_from: z.string().nullable().optional(),
+          valid_to: z.string().nullable().optional(), confidence: z.number().min(0).max(1).default(1.0),
+          source_memory_id: z.string().nullable().optional(), source_type: z.string().max(100).default('manual')
+        })).min(1).max(500),
+        response_format: z.enum(['minimal', 'verbose']).default('minimal')
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false }
+    },
+    async ({ triples, response_format }: Record<string, unknown>) =>
+      memory.addTripleBatch({
+        triples: (triples as Array<Record<string, unknown>>).map(t => ({
+          subjectName: t.subject_name, subjectId: t.subject_id, predicate: t.predicate,
+          objectName: t.object_name, objectId: t.object_id, validFrom: t.valid_from,
+          validTo: t.valid_to, confidence: t.confidence,
+          sourceMemoryId: t.source_memory_id, sourceType: t.source_type
+        })),
+        response_format
       })
   );
 
@@ -108,12 +162,7 @@ export function registerGraphTools({
         direction: z.enum(['outgoing', 'incoming', 'both']).default('both'),
         include_invalid: z.boolean().default(false)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: readOnlyAnnotations
     },
     async ({ entity_id, direction, include_invalid }: Record<string, unknown>) =>
       memory.queryEntityRelationships(entity_id as string, { direction, includeInvalid: include_invalid })
@@ -126,7 +175,8 @@ export function registerGraphTools({
       description: 'Set valid_to on a triple to mark it as no longer current. The triple remains in history but is excluded from current-state queries.',
       inputSchema: {
         triple_id: z.string().min(1),
-        valid_to: z.string().nullable().optional()
+        valid_to: z.string().nullable().optional(),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -135,8 +185,8 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ triple_id, valid_to }: Record<string, unknown>) =>
-      memory.invalidateTriple(triple_id as string, valid_to as string | null | undefined)
+    async ({ triple_id, valid_to, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.invalidateTriple(triple_id as string, valid_to as string | null | undefined), terse as string)
   );
 
   registerJsonTool(
@@ -148,12 +198,7 @@ export function registerGraphTools({
         entity_id: z.string().min(1).max(400),
         as_of_date: z.string().min(1)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: readOnlyAnnotations
     },
     async ({ entity_id, as_of_date }: Record<string, unknown>) =>
       memory.queryTriplesAsOf(entity_id as string, as_of_date as string)
@@ -192,6 +237,23 @@ export function registerGraphTools({
       }
     },
     async () => memory.getKgStats()
+  );
+
+  registerJsonTool(
+    ['localnest_kg_backfill_links'],
+    {
+      title: 'KG Backfill Memory Links',
+      description: 'Retroactively scan existing memories and create KG triples linking them to matching entities. Processes memories in batches. Use limit/offset for pagination.',
+      inputSchema: {
+        limit: z.number().int().min(1).max(500).default(200),
+        offset: z.number().int().min(0).default(0),
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional()
+      },
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false }
+    },
+    async ({ limit, offset, nest, branch }: Record<string, unknown>) =>
+      memory.backfillMemoryKgLinks({ limit, offset, nest, branch })
   );
 
   // --- Nest/Branch Tools (localnest_nest_*) ---
@@ -297,7 +359,8 @@ export function registerGraphTools({
       inputSchema: {
         agent_id: z.string().min(1).max(200),
         content: z.string().min(1).max(20000),
-        topic: z.string().max(200).optional()
+        topic: z.string().max(200).optional(),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -306,8 +369,8 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ agent_id, content, topic }: Record<string, unknown>) =>
-      memory.writeDiaryEntry({ agentId: agent_id, content, topic })
+    async ({ agent_id, content, topic, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.writeDiaryEntry({ agentId: agent_id, content, topic }), terse as string)
   );
 
   registerJsonTool(
@@ -344,7 +407,8 @@ export function registerGraphTools({
         source_label: z.string().max(1000).optional().describe('Optional label for re-ingestion tracking (e.g. filename)'),
         nest: z.string().max(200).default(''),
         branch: z.string().max(200).default(''),
-        agent_id: z.string().max(200).default('')
+        agent_id: z.string().max(200).default(''),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -353,8 +417,8 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ content, source_label, nest, branch, agent_id }: Record<string, unknown>) =>
-      memory.ingestMarkdown({ content, filePath: source_label || '', nest, branch, agentId: agent_id })
+    async ({ content, source_label, nest, branch, agent_id, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.ingestMarkdown({ content, filePath: source_label || '', nest, branch, agentId: agent_id }), terse as string)
   );
 
   registerJsonTool(
@@ -367,7 +431,8 @@ export function registerGraphTools({
         source_label: z.string().max(1000).optional().describe('Optional label for re-ingestion tracking'),
         nest: z.string().max(200).default(''),
         branch: z.string().max(200).default(''),
-        agent_id: z.string().max(200).default('')
+        agent_id: z.string().max(200).default(''),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -376,8 +441,8 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ content, source_label, nest, branch, agent_id }: Record<string, unknown>) =>
-      memory.ingestJson({ content, filePath: source_label || '', nest, branch, agentId: agent_id })
+    async ({ content, source_label, nest, branch, agent_id, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.ingestJson({ content, filePath: source_label || '', nest, branch, agentId: agent_id }), terse as string)
   );
 
   // --- Dedup Tool (localnest_memory_check_duplicate) ---
@@ -394,12 +459,7 @@ export function registerGraphTools({
         branch: z.string().max(200).optional(),
         project_path: z.string().max(1000).optional()
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: readOnlyAnnotations
     },
     async ({ content, threshold, nest, branch, project_path }: Record<string, unknown>) =>
       memory.checkDuplicate(content as string, { threshold, nest, branch, projectPath: project_path })
@@ -413,12 +473,7 @@ export function registerGraphTools({
       title: 'Hooks Stats',
       description: 'Returns hook system statistics: whether hooks are enabled, total registered listener count, and a breakdown of listener counts per event type.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: readOnlyAnnotations
     },
     async () => memory.store.hooks.getStats()
   );
@@ -429,12 +484,7 @@ export function registerGraphTools({
       title: 'Hooks List Events',
       description: 'Returns all valid hook event names that listeners can subscribe to. Covers memory lifecycle (store, update, delete, recall), knowledge graph operations (addEntity, addTriple, invalidate), graph traversal, diary, ingestion, dedup, taxonomy, and catch-all wildcards.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: readOnlyAnnotations
     },
     async () => ({ events: MemoryHooks.validEvents() })
   );

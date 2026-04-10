@@ -1,6 +1,6 @@
 {
   "name": "localnest-mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "author": "LocalNest",
   "repository": {
@@ -16,22 +16,34 @@
     "model-context-protocol",
     "localnest",
     "ai",
-    "agents"
+    "agents",
+    "knowledge-graph",
+    "memory",
+    "code-search",
+    "code-intelligence",
+    "sqlite",
+    "local-first",
+    "embeddings",
+    "semantic-search",
+    "ai-memory",
+    "code-assistant",
+    "temporal-graph",
+    "offline-ai"
   ],
   "publishConfig": {
     "access": "public"
   },
   "type": "module",
-  "description": "LocalNest read-only MCP server for exposing project context from local machine",
+  "description": "Local-first MCP server with 68 tools — code search, persistent AI memory, temporal knowledge graph, and semantic retrieval. Zero cloud, pure SQLite.",
   "bin": {
-    "localnest": "bin/localnest.js",
-    "localnest-mcp": "bin/localnest-mcp.js",
-    "localnest-mcp-upgrade": "bin/localnest-mcp-upgrade.js",
-    "localnest-mcp-setup": "bin/localnest-mcp-setup.js",
-    "localnest-mcp-doctor": "bin/localnest-mcp-doctor.js",
-    "localnest-mcp-install-skill": "bin/localnest-mcp-install-skill.js",
-    "localnest-mcp-task-context": "bin/localnest-mcp-task-context.js",
-    "localnest-mcp-capture-outcome": "bin/localnest-mcp-capture-outcome.js"
+    "localnest": "bin/_boot.cjs",
+    "localnest-mcp": "bin/_boot.cjs",
+    "localnest-mcp-upgrade": "bin/_boot.cjs",
+    "localnest-mcp-setup": "bin/_boot.cjs",
+    "localnest-mcp-doctor": "bin/_boot.cjs",
+    "localnest-mcp-install-skill": "bin/_boot.cjs",
+    "localnest-mcp-task-context": "bin/_boot.cjs",
+    "localnest-mcp-capture-outcome": "bin/_boot.cjs"
   },
   "files": [
     "bin",

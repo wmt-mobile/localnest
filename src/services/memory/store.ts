@@ -13,6 +13,8 @@ import {
   updateEntry as updateMemoryEntry,
   deleteEntry as deleteMemoryEntry
 } from './store/entries.js';
+import { storeEntryBatch as storeEntryBatchFn } from './store/entries-batch.js';
+import type { StoreEntryBatchInput } from './store/entries-batch.js';
 import {
   recall as recallFn,
   captureEvent as captureEventFn,
@@ -44,11 +46,23 @@ import {
   getEntityTimeline as getEntityTimelineFn,
   getKgStats as getKgStatsFn
 } from './knowledge-graph/kg.js';
+import {
+  addEntityBatch as addEntityBatchFn,
+  addTripleBatch as addTripleBatchFn
+} from './knowledge-graph/kg-batch.js';
+import { searchTriples as searchTriplesFn } from './knowledge-graph/kg-search.js';
+import { backfillMemoryKgLinks as backfillMemoryKgLinksFn } from './knowledge-graph/auto-link.js';
+import { getFileMemoryHints as getFileMemoryHintsFn } from './proactive-hints.js';
+import { whatsNew as whatsNewFn } from './temporal/whats-new.js';
+import { runAudit as runAuditFn } from './audit/dashboard.js';
+import type { AddEntityBatchInput, AddTripleBatchInput } from './knowledge-graph/kg-batch.js';
 import type {
   Adapter, EmbeddingService, ListEntriesOpts, StoreEntryInput, UpdateEntryPatch,
   RecallInput, CaptureEventInput, AddEntityInput, AddTripleInput,
   TraverseGraphOpts, DiscoverBridgesOpts, WriteDiaryInput, ReadDiaryInput,
-  DuplicateCheckOpts, IngestOpts, HookEmitResult
+  DuplicateCheckOpts, IngestOpts, HookEmitResult, BackfillResult,
+  ProactiveHintResult, WhatsNewInput, ProjectBackfillOpts, ProjectBackfillResult,
+  AuditResult
 } from './types.js';
 
 interface MemoryStoreConfig {
@@ -185,6 +199,14 @@ export class MemoryStore {
     return result;
   }
 
+  async storeEntryBatch(input: StoreEntryBatchInput) {
+    const hookResult = await this.hooks.emit('before:store:batch', input);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await storeEntryBatchFn(this as never, hookResult.payload as StoreEntryBatchInput);
+    await this.hooks.emit('after:store:batch', result);
+    return result;
+  }
+
   async updateEntry(id: string, patch: UpdateEntryPatch = {}) {
     const hookResult = await this.hooks.emit('before:update', { id, patch });
     if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
@@ -299,6 +321,38 @@ export class MemoryStore {
     return getKgStatsFn(this.adapter!);
   }
 
+  async searchTriples(args: { query: string; limit?: number }) {
+    await this.init();
+    return searchTriplesFn(this.adapter!, args);
+  }
+
+  async addEntityBatch(args: AddEntityBatchInput) {
+    await this.init();
+    const hookResult = await this.hooks.emit('before:kg:addEntity', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await addEntityBatchFn(this.adapter!, hookResult.payload as AddEntityBatchInput);
+    await this.hooks.emit('after:kg:addEntity', result);
+    return result;
+  }
+
+  async addTripleBatch(args: AddTripleBatchInput) {
+    await this.init();
+    const hookResult = await this.hooks.emit('before:kg:addTriple', args);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await addTripleBatchFn(this.adapter!, hookResult.payload as AddTripleBatchInput);
+    await this.hooks.emit('after:kg:addTriple', result);
+    return result;
+  }
+
+  async backfillMemoryKgLinks(opts: { limit?: number; offset?: number; nest?: string; branch?: string } = {}): Promise<BackfillResult> {
+    await this.init();
+    const hookResult = await this.hooks.emit('before:kg:backfill', opts);
+    if (hookResult.cancelled) return { memories_scanned: 0, memories_linked: 0, triples_created: 0, errors: 0 };
+    const result = await backfillMemoryKgLinksFn(this.adapter!, hookResult.payload as typeof opts);
+    await this.hooks.emit('after:kg:backfill', result);
+    return result;
+  }
+
   async listNests() {
     await this.init();
     return listNestsFn(this.adapter!);
@@ -374,5 +428,34 @@ export class MemoryStore {
     const result = await ingestJsonFn(this.adapter!, this.embeddingService, payload.opts);
     await this.hooks.emit('after:ingest', result);
     return result;
+  }
+
+  async getFileMemoryHints(filePath: string, suggestUpdate: boolean = false): Promise<ProactiveHintResult> {
+    await this.init();
+    const result = await getFileMemoryHintsFn(this.adapter!, filePath, suggestUpdate);
+    await this.hooks.emit(suggestUpdate ? 'after:file:changed' : 'after:file:read', result);
+    return result;
+  }
+
+  async whatsNew(args: WhatsNewInput) {
+    await this.init();
+    return whatsNewFn(this.adapter!, args);
+  }
+
+  async scanAndBackfillProjects(opts: ProjectBackfillOpts): Promise<ProjectBackfillResult> {
+    await this.init();
+    const hookResult = await this.hooks.emit('before:graph:backfill_projects', opts);
+    if (hookResult.cancelled) {
+      return { root_path: opts.rootPath, projects_found: 0, projects_backfilled: 0, projects_skipped: 0, dry_run: !!opts.dryRun, projects: [] };
+    }
+    const { scanAndBackfillProjects: scanFn } = await import('./backfill/project-scan.js');
+    const result = await scanFn(this as never, hookResult.payload as ProjectBackfillOpts);
+    await this.hooks.emit('after:graph:backfill_projects', result);
+    return result;
+  }
+
+  async audit(): Promise<AuditResult> {
+    await this.init();
+    return runAuditFn(this.adapter!);
   }
 }

@@ -7,6 +7,9 @@ allowed-tools:
   - Bash
   - Glob
   - Grep
+  - mcp__localnest__localnest_memory_recall
+  - mcp__localnest__localnest_memory_status
+  - mcp__localnest__localnest_kg_query
 ---
 
 <objective>

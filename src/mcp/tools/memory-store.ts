@@ -9,6 +9,7 @@ import {
   normalizeRelationRemovalResult,
   normalizeRelationResult
 } from '../common/response-normalizers.js';
+import { toMinimalWriteResponse } from '../common/terse-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import type {
   MemoryKind,
@@ -23,6 +24,7 @@ interface MemoryService {
   listEntries(opts: Record<string, unknown>): Promise<unknown>;
   getEntry(id: string): Promise<unknown>;
   storeEntry(args: Record<string, unknown>): Promise<{ memory?: unknown; created?: boolean; duplicate?: boolean } | null>;
+  storeEntryBatch(args: { memories: Array<Record<string, unknown>>; response_format?: 'minimal' | 'verbose' }): Promise<{ created: number; duplicates: number; errors: Array<{ index: number; message: string }>; ids?: (string | null)[] }>;
   updateEntry(id: string, patch: Record<string, unknown>): Promise<unknown>;
   deleteEntry(id: string): Promise<unknown>;
   captureEvent(args: Record<string, unknown>): Promise<unknown>;
@@ -124,19 +126,22 @@ export function registerMemoryStoreTools({
       title: 'Memory Store',
       description: 'Store a durable local memory entry.',
       inputSchema: {
-        kind: MEMORY_KIND_SCHEMA,
         title: z.string().min(1).max(400),
-        summary: z.string().max(4000).default(''),
         content: z.string().min(1).max(20000),
-        status: MEMORY_STATUS_SCHEMA,
-        importance: z.number().int().min(0).max(100).default(50),
-        confidence: z.number().min(0).max(1).default(0.7),
-        tags: z.array(z.string()).max(50).default([]),
-        links: z.array(MEMORY_LINK_SCHEMA).max(50).default([]),
-        scope: MEMORY_SCOPE_SCHEMA,
-        source_type: z.string().max(60).default('manual'),
-        source_ref: z.string().max(1000).default(''),
-        change_note: z.string().max(400).default('Initial memory creation')
+        kind: MEMORY_KIND_SCHEMA.optional(),
+        summary: z.string().max(4000).optional(),
+        status: MEMORY_STATUS_SCHEMA.optional(),
+        importance: z.number().int().min(0).max(100).optional(),
+        confidence: z.number().min(0).max(1).optional(),
+        tags: z.array(z.string()).max(50).optional(),
+        links: z.array(MEMORY_LINK_SCHEMA).max(50).optional(),
+        scope: MEMORY_SCOPE_SCHEMA.optional(),
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional(),
+        source_type: z.string().max(60).optional(),
+        source_ref: z.string().max(1000).optional(),
+        change_note: z.string().max(400).optional(),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -145,15 +150,25 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async (args: Record<string, unknown>) => {
+    async ({ terse, ...args }: Record<string, unknown>) => {
       const result = await memory.storeEntry(args);
-      return normalizeMemoryEntryPayload(
-        (result as Record<string, unknown>)?.memory || null,
+      const r = result as Record<string, unknown>;
+      const normalized = normalizeMemoryEntryPayload(
+        r?.memory || null,
         {
-          created: Boolean((result as Record<string, unknown>)?.created),
-          duplicate: Boolean((result as Record<string, unknown>)?.duplicate)
+          created: Boolean(r?.created),
+          duplicate: Boolean(r?.duplicate)
         }
       );
+      const response = toMinimalWriteResponse(normalized, terse as string);
+      // FUSE-03: Attach auto-link results when present
+      if (r?.auto_linked_entities) {
+        (response as Record<string, unknown>).auto_linked_entities = r.auto_linked_entities;
+      }
+      if (r?.auto_triples) {
+        (response as Record<string, unknown>).auto_triples = r.auto_triples;
+      }
+      return response;
     }
   );
 
@@ -176,7 +191,8 @@ export function registerMemoryStoreTools({
         scope: MEMORY_SCOPE_SCHEMA.optional(),
         source_type: z.string().max(60).optional(),
         source_ref: z.string().max(1000).optional(),
-        change_note: z.string().max(400).default('Memory updated')
+        change_note: z.string().max(400).default('Memory updated'),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -185,11 +201,9 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ id, ...patch }: Record<string, unknown>) => {
+    async ({ id, terse, ...patch }: Record<string, unknown>) => {
       const result = await memory.updateEntry(id as string, patch);
-      return normalizeMemoryEntryPayload(result, {
-        updated: true
-      });
+      return toMinimalWriteResponse(normalizeMemoryEntryPayload(result, { updated: true }), terse as string);
     }
   );
 
@@ -199,7 +213,8 @@ export function registerMemoryStoreTools({
       title: 'Memory Delete',
       description: 'Delete a stored memory entry and all of its revisions.',
       inputSchema: {
-        id: z.string().min(1)
+        id: z.string().min(1),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -208,7 +223,7 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ id }: Record<string, unknown>) => normalizeDeleteResult(await memory.deleteEntry(id as string), { id: id as string })
+    async ({ id, terse }: Record<string, unknown>) => toMinimalWriteResponse(normalizeDeleteResult(await memory.deleteEntry(id as string), { id: id as string }), terse as string)
   );
 
   registerJsonTool(
@@ -230,7 +245,10 @@ export function registerMemoryStoreTools({
         tags: z.array(z.string()).max(50).default([]),
         links: z.array(MEMORY_LINK_SCHEMA).max(50).default([]),
         scope: MEMORY_SCOPE_SCHEMA,
-        source_ref: z.string().max(1000).default('')
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional(),
+        source_ref: z.string().max(1000).default(''),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -239,7 +257,7 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async (args: Record<string, unknown>) => memory.captureEvent(args)
+    async ({ terse, ...args }: Record<string, unknown>) => toMinimalWriteResponse(await memory.captureEvent(args), terse as string)
   );
 
   registerJsonTool(
@@ -300,7 +318,8 @@ export function registerMemoryStoreTools({
       inputSchema: {
         source_id: z.string().min(1),
         target_id: z.string().min(1),
-        relation_type: z.string().min(1).max(60).default('related')
+        relation_type: z.string().min(1).max(60).default('related'),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -309,9 +328,9 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ source_id, target_id, relation_type }: Record<string, unknown>) => {
+    async ({ source_id, target_id, relation_type, terse }: Record<string, unknown>) => {
       const result = await memory.addRelation(source_id as string, target_id as string, relation_type as string);
-      return normalizeRelationResult(result, { source_id: source_id as string, target_id: target_id as string, relation_type: relation_type as string });
+      return toMinimalWriteResponse(normalizeRelationResult(result, { source_id: source_id as string, target_id: target_id as string, relation_type: relation_type as string }), terse as string);
     }
   );
 
@@ -322,7 +341,8 @@ export function registerMemoryStoreTools({
       description: 'Remove a relation between two memory entries.',
       inputSchema: {
         source_id: z.string().min(1),
-        target_id: z.string().min(1)
+        target_id: z.string().min(1),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -331,9 +351,9 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ source_id, target_id }: Record<string, unknown>) => {
+    async ({ source_id, target_id, terse }: Record<string, unknown>) => {
       const result = await memory.removeRelation(source_id as string, target_id as string);
-      return normalizeRelationRemovalResult(result, { source_id: source_id as string, target_id: target_id as string });
+      return toMinimalWriteResponse(normalizeRelationRemovalResult(result, { source_id: source_id as string, target_id: target_id as string }), terse as string);
     }
   );
 
@@ -353,5 +373,47 @@ export function registerMemoryStoreTools({
       }
     },
     async ({ id }: Record<string, unknown>) => normalizeRelatedMemoriesResult(await memory.getRelated(id as string), id as string)
+  );
+
+  registerJsonTool(
+    ['localnest_memory_store_batch'],
+    {
+      title: 'Memory Store Batch',
+      description: 'Store up to 100 memory entries in a single atomic transaction. Deduplicates via fingerprint and optional semantic similarity. Returns created/duplicate counts and per-row validation errors.',
+      inputSchema: {
+        memories: z.array(z.object({
+          kind: MEMORY_KIND_SCHEMA.optional(),
+          title: z.string().max(400).optional(),
+          summary: z.string().max(4000).optional(),
+          content: z.string().min(1).max(20000),
+          status: MEMORY_STATUS_SCHEMA.optional(),
+          importance: z.number().int().min(0).max(100).optional(),
+          confidence: z.number().min(0).max(1).optional(),
+          tags: z.array(z.string()).max(50).optional(),
+          links: z.array(MEMORY_LINK_SCHEMA).max(50).optional(),
+          scope: MEMORY_SCOPE_SCHEMA.optional(),
+          nest: z.string().max(200).optional(),
+          branch: z.string().max(200).optional(),
+          agent_id: z.string().max(200).optional(),
+          source_type: z.string().max(60).optional(),
+          source_ref: z.string().max(1000).optional(),
+          change_note: z.string().max(400).optional(),
+          dedup_threshold: z.number().min(0).max(1).optional()
+        })).min(1).max(100),
+        response_format: z.enum(['minimal', 'verbose']).default('minimal')
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+      }
+    },
+    async ({ memories, response_format }: Record<string, unknown>) => {
+      return memory.storeEntryBatch({
+        memories: memories as Array<Record<string, unknown>>,
+        response_format: response_format as 'minimal' | 'verbose'
+      });
+    }
   );
 }

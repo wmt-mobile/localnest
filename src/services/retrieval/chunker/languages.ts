@@ -62,7 +62,10 @@ export const LANGUAGE_LOADERS: Record<string, LanguageLoader> = {
   go: async () => { const mod = await import('tree-sitter-go'); return mod.default || mod; },
   bash: async () => { const mod = await import('tree-sitter-bash'); return mod.default || mod; },
   lua: async () => { const mod = await import('tree-sitter-lua'); return mod.default || mod; },
-  dart: async () => { const mod = await import('tree-sitter-dart'); return mod.default || mod; }
+  dart: async () => { const mod = await import('tree-sitter-dart'); return mod.default || mod; },
+  typescript: async () => { const mod = await import('tree-sitter-typescript'); return (mod.default || mod).typescript; },
+  tsx: async () => { const mod = await import('tree-sitter-typescript'); return (mod.default || mod).tsx; },
+  rust: async () => { const mod = await import('tree-sitter-rust'); return mod.default || mod; }
 };
 
 export const TREE_SITTER_PACKAGE = 'tree-sitter';
@@ -73,7 +76,10 @@ export const LANGUAGE_PACKAGES: Record<string, string> = {
   go: 'tree-sitter-go',
   bash: 'tree-sitter-bash',
   lua: 'tree-sitter-lua',
-  dart: 'tree-sitter-dart'
+  dart: 'tree-sitter-dart',
+  typescript: 'tree-sitter-typescript',
+  tsx: 'tree-sitter-typescript',
+  rust: 'tree-sitter-rust'
 };
 
 export function getExt(filePath: string): string {

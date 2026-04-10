@@ -5,7 +5,7 @@ import type {
   EmbeddingService, ListEntriesOpts, StoreEntryInput, UpdateEntryPatch,
   RecallInput, CaptureEventInput, AddEntityInput, AddTripleInput,
   TraverseGraphOpts, DiscoverBridgesOpts, WriteDiaryInput, ReadDiaryInput,
-  DuplicateCheckOpts, IngestOpts
+  DuplicateCheckOpts, IngestOpts, WhatsNewInput, ProjectBackfillOpts
 } from './types.js';
 
 function parseNodeMajor(version: string | undefined): number {
@@ -147,6 +147,11 @@ export class MemoryService {
     return this.store.storeEntry(input);
   }
 
+  async storeEntryBatch(args: { memories: Array<Record<string, unknown>>; response_format?: 'minimal' | 'verbose' }) {
+    this.assertEnabled();
+    return this.store.storeEntryBatch(args as any);
+  }
+
   async updateEntry(id: string, patch: UpdateEntryPatch) {
     this.assertEnabled();
     return this.store.updateEntry(id, patch);
@@ -232,6 +237,26 @@ export class MemoryService {
     return this.store.getKgStats();
   }
 
+  async searchTriples(args: { query: string; limit?: number }) {
+    this.assertEnabled();
+    return this.store.searchTriples(args);
+  }
+
+  async addEntityBatch(args: { entities: Array<Record<string, unknown>>; response_format?: string }) {
+    this.assertEnabled();
+    return this.store.addEntityBatch(args as any);
+  }
+
+  async addTripleBatch(args: { triples: Array<Record<string, unknown>>; response_format?: string }) {
+    this.assertEnabled();
+    return this.store.addTripleBatch(args as any);
+  }
+
+  async backfillMemoryKgLinks(opts: { limit?: number; offset?: number; nest?: string; branch?: string } = {}) {
+    this.assertEnabled();
+    return this.store.backfillMemoryKgLinks(opts);
+  }
+
   async listNests() {
     this.assertEnabled();
     return this.store.listNests();
@@ -280,6 +305,26 @@ export class MemoryService {
   async ingestJson(opts: IngestOpts = {}) {
     this.assertEnabled();
     return this.store.ingestJson(opts);
+  }
+
+  async whatsNew(args: WhatsNewInput) {
+    this.assertEnabled();
+    return this.store.whatsNew(args);
+  }
+
+  async getFileMemoryHints(filePath: string, suggestUpdate: boolean = false) {
+    this.assertEnabled();
+    return this.store.getFileMemoryHints(filePath, suggestUpdate);
+  }
+
+  async scanAndBackfillProjects(opts: ProjectBackfillOpts) {
+    this.assertEnabled();
+    return this.store.scanAndBackfillProjects(opts);
+  }
+
+  async audit() {
+    this.assertEnabled();
+    return this.store.audit();
   }
 
   assertEnabled(): void {

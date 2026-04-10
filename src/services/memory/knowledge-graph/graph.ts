@@ -18,6 +18,8 @@ interface BridgeRow {
   object_name: string;
   subject_nest: string;
   object_nest: string;
+  subject_type: string;
+  object_type: string;
 }
 
 export async function traverseGraph(
@@ -121,36 +123,83 @@ export async function traverseGraph(
 export async function discoverBridges(adapter: Adapter, { nest }: DiscoverBridgesOpts = {}): Promise<DiscoverBridgesResult> {
   const cleanNest = nest ? cleanString(nest, 200) : null;
 
+  // Use LEFT JOINs so entities with NULL memory_id still participate.
+  // Derive nest via COALESCE: entity's own memory_id -> triple's source_memory_id.
   let sql = `
-    SELECT DISTINCT
-      t.id AS triple_id,
-      t.subject_id,
-      s.name AS subject_name,
-      t.predicate,
-      t.object_id,
-      o.name AS object_name,
-      ms.nest AS subject_nest,
-      mo.nest AS object_nest
-    FROM kg_triples t
-    JOIN kg_entities s ON s.id = t.subject_id
-    JOIN kg_entities o ON o.id = t.object_id
-    JOIN memory_entries ms ON ms.id = s.memory_id
-    JOIN memory_entries mo ON mo.id = o.memory_id
-    WHERE t.valid_to IS NULL
-      AND ms.nest != ''
-      AND mo.nest != ''
-      AND ms.nest != mo.nest`;
+    SELECT * FROM (
+      SELECT DISTINCT
+        t.id AS triple_id,
+        t.subject_id,
+        s.name AS subject_name,
+        s.entity_type AS subject_type,
+        t.predicate,
+        t.object_id,
+        o.name AS object_name,
+        o.entity_type AS object_type,
+        COALESCE(NULLIF(ms1.nest,''), NULLIF(mt.nest,'')) AS subject_nest,
+        COALESCE(NULLIF(mo1.nest,''), NULLIF(mt.nest,'')) AS object_nest
+      FROM kg_triples t
+      JOIN kg_entities s ON s.id = t.subject_id
+      JOIN kg_entities o ON o.id = t.object_id
+      LEFT JOIN memory_entries ms1 ON ms1.id = s.memory_id
+      LEFT JOIN memory_entries mo1 ON mo1.id = o.memory_id
+      LEFT JOIN memory_entries mt  ON mt.id  = t.source_memory_id
+      WHERE t.valid_to IS NULL
+    ) AS bridges
+    WHERE subject_nest != '' AND subject_nest IS NOT NULL
+      AND object_nest  != '' AND object_nest  IS NOT NULL
+      AND subject_nest != object_nest`;
 
   const params: unknown[] = [];
 
   if (cleanNest) {
-    sql += `\n      AND (ms.nest = ? OR mo.nest = ?)`;
+    sql += `\n      AND (subject_nest = ? OR object_nest = ?)`;
     params.push(cleanNest, cleanNest);
   }
 
-  sql += `\n    ORDER BY ms.nest, mo.nest, s.name`;
+  sql += `\n    ORDER BY subject_nest, object_nest, subject_name`;
 
   const rows = await adapter.all<BridgeRow>(sql, params);
+
+  // --- Build insights from entity -> nests mapping ---
+  // Each entity in a bridge row is connected to both nests of that bridge.
+  const entityNests = new Map<string, { name: string; type: string; nests: Set<string>; predicates: Set<string> }>();
+
+  for (const row of rows) {
+    const bothNests = [row.subject_nest, row.object_nest];
+    for (const [id, name, type] of [
+      [row.subject_id, row.subject_name, row.subject_type],
+      [row.object_id, row.object_name, row.object_type]
+    ] as [string, string, string][]) {
+      let entry = entityNests.get(id);
+      if (!entry) {
+        entry = { name, type, nests: new Set(), predicates: new Set() };
+        entityNests.set(id, entry);
+      }
+      for (const n of bothNests) entry.nests.add(n);
+      entry.predicates.add(row.predicate);
+    }
+  }
+
+  const insights: string[] = [];
+  for (const [, info] of entityNests) {
+    if (info.nests.size >= 2) {
+      const nestList = [...info.nests].sort().join(', ');
+      const predList = [...info.predicates].sort().join(', ');
+      insights.push(`'${info.name}' (${info.type}) bridges ${nestList} via '${predList}'`);
+    }
+  }
+
+  // --- Summary ---
+  const nestPairs = new Set<string>();
+  for (const row of rows) {
+    const pair = [row.subject_nest, row.object_nest].sort().join('<->');
+    nestPairs.add(pair);
+  }
+  const sharedCount = [...entityNests.values()].filter(e => e.nests.size >= 2).length;
+  const summary = rows.length === 0
+    ? 'No cross-nest bridges found'
+    : `Found ${rows.length} bridge(s) across ${nestPairs.size} nest pair(s) involving ${sharedCount} shared entity/entities`;
 
   return {
     filter_nest: cleanNest,
@@ -163,7 +212,11 @@ export async function discoverBridges(adapter: Adapter, { nest }: DiscoverBridge
       object_id: row.object_id,
       object_name: row.object_name,
       subject_nest: row.subject_nest,
-      object_nest: row.object_nest
-    }))
+      object_nest: row.object_nest,
+      subject_type: row.subject_type,
+      object_type: row.object_type
+    })),
+    insights,
+    summary
   };
 }

@@ -14,6 +14,7 @@ export {
   MEMORY_EVENT_TYPE_SCHEMA,
   MEMORY_EVENT_STATUS_SCHEMA
 } from './schemas.js';
+export { toMinimalWriteResponse, stripEmptyFields } from './terse-utils.js';
 export { createServerStatusBuilder, buildUsageGuide } from './status.js';
 export { startStalenessMonitor } from './staleness-monitor.js';
 export { startHealthMonitor } from './health-monitor.js';

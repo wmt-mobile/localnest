@@ -3,12 +3,15 @@ import {
   normalizeCaptureOutcomeResult,
   normalizeMemoryRecallResult,
   normalizeMemoryStatus,
-  normalizeTaskContextResult
+  normalizeTaskContextResult,
+  normalizeAgentPrimeResult
 } from '../common/response-normalizers.js';
+import { toMinimalWriteResponse } from '../common/terse-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import type {
   MemoryKind,
   MemoryLink,
+  MemoryScope,
   MemoryEventType,
   MemoryEventStatus
 } from '../common/schemas.js';
@@ -16,15 +19,19 @@ import type {
 interface MemoryService {
   getStatus(): Promise<unknown>;
   recall(opts: Record<string, unknown>): Promise<unknown>;
+  whatsNew(args: Record<string, unknown>): Promise<unknown>;
 }
 
 interface MemoryWorkflowService {
   getTaskContext(args: Record<string, unknown>): Promise<unknown>;
   captureOutcome(args: Record<string, unknown>): Promise<unknown>;
+  agentPrime(args: Record<string, unknown>): Promise<unknown>;
+  teach(args: Record<string, unknown>): Promise<unknown>;
 }
 
 interface SharedSchemas {
   MEMORY_KIND_SCHEMA: z.ZodType<MemoryKind>;
+  MEMORY_SCOPE_SCHEMA: z.ZodType<MemoryScope>;
   MEMORY_LINK_SCHEMA: z.ZodType<MemoryLink>;
   MEMORY_EVENT_TYPE_SCHEMA: z.ZodType<MemoryEventType>;
   MEMORY_EVENT_STATUS_SCHEMA: z.ZodType<MemoryEventStatus>;
@@ -45,6 +52,7 @@ export function registerMemoryWorkflowTools({
 }: RegisterMemoryWorkflowToolsOptions): void {
   const {
     MEMORY_KIND_SCHEMA,
+    MEMORY_SCOPE_SCHEMA,
     MEMORY_LINK_SCHEMA,
     MEMORY_EVENT_TYPE_SCHEMA,
     MEMORY_EVENT_STATUS_SCHEMA
@@ -154,7 +162,10 @@ export function registerMemoryWorkflowTools({
         branch_name: z.string().optional(),
         topic: z.string().optional(),
         feature: z.string().optional(),
-        source_ref: z.string().max(1000).default('')
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional(),
+        source_ref: z.string().max(1000).default(''),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -163,6 +174,88 @@ export function registerMemoryWorkflowTools({
         openWorldHint: false
       }
     },
-    async (args: Record<string, unknown>) => normalizeCaptureOutcomeResult(await memoryWorkflow.captureOutcome(args))
+    async ({ terse, ...args }: Record<string, unknown>) => toMinimalWriteResponse(normalizeCaptureOutcomeResult(await memoryWorkflow.captureOutcome(args)), terse as string)
+  );
+
+  registerJsonTool(
+    ['localnest_agent_prime'],
+    {
+      title: 'Agent Prime',
+      description: 'Get everything an agent needs to start a task in one call: recalled memories, KG entities, relevant files, recent changes, and suggested actions. Returns a compact <2KB context packet. Use this instead of calling task_context + memory_recall + search_hybrid separately.',
+      inputSchema: {
+        task: z.string().min(1).max(500),
+        project_path: z.string().optional(),
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional(),
+        max_memories: z.number().int().min(1).max(10).default(5),
+        max_entities: z.number().int().min(1).max(20).default(10),
+        max_files: z.number().int().min(1).max(10).default(5)
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+      }
+    },
+    async (args: Record<string, unknown>) => normalizeAgentPrimeResult(
+      await memoryWorkflow.agentPrime(args as any)
+    )
+  );
+
+  registerJsonTool(
+    ['localnest_whats_new'],
+    {
+      title: "What's New",
+      description: 'Cross-session delta: new memories, KG triples, file changes, and commits since a given timestamp or last session.',
+      inputSchema: {
+        since: z.string().min(1),
+        agent_id: z.string().optional(),
+        project_path: z.string().optional(),
+        limit: z.number().int().min(1).max(50).default(10)
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+      }
+    },
+    async ({ since, agent_id, project_path, limit }: Record<string, unknown>) => {
+      const result = await memory.whatsNew({
+        since: since as string,
+        agentId: agent_id as string | undefined,
+        projectPath: project_path as string | undefined,
+        limit: limit as number | undefined
+      });
+      return result;
+    }
+  );
+
+  registerJsonTool(
+    ['localnest_teach'],
+    {
+      title: 'Teach',
+      description: 'Teach the agent a durable behavior rule. Stores a high-importance feedback memory that auto-surfaces in agent_prime when future tasks match the instruction domain. Use this to set persistent preferences, coding standards, or workflow rules that should apply across sessions. Teach memories can be listed (kind=feedback), updated, or deleted via existing memory CRUD tools.',
+      inputSchema: {
+        instruction: z.string().min(1).max(4000),
+        importance: z.number().int().min(70).max(100).default(95),
+        tags: z.array(z.string()).max(50).default([]),
+        nest: z.string().max(200).optional(),
+        branch: z.string().max(200).optional(),
+        scope: MEMORY_SCOPE_SCHEMA.optional(),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
+      },
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false
+      }
+    },
+    async ({ terse, ...args }: Record<string, unknown>) => {
+      const result = await memoryWorkflow.teach(args as any);
+      return toMinimalWriteResponse(result, terse as string);
+    }
   );
 }

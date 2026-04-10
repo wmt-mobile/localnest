@@ -175,6 +175,8 @@ export interface StoreEntryResult {
   memory: MemoryEntryWithRevisions | null;
   cancelled?: boolean;
   reason?: string;
+  auto_linked_entities?: AutoLinkedEntity[];
+  auto_triples?: AutoLinkedTriple[];
 }
 
 export interface UpdateEntryPatch {
@@ -369,10 +371,10 @@ export interface AddTripleInput {
   predicate: string;
   objectId?: string;
   objectName?: string;
-  validFrom?: string;
-  validTo?: string;
+  validFrom?: string | null;
+  validTo?: string | null;
   confidence?: number;
-  sourceMemoryId?: string;
+  sourceMemoryId?: string | null;
   sourceType?: string;
 }
 
@@ -395,6 +397,31 @@ export interface AddTripleResult {
   created_at: string;
   contradictions: TripleContradiction[];
   has_contradiction: boolean;
+}
+
+export interface AutoLinkedEntity {
+  entity_id: string;
+  name: string;
+  entity_type: string;
+}
+
+export interface AutoLinkedTriple {
+  triple_id: string;
+  subject: string;
+  predicate: string;
+  object: string;
+}
+
+export interface AutoLinkResult {
+  auto_linked_entities: AutoLinkedEntity[];
+  auto_triples: AutoLinkedTriple[];
+}
+
+export interface BackfillResult {
+  memories_scanned: number;
+  memories_linked: number;
+  triples_created: number;
+  errors: number;
 }
 
 export interface InvalidateTripleResult {
@@ -454,12 +481,43 @@ export interface BridgeEntry {
   object_name: string;
   subject_nest: string;
   object_nest: string;
+  subject_type?: string;
+  object_type?: string;
 }
 
 export interface DiscoverBridgesResult {
   filter_nest: string | null;
   bridge_count: number;
   bridges: BridgeEntry[];
+  insights: string[];
+  summary: string;
+}
+
+// ---------------------------------------------------------------------------
+// Project backfill
+// ---------------------------------------------------------------------------
+
+export interface ProjectBackfillOpts {
+  rootPath: string;
+  dryRun?: boolean;
+}
+
+export interface ProjectBackfillProject {
+  path: string;
+  name: string;
+  language: string;
+  marker: string;
+  status: 'backfilled' | 'would_backfill' | 'skipped_has_memories' | 'error';
+  error?: string;
+}
+
+export interface ProjectBackfillResult {
+  root_path: string;
+  projects_found: number;
+  projects_backfilled: number;
+  projects_skipped: number;
+  dry_run: boolean;
+  projects: ProjectBackfillProject[];
 }
 
 // ---------------------------------------------------------------------------
@@ -571,6 +629,8 @@ export interface TaxonomyTree {
   total_nests: number;
   total_branches: number;
   total_memories: number;
+  total_kg_entities?: number;
+  total_kg_triples?: number;
   nests: TaxonomyNest[];
 }
 
@@ -592,10 +652,20 @@ export interface RecallInput {
   limit?: number;
 }
 
+export interface RelatedFact {
+  entity_id: string;
+  entity_name: string;
+  predicate: string;
+  related_entity_id: string;
+  related_entity_name: string;
+  direction: 'outgoing' | 'incoming';
+}
+
 export interface RecallResultItem {
   score: number;
   raw_score: number;
   memory: MemoryEntry;
+  related_facts?: RelatedFact[];
 }
 
 export interface RecallResult {
@@ -686,6 +756,24 @@ export interface HookHandle {
 }
 
 // ---------------------------------------------------------------------------
+// Proactive hints
+// ---------------------------------------------------------------------------
+
+export interface ProactiveHint {
+  memory_id: string;
+  title: string;
+  importance: number;
+  kind: string;
+  summary_excerpt: string;
+  suggest_update: boolean;
+}
+
+export interface ProactiveHintResult {
+  file_path: string;
+  hints: ProactiveHint[];
+}
+
+// ---------------------------------------------------------------------------
 // Schema / Migrations
 // ---------------------------------------------------------------------------
 
@@ -768,4 +856,121 @@ export interface MergeCandidateInput {
   content: string;
   scope: Scope;
   tags: string[];
+}
+
+// ---------------------------------------------------------------------------
+// What's New (temporal awareness)
+// ---------------------------------------------------------------------------
+
+export interface WhatsNewInput {
+  since: string;
+  agentId?: string;
+  projectPath?: string;
+  limit?: number;
+}
+
+export interface WhatsNewMemoryItem {
+  id: string;
+  title: string;
+  kind: string;
+  created_at: string;
+}
+
+export interface WhatsNewTripleItem {
+  id: string;
+  subject_name: string;
+  predicate: string;
+  object_name: string;
+  created_at: string;
+}
+
+export interface WhatsNewCommitItem {
+  id: number;
+  title: string;
+  event_type: string;
+  created_at: string;
+}
+
+export interface WhatsNewResult {
+  since: string;
+  resolved_from: 'timestamp' | 'last_session' | 'epoch';
+  new_memories: { count: number; items: WhatsNewMemoryItem[] };
+  new_triples: { count: number; items: WhatsNewTripleItem[] };
+  files_changed: { count: number; paths: string[] };
+  recent_commits: { count: number; items: WhatsNewCommitItem[] };
+  summary: string;
+}
+
+// ---------------------------------------------------------------------------
+// Self-Audit Dashboard (Phase 38)
+// ---------------------------------------------------------------------------
+
+export interface AuditProjectCoverage {
+  total_projects: number;
+  projects_with_memories: number;
+  projects_without_memories: number;
+  total_memories: number;
+  projects: Array<{ project_path: string; memory_count: number }>;
+}
+
+export interface AuditKgDensity {
+  total_entities: number;
+  total_triples: number;
+  active_triples: number;
+  orphaned_entities: number;
+  orphaned_entity_list: Array<{ id: string; name: string; entity_type: string }>;
+  duplicate_triples: number;
+  duplicate_triple_details: Array<{
+    subject_id: string;
+    predicate: string;
+    object_id: string;
+    count: number;
+  }>;
+  connected_components: number;
+}
+
+export interface AuditNestHealth {
+  memories_without_nest: number;
+  memories_without_branch: number;
+  broken_bridges: number;
+  broken_bridge_list: Array<{
+    triple_id: string;
+    subject_id: string;
+    object_id: string;
+    predicate: string;
+    issue: string;
+  }>;
+}
+
+export interface AuditStaleMemoryItem {
+  id: string;
+  title: string;
+  importance: number;
+  recall_count: number;
+  created_at: string;
+  last_recalled_at: string | null;
+}
+
+export interface AuditStaleMemories {
+  stale_count: number;
+  never_recalled_count: number;
+  low_importance_count: number;
+  stale_items: AuditStaleMemoryItem[];
+}
+
+export interface AuditSuggestion {
+  category: 'coverage' | 'kg_density' | 'nest_health' | 'stale';
+  severity: 'info' | 'warning' | 'error';
+  message: string;
+}
+
+export interface AuditResult {
+  audited_at: string;
+  health_score: number;
+  project_coverage: AuditProjectCoverage;
+  kg_density: AuditKgDensity;
+  nest_health: AuditNestHealth;
+  stale_memories: AuditStaleMemories;
+  suggestions: AuditSuggestion[];
+  summary: string;
 }

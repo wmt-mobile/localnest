@@ -12,7 +12,8 @@ import {
   VectorIndexService,
   EmbeddingService,
   AstChunker,
-  RerankerService
+  RerankerService,
+  SymbolIndexService
 } from '../services/retrieval/index.js';
 import { UpdateService } from '../services/update/index.js';
 import { MemoryService } from '../services/memory/index.js';
@@ -97,6 +98,7 @@ export async function createServices(runtime: any): Promise<AppServices> {
   const vectorIndex = await createVectorIndex(runtime, workspace, embeddingService, (nextBackend: string) => {
     activeIndexBackend = nextBackend;
   });
+  const symbolIndex = new SymbolIndexService(runtime.sqliteDbPath, new AstChunker());
   const search = new SearchService({
     workspace,
     ignoreDirs: IGNORE_DIRS,
@@ -108,7 +110,8 @@ export async function createServices(runtime: any): Promise<AppServices> {
       provider: runtime.rerankerProvider,
       model: runtime.rerankerModel,
       cacheDir: runtime.rerankerCacheDir
-    })
+    }),
+    symbolIndex: symbolIndex as any
   });
   const updates = new UpdateService({
     localnestHome: runtime.localnestHome,

@@ -111,7 +111,16 @@ export class UpdateService {
       if (!fs.existsSync(this.cachePath)) return null;
       const parsed = JSON.parse(fs.readFileSync(this.cachePath, 'utf8'));
       if (!parsed || typeof parsed !== 'object') return null;
-      return this.normalizeStatusRecord(parsed as Partial<UpdateStatus>);
+      // Preserve the on-disk current_version so version-drift detection in
+      // shouldRefresh / getCachedStatus can see whether the running binary
+      // has advanced past what the cache knew about. normalizeStatusRecord
+      // would otherwise stomp current_version to this.currentVersion.
+      const input = parsed as Partial<UpdateStatus>;
+      const normalized = this.normalizeStatusRecord(input);
+      if (typeof input.current_version === 'string' && input.current_version) {
+        normalized.current_version = input.current_version;
+      }
+      return normalized;
     } catch {
       return null;
     }
@@ -125,6 +134,12 @@ export class UpdateService {
   shouldRefresh(cache: UpdateStatus | null, now: number, force: boolean): boolean {
     if (force) return true;
     if (!cache?.last_checked_at) return true;
+    if (!cache.latest_version) return true;
+    // Invalidate when the running binary has moved past what the cache knew.
+    // e.g. user upgrades LocalNest 0.0.3 -> 0.1.0 locally; the cache still
+    // carries latest_version=0.0.3 from before the upgrade and would otherwise
+    // surface a stale "latest" that predates the installed binary.
+    if (cache.current_version && cache.current_version !== this.currentVersion) return true;
     const ageMs = now - parseIsoTime(cache.last_checked_at);
     const backoffMinutes = cache.last_check_ok ? this.checkIntervalMinutes : this.failureBackoffMinutes;
     return ageMs >= backoffMinutes * 60 * 1000;
@@ -165,9 +180,23 @@ export class UpdateService {
   getCachedStatus(now: number = Date.now()): UpdateStatus & StatusMetadata {
     const cache = this.readCache();
     if (cache) {
+      const versionDrift = Boolean(
+        cache.current_version && cache.current_version !== this.currentVersion
+      );
+      const stale = this.shouldRefresh(cache, now, false);
+      // When the running binary has drifted past the cached current_version,
+      // the cached latest_version can no longer be trusted to reflect reality
+      // (e.g. cache says latest=0.0.3 but we are now running 0.1.0). Neutralize
+      // to "current == latest, not outdated" and flag stale so warmCheck or
+      // the next explicit getStatus() call can refresh.
+      const safeLatest = versionDrift ? this.currentVersion : cache.latest_version;
+      const safeOutdated = versionDrift ? false : Boolean(cache.is_outdated);
       return this.withStatusMetadata({
         ...cache,
-        stale: this.shouldRefresh(cache, now, false),
+        current_version: this.currentVersion,
+        latest_version: safeLatest,
+        is_outdated: safeOutdated,
+        stale,
         source: 'cache'
       }, now);
     }

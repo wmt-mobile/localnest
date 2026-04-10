@@ -16,8 +16,21 @@ import { createInterface } from 'node:readline';
 import { printSubcommandHelp } from '../help.js';
 import type { VerbDef } from '../help.js';
 import { writeError as sharedWriteError } from '../output.js';
-// @ts-ignore — scripts/ is outside rootDir but required for skill management
-import { listBundledSkillDirs, getKnownToolSkillDirs, getKnownProjectSkillDirs, detectSkillToolFamily } from '../../../scripts/runtime/install-localnest-skill.mjs';
+// Lazy-loaded from scripts/runtime — outside rootDir, computed path prevents tsc from analyzing it
+const __dirname = path.dirname(new URL(import.meta.url).pathname);
+const SKILL_SCRIPT = path.resolve(__dirname, '..', '..', '..', 'scripts', 'runtime', 'install-localnest-skill.mjs');
+let _skillModule: {
+  listBundledSkillDirs: () => string[];
+  getKnownToolSkillDirs: (home: string) => string[];
+  getKnownProjectSkillDirs: (cwd: string) => string[];
+  detectSkillToolFamily: (dir: string) => string;
+} | null = null;
+async function getSkillModule() {
+  if (!_skillModule) {
+    _skillModule = await import(/* webpackIgnore: true */ SKILL_SCRIPT) as typeof _skillModule;
+  }
+  return _skillModule!;
+}
 import type { GlobalOptions } from '../options.js';
 
 const SKILL_METADATA_FILE = '.localnest-skill.json';
@@ -95,11 +108,12 @@ function readSkillMeta(skillDir: string): SkillMeta | null {
 /**
  * Scan known skill directories for installed skills.
  */
-function scanInstalledSkills(): InstalledSkill[] {
+async function scanInstalledSkills(): Promise<InstalledSkill[]> {
+  const mod = await getSkillModule();
   const homeDir = os.homedir();
   const cwd = process.cwd();
-  const userDirs: string[] = getKnownToolSkillDirs(homeDir);
-  const projectDirs: string[] = getKnownProjectSkillDirs(cwd);
+  const userDirs: string[] = mod.getKnownToolSkillDirs(homeDir);
+  const projectDirs: string[] = mod.getKnownProjectSkillDirs(cwd);
   const allDirs = [...userDirs, ...projectDirs];
 
   const results: InstalledSkill[] = [];
@@ -121,7 +135,7 @@ function scanInstalledSkills(): InstalledSkill[] {
       const meta = readSkillMeta(skillPath);
       if (!meta) continue;
 
-      const toolFamily: string = detectSkillToolFamily(skillPath);
+      const toolFamily: string = mod.detectSkillToolFamily(skillPath);
       results.push({
         name: meta.name,
         version: meta.version,
@@ -160,12 +174,12 @@ async function handleInstall(args: string[], opts: GlobalOptions): Promise<void>
   process.argv = [process.argv[0], process.argv[1], ...fwdArgs];
 
   try {
-    const { main } = await import('../../../scripts/runtime/install-localnest-skill.mjs');
+    const { main } = await import(/* webpackIgnore: true */ SKILL_SCRIPT);
     main();
 
     if (opts.json) {
       // After install, report what was installed
-      const installed = scanInstalledSkills();
+      const installed = await scanInstalledSkills();
       writeJson({ success: true, installed });
     }
   } catch (err: unknown) {
@@ -176,7 +190,7 @@ async function handleInstall(args: string[], opts: GlobalOptions): Promise<void>
 }
 
 async function handleList(_args: string[], opts: GlobalOptions): Promise<void> {
-  const installed = scanInstalledSkills();
+  const installed = await scanInstalledSkills();
 
   if (opts.json) {
     writeJson({ count: installed.length, skills: installed });
@@ -211,7 +225,8 @@ async function handleList(_args: string[], opts: GlobalOptions): Promise<void> {
   process.stdout.write('\n');
 
   // Show bundled skills available for install
-  const bundled: string[] = listBundledSkillDirs();
+  const mod = await getSkillModule();
+  const bundled: string[] = mod.listBundledSkillDirs();
   if (bundled.length > 0) {
     const bundledNames = bundled.map((d: string) => path.basename(d));
     process.stdout.write(`Bundled skills available: ${bundledNames.join(', ')}\n`);
@@ -229,7 +244,7 @@ async function handleRemove(args: string[], opts: GlobalOptions): Promise<void> 
     return;
   }
 
-  const installed = scanInstalledSkills().filter((s) => s.name === name);
+  const installed = (await scanInstalledSkills()).filter((s) => s.name === name);
 
   if (installed.length === 0) {
     writeError(`No installed skill found with name: ${name}`, opts.json);

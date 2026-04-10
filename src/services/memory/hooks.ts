@@ -22,6 +22,12 @@ const VALID_EVENTS = new Set([
   // Ingestion
   'before:ingest', 'after:ingest',
 
+  // File proactive hooks
+  'after:file:read', 'after:file:changed',
+
+  // Teach
+  'after:teach',
+
   // Dedup
   'before:dedup', 'after:dedup',
 

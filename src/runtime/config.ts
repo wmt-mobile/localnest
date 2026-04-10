@@ -440,7 +440,7 @@ export function buildRuntimeConfig(env: Record<string, string | undefined> = pro
     updatePackageName: parseStringEnv(env.LOCALNEST_UPDATE_PACKAGE, 'localnest-mcp'),
     updateCheckIntervalMinutes: parseIntEnvClamped(
       env.LOCALNEST_UPDATE_CHECK_INTERVAL_MINUTES,
-      120,
+      60,
       15,
       1440
     ),

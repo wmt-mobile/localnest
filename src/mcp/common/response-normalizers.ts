@@ -3,6 +3,8 @@
 // Normalizer functions receive untyped service results and return well-shaped objects.
 // Using `any` for inputs is intentional — these functions guard against missing/malformed data.
 
+import { stripEmptyFields } from './terse-utils.js';
+
 export interface NormalizedEmbedStatus {
   backend: string;
   ready: boolean;
@@ -217,11 +219,12 @@ export interface NormalizedMemoryRecallResult {
 }
 
 export function normalizeMemoryRecallResult(result: any, query: string = ''): NormalizedMemoryRecallResult {
+  const items = Array.isArray(result?.items) ? result.items.map(stripEmptyFields) : [];
   return {
     ...result,
     query: result?.query || query,
     count: Number.isFinite(result?.count) ? result.count : 0,
-    items: Array.isArray(result?.items) ? result.items : []
+    items
   };
 }
 
@@ -244,7 +247,7 @@ export function normalizeMemoryEntryPayload(entry: any, extras: Record<string, u
     return { ...extras, id: null, kind: null, title: null, summary: '', content: '', status: null, importance: null, confidence: null, revisions: [], memory: entry ?? null } as NormalizedMemoryEntryPayload;
   }
 
-  return {
+  const payload = {
     ...extras,
     id: entry.id ?? null,
     kind: entry.kind ?? null,
@@ -257,6 +260,7 @@ export function normalizeMemoryEntryPayload(entry: any, extras: Record<string, u
     revisions: Array.isArray(entry.revisions) ? entry.revisions : [],
     memory: entry
   };
+  return stripEmptyFields(payload) as NormalizedMemoryEntryPayload;
 }
 
 export interface NormalizedDeleteResult {
@@ -489,6 +493,7 @@ export interface NormalizedSearchHybridResult {
 }
 
 export function normalizeSearchHybridResult(result: any, query: string): NormalizedSearchHybridResult {
+  const results = Array.isArray(result?.results) ? result.results.map(stripEmptyFields) : [];
   return {
     ...result,
     query: result?.query || query,
@@ -499,7 +504,7 @@ export function normalizeSearchHybridResult(result: any, query: string): Normali
     reranker: result?.reranker || null,
     index_stale: result?.index_stale ?? null,
     index_staleness: result?.index_staleness || null,
-    results: Array.isArray(result?.results) ? result.results : []
+    results
   };
 }
 
@@ -571,5 +576,61 @@ export function normalizeProjectSummaryResult(result: any, projectPath: string):
     ...result,
     project_path: result?.project_path || projectPath,
     summary: result?.summary || ''
+  };
+}
+
+export interface NormalizedAgentPrimeResult {
+  task: string;
+  memories: Array<{ id: string; title: string; summary: string; kind: string; score: number }>;
+  entities: Array<{ id: string; name: string; type: string; predicates: string[] }>;
+  files: Array<{ path: string; score: number }>;
+  recent_changes: string;
+  suggested_actions: string[];
+}
+
+export function normalizeAgentPrimeResult(result: any): NormalizedAgentPrimeResult {
+  return {
+    task: result?.task || '',
+    memories: Array.isArray(result?.memories) ? result.memories : [],
+    entities: Array.isArray(result?.entities) ? result.entities : [],
+    files: Array.isArray(result?.files) ? result.files : [],
+    recent_changes: result?.recent_changes || 'unavailable',
+    suggested_actions: Array.isArray(result?.suggested_actions) ? result.suggested_actions : []
+  };
+}
+
+// -- Symbol intelligence normalizers --
+
+export function normalizeCallersResult(result: any, symbol: string) {
+  return {
+    symbol: result?.symbol || symbol,
+    count: Number.isFinite(result?.count) ? result.count : 0,
+    callers: Array.isArray(result?.callers) ? result.callers : []
+  };
+}
+
+export function normalizeDefinitionResult(result: any, symbol: string) {
+  return {
+    symbol: result?.symbol || symbol,
+    count: Number.isFinite(result?.count) ? result.count : 0,
+    definitions: Array.isArray(result?.definitions) ? result.definitions : []
+  };
+}
+
+export function normalizeImplementationsResult(result: any, interfaceName: string) {
+  return {
+    symbol: result?.symbol || interfaceName,
+    count: Number.isFinite(result?.count) ? result.count : 0,
+    implementations: Array.isArray(result?.implementations) ? result.implementations : []
+  };
+}
+
+export function normalizeRenamePreviewResult(result: any, oldName: string, newName: string) {
+  return {
+    old_name: result?.old_name || oldName,
+    new_name: result?.new_name || newName,
+    total_changes: Number.isFinite(result?.total_changes) ? result.total_changes : 0,
+    files_affected: Number.isFinite(result?.files_affected) ? result.files_affected : 0,
+    changes: Array.isArray(result?.changes) ? result.changes : []
   };
 }

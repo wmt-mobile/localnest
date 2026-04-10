@@ -135,6 +135,8 @@ export async function captureEvent(
         tags,
         links,
         scope,
+        nest: input.nest,
+        branch: input.branch,
         source_type: 'capture-event',
         source_ref: sourceRef,
         change_note: `Auto-captured from ${eventType} event`

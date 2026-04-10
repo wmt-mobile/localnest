@@ -8,7 +8,9 @@ import {
   scoreScopeMatch,
   deserializeEntry
 } from '../utils.js';
-import type { Adapter, MemoryEntryRow, RecallInput, RecallResult, RecallResultItem, MemoryEntry } from '../types.js';
+import { extractEntities } from '../ingest/ingest.js';
+import { normalizeEntityId } from '../knowledge-graph/kg.js';
+import type { Adapter, MemoryEntryRow, RecallInput, RecallResult, RecallResultItem, MemoryEntry, RelatedFact } from '../types.js';
 
 export async function recall(adapter: Adapter, {
   query,
@@ -99,6 +101,7 @@ export async function recall(adapter: Adapter, {
       });
       if (row.last_recalled_at) score += Math.min(row.recall_count || 0, 5) * 0.1;
       if (row.kind === 'preference') score += 0.25;
+      if (row.kind === 'feedback') score += 2.0;
 
       return {
         score,
@@ -108,6 +111,69 @@ export async function recall(adapter: Adapter, {
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score)
     .slice(0, safeLimit);
+
+  // FUSE-04: Enrich top-N results with 1-hop KG neighbors
+  const KG_ENRICH_LIMIT = 5;
+  const MAX_FACTS_PER_ITEM = 10;
+
+  for (let i = 0; i < Math.min(ranked.length, KG_ENRICH_LIMIT); i++) {
+    try {
+      const item = ranked[i];
+      const entities = extractEntities(
+        `${item.entry.title} ${item.entry.summary} ${item.entry.content}`
+      );
+      const facts: RelatedFact[] = [];
+      const seenTriples = new Set<string>();
+
+      for (const entity of entities.slice(0, 5)) {
+        const entityId = normalizeEntityId(entity.name);
+        if (!entityId) continue;
+
+        const exists = await adapter.get<{ id: string }>(
+          'SELECT id FROM kg_entities WHERE id = ?',
+          [entityId]
+        );
+        if (!exists) continue;
+
+        const triples = await adapter.all<{
+          id: string; subject_id: string; predicate: string; object_id: string;
+          subject_name: string; object_name: string;
+        }>(
+          `SELECT t.id, t.subject_id, t.predicate, t.object_id,
+                  s.name AS subject_name, o.name AS object_name
+             FROM kg_triples t
+             JOIN kg_entities s ON s.id = t.subject_id
+             JOIN kg_entities o ON o.id = t.object_id
+            WHERE (t.subject_id = ? OR t.object_id = ?)
+              AND t.valid_to IS NULL
+            LIMIT 10`,
+          [entityId, entityId]
+        );
+
+        for (const t of triples) {
+          if (seenTriples.has(t.id)) continue;
+          seenTriples.add(t.id);
+          if (facts.length >= MAX_FACTS_PER_ITEM) break;
+
+          const direction = t.subject_id === entityId ? 'outgoing' : 'incoming';
+          facts.push({
+            entity_id: entityId,
+            entity_name: entity.name,
+            predicate: t.predicate,
+            related_entity_id: direction === 'outgoing' ? t.object_id : t.subject_id,
+            related_entity_name: direction === 'outgoing' ? t.object_name : t.subject_name,
+            direction
+          });
+        }
+
+        if (facts.length >= MAX_FACTS_PER_ITEM) break;
+      }
+
+      (item as { related_facts?: RelatedFact[] }).related_facts = facts;
+    } catch {
+      // Non-blocking: KG enrichment failure does not break recall
+    }
+  }
 
   const recalledAt = nowIso();
   if (ranked.length > 0) {
@@ -131,7 +197,8 @@ export async function recall(adapter: Adapter, {
     items: ranked.map((item): RecallResultItem => ({
       score: Number(normalizeRecallScore(item.score).toFixed(3)),
       raw_score: Number(item.score.toFixed(3)),
-      memory: item.entry
+      memory: item.entry,
+      related_facts: (item as { related_facts?: RelatedFact[] }).related_facts || []
     }))
   };
 }

@@ -16,6 +16,7 @@ import { fuseRankAndRerank } from './hybrid-ranking.js';
 import type { FusedResult, RerankerMeta } from './hybrid-ranking.js';
 import { maybeBootstrapSemanticIndex } from './auto-index.js';
 import type { SemanticResult, AutoIndexMeta } from './auto-index.js';
+import type { FindCallersResult, FindDefinitionResult, FindImplementationsResult, RenamePreviewResult } from '../symbols/types.js';
 
 interface WorkspaceLike {
   resolveSearchBases(projectPath: string | undefined, allRoots: boolean | undefined): string[];
@@ -45,6 +46,13 @@ interface VectorIndexLike {
 interface RerankerLike {
   isEnabled?: () => boolean;
   rerank(query: string, candidates: FusedResult[]): Promise<number[]>;
+}
+
+interface SymbolIndexLike {
+  findCallers(symbol: string, opts?: Record<string, unknown>): FindCallersResult;
+  findDefinition(symbol: string, opts?: Record<string, unknown>): FindDefinitionResult;
+  findImplementations(interfaceName: string, opts?: Record<string, unknown>): FindImplementationsResult;
+  renamePreview(oldName: string, newName: string, opts?: Record<string, unknown>): RenamePreviewResult;
 }
 
 export interface SymbolResult {
@@ -103,6 +111,7 @@ export interface SearchServiceOptions {
   reranker?: RerankerLike | null;
   rerankerMinCandidates?: number;
   rerankerTopN?: number;
+  symbolIndex?: SymbolIndexLike | null;
 }
 
 export class SearchService {
@@ -117,6 +126,7 @@ export class SearchService {
   rerankerTopN: number;
   autoIndexedScopes: Set<string>;
   defaultAutoIndexMaxFiles: number;
+  symbolIndex: SymbolIndexLike | null;
 
   constructor({
     workspace,
@@ -127,7 +137,8 @@ export class SearchService {
     vectorIndex,
     reranker,
     rerankerMinCandidates = 15,
-    rerankerTopN = 25
+    rerankerTopN = 25,
+    symbolIndex = null
   }: SearchServiceOptions) {
     this.workspace = workspace;
     this.ignoreDirs = ignoreDirs;
@@ -140,6 +151,7 @@ export class SearchService {
     this.rerankerTopN = Math.max(1, rerankerTopN);
     this.autoIndexedScopes = new Set();
     this.defaultAutoIndexMaxFiles = 20000;
+    this.symbolIndex = symbolIndex;
   }
 
   searchCode({ query, projectPath, allRoots, glob, maxResults, caseSensitive, contextLines = 0, useRegex = false }: {
@@ -296,6 +308,43 @@ export class SearchService {
       count: usages.length,
       usages
     };
+  }
+
+  // -- Symbol-index-powered queries (with regex fallback) --
+
+  findCallersSymbol(opts: { symbol: string; projectPath?: string; language?: string; maxResults?: number }): FindCallersResult {
+    if (this.symbolIndex) return this.symbolIndex.findCallers(opts.symbol, opts);
+    const r = this.findUsages({ symbol: opts.symbol, projectPath: opts.projectPath, maxResults: opts.maxResults || 100, caseSensitive: false, glob: '*' });
+    const calls = r.usages.filter(u => u.kind === 'call');
+    return { symbol: r.symbol, count: calls.length, callers: calls.map(u => ({
+      file: u.file, line_start: u.line, line_end: u.line, text: u.text, kind: 'call' as const, scope_path: '', language: '', is_export: false
+    })) };
+  }
+
+  findDefinitionSymbol(opts: { symbol: string; projectPath?: string; language?: string }): FindDefinitionResult {
+    if (this.symbolIndex) return this.symbolIndex.findDefinition(opts.symbol, opts);
+    const r = this.getSymbol({ symbol: opts.symbol, projectPath: opts.projectPath, caseSensitive: false });
+    return { symbol: r.symbol, count: r.definitions.length, definitions: r.definitions.map(d => ({
+      file: d.file, line_start: d.start_line, line_end: d.end_line, text: d.text, kind: 'function' as const, scope_path: '', language: '', is_export: false
+    })) };
+  }
+
+  findImplementationsSymbol(opts: { interfaceName: string; projectPath?: string; language?: string; maxResults?: number }): FindImplementationsResult {
+    if (this.symbolIndex) return this.symbolIndex.findImplementations(opts.interfaceName, opts);
+    const rows = this.searchCode({ query: `implements ${opts.interfaceName}`, projectPath: opts.projectPath, glob: '*', maxResults: opts.maxResults || 100, caseSensitive: false });
+    return { symbol: opts.interfaceName, count: rows.length, implementations: rows.map(r => ({
+      file: r.file, line_start: r.line, line_end: r.line, text: r.text, kind: 'class' as const, scope_path: '', language: '', is_export: false
+    })) };
+  }
+
+  renamePreviewSymbol(opts: { oldName: string; newName: string; projectPath?: string; maxResults?: number }): RenamePreviewResult {
+    if (this.symbolIndex) return this.symbolIndex.renamePreview(opts.oldName, opts.newName, opts);
+    const rows = this.searchCode({ query: buildSymbolWordPattern(opts.oldName), projectPath: opts.projectPath, glob: '*', maxResults: opts.maxResults || 500, caseSensitive: true, useRegex: true });
+    const esc = opts.oldName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`\\b${esc}\\b`, 'g');
+    const filesSet = new Set<string>();
+    const changes = rows.map(r => { filesSet.add(r.file); return { file: r.file, line: r.line, original_text: r.text, preview_text: r.text.replace(re, opts.newName), kind: (classifySymbolLine(r.text, opts.oldName) || 'reference') as any }; });
+    return { old_name: opts.oldName, new_name: opts.newName, total_changes: changes.length, files_affected: filesSet.size, changes };
   }
 
   async searchHybrid({

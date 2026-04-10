@@ -27,9 +27,9 @@ function countToolRegistrations(): number {
       const matches = src.match(/registerJsonTool\(/g);
       if (matches) total += matches.length;
     }
-    return total || 52; // fallback
+    return total || 68; // fallback
   } catch {
-    return 52; // safe fallback
+    return 68; // safe fallback
   }
 }
 

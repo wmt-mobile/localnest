@@ -37,11 +37,13 @@ interface TaxonomyRow {
 
 export async function getTaxonomyTree(adapter: Adapter): Promise<TaxonomyTree> {
   const rows = await adapter.all<TaxonomyRow>(
-    `SELECT nest, branch, COUNT(*) AS count
+    `SELECT COALESCE(NULLIF(nest, ''), '(default)') AS nest,
+            COALESCE(NULLIF(branch, ''), '(default)') AS branch,
+            COUNT(*) AS count
        FROM memory_entries
-      WHERE status = 'active' AND nest != ''
-      GROUP BY nest, branch
-      ORDER BY nest ASC, count DESC, branch ASC`
+      WHERE status = 'active'
+      GROUP BY 1, 2
+      ORDER BY 1 ASC, count DESC, 2 ASC`
   );
 
   const nestMap = new Map<string, TaxonomyNest>();
@@ -56,11 +58,20 @@ export async function getTaxonomyTree(adapter: Adapter): Promise<TaxonomyTree> {
     }
   }
 
+  const kgEntityCount = await adapter.get<{ count: number }>(
+    'SELECT COUNT(*) AS count FROM kg_entities'
+  );
+  const kgTripleCount = await adapter.get<{ count: number }>(
+    'SELECT COUNT(*) AS count FROM kg_triples WHERE valid_to IS NULL'
+  );
+
   const nests = Array.from(nestMap.values());
   return {
     total_nests: nests.length,
     total_branches: nests.reduce((sum, n) => sum + n.branches.length, 0),
     total_memories: nests.reduce((sum, n) => sum + n.count, 0),
+    total_kg_entities: kgEntityCount?.count ?? 0,
+    total_kg_triples: kgTripleCount?.count ?? 0,
     nests
   };
 }

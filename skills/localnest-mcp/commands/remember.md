@@ -5,6 +5,9 @@ argument-hint: "<what to remember>"
 allowed-tools:
   - Read
   - Bash
+  - mcp__localnest__localnest_memory_store
+  - mcp__localnest__localnest_memory_suggest_relations
+  - mcp__localnest__localnest_memory_add_relation
 ---
 
 <objective>

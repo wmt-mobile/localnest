@@ -4,23 +4,31 @@
 
 LocalNest is a local-first MCP server that gives AI agents safe, scoped access to code — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory that never leaves your machine. 50 MCP tools, zero cloud dependencies, pure SQLite.
 
-## Current Milestone: v0.1.0 — The Big Upgrade
+## Current Milestone: v0.2.0 — Memory-KG Fusion & Agent-First Surface
 
-**Goal:** TypeScript migration, CLI visual refresh, search/memory performance, latest libraries.
+**Goal:** Make LocalNest the single primitive an agent calls at the start of every task and at the end of every outcome, with batch writes, terse responses, fused search, and a connected memory-KG graph.
 
-**Phases:**
-1. CLI Foundation — extract shared ANSI/output module (deduplicate 5 files)
-2. CLI Visual Refresh — add spinners, modernize help/dashboard, consistent formatting
-3. Performance Quick Wins — composite indexes, embedding cache, prepared statements
-4. Performance Deep — async vector index, sqlite-vec, batch embeddings
-5. TypeScript Infrastructure — tsconfig, build pipeline, CI changes
-6. TypeScript Migration — convert 94 source files + 3 test files
-7. Library Updates + Ship — update all deps, final verification, release
+**Target features:**
+- Batch write variants for every write tool (`kg_add_triples_batch`, `memory_store_batch`) — turn 300 calls into 3
+- Terse response format (`response_format: "minimal"`) — 80% token reduction
+- Auto-link memories ↔ KG via entity extraction — populate `source_memory_id`, wire KG into recall
+- Predicate cardinality (functional vs multi-valued) — fix contradiction false-positives
+- `localnest_agent_prime(task)` unified context primitive — replaces 4 tool calls
+- `localnest_find(query)` fused memory + code + KG search
+- Symbol-aware code intelligence via tree-sitter — `find_callers`, `find_definition`, `find_implementations`, `rename_preview`
+- `localnest_whats_new(since)` — cross-session delta summary
+- Slim SKILL.md + auto-infer capture fields — drop 350 lines of agent overhead
+- Auto-populate nest/branch on capture — unlock `graph_bridges` and `nest_tree`
+- Proactive memory hints via hooks — push, don't pull
+- `localnest_teach(instruction)` — durable behavior modifier
+- `localnest_audit()` self-audit dashboard
 
-**Parallel lanes:**
-- Lane A (CLI): Phase 1 → 2
-- Lane B (Perf): Phase 3 → 4
-- Lane C (TS): Phase 5 → 6 → 7
+**Deferred to release/0.1.0 branch:**
+- v0.1.0 TypeScript migration + perf + CLI polish (phases 19-25) — ships separately on its own branch
+
+**Provenance:**
+- Driven by 2026-04-09 dogfooding retrospective exposing memory-KG disconnect, duplicate triples, empty nest/branch, 400-line SKILL.md token cost
+- Absorbs pending quick task `260409-ohq` (contradiction detection) into Phase 28
 
 ## Core Value
 
@@ -41,17 +49,30 @@ A single local MCP server that handles both code retrieval AND rich structured m
 
 ### Active
 
-- [ ] Unified CLI framework with Commander.js noun-verb subcommands
-- [ ] Memory CLI commands (localnest memory add/search/list/show/delete)
-- [ ] Knowledge Graph CLI commands (localnest kg add/query/timeline/stats)
-- [ ] Skill CLI commands (localnest skill install/list/remove/search)
-- [ ] MCP lifecycle CLI (localnest mcp start/status/config)
-- [ ] Ingest CLI (localnest ingest markdown/json)
-- [ ] Hook MCP tools (localnest_hooks_stats, before/after event exposure)
-- [ ] Shell completions + --json flag + colored help
-- [ ] Deprecate old localnest-mcp-* binaries
-- [ ] Agent-scoped memory (per-agent isolated namespaces/diaries)
-- [ ] Semantic duplicate detection (similarity-based dedup before storage)
+- [ ] Batch write variants for every write tool (`kg_add_entities_batch`, `kg_add_triples_batch`, `memory_store_batch`) with summary-only responses
+- [ ] Write-time dedup on `(subject_id, predicate, object_id)` where `valid_to IS NULL` — return existing ID on conflict
+- [ ] Auto-stamp `valid_from = now` on every KG triple to enable `kg_as_of` queries
+- [ ] `response_format: "minimal"` on every write tool, default for batches
+- [ ] Predicate cardinality (functional vs multi-valued) with hardcoded default + DB override table
+- [ ] Auto-link memories to KG entities via entity extraction during `capture_outcome` / `memory_store`
+- [ ] Wire KG 1-hop neighbors into recall as `related_facts`
+- [ ] `localnest_agent_prime(task)` — unified context primitive returning memories + entities + files + recent changes + suggested actions
+- [ ] `localnest_find(query)` — fused memory + code + KG search with cross-source re-ranking
+- [ ] Tree-sitter AST parsing for symbol-aware code intelligence (`find_callers`, `find_definition`, `find_implementations`, `rename_preview`)
+- [ ] `localnest_whats_new(since)` — cross-session delta summary
+- [ ] Slim SKILL.md (~50 lines) + `localnest_help(task)` for just-in-time tool guidance
+- [ ] Auto-infer `project_path`, `branch_name`, `nest`, `branch`, `topic`, `tags` on capture — reduce agent-facing surface to `{title, content}`
+- [ ] Auto-populate nest/branch from project path and content classification
+- [ ] Proactive memory suggestions via Read-file hooks
+- [ ] `localnest_teach(instruction)` — durable behavior modifier via high-importance feedback memory
+- [ ] `localnest_audit()` — self-audit dashboard for coverage, density, orphans, stale memories
+
+### Deferred (release/0.1.0 branch)
+
+- [ ] CLI foundation + visual refresh (shared ANSI module, ora spinners)
+- [ ] Performance quick wins + deep (composite indexes, async vector index, sqlite-vec)
+- [ ] TypeScript infrastructure + migration (tsconfig, 94-file conversion)
+- [ ] Library updates and v0.1.0 release
 
 ### Out of Scope
 
@@ -108,4 +129,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-09 after milestone v0.1.0 initialization*
+*Last updated: 2026-04-09 after milestone v0.2.0 initialization*

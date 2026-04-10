@@ -21,7 +21,11 @@ import {
   registerMemoryWorkflowTools,
   registerMemoryStoreTools,
   registerRetrievalTools,
-  registerGraphTools
+  registerGraphTools,
+  registerBackfillTools,
+  registerFindTools,
+  registerAuditTools,
+  registerSymbolTools
 } from '../mcp/index.js';
 import { MemoryWorkflowService } from '../services/memory/index.js';
 import type { AppServices } from './create-services.js';
@@ -40,7 +44,8 @@ export function registerAppTools(server: any, runtime: any, services: any): void
   });
   const memoryWorkflow = new MemoryWorkflowService({
     memory: services.memory,
-    getRuntimeSummary: async () => buildServerStatus()
+    getRuntimeSummary: async () => buildServerStatus(),
+    search: services.search
   });
   const sharedSchemas = {
     MEMORY_KIND_SCHEMA,
@@ -79,12 +84,34 @@ export function registerAppTools(server: any, runtime: any, services: any): void
     vectorIndex: services.vectorIndex,
     search: services.search,
     defaultMaxReadLines: DEFAULT_MAX_READ_LINES,
-    defaultMaxResults: DEFAULT_MAX_RESULTS
+    defaultMaxResults: DEFAULT_MAX_RESULTS,
+    memory: services.memory
   });
 
   registerGraphTools({
     registerJsonTool,
     schemas: sharedSchemas,
     memory: services.memory
+  });
+
+  registerBackfillTools({
+    registerJsonTool,
+    memory: services.memory
+  });
+
+  registerFindTools({
+    registerJsonTool,
+    memory: services.memory,
+    search: services.search
+  });
+
+  registerAuditTools({
+    registerJsonTool,
+    memory: services.memory
+  });
+
+  registerSymbolTools({
+    registerJsonTool,
+    search: services.search
   });
 }

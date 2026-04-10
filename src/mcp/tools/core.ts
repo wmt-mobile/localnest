@@ -5,6 +5,7 @@ import {
 } from '../common/response-normalizers.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import type { ServerStatus } from '../common/status.js';
+import { buildHelpGuide } from '../common/status.js';
 
 interface UpdateService {
   getStatus(opts: { force: boolean; channel?: string }): Promise<unknown>;
@@ -96,6 +97,24 @@ export function registerCoreTools({
       }
     },
     async () => buildUsageGuide()
+  );
+
+  registerJsonTool(
+    'localnest_help',
+    {
+      title: 'Help',
+      description: 'Get task-scoped tool guidance. Describe what you want to do and receive a tailored list of tools, workflow steps, and tips.',
+      inputSchema: {
+        task: z.string().max(500).default('')
+      },
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false
+      }
+    },
+    async ({ task }: Record<string, unknown>) => buildHelpGuide(task as string)
   );
 
   registerJsonTool(

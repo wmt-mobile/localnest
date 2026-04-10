@@ -1,7 +1,7 @@
 import { buildSearchTerms, stableJson } from './utils.js';
 import type { Adapter, MigrationSpec, MigrationContext } from './types.js';
 
-export const SCHEMA_VERSION = 10;
+export const SCHEMA_VERSION = 11;
 
 export async function ensureSchema(adapter: Adapter): Promise<void> {
   await adapter.exec(`
@@ -313,6 +313,22 @@ export async function runMigrations({ adapter, getMeta }: MigrationContext): Pro
         await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_subject_valid ON kg_triples(subject_id, valid_to, object_id)`);
         await ad.exec(`CREATE INDEX IF NOT EXISTS idx_memory_entries_status_embedding ON memory_entries(status) WHERE embedding_json IS NOT NULL`);
         await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_pred_subject ON kg_triples(predicate, subject_id)`);
+      }
+    },
+    {
+      version: 11,
+      migrate: async (ad) => {
+        // Additive: create the predicate cardinality override table.
+        // Empty by default -- all rules come from the hardcoded FUNCTIONAL_PREDICATES
+        // set in knowledge-graph/kg.ts unless users add rows here.
+        // Fixes false-positive contradiction detection for multi-valued predicates.
+        await ad.exec(`
+          CREATE TABLE IF NOT EXISTS kg_predicate_cardinality (
+            predicate TEXT PRIMARY KEY,
+            cardinality TEXT NOT NULL CHECK(cardinality IN ('functional','multi')),
+            updated_at TEXT NOT NULL
+          )
+        `);
       }
     }
   ];
