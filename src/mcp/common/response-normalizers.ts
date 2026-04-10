@@ -3,6 +3,8 @@
 // Normalizer functions receive untyped service results and return well-shaped objects.
 // Using `any` for inputs is intentional — these functions guard against missing/malformed data.
 
+import { stripEmptyFields } from './terse-utils.js';
+
 export interface NormalizedEmbedStatus {
   backend: string;
   ready: boolean;
@@ -217,11 +219,12 @@ export interface NormalizedMemoryRecallResult {
 }
 
 export function normalizeMemoryRecallResult(result: any, query: string = ''): NormalizedMemoryRecallResult {
+  const items = Array.isArray(result?.items) ? result.items.map(stripEmptyFields) : [];
   return {
     ...result,
     query: result?.query || query,
     count: Number.isFinite(result?.count) ? result.count : 0,
-    items: Array.isArray(result?.items) ? result.items : []
+    items
   };
 }
 
@@ -244,7 +247,7 @@ export function normalizeMemoryEntryPayload(entry: any, extras: Record<string, u
     return { ...extras, id: null, kind: null, title: null, summary: '', content: '', status: null, importance: null, confidence: null, revisions: [], memory: entry ?? null } as NormalizedMemoryEntryPayload;
   }
 
-  return {
+  const payload = {
     ...extras,
     id: entry.id ?? null,
     kind: entry.kind ?? null,
@@ -257,6 +260,7 @@ export function normalizeMemoryEntryPayload(entry: any, extras: Record<string, u
     revisions: Array.isArray(entry.revisions) ? entry.revisions : [],
     memory: entry
   };
+  return stripEmptyFields(payload) as NormalizedMemoryEntryPayload;
 }
 
 export interface NormalizedDeleteResult {
@@ -489,6 +493,7 @@ export interface NormalizedSearchHybridResult {
 }
 
 export function normalizeSearchHybridResult(result: any, query: string): NormalizedSearchHybridResult {
+  const results = Array.isArray(result?.results) ? result.results.map(stripEmptyFields) : [];
   return {
     ...result,
     query: result?.query || query,
@@ -499,7 +504,7 @@ export function normalizeSearchHybridResult(result: any, query: string): Normali
     reranker: result?.reranker || null,
     index_stale: result?.index_stale ?? null,
     index_staleness: result?.index_staleness || null,
-    results: Array.isArray(result?.results) ? result.results : []
+    results
   };
 }
 

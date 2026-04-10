@@ -9,6 +9,7 @@ import {
   normalizeRelationRemovalResult,
   normalizeRelationResult
 } from '../common/response-normalizers.js';
+import { toMinimalWriteResponse } from '../common/terse-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import type {
   MemoryKind,
@@ -139,7 +140,8 @@ export function registerMemoryStoreTools({
         branch: z.string().max(200).optional(),
         source_type: z.string().max(60).default('manual'),
         source_ref: z.string().max(1000).default(''),
-        change_note: z.string().max(400).default('Initial memory creation')
+        change_note: z.string().max(400).default('Initial memory creation'),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -148,15 +150,16 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async (args: Record<string, unknown>) => {
+    async ({ terse, ...args }: Record<string, unknown>) => {
       const result = await memory.storeEntry(args);
-      return normalizeMemoryEntryPayload(
+      const normalized = normalizeMemoryEntryPayload(
         (result as Record<string, unknown>)?.memory || null,
         {
           created: Boolean((result as Record<string, unknown>)?.created),
           duplicate: Boolean((result as Record<string, unknown>)?.duplicate)
         }
       );
+      return toMinimalWriteResponse(normalized, terse as string);
     }
   );
 
@@ -179,7 +182,8 @@ export function registerMemoryStoreTools({
         scope: MEMORY_SCOPE_SCHEMA.optional(),
         source_type: z.string().max(60).optional(),
         source_ref: z.string().max(1000).optional(),
-        change_note: z.string().max(400).default('Memory updated')
+        change_note: z.string().max(400).default('Memory updated'),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -188,11 +192,9 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ id, ...patch }: Record<string, unknown>) => {
+    async ({ id, terse, ...patch }: Record<string, unknown>) => {
       const result = await memory.updateEntry(id as string, patch);
-      return normalizeMemoryEntryPayload(result, {
-        updated: true
-      });
+      return toMinimalWriteResponse(normalizeMemoryEntryPayload(result, { updated: true }), terse as string);
     }
   );
 
@@ -202,7 +204,8 @@ export function registerMemoryStoreTools({
       title: 'Memory Delete',
       description: 'Delete a stored memory entry and all of its revisions.',
       inputSchema: {
-        id: z.string().min(1)
+        id: z.string().min(1),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -211,7 +214,7 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ id }: Record<string, unknown>) => normalizeDeleteResult(await memory.deleteEntry(id as string), { id: id as string })
+    async ({ id, terse }: Record<string, unknown>) => toMinimalWriteResponse(normalizeDeleteResult(await memory.deleteEntry(id as string), { id: id as string }), terse as string)
   );
 
   registerJsonTool(
@@ -235,7 +238,8 @@ export function registerMemoryStoreTools({
         scope: MEMORY_SCOPE_SCHEMA,
         nest: z.string().max(200).optional(),
         branch: z.string().max(200).optional(),
-        source_ref: z.string().max(1000).default('')
+        source_ref: z.string().max(1000).default(''),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -244,7 +248,7 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async (args: Record<string, unknown>) => memory.captureEvent(args)
+    async ({ terse, ...args }: Record<string, unknown>) => toMinimalWriteResponse(await memory.captureEvent(args), terse as string)
   );
 
   registerJsonTool(
@@ -305,7 +309,8 @@ export function registerMemoryStoreTools({
       inputSchema: {
         source_id: z.string().min(1),
         target_id: z.string().min(1),
-        relation_type: z.string().min(1).max(60).default('related')
+        relation_type: z.string().min(1).max(60).default('related'),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -314,9 +319,9 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ source_id, target_id, relation_type }: Record<string, unknown>) => {
+    async ({ source_id, target_id, relation_type, terse }: Record<string, unknown>) => {
       const result = await memory.addRelation(source_id as string, target_id as string, relation_type as string);
-      return normalizeRelationResult(result, { source_id: source_id as string, target_id: target_id as string, relation_type: relation_type as string });
+      return toMinimalWriteResponse(normalizeRelationResult(result, { source_id: source_id as string, target_id: target_id as string, relation_type: relation_type as string }), terse as string);
     }
   );
 
@@ -327,7 +332,8 @@ export function registerMemoryStoreTools({
       description: 'Remove a relation between two memory entries.',
       inputSchema: {
         source_id: z.string().min(1),
-        target_id: z.string().min(1)
+        target_id: z.string().min(1),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -336,9 +342,9 @@ export function registerMemoryStoreTools({
         openWorldHint: false
       }
     },
-    async ({ source_id, target_id }: Record<string, unknown>) => {
+    async ({ source_id, target_id, terse }: Record<string, unknown>) => {
       const result = await memory.removeRelation(source_id as string, target_id as string);
-      return normalizeRelationRemovalResult(result, { source_id: source_id as string, target_id: target_id as string });
+      return toMinimalWriteResponse(normalizeRelationRemovalResult(result, { source_id: source_id as string, target_id: target_id as string }), terse as string);
     }
   );
 

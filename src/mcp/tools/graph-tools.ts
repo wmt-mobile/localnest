@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { MemoryHooks } from '../../services/memory/hooks.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
+import { toMinimalWriteResponse } from '../common/terse-utils.js';
 
 interface MemoryService {
   addEntity(opts: Record<string, unknown>): Promise<unknown>;
@@ -48,7 +49,8 @@ export function registerGraphTools({
         name: z.string().min(1).max(400),
         type: z.string().max(100).default('concept'),
         properties: z.record(z.string(), z.any()).default({}),
-        memory_id: z.string().optional()
+        memory_id: z.string().optional(),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -57,8 +59,8 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ name, type, properties, memory_id }: Record<string, unknown>) =>
-      memory.addEntity({ name, type, properties, memoryId: memory_id })
+    async ({ name, type, properties, memory_id, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.addEntity({ name, type, properties, memoryId: memory_id }), terse as string)
   );
 
   registerJsonTool(
@@ -76,7 +78,8 @@ export function registerGraphTools({
         valid_to: z.string().nullable().optional(),
         confidence: z.number().min(0).max(1).default(1.0),
         source_memory_id: z.string().nullable().optional(),
-        source_type: z.string().max(100).default('manual')
+        source_type: z.string().max(100).default('manual'),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -85,19 +88,13 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ subject_name, predicate, object_name, subject_id, object_id, valid_from, valid_to, confidence, source_memory_id, source_type }: Record<string, unknown>) =>
-      memory.addTriple({
-        subjectName: subject_name,
-        subjectId: subject_id,
-        predicate,
-        objectName: object_name,
-        objectId: object_id,
-        validFrom: valid_from,
-        validTo: valid_to,
-        confidence,
-        sourceMemoryId: source_memory_id,
-        sourceType: source_type
-      })
+    async ({ subject_name, predicate, object_name, subject_id, object_id, valid_from, valid_to, confidence, source_memory_id, source_type, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.addTriple({
+        subjectName: subject_name, subjectId: subject_id, predicate,
+        objectName: object_name, objectId: object_id,
+        validFrom: valid_from, validTo: valid_to, confidence,
+        sourceMemoryId: source_memory_id, sourceType: source_type
+      }), terse as string)
   );
 
   registerJsonTool(
@@ -180,7 +177,8 @@ export function registerGraphTools({
       description: 'Set valid_to on a triple to mark it as no longer current. The triple remains in history but is excluded from current-state queries.',
       inputSchema: {
         triple_id: z.string().min(1),
-        valid_to: z.string().nullable().optional()
+        valid_to: z.string().nullable().optional(),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -189,8 +187,8 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ triple_id, valid_to }: Record<string, unknown>) =>
-      memory.invalidateTriple(triple_id as string, valid_to as string | null | undefined)
+    async ({ triple_id, valid_to, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.invalidateTriple(triple_id as string, valid_to as string | null | undefined), terse as string)
   );
 
   registerJsonTool(
@@ -351,7 +349,8 @@ export function registerGraphTools({
       inputSchema: {
         agent_id: z.string().min(1).max(200),
         content: z.string().min(1).max(20000),
-        topic: z.string().max(200).optional()
+        topic: z.string().max(200).optional(),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -360,8 +359,8 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ agent_id, content, topic }: Record<string, unknown>) =>
-      memory.writeDiaryEntry({ agentId: agent_id, content, topic })
+    async ({ agent_id, content, topic, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.writeDiaryEntry({ agentId: agent_id, content, topic }), terse as string)
   );
 
   registerJsonTool(
@@ -398,7 +397,8 @@ export function registerGraphTools({
         source_label: z.string().max(1000).optional().describe('Optional label for re-ingestion tracking (e.g. filename)'),
         nest: z.string().max(200).default(''),
         branch: z.string().max(200).default(''),
-        agent_id: z.string().max(200).default('')
+        agent_id: z.string().max(200).default(''),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -407,8 +407,8 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ content, source_label, nest, branch, agent_id }: Record<string, unknown>) =>
-      memory.ingestMarkdown({ content, filePath: source_label || '', nest, branch, agentId: agent_id })
+    async ({ content, source_label, nest, branch, agent_id, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.ingestMarkdown({ content, filePath: source_label || '', nest, branch, agentId: agent_id }), terse as string)
   );
 
   registerJsonTool(
@@ -421,7 +421,8 @@ export function registerGraphTools({
         source_label: z.string().max(1000).optional().describe('Optional label for re-ingestion tracking'),
         nest: z.string().max(200).default(''),
         branch: z.string().max(200).default(''),
-        agent_id: z.string().max(200).default('')
+        agent_id: z.string().max(200).default(''),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -430,8 +431,8 @@ export function registerGraphTools({
         openWorldHint: false
       }
     },
-    async ({ content, source_label, nest, branch, agent_id }: Record<string, unknown>) =>
-      memory.ingestJson({ content, filePath: source_label || '', nest, branch, agentId: agent_id })
+    async ({ content, source_label, nest, branch, agent_id, terse }: Record<string, unknown>) =>
+      toMinimalWriteResponse(await memory.ingestJson({ content, filePath: source_label || '', nest, branch, agentId: agent_id }), terse as string)
   );
 
   // --- Dedup Tool (localnest_memory_check_duplicate) ---

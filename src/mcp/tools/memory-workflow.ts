@@ -5,6 +5,7 @@ import {
   normalizeMemoryStatus,
   normalizeTaskContextResult
 } from '../common/response-normalizers.js';
+import { toMinimalWriteResponse } from '../common/terse-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import type {
   MemoryKind,
@@ -156,7 +157,8 @@ export function registerMemoryWorkflowTools({
         feature: z.string().optional(),
         nest: z.string().max(200).optional(),
         branch: z.string().max(200).optional(),
-        source_ref: z.string().max(1000).default('')
+        source_ref: z.string().max(1000).default(''),
+        terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
       annotations: {
         readOnlyHint: false,
@@ -165,6 +167,6 @@ export function registerMemoryWorkflowTools({
         openWorldHint: false
       }
     },
-    async (args: Record<string, unknown>) => normalizeCaptureOutcomeResult(await memoryWorkflow.captureOutcome(args))
+    async ({ terse, ...args }: Record<string, unknown>) => toMinimalWriteResponse(normalizeCaptureOutcomeResult(await memoryWorkflow.captureOutcome(args)), terse as string)
   );
 }
