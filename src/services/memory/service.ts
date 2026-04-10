@@ -322,6 +322,11 @@ export class MemoryService {
     return this.store.scanAndBackfillProjects(opts);
   }
 
+  async audit() {
+    this.assertEnabled();
+    return this.store.audit();
+  }
+
   assertEnabled(): void {
     if (!this.enabled) {
       throw new Error('Local memory is disabled. Re-run localnest setup and opt in to memory.');

@@ -23,7 +23,9 @@ import {
   registerRetrievalTools,
   registerGraphTools,
   registerBackfillTools,
-  registerFindTools
+  registerFindTools,
+  registerAuditTools,
+  registerSymbolTools
 } from '../mcp/index.js';
 import { MemoryWorkflowService } from '../services/memory/index.js';
 import type { AppServices } from './create-services.js';
@@ -100,6 +102,16 @@ export function registerAppTools(server: any, runtime: any, services: any): void
   registerFindTools({
     registerJsonTool,
     memory: services.memory,
+    search: services.search
+  });
+
+  registerAuditTools({
+    registerJsonTool,
+    memory: services.memory
+  });
+
+  registerSymbolTools({
+    registerJsonTool,
     search: services.search
   });
 }

@@ -54,13 +54,15 @@ import { searchTriples as searchTriplesFn } from './knowledge-graph/kg-search.js
 import { backfillMemoryKgLinks as backfillMemoryKgLinksFn } from './knowledge-graph/auto-link.js';
 import { getFileMemoryHints as getFileMemoryHintsFn } from './proactive-hints.js';
 import { whatsNew as whatsNewFn } from './temporal/whats-new.js';
+import { runAudit as runAuditFn } from './audit/dashboard.js';
 import type { AddEntityBatchInput, AddTripleBatchInput } from './knowledge-graph/kg-batch.js';
 import type {
   Adapter, EmbeddingService, ListEntriesOpts, StoreEntryInput, UpdateEntryPatch,
   RecallInput, CaptureEventInput, AddEntityInput, AddTripleInput,
   TraverseGraphOpts, DiscoverBridgesOpts, WriteDiaryInput, ReadDiaryInput,
   DuplicateCheckOpts, IngestOpts, HookEmitResult, BackfillResult,
-  ProactiveHintResult, WhatsNewInput, ProjectBackfillOpts, ProjectBackfillResult
+  ProactiveHintResult, WhatsNewInput, ProjectBackfillOpts, ProjectBackfillResult,
+  AuditResult
 } from './types.js';
 
 interface MemoryStoreConfig {
@@ -450,5 +452,10 @@ export class MemoryStore {
     const result = await scanFn(this as never, hookResult.payload as ProjectBackfillOpts);
     await this.hooks.emit('after:graph:backfill_projects', result);
     return result;
+  }
+
+  async audit(): Promise<AuditResult> {
+    await this.init();
+    return runAuditFn(this.adapter!);
   }
 }
