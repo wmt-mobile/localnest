@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v0.2.0
 milestone_name: Memory-KG Fusion & Agent-First Surface
 status: active
-stopped_at: "Phase 26 complete — batch write tools implemented, moving to Phase 27"
-last_updated: "2026-04-10T06:10:00Z"
-last_activity: "2026-04-10 - Phase 26 complete: 3 new MCP tools, 20 tests, valid_from auto-stamp"
+stopped_at: "Phase 27 complete — terse responses implemented, moving to Phase 28"
+last_updated: "2026-04-10T06:30:00Z"
+last_activity: "2026-04-10 - Phase 27 complete: terse param on 13 write tools, read cleanup, 70% reduction"
 progress:
   total_phases: 13
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
-  percent: 8
-  next_phase: 27
+  completed_phases: 2
+  total_plans: 3
+  completed_plans: 3
+  percent: 15
+  next_phase: 28
 ---
 
 # Project State
@@ -22,16 +22,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** v0.2.0 Memory-KG Fusion — Phase 26 done, now Phase 27 (Terse Response Format). Branch: release/0.2.0.
+**Current focus:** v0.2.0 Memory-KG Fusion — Phase 27 done, now Phase 28 (Predicate Cardinality & Contradiction Fix). Branch: release/0.2.0.
 
 ## Current Position
 
-Phase: **Phase 27 (Terse Response Format)** — not yet started
+Phase: **Phase 28 (Predicate Cardinality & Contradiction Fix)** — not yet started
 Plan: —
-Status: Phase 26 complete; ready to plan Phase 27
-Last activity: 2026-04-10 - Phase 26 shipped: kg_add_entities_batch, kg_add_triples_batch, memory_store_batch + valid_from auto-stamp + dedup
+Status: Phase 27 complete; ready to plan Phase 28
+Last activity: 2026-04-10 - Phase 27 shipped: terse param on 13 write tools, read cleanup, 70% token reduction
 
-Progress (v0.2.0 only): [█░░░░░░░░░] 8% (1/13 phases)
+Progress (v0.2.0 only): [██░░░░░░░░] 15% (2/13 phases)
 
 ## v0.2.0 Execution Plan
 
