@@ -598,3 +598,39 @@ export function normalizeAgentPrimeResult(result: any): NormalizedAgentPrimeResu
     suggested_actions: Array.isArray(result?.suggested_actions) ? result.suggested_actions : []
   };
 }
+
+// -- Symbol intelligence normalizers --
+
+export function normalizeCallersResult(result: any, symbol: string) {
+  return {
+    symbol: result?.symbol || symbol,
+    count: Number.isFinite(result?.count) ? result.count : 0,
+    callers: Array.isArray(result?.callers) ? result.callers : []
+  };
+}
+
+export function normalizeDefinitionResult(result: any, symbol: string) {
+  return {
+    symbol: result?.symbol || symbol,
+    count: Number.isFinite(result?.count) ? result.count : 0,
+    definitions: Array.isArray(result?.definitions) ? result.definitions : []
+  };
+}
+
+export function normalizeImplementationsResult(result: any, interfaceName: string) {
+  return {
+    symbol: result?.symbol || interfaceName,
+    count: Number.isFinite(result?.count) ? result.count : 0,
+    implementations: Array.isArray(result?.implementations) ? result.implementations : []
+  };
+}
+
+export function normalizeRenamePreviewResult(result: any, oldName: string, newName: string) {
+  return {
+    old_name: result?.old_name || oldName,
+    new_name: result?.new_name || newName,
+    total_changes: Number.isFinite(result?.total_changes) ? result.total_changes : 0,
+    files_affected: Number.isFinite(result?.files_affected) ? result.files_affected : 0,
+    changes: Array.isArray(result?.changes) ? result.changes : []
+  };
+}
