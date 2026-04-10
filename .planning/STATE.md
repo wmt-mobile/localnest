@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v0.2.0
 milestone_name: Memory-KG Fusion & Agent-First Surface
 status: active
-stopped_at: "Phase 29 complete — Lane A done, Lanes B/C/D/E unlocked"
-last_updated: "2026-04-10T07:15:00Z"
-last_activity: "2026-04-10 - Phase 29 complete: auto-linking, recall enrichment, backfill, nest_tree fix"
+stopped_at: "Phases 30,33,34,36 complete — remaining: 31,32,35,37,38"
+last_updated: "2026-04-10T08:00:00Z"
+last_activity: "2026-04-10 - Phases 30,33,34,36 shipped in parallel"
 progress:
   total_phases: 13
-  completed_phases: 4
-  total_plans: 4
-  completed_plans: 4
-  percent: 31
-  next_phase: 30
+  completed_phases: 8
+  total_plans: 8
+  completed_plans: 8
+  percent: 62
+  next_phase: 31
 ---
 
 # Project State
@@ -22,16 +22,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** v0.2.0 Memory-KG Fusion — Lane A complete (26-29), now parallel lanes B/C/D/E. Branch: release/0.2.0.
+**Current focus:** v0.2.0 Memory-KG Fusion — 8/13 phases done. Remaining: 31,32,35,37,38. Branch: release/0.2.0.
 
 ## Current Position
 
-Phase: **Phases 30-36** — parallel execution unlocked
+Phase: **Phases 31,32,35,37** — all unlocked, ready to plan+execute
 Plan: —
-Status: Lane A (26->27->28->29) complete; Lanes B (30,31), C (32), D (33,34), E (36) now runnable
-Last activity: 2026-04-10 - Phase 29 shipped: auto-link, recall enrichment, backfill, nest_tree fix
+Status: 8 phases complete; 5 remaining (31,32,35,37,38)
+Last activity: 2026-04-10 - Phases 30,33,34,36 shipped in parallel batch
 
-Progress (v0.2.0 only): [███░░░░░░░] 31% (4/13 phases)
+Progress (v0.2.0 only): [██████░░░░] 62% (8/13 phases)
 
 ## v0.2.0 Execution Plan
 
