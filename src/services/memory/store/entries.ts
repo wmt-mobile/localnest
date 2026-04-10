@@ -77,6 +77,9 @@ export async function listEntries(store: MemoryStoreLike, {
   status,
   projectPath,
   topic,
+  nest,
+  branch,
+  tags,
   limit = 20,
   offset = 0
 }: ListEntriesOpts = {}): Promise<ListEntriesResult> {
@@ -88,6 +91,14 @@ export async function listEntries(store: MemoryStoreLike, {
   if (status) { filters.push('status = ?'); params.push(status); }
   if (projectPath) { filters.push('scope_project_path = ?'); params.push(projectPath); }
   if (topic) { filters.push('topic = ?'); params.push(topic); }
+  if (nest) { filters.push('nest = ?'); params.push(nest); }
+  if (branch) { filters.push('branch = ?'); params.push(branch); }
+  if (Array.isArray(tags) && tags.length > 0) {
+    for (const tag of tags) {
+      filters.push('EXISTS (SELECT 1 FROM JSON_EACH(tags_json) WHERE JSON_EACH.value = ?)');
+      params.push(tag);
+    }
+  }
 
   const where = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
   const countRow = await store.adapter.get<{ c: number }>(

@@ -13,8 +13,8 @@ import {
   updateEntry as updateMemoryEntry,
   deleteEntry as deleteMemoryEntry
 } from './store/entries.js';
-import { storeEntryBatch as storeEntryBatchFn } from './store/entries-batch.js';
-import type { StoreEntryBatchInput } from './store/entries-batch.js';
+import { storeEntryBatch as storeEntryBatchFn, deleteEntryBatch as deleteEntryBatchFn } from './store/entries-batch.js';
+import type { StoreEntryBatchInput, DeleteEntryBatchInput } from './store/entries-batch.js';
 import {
   recall as recallFn,
   captureEvent as captureEventFn,
@@ -222,6 +222,14 @@ export class MemoryStore {
     const payload = hookResult.payload as { id: string };
     const result = await deleteMemoryEntry(this as never, payload.id);
     await this.hooks.emit('after:delete', result);
+    return result;
+  }
+
+  async deleteEntryBatch(input: DeleteEntryBatchInput) {
+    const hookResult = await this.hooks.emit('before:delete:batch', input);
+    if (hookResult.cancelled) return { cancelled: true, reason: hookResult.reason };
+    const result = await deleteEntryBatchFn(this as never, hookResult.payload as DeleteEntryBatchInput);
+    await this.hooks.emit('after:delete:batch', result);
     return result;
   }
 

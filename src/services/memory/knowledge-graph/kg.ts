@@ -347,6 +347,10 @@ export async function queryTriplesAsOf(
   if (!id) throw new Error('entityId is required');
   if (!asOfDate) throw new Error('asOfDate is required');
 
+  // When the caller passes a date-only string like "2026-04-10", treat it as
+  // end-of-day so that triples created at any time during that day are included.
+  const resolvedDate = !asOfDate.includes('T') ? `${asOfDate}T23:59:59.999Z` : asOfDate;
+
   const triples = await adapter.all<KgTripleWithNames>(
     `SELECT t.*, s.name AS subject_name, o.name AS object_name
        FROM kg_triples t
@@ -356,7 +360,7 @@ export async function queryTriplesAsOf(
         AND (t.valid_from IS NULL OR t.valid_from <= ?)
         AND (t.valid_to IS NULL OR t.valid_to > ?)
       ORDER BY t.valid_from ASC`,
-    [id, id, asOfDate, asOfDate]
+    [id, id, resolvedDate, resolvedDate]
   );
 
   return {

@@ -9,6 +9,63 @@ import type {
   Adapter, EmbeddingService, StoreEntryInput, Scope, Link
 } from '../types.js';
 
+// ---------------------------------------------------------------------------
+// Delete batch
+// ---------------------------------------------------------------------------
+
+export interface DeleteEntryBatchInput {
+  ids: string[];
+}
+
+export interface DeleteEntryBatchResult {
+  deleted: number;
+  errors: BatchError[];
+}
+
+export async function deleteEntryBatch(
+  store: MemoryStoreLike,
+  { ids }: DeleteEntryBatchInput
+): Promise<DeleteEntryBatchResult> {
+  if (!Array.isArray(ids)) {
+    throw new Error('ids must be an array');
+  }
+  if (ids.length > MEMORY_BATCH_LIMIT) {
+    throw new BatchSizeExceededError(MEMORY_BATCH_LIMIT, ids.length);
+  }
+
+  await store.init();
+
+  const result: DeleteEntryBatchResult = { deleted: 0, errors: [] };
+
+  await store.adapter.transaction(async (ad) => {
+    for (let i = 0; i < ids.length; i += 1) {
+      const id = typeof ids[i] === 'string' ? ids[i].trim() : '';
+      if (!id) {
+        result.errors.push({ index: i, message: 'id is required' });
+        continue;
+      }
+      try {
+        const existing = await ad.get<{ id: string }>(
+          'SELECT id FROM memory_entries WHERE id = ?',
+          [id]
+        );
+        if (!existing) {
+          result.errors.push({ index: i, message: `memory not found: ${id}` });
+          continue;
+        }
+        await ad.run('DELETE FROM memory_relations WHERE source_id = ? OR target_id = ?', [id, id]);
+        await ad.run('DELETE FROM memory_revisions WHERE memory_id = ?', [id]);
+        await ad.run('DELETE FROM memory_entries WHERE id = ?', [id]);
+        result.deleted += 1;
+      } catch (err) {
+        result.errors.push({ index: i, message: (err as Error)?.message || String(err) });
+      }
+    }
+  });
+
+  return result;
+}
+
 /** Maximum memories accepted in a single batch call. */
 export const MEMORY_BATCH_LIMIT = 100;
 

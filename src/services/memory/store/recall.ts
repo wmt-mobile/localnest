@@ -23,6 +23,7 @@ export async function recall(adapter: Adapter, {
   nest,
   branch,
   agentId,
+  tags,
   limit = 10
 }: RecallInput): Promise<RecallResult> {
   const safeLimit = clampInt(limit, 10, 1, 50);
@@ -57,6 +58,15 @@ export async function recall(adapter: Adapter, {
   if (branch) {
     filters.push('branch = ?');
     params.push(branch);
+  }
+  if (tags && tags.length > 0) {
+    // Require ALL specified tags to be present (AND semantics)
+    for (const tag of tags) {
+      filters.push(
+        `EXISTS (SELECT 1 FROM JSON_EACH(tags_json) WHERE JSON_EACH.value = ?)`
+      );
+      params.push(tag);
+    }
   }
 
   const rows = await adapter.all<MemoryEntryRow>(

@@ -649,6 +649,7 @@ export interface RecallInput {
   nest?: string;
   branch?: string;
   agentId?: string;
+  tags?: string[];
   limit?: number;
 }
 
@@ -797,6 +798,9 @@ export interface ListEntriesOpts {
   status?: string;
   projectPath?: string;
   topic?: string;
+  nest?: string;
+  branch?: string;
+  tags?: string[];
   limit?: number;
   offset?: number;
 }

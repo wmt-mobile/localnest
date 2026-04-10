@@ -479,6 +479,12 @@ export function normalizeProjectTreeResult(result: any, projectPath: string): No
   };
 }
 
+export interface IndexWarning {
+  stale: boolean;
+  stale_files: number;
+  suggestion: string;
+}
+
 export interface NormalizedSearchHybridResult {
   query: string;
   lexical_hits: number;
@@ -488,13 +494,16 @@ export interface NormalizedSearchHybridResult {
   reranker: unknown;
   index_stale: boolean | null;
   index_staleness: unknown;
+  _index_warning?: IndexWarning;
   results: unknown[];
   [key: string]: unknown;
 }
 
 export function normalizeSearchHybridResult(result: any, query: string): NormalizedSearchHybridResult {
   const results = Array.isArray(result?.results) ? result.results.map(stripEmptyFields) : [];
-  return {
+  const isStale = result?.index_stale === true;
+  const staleness = result?.index_staleness;
+  const normalized: NormalizedSearchHybridResult = {
     ...result,
     query: result?.query || query,
     lexical_hits: Number.isFinite(result?.lexical_hits) ? result.lexical_hits : 0,
@@ -503,9 +512,17 @@ export function normalizeSearchHybridResult(result: any, query: string): Normali
     auto_index: result?.auto_index || null,
     reranker: result?.reranker || null,
     index_stale: result?.index_stale ?? null,
-    index_staleness: result?.index_staleness || null,
+    index_staleness: staleness || null,
     results
   };
+  if (isStale) {
+    normalized._index_warning = {
+      stale: true,
+      stale_files: Number.isFinite(staleness?.stale_count) ? staleness.stale_count : 0,
+      suggestion: 'Run localnest_index_project to refresh'
+    };
+  }
+  return normalized;
 }
 
 export interface NormalizedSymbolResult {

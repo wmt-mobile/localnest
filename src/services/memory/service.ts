@@ -162,6 +162,11 @@ export class MemoryService {
     return this.store.deleteEntry(id);
   }
 
+  async deleteEntryBatch(args: { ids: string[] }) {
+    this.assertEnabled();
+    return this.store.deleteEntryBatch(args);
+  }
+
   async recall(args: RecallInput) {
     this.assertEnabled();
     return this.store.recall(args);

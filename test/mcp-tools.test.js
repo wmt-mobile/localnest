@@ -281,6 +281,7 @@ test('MCP tools register and execute across all tool groups', async () => {
     'localnest_memory_get',
     'localnest_memory_store',
     'localnest_memory_store_batch',
+    'localnest_memory_delete_batch',
     'localnest_memory_update',
     'localnest_memory_delete',
     'localnest_memory_capture_event',
