@@ -81,7 +81,7 @@ test('MCP registration: all 13 write tools include terse parameter', async () =>
   const { z } = await import('zod');
 
   const tools = new Map();
-  const fakeRegister = (names, def, _handler) => {
+  const fakeRegister = (names, def, /* handler */) => {
     const canonical = Array.isArray(names) ? names[0] : names;
     tools.set(canonical, def);
   };

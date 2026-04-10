@@ -31,8 +31,6 @@ export function ensureTsx() {
 export function relaunchWithTsx() {
   const req = createRequire(new URL('../package.json', import.meta.url));
   const tsxEsm = pathToFileURL(req.resolve('tsx/esm')).href;
-  const script = fileURLToPath(import.meta.url);
-
   // Already relaunched — don't loop
   if (process.env.__LOCALNEST_TSX_RELAUNCHED === '1') return false;
 
