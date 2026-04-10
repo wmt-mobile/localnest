@@ -1,4 +1,4 @@
-import { extractEntities } from '../ingest/ingest.js';
+import { extractEntities } from '../ingest/entity-extractor.js';
 import { ensureEntity, addTriple, normalizeEntityId } from './kg.js';
 import type { Adapter, AutoLinkedEntity, AutoLinkedTriple, AutoLinkResult, BackfillResult } from '../types.js';
 
