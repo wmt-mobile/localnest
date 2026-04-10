@@ -16,7 +16,7 @@ LocalNest is a local-first MCP server where your AI builds its nest — right on
 
 A private AI coding assistant with semantic code search, offline AI code tools, and an AI knowledge graph — all running locally. No-cloud AI tools for local-first development.
 
-**67 MCP tools** | **TypeScript** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
+**68 MCP tools** | **TypeScript** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
 
 📖 [Full documentation](https://wmt-mobile.github.io/localnest/) · [Architecture deep dive](./localnest-docs/docs/guides/architecture.md)
 
@@ -344,6 +344,13 @@ localnest completion bash           # shell completions
 | `localnest_find_implementations` | Find interface/trait implementations |
 | `localnest_rename_preview` | Preview all references before renaming |
 
+### Hook Introspection
+
+| Tool | What it does |
+|------|-------------|
+| `localnest_hooks_stats` | Hook execution counts and timing statistics |
+| `localnest_hooks_list_events` | List all available hook event names |
+
 ### Server & Updates
 
 | Tool | What it does |
@@ -354,7 +361,7 @@ localnest completion bash           # shell completions
 | `localnest_update_status` | Check npm for latest version (cached) |
 | `localnest_update_self` | Update globally and sync bundled skill (approval required) |
 
-**67 tools total.** All support `response_format: "json"` (default) or `"markdown"`. List tools return `total_count`, `has_more`, `next_offset` for pagination.
+**68 tools total.** All support `response_format: "json"` (default) or `"markdown"`. List tools return `total_count`, `has_more`, `next_offset` for pagination.
 
 ---
 
@@ -365,7 +372,7 @@ LocalNest is the only local-first MCP server that combines code retrieval AND st
 | Capability | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
 |---|---|---|---|---|---|
 | **Local-first (no cloud)** | Yes | Yes | No ($25+/mo) | No (Neo4j) | No ($20-200/mo) |
-| **Code retrieval** | 67 MCP tools, AST-aware, hybrid search | None | None | None | None |
+| **Code retrieval** | 68 MCP tools, AST-aware, hybrid search | None | None | None | None |
 | **Knowledge graph** | SQLite triples with temporal validity | SQLite triples | Neo4j | Neo4j | Key-value |
 | **Multi-hop traversal** | Yes (recursive CTEs, 2-5 hops) | No (flat lookup only) | No | Yes (requires Neo4j) | No |
 | **Temporal queries (as_of)** | Yes | Yes | Yes | Yes | No |
