@@ -3,16 +3,16 @@ gsd_state_version: 1.0
 milestone: v0.2.0
 milestone_name: Memory-KG Fusion & Agent-First Surface
 status: active
-stopped_at: "Phase 27 complete — terse responses implemented, moving to Phase 28"
-last_updated: "2026-04-10T06:30:00Z"
-last_activity: "2026-04-10 - Phase 27 complete: terse param on 13 write tools, read cleanup, 70% reduction"
+stopped_at: "Phase 28 complete (pre-implemented), moving to Phase 29"
+last_updated: "2026-04-10T06:35:00Z"
+last_activity: "2026-04-10 - Phase 28 absorbed from quick task 260409-ohq, all CARD-01..06 met"
 progress:
   total_phases: 13
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 3
   completed_plans: 3
-  percent: 15
-  next_phase: 28
+  percent: 23
+  next_phase: 29
 ---
 
 # Project State
@@ -22,16 +22,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** v0.2.0 Memory-KG Fusion — Phase 27 done, now Phase 28 (Predicate Cardinality & Contradiction Fix). Branch: release/0.2.0.
+**Current focus:** v0.2.0 Memory-KG Fusion — Phase 28 done, now Phase 29 (Memory <-> KG Auto-Linking). Branch: release/0.2.0.
 
 ## Current Position
 
-Phase: **Phase 28 (Predicate Cardinality & Contradiction Fix)** — not yet started
+Phase: **Phase 29 (Memory <-> KG Auto-Linking)** — not yet started
 Plan: —
-Status: Phase 27 complete; ready to plan Phase 28
-Last activity: 2026-04-10 - Phase 27 shipped: terse param on 13 write tools, read cleanup, 70% token reduction
+Status: Phase 28 complete (absorbed from quick task); ready to plan Phase 29
+Last activity: 2026-04-10 - Phase 28 absorbed from 260409-ohq; all CARD-01..06 already implemented
 
-Progress (v0.2.0 only): [██░░░░░░░░] 15% (2/13 phases)
+Progress (v0.2.0 only): [██░░░░░░░░] 23% (3/13 phases)
 
 ## v0.2.0 Execution Plan
 
