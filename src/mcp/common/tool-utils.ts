@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { FREEFORM_RESULT_SCHEMA } from './schemas.js';
 
 export const RESPONSE_SCHEMA_VERSION = '1.0';
 
@@ -130,7 +131,8 @@ interface ToolResult {
   content: Array<{ type: string; text: string }>;
 }
 
-function toolResult(result: unknown, responseFormat: string = 'json', markdownTitle: string = 'Result'): ToolResult {
+// Exported for unit testing — see Phase 40 Plan 02 Task 3 (STRUCT-01).
+export function toolResult(result: unknown, responseFormat: string = 'json', markdownTitle: string = 'Result'): ToolResult {
   const { data, meta, note } = normalizeToolResponsePayload(result);
   const mergedMeta: Record<string, unknown> = {
     schema_version: RESPONSE_SCHEMA_VERSION,
@@ -198,6 +200,7 @@ interface ToolDefinition {
   inputSchema: Record<string, z.ZodTypeAny>;
   annotations?: Record<string, unknown>;
   markdownTitle?: string;
+  outputSchema?: { data: z.ZodTypeAny; meta: z.ZodTypeAny };
 }
 
 interface McpServer {
@@ -223,7 +226,7 @@ export type RegisterJsonToolFn = (
 export function createJsonToolRegistrar(server: McpServer, responseFormatSchema: z.ZodTypeAny): RegisterJsonToolFn {
   return function registerJsonTool(
     names: string | string[],
-    { title, description, inputSchema, annotations, markdownTitle }: ToolDefinition,
+    { title, description, inputSchema, annotations, markdownTitle, outputSchema }: ToolDefinition,
     handler: ToolHandler
   ): void {
     const canonical = Array.isArray(names) ? names[0] : names;
@@ -238,9 +241,9 @@ export function createJsonToolRegistrar(server: McpServer, responseFormatSchema:
         title,
         description,
         inputSchema: schema,
-        outputSchema: {
-          data: z.any(),
-          meta: z.any().optional()
+        outputSchema: outputSchema ?? {
+          data: FREEFORM_RESULT_SCHEMA.data,
+          meta: FREEFORM_RESULT_SCHEMA.meta
         },
         annotations
       },
