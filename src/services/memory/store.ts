@@ -317,9 +317,9 @@ export class MemoryStore {
     return queryEntityRelationshipsFn(this.adapter!, entityId, opts);
   }
 
-  async queryTriplesAsOf(entityId: string, asOfDate: string) {
+  async queryTriplesAsOf(entityId: string, asOfDate: string, mode?: 'event' | 'transaction') {
     await this.init();
-    return queryTriplesAsOfFn(this.adapter!, entityId, asOfDate);
+    return queryTriplesAsOfFn(this.adapter!, entityId, asOfDate, mode);
   }
 
   async getEntityTimeline(entityId: string) {

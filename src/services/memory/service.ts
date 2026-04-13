@@ -227,9 +227,9 @@ export class MemoryService {
     return this.store.queryEntityRelationships(entityId, opts);
   }
 
-  async queryTriplesAsOf(entityId: string, asOfDate: string) {
+  async queryTriplesAsOf(entityId: string, asOfDate: string, mode?: 'event' | 'transaction') {
     this.assertEnabled();
-    return this.store.queryTriplesAsOf(entityId, asOfDate);
+    return this.store.queryTriplesAsOf(entityId, asOfDate, mode);
   }
 
   async getEntityTimeline(entityId: string) {

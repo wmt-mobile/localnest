@@ -396,6 +396,7 @@ export interface AddTripleResult {
   source_memory_id: string | null;
   source_type: string;
   created_at: string;
+  recorded_at: string;
   contradictions: TripleContradiction[];
   has_contradiction: boolean;
 }
