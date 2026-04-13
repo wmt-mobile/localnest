@@ -238,7 +238,7 @@
 ### Resource Links (MCP Spec)
 - [ ] **RLINK-01**: `read_file`, `search_code`, `search_files` return `resource_link` objects instead of inlining full file content
 - [ ] **RLINK-02**: Clients can dereference resource links via MCP resource protocol
-- [ ] **RLINK-03**: Fallback: when client doesn't support resource links, inline content as before
+- [x] **RLINK-03**: Fallback: when client doesn't support resource links, inline content as before
 
 ### Bi-Temporal KG Model
 - [ ] **BITEMP-01**: `kg_triples` table gains a `recorded_at` column (additive migration) tracking when the triple was stored

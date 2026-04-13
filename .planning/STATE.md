@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: MCP Spec Compliance & Production Hardening
-status: verifying
-stopped_at: Completed 40-02-PLAN.md — 72/72 tools wired, 165 tests green, Phase 40 ready for verification
-last_updated: "2026-04-13T08:02:56.399Z"
+status: executing
+stopped_at: Completed 41-01-PLAN.md
+last_updated: "2026-04-13T08:52:41.052Z"
 last_activity: 2026-04-13
 progress:
   total_phases: 7
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Project State
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** Phase 40 — Structured Output (MCP Spec)
+**Current focus:** Phase 41 — Resource Links (MCP Spec)
 
 ## Current Position
 
-Phase: 40 (Structured Output (MCP Spec)) — EXECUTING
+Phase: 41 (Resource Links (MCP Spec)) — EXECUTING
 Plan: 2 of 2
-Status: Phase complete — ready for verification
+Status: Ready to execute
 Last activity: 2026-04-13
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
@@ -86,6 +86,7 @@ Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 | Phase 39-tool-annotations-mcp-spec P02 | 182 | 2 tasks | 1 files |
 | Phase 40 P01 | 5m | 3 tasks | 4 files |
 | Phase 40-structured-output-mcp-spec P02 | 21m | 3 tasks | 12 files |
+| Phase 41 P01 | 200 | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,8 @@ Recent decisions affecting current work:
 - [Phase 40]: FREEFORM_RESULT_SCHEMA is the single named escape hatch — registrar fallback references it instead of inlining z.any(), zero orphans in tool-utils.ts
 - [Phase 40-structured-output-mcp-spec]: All 72 tools wired to 8 output archetypes (17 SEARCH, 10 STATUS, 11 BATCH, 6 MEMORY, 7 ACK, 4 TRIPLE, 14 BUNDLE, 3 FREEFORM); FREEFORM budget 3 of 5; ENTITY archetype confirmed unnecessary
 - [Phase 40-structured-output-mcp-spec]: graph-tools.ts schemas prop promoted from optional unknown to required SharedSchemas — harness test/terse-response.test.js updated to pass the 8 archetypes
+- [Phase 41]: Explicit 4th resourceLinks parameter on toolResult() takes precedence over ToolResponsePayload.resource_links channel (zero-ambiguity merge rule for Plan 02)
+- [Phase 41]: file URI format uses file://${path.resolve(p)} — POSIX yields canonical file:///abs, Windows yields file://C:\\ matching VS Code MCP convention
 
 ### Pending Todos
 
@@ -137,7 +140,7 @@ None — autonomous execution in progress.
 
 ## Session Continuity
 
-Last session: 2026-04-13T08:02:56.392Z
-Stopped at: Completed 40-02-PLAN.md — 72/72 tools wired, 165 tests green, Phase 40 ready for verification
+Last session: 2026-04-13T08:52:32.610Z
+Stopped at: Completed 41-01-PLAN.md
 Resume file: None
 Next command: `/gsd:plan-phase 27`

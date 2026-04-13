@@ -433,7 +433,7 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
   2. Clients can dereference links via MCP resource protocol
   3. Fallback: clients without resource link support still receive inline content
 **Plans**: 2 plans
-- [ ] 41-01-PLAN.md — Mime helper + ToolResult/createToolResponse/toolResult resource_link channel (RLINK-03 framework)
+- [x] 41-01-PLAN.md — Mime helper + ToolResult/createToolResponse/toolResult resource_link channel (RLINK-03 framework)
 - [ ] 41-02-PLAN.md — Wire 3 retrieval handlers (read_file, search_files, search_code) + new mcp-resource-links.test.js (RLINK-01, RLINK-02, RLINK-03)
 
 ### Phase 42: Bi-Temporal KG Model
