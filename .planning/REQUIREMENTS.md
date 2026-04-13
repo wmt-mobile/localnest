@@ -228,7 +228,7 @@
 ### Tool Annotations (MCP Spec)
 - [x] **ANNOT-01**: All 72 MCP tools have `readOnlyHint`, `destructiveHint`, `idempotentHint` annotations matching their actual behavior
 - [x] **ANNOT-02**: Write tools marked `destructiveHint: false` (additive), delete tools marked `destructiveHint: true`
-- [ ] **ANNOT-03**: Annotations are validated in the MCP tools test (tool name -> expected annotations mapping)
+- [x] **ANNOT-03**: Annotations are validated in the MCP tools test (tool name -> expected annotations mapping)
 
 ### Structured Output (MCP Spec)
 - [ ] **STRUCT-01**: All tool responses include `structuredContent` alongside text `content`

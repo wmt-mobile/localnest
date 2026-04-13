@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: MCP Spec Compliance & Production Hardening
-status: executing
-stopped_at: Completed 39-01-PLAN.md (tool annotations + 9 mismatch fixes + shared constant migration)
-last_updated: "2026-04-13T06:29:50.771Z"
+status: verifying
+stopped_at: Completed 39-02-PLAN.md
+last_updated: "2026-04-13T06:37:37.697Z"
 last_activity: 2026-04-13
 progress:
   total_phases: 7
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 Phase: 39 (Tool Annotations (MCP Spec)) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-13
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
@@ -83,6 +83,7 @@ Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 
 *Updated after each plan completion. v0.2.0 phases (26-38) will populate as they execute.*
 | Phase 39 P01 | 960 | 3 tasks | 11 files |
+| Phase 39-tool-annotations-mcp-spec P02 | 182 | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -106,6 +107,7 @@ Recent decisions affecting current work:
 - [Roadmap v0.2.0]: Phases 19-25 belong to release/0.1.0 branch and stay reserved — v0.2.0 skips from 18 to 26
 - [Phase 39]: Added IDEMPOTENT_WRITE_ANNOTATIONS as 4th annotation bucket (renamed DELETE→DESTRUCTIVE) for dedup-upsert writes
 - [Phase 39]: update_status and update_self kept as inline exceptions (both have openWorldHint:true, hitting npm registry)
+- [Phase 39-tool-annotations-mcp-spec]: Plan 02: Validation test uses full registerAppTools pipeline with noop fake services; asserts only RO/DH/IH (openWorldHint deferred)
 
 ### Pending Todos
 
@@ -128,7 +130,7 @@ None — autonomous execution in progress.
 
 ## Session Continuity
 
-Last session: 2026-04-13T06:29:50.766Z
-Stopped at: Completed 39-01-PLAN.md (tool annotations + 9 mismatch fixes + shared constant migration)
+Last session: 2026-04-13T06:37:37.692Z
+Stopped at: Completed 39-02-PLAN.md
 Resume file: None
 Next command: `/gsd:plan-phase 27`
