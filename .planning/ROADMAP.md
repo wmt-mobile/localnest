@@ -203,7 +203,9 @@
   2. Default format is `verbose` for single writes and `minimal` for batches without the caller specifying anything
   3. Calling `memory_recall` or `search_hybrid` on an entry with empty `nest`/`branch`/`topic`/`feature` returns a response that omits those keys entirely, and drops `raw_score` when `score` is present
   4. A reproducible benchmark conversation run shows at least 70% token reduction on the write portion compared to the pre-Phase-27 baseline
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 45-01-PLAN.md — Schema migration v13 + type definitions + write/read/filter paths + MCP tool schemas (ACTOR-01, ACTOR-02, ACTOR-03, ACTOR-04)
 
 ### Phase 28: Predicate Cardinality & Contradiction Fix
 **Goal**: Contradiction detection only fires for functional predicates; multi-valued and unknown predicates no longer produce false positives, and users can override cardinality via a DB table (absorbs quick task 260409-ohq plan as starting point)
@@ -479,4 +481,6 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
   2. memory_store and memory_store_batch accept actor_id, auto-inferred from agent_id if omitted
   3. memory_recall and memory_list accept actor_id filter
   4. agent_prime surfaces actor attribution in recalled memories
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 45-01-PLAN.md — Schema migration v13 + type definitions + write/read/filter paths + MCP tool schemas (ACTOR-01, ACTOR-02, ACTOR-03, ACTOR-04)
