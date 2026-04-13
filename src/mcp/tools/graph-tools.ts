@@ -27,7 +27,7 @@ interface MemoryService {
   addTripleBatch(opts: Record<string, unknown>): Promise<unknown>;
   queryEntityRelationships(entityId: string, opts: Record<string, unknown>): Promise<unknown>;
   invalidateTriple(tripleId: string, validTo?: string | null): Promise<unknown>;
-  queryTriplesAsOf(entityId: string, asOfDate: string): Promise<unknown>;
+  queryTriplesAsOf(entityId: string, asOfDate: string, mode?: 'event' | 'transaction'): Promise<unknown>;
   getEntityTimeline(entityId: string): Promise<unknown>;
   getKgStats(): Promise<unknown>;
   listNests(): Promise<unknown>;
@@ -200,16 +200,17 @@ export function registerGraphTools({
     ['localnest_kg_as_of'],
     {
       title: 'KG As-Of Query',
-      description: 'Query triples for an entity at a specific point in time. Returns only facts valid at the given date (valid_from <= date, valid_to > date or NULL).',
+      description: 'Query triples for an entity at a specific point in time. mode="event" (default) returns facts whose valid_from/valid_to bracket the date (event-time axis). mode="transaction" returns every triple LocalNest knew at that time via recorded_at, regardless of valid_to (transaction-time axis).',
       inputSchema: {
         entity_id: z.string().min(1).max(400),
-        as_of_date: z.string().min(1)
+        as_of_date: z.string().min(1),
+        mode: z.enum(['event', 'transaction']).default('event')
       },
       annotations: READ_ONLY_ANNOTATIONS,
       outputSchema: schemas.OUTPUT_TRIPLE_RESULT_SCHEMA
     },
-    async ({ entity_id, as_of_date }: Record<string, unknown>) =>
-      memory.queryTriplesAsOf(entity_id as string, as_of_date as string)
+    async ({ entity_id, as_of_date, mode }: Record<string, unknown>) =>
+      memory.queryTriplesAsOf(entity_id as string, as_of_date as string, mode as 'event' | 'transaction' | undefined)
   );
 
   registerJsonTool(
