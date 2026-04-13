@@ -393,7 +393,7 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
 
 - [x] **Phase 39: Tool Annotations (MCP Spec)** - Accurate readOnlyHint/destructiveHint/idempotentHint on every tool (completed 2026-04-13)
 - [x] **Phase 40: Structured Output (MCP Spec)** - structuredContent + outputSchema alongside text content (completed 2026-04-13)
-- [ ] **Phase 41: Resource Links (MCP Spec)** - File-returning tools emit resource_link objects
+- [x] **Phase 41: Resource Links (MCP Spec)** - File-returning tools emit resource_link objects (completed 2026-04-13)
 - [ ] **Phase 42: Bi-Temporal KG Model** - recorded_at transaction time alongside valid_from/valid_to
 - [ ] **Phase 43: WAL Mode & Performance Tuning** - WAL journal_mode + tuned PRAGMAs + regression guard
 - [ ] **Phase 44: Backup & Restore** - localnest_backup / localnest_restore MCP + CLI surface
@@ -434,7 +434,7 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
   3. Fallback: clients without resource link support still receive inline content
 **Plans**: 2 plans
 - [x] 41-01-PLAN.md — Mime helper + ToolResult/createToolResponse/toolResult resource_link channel (RLINK-03 framework)
-- [ ] 41-02-PLAN.md — Wire 3 retrieval handlers (read_file, search_files, search_code) + new mcp-resource-links.test.js (RLINK-01, RLINK-02, RLINK-03)
+- [x] 41-02-PLAN.md — Wire 3 retrieval handlers (read_file, search_files, search_code) + new mcp-resource-links.test.js (RLINK-01, RLINK-02, RLINK-03)
 
 ### Phase 42: Bi-Temporal KG Model
 **Goal**: KG triples track both event time (valid_from/valid_to) and transaction time (recorded_at) for full temporal provenance

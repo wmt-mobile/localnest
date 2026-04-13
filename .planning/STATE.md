@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: MCP Spec Compliance & Production Hardening
-status: executing
-stopped_at: Completed 41-01-PLAN.md
-last_updated: "2026-04-13T08:52:41.052Z"
+status: verifying
+stopped_at: Completed 41-02-PLAN.md
+last_updated: "2026-04-13T09:00:13.603Z"
 last_activity: 2026-04-13
 progress:
   total_phases: 7
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 Phase: 41 (Resource Links (MCP Spec)) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-13
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
@@ -87,6 +87,7 @@ Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 | Phase 40 P01 | 5m | 3 tasks | 4 files |
 | Phase 40-structured-output-mcp-spec P02 | 21m | 3 tasks | 12 files |
 | Phase 41 P01 | 200 | 3 tasks | 3 files |
+| Phase 41 P02 | 221 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -118,6 +119,9 @@ Recent decisions affecting current work:
 - [Phase 40-structured-output-mcp-spec]: graph-tools.ts schemas prop promoted from optional unknown to required SharedSchemas — harness test/terse-response.test.js updated to pass the 8 archetypes
 - [Phase 41]: Explicit 4th resourceLinks parameter on toolResult() takes precedence over ToolResponsePayload.resource_links channel (zero-ambiguity merge rule for Plan 02)
 - [Phase 41]: file URI format uses file://${path.resolve(p)} — POSIX yields canonical file:///abs, Windows yields file://C:\\ matching VS Code MCP convention
+- [Phase 41]: Dedup by absolute path before buildResourceLink -- helpers stay per-path, not per-match
+- [Phase 41]: Description format strings locked to CONTEXT.md: chunk X-Y of N lines / path match: frag / N match(es) for query
+- [Phase 41]: Empty-result and error paths emit zero resource_links via natural code-flow (no defensive branch)
 
 ### Pending Todos
 
@@ -140,7 +144,7 @@ None — autonomous execution in progress.
 
 ## Session Continuity
 
-Last session: 2026-04-13T08:52:32.610Z
-Stopped at: Completed 41-01-PLAN.md
+Last session: 2026-04-13T09:00:13.597Z
+Stopped at: Completed 41-02-PLAN.md
 Resume file: None
 Next command: `/gsd:plan-phase 27`
