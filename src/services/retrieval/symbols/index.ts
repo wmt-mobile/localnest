@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { applySqliteTuning } from '../../memory/sqlite-tuning.js';
 import { ensureSymbolIndexTable } from './schema.js';
 import { extractSymbolsFromFile } from './extractor.js';
 import { findCallers, findDefinition, findImplementations, renamePreview } from './queries.js';
@@ -42,6 +43,7 @@ export class SymbolIndexService {
     if (this.db) return this.db;
     fs.mkdirSync(path.dirname(this.dbPath), { recursive: true });
     this.db = new DatabaseSync(this.dbPath) as unknown as DbLike;
+    void applySqliteTuning(this.db);
     return this.db;
   }
 
