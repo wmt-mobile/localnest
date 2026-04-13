@@ -1,6 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { registerAppTools } from '../src/app/register-tools.js';
+import {
+  SEARCH_RESULT_SCHEMA,
+  TRIPLE_RESULT_SCHEMA,
+  STATUS_RESULT_SCHEMA,
+  BATCH_RESULT_SCHEMA,
+  MEMORY_RESULT_SCHEMA,
+  ACK_RESULT_SCHEMA,
+  BUNDLE_RESULT_SCHEMA,
+  FREEFORM_RESULT_SCHEMA,
+  toolResult
+} from '../src/mcp/common/index.js';
 
 /**
  * MCP Tool Annotations Validation Test — Phase 39 (ANNOT-03).
@@ -265,6 +276,97 @@ const EXPECTED_ANNOTATIONS = {
 };
 
 // ---------------------------------------------------------------------------
+// EXPECTED_OUTPUT_SCHEMAS — Phase 40 STRUCT-02 ground truth for 72 tools.
+// Short labels resolve via ARCHETYPE_MAP to archetype objects; identity
+// equality is asserted. ENTITY dropped in Plan 01 revision.
+// ---------------------------------------------------------------------------
+const ARCHETYPE_MAP = {
+  SEARCH:   SEARCH_RESULT_SCHEMA,
+  TRIPLE:   TRIPLE_RESULT_SCHEMA,
+  STATUS:   STATUS_RESULT_SCHEMA,
+  BATCH:    BATCH_RESULT_SCHEMA,
+  MEMORY:   MEMORY_RESULT_SCHEMA,
+  ACK:      ACK_RESULT_SCHEMA,
+  BUNDLE:   BUNDLE_RESULT_SCHEMA,
+  FREEFORM: FREEFORM_RESULT_SCHEMA
+};
+
+const EXPECTED_OUTPUT_SCHEMAS = {
+  'localnest_agent_prime':              'BUNDLE',
+  'localnest_audit':                    'BUNDLE',
+  'localnest_capture_outcome':          'MEMORY',
+  'localnest_diary_read':               'FREEFORM',
+  'localnest_diary_write':              'ACK',
+  'localnest_embed_status':             'STATUS',
+  'localnest_file_changed':             'BUNDLE',
+  'localnest_find':                     'SEARCH',
+  'localnest_find_callers':             'SEARCH',
+  'localnest_find_definition':          'SEARCH',
+  'localnest_find_implementations':     'SEARCH',
+  'localnest_find_usages':              'SEARCH',
+  'localnest_get_symbol':               'SEARCH',
+  'localnest_graph_bridges':            'BUNDLE',
+  'localnest_graph_traverse':           'BUNDLE',
+  'localnest_health':                   'STATUS',
+  'localnest_help':                     'FREEFORM',
+  'localnest_hooks_list_events':        'STATUS',
+  'localnest_hooks_stats':              'STATUS',
+  'localnest_index_project':            'STATUS',
+  'localnest_index_status':             'STATUS',
+  'localnest_ingest_json':              'BATCH',
+  'localnest_ingest_markdown':          'BATCH',
+  'localnest_kg_add_entities_batch':    'BATCH',
+  'localnest_kg_add_entity':            'ACK',
+  'localnest_kg_add_triple':            'TRIPLE',
+  'localnest_kg_add_triples_batch':     'BATCH',
+  'localnest_kg_as_of':                 'TRIPLE',
+  'localnest_kg_backfill_links':        'BATCH',
+  'localnest_kg_delete_entities_batch': 'BATCH',
+  'localnest_kg_delete_entity':         'BATCH',
+  'localnest_kg_delete_triples_batch':  'BATCH',
+  'localnest_kg_invalidate':            'ACK',
+  'localnest_kg_query':                 'TRIPLE',
+  'localnest_kg_stats':                 'STATUS',
+  'localnest_kg_timeline':              'TRIPLE',
+  'localnest_list_projects':            'SEARCH',
+  'localnest_list_roots':               'SEARCH',
+  'localnest_memory_add_relation':      'ACK',
+  'localnest_memory_capture_event':     'MEMORY',
+  'localnest_memory_check_duplicate':   'BUNDLE',
+  'localnest_memory_delete':            'ACK',
+  'localnest_memory_delete_batch':      'BATCH',
+  'localnest_memory_events':            'SEARCH',
+  'localnest_memory_get':               'MEMORY',
+  'localnest_memory_list':              'SEARCH',
+  'localnest_memory_recall':            'SEARCH',
+  'localnest_memory_related':           'SEARCH',
+  'localnest_memory_remove_relation':   'ACK',
+  'localnest_memory_status':            'STATUS',
+  'localnest_memory_store':             'MEMORY',
+  'localnest_memory_store_batch':       'BATCH',
+  'localnest_memory_suggest_relations': 'SEARCH',
+  'localnest_memory_update':            'MEMORY',
+  'localnest_nest_branches':            'BUNDLE',
+  'localnest_nest_list':                'BUNDLE',
+  'localnest_nest_tree':                'BUNDLE',
+  'localnest_project_backfill':         'BATCH',
+  'localnest_project_tree':             'BUNDLE',
+  'localnest_read_file':                'BUNDLE',
+  'localnest_rename_preview':           'SEARCH',
+  'localnest_search_code':              'SEARCH',
+  'localnest_search_files':             'SEARCH',
+  'localnest_search_hybrid':            'SEARCH',
+  'localnest_server_status':            'STATUS',
+  'localnest_summarize_project':        'BUNDLE',
+  'localnest_task_context':             'BUNDLE',
+  'localnest_teach':                    'MEMORY',
+  'localnest_update_self':              'ACK',
+  'localnest_update_status':            'STATUS',
+  'localnest_usage_guide':              'FREEFORM',
+  'localnest_whats_new':                'BUNDLE'
+};
+
+// ---------------------------------------------------------------------------
 // Test
 // ---------------------------------------------------------------------------
 test('mcp-annotations: all 72 tools match expected readOnly/destructive/idempotent hints', () => {
@@ -316,5 +418,79 @@ test('mcp-annotations: all 72 tools match expected readOnly/destructive/idempote
     mismatches.length,
     0,
     `Annotation mismatches (${mismatches.length} total):\n  ${mismatches.join('\n  ')}`
+  );
+});
+
+// ---------------------------------------------------------------------------
+// Test 2: output schema identity — STRUCT-02
+// ---------------------------------------------------------------------------
+test('mcp-annotations: all 72 tools declare expected outputSchema archetypes', () => {
+  const server = makeFakeServer();
+  const fakeRuntime = {
+    mcpMode: 'stdio', hasRipgrep: false, autoProjectSplit: false,
+    maxAutoProjects: 0, forceSplitChildren: false, rgTimeoutMs: 0,
+    indexBackend: 'none', vectorIndexPath: '/tmp/fake.idx'
+  };
+  const fakeServices = makeFakeServices();
+
+  registerAppTools(server, fakeRuntime, fakeServices);
+
+  const registered = Array.from(server.tools.keys()).sort();
+  const expected = Object.keys(EXPECTED_OUTPUT_SCHEMAS).sort();
+
+  // 1. Registered tool set matches expected set (defense-in-depth;
+  //    the Test 1 assertion already covers this but the parallel check
+  //    locks the EXPECTED_OUTPUT_SCHEMAS map to 72 entries).
+  assert.deepEqual(
+    expected.filter((n) => !registered.includes(n)), [],
+    'Tools in EXPECTED_OUTPUT_SCHEMAS but not registered'
+  );
+  assert.deepEqual(
+    registered.filter((n) => !expected.includes(n)), [],
+    'Tools registered but missing from EXPECTED_OUTPUT_SCHEMAS'
+  );
+
+  // 2. Collect-all-mismatches (same pattern as Test 1) — identity equality
+  const mismatches = [];
+  for (const name of expected) {
+    const { meta } = server.tools.get(name);
+    const expectedLabel = EXPECTED_OUTPUT_SCHEMAS[name];
+    const expectedArchetype = ARCHETYPE_MAP[expectedLabel];
+    if (meta.outputSchema !== expectedArchetype) {
+      // Drift: either missing entirely, wrong archetype, or accidentally
+      // reallocated to an equivalent-but-distinct object.
+      const got = meta.outputSchema === undefined
+        ? 'undefined (no outputSchema set)'
+        : 'different object (possibly reallocated)';
+      mismatches.push(`${name}: expected ${expectedLabel}_RESULT_SCHEMA, got ${got}`);
+    }
+  }
+  assert.equal(
+    mismatches.length, 0,
+    `outputSchema mismatches (${mismatches.length} total):\n  ${mismatches.join('\n  ')}`
+  );
+});
+
+// ---------------------------------------------------------------------------
+// Test 3: toolResult envelope produces structuredContent AND text content — STRUCT-01
+// ---------------------------------------------------------------------------
+test('mcp-annotations: toolResult() populates both structuredContent.data and content[0].text', () => {
+  const result = toolResult({ foo: 'bar' }, 'json', 'Test');
+  assert.ok(result.structuredContent, 'toolResult must return structuredContent');
+  assert.deepEqual(
+    result.structuredContent.data,
+    { foo: 'bar' },
+    'structuredContent.data must equal the input payload'
+  );
+  assert.ok(
+    result.structuredContent.meta && result.structuredContent.meta.schema_version,
+    'structuredContent.meta.schema_version must be present'
+  );
+  assert.ok(Array.isArray(result.content), 'content must be an array');
+  assert.equal(result.content.length, 1, 'content must have exactly one text block');
+  assert.equal(result.content[0].type, 'text', 'content[0].type must be "text"');
+  assert.ok(
+    result.content[0].text.includes('"foo"') && result.content[0].text.includes('"bar"'),
+    'content[0].text must contain the JSON-serialized payload'
   );
 });
