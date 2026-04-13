@@ -1,6 +1,7 @@
 export {
   RESPONSE_SCHEMA_VERSION,
   createToolResponse,
+  toolResult, // Phase 40 Plan 01: exposed for Plan 02 unit testing (STRUCT-01)
   paginateItems,
   buildRipgrepHelpMessage,
   createJsonToolRegistrar
@@ -12,7 +13,18 @@ export {
   MEMORY_SCOPE_SCHEMA,
   MEMORY_LINK_SCHEMA,
   MEMORY_EVENT_TYPE_SCHEMA,
-  MEMORY_EVENT_STATUS_SCHEMA
+  MEMORY_EVENT_STATUS_SCHEMA,
+  // Phase 40: output archetypes
+  META_SCHEMA,
+  PAGINATION_META_SCHEMA,
+  SEARCH_RESULT_SCHEMA,
+  TRIPLE_RESULT_SCHEMA,
+  STATUS_RESULT_SCHEMA,
+  BATCH_RESULT_SCHEMA,
+  MEMORY_RESULT_SCHEMA,
+  ACK_RESULT_SCHEMA,
+  BUNDLE_RESULT_SCHEMA,
+  FREEFORM_RESULT_SCHEMA
 } from './schemas.js';
 export { toMinimalWriteResponse, stripEmptyFields } from './terse-utils.js';
 export { createServerStatusBuilder, buildUsageGuide } from './status.js';
