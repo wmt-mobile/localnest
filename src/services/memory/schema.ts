@@ -1,7 +1,7 @@
 import { buildSearchTerms, stableJson } from './utils.js';
 import type { Adapter, MigrationSpec, MigrationContext } from './types.js';
 
-export const SCHEMA_VERSION = 12;
+export const SCHEMA_VERSION = 13;
 
 export async function ensureSchema(adapter: Adapter): Promise<void> {
   await adapter.exec(`
@@ -27,6 +27,7 @@ export async function ensureSchema(adapter: Adapter): Promise<void> {
       nest TEXT NOT NULL DEFAULT '',
       branch TEXT NOT NULL DEFAULT '',
       agent_id TEXT NOT NULL DEFAULT '',
+      actor_id TEXT NOT NULL DEFAULT '',
       tags_json TEXT NOT NULL DEFAULT '[]',
       search_terms_json TEXT NOT NULL DEFAULT '[]',
       links_json TEXT NOT NULL DEFAULT '[]',
@@ -346,6 +347,20 @@ export async function runMigrations({ adapter, getMeta }: MigrationContext): Pro
         }
         await ad.exec(`UPDATE kg_triples SET recorded_at = created_at WHERE recorded_at = ''`);
         await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_recorded_at ON kg_triples(recorded_at)`);
+      }
+    },
+    {
+      version: 13,
+      migrate: async (ad) => {
+        // ACTOR-01: add actor attribution column to memory_entries.
+        // actor_id = who created this memory (user, agent, tool).
+        // Separate from agent_id which is the visibility-scoping axis.
+        try {
+          await ad.exec(`ALTER TABLE memory_entries ADD COLUMN actor_id TEXT NOT NULL DEFAULT ''`);
+        } catch {
+          // Column already exists on fresh schema — idempotent.
+        }
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_memory_entries_actor_id ON memory_entries(actor_id)`);
       }
     }
   ];

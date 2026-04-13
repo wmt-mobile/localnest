@@ -71,6 +71,7 @@ export interface MemoryEntry {
   nest: string;
   branch: string;
   agent_id: string;
+  actor_id: string;
   tags: string[];
   links: Link[];
   source_type: string;
@@ -99,6 +100,7 @@ export interface MemoryEntryRow {
   nest: string;
   branch: string;
   agent_id: string;
+  actor_id: string;
   tags_json: string;
   search_terms_json: string;
   links_json: string;
@@ -158,6 +160,7 @@ export interface StoreEntryInput {
   nest?: string;
   branch?: string;
   agent_id?: string;
+  actor_id?: string;
   source_type?: string;
   sourceType?: string;
   source_ref?: string;
@@ -672,6 +675,7 @@ export interface RecallInput {
   nest?: string;
   branch?: string;
   agentId?: string;
+  actorId?: string;
   tags?: string[];
   limit?: number;
 }
@@ -823,6 +827,7 @@ export interface ListEntriesOpts {
   topic?: string;
   nest?: string;
   branch?: string;
+  actorId?: string;
   tags?: string[];
   limit?: number;
   offset?: number;
