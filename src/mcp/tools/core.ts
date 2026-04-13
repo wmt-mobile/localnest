@@ -7,6 +7,11 @@ import { READ_ONLY_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import type { ServerStatus } from '../common/status.js';
 import { buildHelpGuide } from '../common/status.js';
+import {
+  STATUS_RESULT_SCHEMA,
+  FREEFORM_RESULT_SCHEMA,
+  ACK_RESULT_SCHEMA
+} from '../common/schemas.js';
 
 interface UpdateService {
   getStatus(opts: { force: boolean; channel?: string }): Promise<unknown>;
@@ -47,7 +52,8 @@ export function registerCoreTools({
       title: 'Server Status',
       description: 'Return runtime status and active configuration summary for this MCP server.',
       inputSchema: {},
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: STATUS_RESULT_SCHEMA
     },
     async () => buildServerStatus()
   );
@@ -58,7 +64,8 @@ export function registerCoreTools({
       title: 'Health',
       description: 'Return a compact runtime health summary for fast smoke checks.',
       inputSchema: {},
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: STATUS_RESULT_SCHEMA
     },
     async () => {
       const status = await buildServerStatus();
@@ -80,7 +87,8 @@ export function registerCoreTools({
       title: 'Usage Guide',
       description: 'Return concise best-practice guidance for users and AI agents using this MCP.',
       inputSchema: {},
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: FREEFORM_RESULT_SCHEMA
     },
     async () => buildUsageGuide()
   );
@@ -93,7 +101,8 @@ export function registerCoreTools({
       inputSchema: {
         task: z.string().max(500).default('')
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: FREEFORM_RESULT_SCHEMA
     },
     async ({ task }: Record<string, unknown>) => buildHelpGuide(task as string)
   );
@@ -115,7 +124,8 @@ export function registerCoreTools({
         destructiveHint: false,
         idempotentHint: true,
         openWorldHint: true
-      }
+      },
+      outputSchema: STATUS_RESULT_SCHEMA
     },
     async ({ force_check, channel }: Record<string, unknown>) => normalizeUpdateStatus(
       await updates.getStatus({ force: force_check as boolean, channel: channel as string })
@@ -142,7 +152,8 @@ export function registerCoreTools({
         destructiveHint: true,
         idempotentHint: true,
         openWorldHint: true
-      }
+      },
+      outputSchema: ACK_RESULT_SCHEMA
     },
     async ({ approved_by_user, dry_run, version, reinstall_skill }: Record<string, unknown>) => normalizeUpdateSelfResult(
       await updates.selfUpdate({

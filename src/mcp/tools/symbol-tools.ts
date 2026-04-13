@@ -7,6 +7,7 @@ import {
   normalizeImplementationsResult,
   normalizeRenamePreviewResult
 } from '../common/response-normalizers.js';
+import { SEARCH_RESULT_SCHEMA } from '../common/schemas.js';
 
 interface SymbolSearchService {
   findCallersSymbol(opts: {
@@ -58,7 +59,8 @@ export function registerSymbolTools({
         language: z.string().optional().describe('Filter by language: typescript, javascript, python, go, rust'),
         max_results: z.number().int().min(1).max(1000).default(100)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ symbol, project_path, language, max_results }: Record<string, unknown>) =>
       normalizeCallersResult(
@@ -85,7 +87,8 @@ export function registerSymbolTools({
         project_path: z.string().optional().describe('Scope search to a specific project'),
         language: z.string().optional().describe('Filter by language: typescript, javascript, python, go, rust')
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ symbol, project_path, language }: Record<string, unknown>) =>
       normalizeDefinitionResult(
@@ -112,7 +115,8 @@ export function registerSymbolTools({
         language: z.string().optional().describe('Filter by language: typescript, javascript, python, go, rust'),
         max_results: z.number().int().min(1).max(1000).default(100)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ interface_name, project_path, language, max_results }: Record<string, unknown>) =>
       normalizeImplementationsResult(
@@ -140,7 +144,8 @@ export function registerSymbolTools({
         project_path: z.string().optional().describe('Scope search to a specific project'),
         max_results: z.number().int().min(1).max(2000).default(500)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ old_name, new_name, project_path, max_results }: Record<string, unknown>) =>
       normalizeRenamePreviewResult(

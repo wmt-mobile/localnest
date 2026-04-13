@@ -1,5 +1,6 @@
 import { READ_ONLY_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
+import { BUNDLE_RESULT_SCHEMA } from '../common/schemas.js';
 
 interface MemoryService {
   audit(): Promise<unknown>;
@@ -24,7 +25,8 @@ export function registerAuditTools({
         'unpopulated nests, broken bridges, stale memories, a 0-100 health score, and actionable suggestions. ' +
         'Call once to get a full integrity dashboard.',
       inputSchema: {},
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: BUNDLE_RESULT_SCHEMA
     },
     async () => memory.audit()
   );

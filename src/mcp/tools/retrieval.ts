@@ -12,6 +12,11 @@ import {
   normalizeSymbolResult,
   normalizeUsageResult
 } from '../common/response-normalizers.js';
+import {
+  SEARCH_RESULT_SCHEMA,
+  STATUS_RESULT_SCHEMA,
+  BUNDLE_RESULT_SCHEMA
+} from '../common/schemas.js';
 import type { RootEntry } from '../../runtime/config.js';
 
 interface WorkspaceService {
@@ -139,7 +144,8 @@ export function registerRetrievalTools({
         limit: z.number().int().min(1).max(1000).default(100),
         offset: z.number().int().min(0).default(0)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ limit, offset }: Record<string, unknown>) => paginateItems(workspace.listRoots(), limit as number, offset as number)
   );
@@ -155,7 +161,8 @@ export function registerRetrievalTools({
         limit: z.number().int().min(1).max(1000).default(100),
         offset: z.number().int().min(0).default(0)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ root_path, max_entries, limit, offset }: Record<string, unknown>) => {
       const effectiveLimit = (max_entries || limit) as number;
@@ -178,7 +185,8 @@ export function registerRetrievalTools({
         max_depth: z.number().int().min(1).max(8).default(3),
         max_entries: z.number().int().min(1).max(10000).default(1500)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: BUNDLE_RESULT_SCHEMA
     },
     async ({ project_path, max_depth, max_entries }: Record<string, unknown>) => normalizeProjectTreeResult(
       workspace.projectTree(project_path as string, max_depth as number, max_entries as number),
@@ -192,7 +200,8 @@ export function registerRetrievalTools({
       title: 'Index Status',
       description: 'Return local semantic index status and metadata.',
       inputSchema: {},
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: STATUS_RESULT_SCHEMA
     },
     async () => normalizeIndexStatus(vectorIndex.getStatus())
   );
@@ -203,7 +212,8 @@ export function registerRetrievalTools({
       title: 'Embedding Status',
       description: 'Return active embedding backend/model status and vector-search readiness.',
       inputSchema: {},
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: STATUS_RESULT_SCHEMA
     },
     async () => {
       const status = vectorIndex.getStatus();
@@ -222,7 +232,8 @@ export function registerRetrievalTools({
         force: z.boolean().default(false),
         max_files: z.number().int().min(1).max(200000).default(20000)
       },
-      annotations: WRITE_ANNOTATIONS
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: STATUS_RESULT_SCHEMA
     },
     async ({ project_path, all_roots, force, max_files }: Record<string, unknown>, extra: unknown) => {
       const maxFilesNum = max_files as number;
@@ -258,7 +269,8 @@ export function registerRetrievalTools({
         max_results: z.number().int().min(1).max(1000).default(defaultMaxResults),
         case_sensitive: z.boolean().default(false)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ query, project_path, all_roots, max_results, case_sensitive }: Record<string, unknown>) => {
       const results = search.searchFiles({
@@ -305,7 +317,8 @@ export function registerRetrievalTools({
         context_lines: z.number().int().min(0).max(10).default(0),
         use_regex: z.boolean().default(false)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ query, project_path, all_roots, glob, max_results, case_sensitive, context_lines, use_regex }: Record<string, unknown>) => {
       const results = search.searchCode({
@@ -359,7 +372,8 @@ export function registerRetrievalTools({
         auto_index: z.boolean().default(true),
         use_reranker: z.boolean().default(false)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ query, project_path, all_roots, glob, max_results, case_sensitive, min_semantic_score, auto_index, use_reranker }: Record<string, unknown>) => normalizeSearchHybridResult(
       await search.searchHybrid({
@@ -390,7 +404,8 @@ export function registerRetrievalTools({
         max_results: z.number().int().min(1).max(1000).default(defaultMaxResults),
         case_sensitive: z.boolean().default(false)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ symbol, project_path, all_roots, glob, max_results, case_sensitive }: Record<string, unknown>) => normalizeSymbolResult(
       search.getSymbol({
@@ -419,7 +434,8 @@ export function registerRetrievalTools({
         case_sensitive: z.boolean().default(false),
         context_lines: z.number().int().min(0).max(10).default(0)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ symbol, project_path, all_roots, glob, max_results, case_sensitive, context_lines }: Record<string, unknown>) => normalizeUsageResult(
       search.findUsages({
@@ -445,7 +461,8 @@ export function registerRetrievalTools({
         start_line: z.number().int().min(1).default(1),
         end_line: z.number().int().min(1).default(defaultMaxReadLines)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: BUNDLE_RESULT_SCHEMA
     },
     async ({ path: filePath, start_line, end_line }: Record<string, unknown>) => {
       const result = normalizeReadFileChunkResult(
@@ -478,7 +495,8 @@ export function registerRetrievalTools({
       inputSchema: {
         path: z.string()
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: BUNDLE_RESULT_SCHEMA
     },
     async ({ path: filePath }: Record<string, unknown>) => {
       if (!memory) {
@@ -506,7 +524,8 @@ export function registerRetrievalTools({
         project_path: z.string(),
         max_files: z.number().int().min(100).max(20000).default(3000)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: BUNDLE_RESULT_SCHEMA
     },
     async ({ project_path, max_files }: Record<string, unknown>) => normalizeProjectSummaryResult(
       workspace.summarizeProject(project_path as string, max_files as number),
