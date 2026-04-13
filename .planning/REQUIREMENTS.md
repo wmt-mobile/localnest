@@ -256,10 +256,10 @@
 - [ ] **BACKUP-03**: CLI `localnest backup` and `localnest restore` commands wrap the MCP tools
 
 ### Actor-Aware Memories
-- [ ] **ACTOR-01**: `memory_entries` gains `actor_id` column (additive migration) — who created this memory
-- [ ] **ACTOR-02**: `memory_store` and `memory_store_batch` accept `actor_id` parameter, auto-inferred from agent_id if omitted
-- [ ] **ACTOR-03**: `memory_recall` and `memory_list` accept `actor_id` filter
-- [ ] **ACTOR-04**: `agent_prime` surfaces actor attribution in recalled memory items
+- [x] **ACTOR-01**: `memory_entries` gains `actor_id` column (additive migration) — who created this memory
+- [x] **ACTOR-02**: `memory_store` and `memory_store_batch` accept `actor_id` parameter, auto-inferred from agent_id if omitted
+- [x] **ACTOR-03**: `memory_recall` and `memory_list` accept `actor_id` filter
+- [x] **ACTOR-04**: `agent_prime` surfaces actor attribution in recalled memory items
 
 ### v0.3.0 Tracking
 
