@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: MCP Spec Compliance & Production Hardening
-status: verifying
-stopped_at: Completed 39-02-PLAN.md
-last_updated: "2026-04-13T06:37:37.697Z"
+status: executing
+stopped_at: Completed 40-01-PLAN.md (archetype library + registrar extension)
+last_updated: "2026-04-13T07:35:19.707Z"
 last_activity: 2026-04-13
 progress:
   total_phases: 7
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 4
+  completed_plans: 3
 ---
 
 # Project State
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** Phase 39 — Tool Annotations (MCP Spec)
+**Current focus:** Phase 40 — Structured Output (MCP Spec)
 
 ## Current Position
 
-Phase: 39 (Tool Annotations (MCP Spec)) — EXECUTING
+Phase: 40 (Structured Output (MCP Spec)) — EXECUTING
 Plan: 2 of 2
-Status: Phase complete — ready for verification
+Status: Ready to execute
 Last activity: 2026-04-13
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
@@ -84,6 +84,7 @@ Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 *Updated after each plan completion. v0.2.0 phases (26-38) will populate as they execute.*
 | Phase 39 P01 | 960 | 3 tasks | 11 files |
 | Phase 39-tool-annotations-mcp-spec P02 | 182 | 2 tasks | 1 files |
+| Phase 40 P01 | 5m | 3 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -108,6 +109,9 @@ Recent decisions affecting current work:
 - [Phase 39]: Added IDEMPOTENT_WRITE_ANNOTATIONS as 4th annotation bucket (renamed DELETE→DESTRUCTIVE) for dedup-upsert writes
 - [Phase 39]: update_status and update_self kept as inline exceptions (both have openWorldHint:true, hitting npm registry)
 - [Phase 39-tool-annotations-mcp-spec]: Plan 02: Validation test uses full registerAppTools pipeline with noop fake services; asserts only RO/DH/IH (openWorldHint deferred)
+- [Phase 40]: Dropped ENTITY_RESULT_SCHEMA from v0.3.0 — zero Plan 02 consumers per CONTEXT.md 'smallest set' rule
+- [Phase 40]: Exported toolResult() from tool-utils via single-token change so Plan 02 unit tests import from public barrel without framework reach-back
+- [Phase 40]: FREEFORM_RESULT_SCHEMA is the single named escape hatch — registrar fallback references it instead of inlining z.any(), zero orphans in tool-utils.ts
 
 ### Pending Todos
 
@@ -130,7 +134,7 @@ None — autonomous execution in progress.
 
 ## Session Continuity
 
-Last session: 2026-04-13T06:37:37.692Z
-Stopped at: Completed 39-02-PLAN.md
+Last session: 2026-04-13T07:35:19.703Z
+Stopped at: Completed 40-01-PLAN.md (archetype library + registrar extension)
 Resume file: None
 Next command: `/gsd:plan-phase 27`

@@ -232,8 +232,8 @@
 
 ### Structured Output (MCP Spec)
 - [ ] **STRUCT-01**: All tool responses include `structuredContent` alongside text `content`
-- [ ] **STRUCT-02**: Tools declare `outputSchema` in their registration for typed response parsing
-- [ ] **STRUCT-03**: Existing `response_format: "json"` behavior preserved as backwards-compatible default
+- [x] **STRUCT-02**: Tools declare `outputSchema` in their registration for typed response parsing
+- [x] **STRUCT-03**: Existing `response_format: "json"` behavior preserved as backwards-compatible default
 
 ### Resource Links (MCP Spec)
 - [ ] **RLINK-01**: `read_file`, `search_code`, `search_files` return `resource_link` objects instead of inlining full file content

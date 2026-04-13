@@ -421,7 +421,7 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
   2. Every tool declares an outputSchema in its registration
   3. Existing response_format: "json" behavior is preserved (backwards compat)
 **Plans**: 2 plans
-- [ ] 40-01-PLAN.md — Shared output archetype library + registrar extension (STRUCT-02, STRUCT-03)
+- [x] 40-01-PLAN.md — Shared output archetype library + registrar extension (STRUCT-02, STRUCT-03)
 - [ ] 40-02-PLAN.md — Per-tool archetype assignment + EXPECTED_OUTPUT_SCHEMAS test (STRUCT-01, STRUCT-02, STRUCT-03)
 
 ### Phase 41: Resource Links (MCP Spec)
