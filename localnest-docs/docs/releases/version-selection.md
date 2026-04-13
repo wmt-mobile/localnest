@@ -1,67 +1,64 @@
 ---
-description: Choose the correct LocalNest version line with explicit install commands for the current stable release, older stable releases, and archived beta releases.
+description: Choose the correct LocalNest version line with explicit install commands for the current stable release, beta track, and archived releases.
 ---
 
 # Version Selection
 
-Use this page to choose a LocalNest version line and install it explicitly.
+Use this page to choose a LocalNest version track and install it explicitly.
 
-## Recommended defaults
+## Multi-Track Offerings
 
-- Want the current stable release: use `0.1.0` (TypeScript, temporal KG, CLI-first, 72 tools)
-- Want the previous stable: use `0.0.5`
-- Want an archived beta: use `0.0.7-beta.2` or `0.0.6-beta.1`
-- Want older stable behavior: use `0.0.3`
-- Need older behavior for compatibility: use the archived beta rows below
+LocalNest maintains two active release tracks to balance proven stability with rapid innovation.
 
-Common upgrade commands:
+- **Stable (v0.2.0)**: Use for production-critical workflows and established tools.
+- **Beta (v0.3.0-beta.1)**: Use for the modern interactive CLI, TUI Dashboard, and refactored diagnostics.
 
-```bash
-localnest upgrade stable
-localnest upgrade 0.1.0
-localnest upgrade 0.0.5
-localnest upgrade 0.0.3
-```
+## Quick Selection
 
-## Install commands by version
-
-| Version | Channel | Install command |
+| Goal | Version | Command |
 | --- | --- | --- |
-| `0.1.0` | current stable | `npm install -g localnest-mcp@0.1.0` |
+| **Current Beta** | `0.3.0-beta.1` | `npm install -g localnest-mcp@beta` |
+| **Current Stable** | `0.2.0` | `npm install -g localnest-mcp` |
+| **Previous Stable** | `0.1.0` | `npm install -g localnest-mcp@0.1.0` |
+| **Archived Beta** | `0.0.7-beta.2` | `npm install -g localnest-mcp@0.0.7-beta.2` |
+
+## Detailed Version Matrix
+
+| Version | Channel | Install Command |
+| --- | --- | --- |
+| `0.3.0-beta.1` | beta | `npm install -g localnest-mcp@0.3.0-beta.1` |
+| `0.2.0` | latest stable | `npm install -g localnest-mcp@0.2.0` |
+| `0.1.0` | previous stable | `npm install -g localnest-mcp@0.1.0` |
 | `0.0.7-beta.2` | archived beta | `npm install -g localnest-mcp@0.0.7-beta.2` |
 | `0.0.6-beta.1` | archived beta | `npm install -g localnest-mcp@0.0.6-beta.1` |
-| `0.0.5` | previous stable | `npm install -g localnest-mcp@0.0.5` |
+| `0.0.5` | legacy stable | `npm install -g localnest-mcp@0.0.5` |
 | `0.0.4-beta.9` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.9` |
-| `0.0.4-beta.8` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.8` |
-| `0.0.4-beta.7` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.7` |
-| `0.0.4-beta.6` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.6` |
-| `0.0.4-beta.5` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.5` |
-| `0.0.4-beta.4` | archived beta | `npm install -g localnest-mcp@0.0.4-beta.4` |
-| `0.0.3` | stable | `npm install -g localnest-mcp@0.0.3` |
-| `0.0.2-beta.3` | archived beta | `npm install -g localnest-mcp@0.0.2-beta.3` |
-| `0.0.2-beta.2` | archived beta | `npm install -g localnest-mcp@0.0.2-beta.2` |
-| `0.0.1-beta.1` | archived beta | `npm install -g localnest-mcp@0.0.1-beta.1` |
+| `0.0.3` | legacy stable | `npm install -g localnest-mcp@0.0.3` |
 
-## Post-install command differences
+## Post-Install Command Differences
 
-| Version | `localnest-mcp-install-skill` | Setup style |
+| Version Line | Primary CLI Command | Dashboard Support |
 | --- | --- | --- |
-| `0.0.6-beta.1` | yes (deprecated compatibility alias) | canonical `localnest` CLI + soft-deprecated helper wrappers |
-| `0.0.5` | yes | stable promotion of beta.9 fixes + installed-runtime validation hardening |
-| `0.0.4-beta.9` | yes | skill version reporting fix + beta.8 runtime baseline |
-| `0.0.4-beta.8` | yes | startup/runtime regression fixes + sqlite-vec status hardening |
-| `0.0.4-beta.7` | yes | global-first + sqlite-vec auto-detection + Hugging Face runtime |
-| `0.0.4-beta.6` | yes | global-first + release-hardening + restructured internals |
-| `0.0.4-beta.5` | yes | global-first + `localnest upgrade` command path |
-| `0.0.4-beta.4` | yes | global-first + memory consent |
-| `0.0.3` | yes | global-first |
-| `0.0.2-beta.3` | yes | transitional (`npm -g` + `npx` setup common) |
-| `0.0.2-beta.2` | yes (introduced here) | transitional |
-| `0.0.1-beta.1` | no | `npx`-first setup flow |
+| **0.3.0+** | `localnest` ([Modernized]) | Yes (Interactive TUI) |
+| **0.1.0 - 0.2.0** | `localnest` | No (CLI only) |
+| **0.0.4 - 0.0.7** | `localnest` | No |
+| **< 0.0.4** | `localnest-mcp-setup` | No |
 
-## Notes
+## Upgrade / Downgrade Examples
 
-- If you need deterministic behavior across environments, pin exact versions instead of using floating tags.
-- `0.1.0` is the current stable release with the full TypeScript migration.
-- The phrase "beta 9" in this repo maps to `0.0.4-beta.9` package naming.
-- Use [Release Matrix](./history) for context, [Current Release](./current) for active stable behavior, and the archived per-version pages for [0.0.4-beta.9](/docs/versions/0.0.4-beta.9/overview) or [0.0.4-beta.8](/docs/versions/0.0.4-beta.8/overview) when you need frozen prerelease notes.
+```bash
+# Upgrade to beta
+localnest upgrade beta
+
+# Pin to current stable
+npm install -g localnest-mcp@0.2.0
+
+# Revert to previous stable
+localnest upgrade 0.1.0
+```
+
+---
+
+- `0.3.0-beta.1` introduces the **Modernization Update** with a full visual refactor.
+- `0.2.0` is the current stable baseline with full TypeScript and 74 tool support.
+- Use [Release Matrix](./history) for the full context and [Current Release](./current) for the active documentation track.

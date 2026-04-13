@@ -13,10 +13,7 @@
 import { EmbeddingService } from '../../services/retrieval/embedding/service.js';
 import { MemoryService } from '../../services/memory/service.js';
 import { SERVER_VERSION } from '../../runtime/version.js';
-import {
-  bold, dim,
-  boxTop, boxBottom, boxLine, separator,
-} from '../ansi.js';
+import { c, symbol, boxTop, boxBottom, boxLine, separator } from '../ansi.js';
 import { startSpinner } from '../spinner.js';
 import type { Ora } from 'ora';
 import type { GlobalOptions } from '../options.js';
@@ -146,32 +143,29 @@ export async function run(args: string[], opts: GlobalOptions): Promise<void> {
   }
 
   const lines: string[] = [];
-  const W = 60;
 
-  lines.push('');
-  lines.push(boxTop(W));
-  lines.push(boxLine(`${bold('LocalNest Self-Test')}  ${dim(`v${SERVER_VERSION}`)}`, W));
-  lines.push(boxBottom(W));
-  lines.push('');
+  process.stdout.write(`\n  ${c.bold('LocalNest Self-Check')}  ${c.gray(`v${SERVER_VERSION}`)}\n`);
+  process.stdout.write(`  ${c.dim('Running system diagnostics and integration tests...')}\n\n`);
 
   for (const r of results) {
     lines.push(formatLine(r));
   }
 
-  lines.push('');
-  lines.push(separator());
+  process.stdout.write(lines.join('\n') + '\n\n');
+  process.stdout.write(separator() + '\n');
 
   const passed = results.filter(r => r.status === 'pass').length;
-  const warnings = results.filter(r => r.status === 'warn').length;
+  const warned = results.filter(r => r.status === 'warn').length;
   const failed = results.filter(r => r.status === 'fail').length;
 
-  const parts: string[] = [];
-  if (passed > 0) parts.push(bold(`${passed} passed`));
-  if (warnings > 0) parts.push(`${warnings} warning${warnings === 1 ? '' : 's'}`);
-  if (failed > 0) parts.push(`${failed} action${failed === 1 ? '' : 's'} needed`);
+  process.stdout.write(`  ${c.bold('Summary')}\n`);
+  process.stdout.write(`  ${c.green(`${passed} passed`)}, ${c.red(`${failed} failed`)}, ${c.yellow(`${warned} warnings`)}\n\n`);
 
-  lines.push(`  ${bold('Result:')} ${parts.join(', ')}`);
-  lines.push('');
-
-  process.stdout.write(lines.join('\n') + '\n');
+  if (failed > 0) {
+    process.stdout.write(`  ${c.red('FAILED')}: Self-check encountered critical issues.\n\n`);
+  } else if (warned > 0) {
+    process.stdout.write(`  ${c.yellow('PASSED WITH WARNINGS')}: System is operational but needs attention.\n\n`);
+  } else {
+    process.stdout.write(`  ${c.green('PASSED')}: System is healthy.\n\n`);
+  }
 }

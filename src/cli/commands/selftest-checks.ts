@@ -11,7 +11,7 @@ import { buildRuntimeConfig } from '../../runtime/config.js';
 import { EmbeddingService } from '../../services/retrieval/embedding/service.js';
 import { MemoryService } from '../../services/memory/service.js';
 import { SCHEMA_VERSION } from '../../services/memory/schema.js';
-import { green, red, yellow, dim } from '../ansi.js';
+import { c, symbol } from '../ansi.js';
 
 /* ------------------------------------------------------------------ */
 /*  Result tracking                                                    */
@@ -34,9 +34,9 @@ const ICON: Record<CheckStatus, string> = {
 
 export function statusIcon(status: CheckStatus): string {
   switch (status) {
-    case 'pass': return green(ICON.pass);
-    case 'warn': return yellow(ICON.warn);
-    case 'fail': return red(ICON.fail);
+    case 'pass': return c.green(symbol.success());
+    case 'warn': return c.yellow(symbol.warn());
+    case 'fail': return c.red(symbol.error());
     default: return ' ';
   }
 }
@@ -44,7 +44,7 @@ export function statusIcon(status: CheckStatus): string {
 export function formatLine(result: CheckResult): string {
   const icon = statusIcon(result.status);
   const nameCol = result.name.padEnd(24);
-  const detailCol = dim(result.detail);
+  const detailCol = c.dim(result.detail);
   return `  ${icon} ${nameCol} ${detailCol}`;
 }
 

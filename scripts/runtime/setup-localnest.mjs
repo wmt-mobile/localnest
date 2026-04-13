@@ -14,6 +14,8 @@ import {
   buildLocalnestServerConfig,
   installLocalnestIntoDetectedClients
 } from '../../src/setup/client-installer.js';
+import ora from 'ora';
+import { c, symbol, box, rule } from '../../src/cli/ansi.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';
@@ -470,7 +472,7 @@ async function warmupModels(indexConfig) {
   const { EmbeddingService, RerankerService } = await import('../../src/services/retrieval/index.js');
 
   if (indexConfig?.embedding?.provider && indexConfig.embedding.provider !== 'none') {
-    process.stdout.write('[setup] warming up embedding model (first run downloads model files)...\n');
+    const embedSpinner = ora('Warming up embedding model (first run downloads ~90MB)…').start();
     try {
       const embedding = new EmbeddingService({
         provider: indexConfig.embedding.provider,
@@ -478,13 +480,14 @@ async function warmupModels(indexConfig) {
         cacheDir: indexConfig.embedding.cacheDir
       });
       await embedding.embed('localnest embedding warmup');
+      embedSpinner.succeed('Embedding model ready');
     } catch (error) {
-      process.stderr.write(`[setup] warning: embedding warmup failed: ${error?.message || error}\n`);
+      embedSpinner.warn(`Embedding warmup failed: ${error?.message || error}`);
     }
   }
 
   if (indexConfig?.reranker?.provider && indexConfig.reranker.provider !== 'none') {
-    process.stdout.write('[setup] warming up reranker model (first run downloads model files)...\n');
+    const rerankSpinner = ora('Warming up reranker model…').start();
     try {
       const reranker = new RerankerService({
         provider: indexConfig.reranker.provider,
@@ -492,60 +495,62 @@ async function warmupModels(indexConfig) {
         cacheDir: indexConfig.reranker.cacheDir
       });
       await reranker.score('warmup query', 'warmup candidate');
+      rerankSpinner.succeed('Reranker model ready');
     } catch (error) {
-      process.stderr.write(`[setup] warning: reranker warmup failed: ${error?.message || error}\n`);
+      rerankSpinner.warn(`Reranker warmup failed: ${error?.message || error}`);
     }
   }
 }
 
 function printSuccess(packageRef, indexConfig) {
   const launch = resolveLaunchPreference(packageRef);
-  const globalSnippet = buildGlobalClientSnippet(indexConfig);
-  const preferredSnippet = buildClientSnippet(packageRef, indexConfig);
-  const npxSnippet = buildNpxClientSnippet(packageRef, indexConfig);
   const clientInstall = installClientConfigs(packageRef, indexConfig);
+  const verbose = argv.includes('--verbose') || argv.includes('-v');
 
   console.log('');
-  console.log(`Saved root config: ${configPath}`);
-  console.log(`Saved client snippet: ${snippetPath}`);
-  console.log(`Preferred LocalNest launcher: ${launch.command}${launch.args.length ? ` ${launch.args.join(' ')}` : ''}`);
-  if (indexConfig.backend === 'sqlite-vec') {
-    if (indexConfig.sqliteVecExtensionPath) {
-      console.log(`Configured sqlite-vec native extension: ${indexConfig.sqliteVecExtensionPath}`);
-    } else {
-      console.log('sqlite-vec native extension not configured. LocalNest will not have vec0 acceleration until setup can detect or install it.');
-    }
-  }
-  console.log('');
+  console.log(box.top(60));
+  console.log(box.row(c.bold('LocalNest Setup Complete ✓'), 60));
+  console.log(box.divider(60));
+  console.log(box.row(`Launcher: ${launch.command}${launch.args.length ? ' ' + launch.args.join(' ') : ''}`, 60));
+  console.log(box.row(`Backend:  ${indexConfig.backend}`, 60));
+  console.log(box.row(`Config:   ${configPath}`, 60));
+
   if (clientInstall.installed.length > 0) {
-    console.log('Auto-installed LocalNest into detected AI tools:');
+    console.log(box.divider(60));
+    console.log(box.row('Auto-installed into:', 60));
     for (const result of clientInstall.installed) {
-      console.log(`- ${result.tool}: ${result.status} (${result.configPath})`);
+      console.log(box.row(`  ${symbol.ok()} ${result.tool}: ${result.status}`, 60));
     }
-    console.log('');
   }
+  console.log(box.bottom(60));
+  console.log('');
+
   if (clientInstall.unsupported.length > 0) {
-    console.log('Detected but not auto-configured:');
+    console.log(c.yellow('Detected but not auto-configured:'));
     for (const item of clientInstall.unsupported) {
-      console.log(`- ${item.label}: ${item.reason}`);
+      console.log(`  ${symbol.warn()} ${item.label}: ${item.reason}`);
     }
     console.log('');
   }
+
+  console.log(rule('Next steps'));
+  console.log('1) Restart AI tools that were updated above');
+
+  if (verbose) {
+    console.log('2) Client configuration snippet:');
+    const preferredSnippet = buildClientSnippet(packageRef, indexConfig);
+    console.log('');
+    console.log(JSON.stringify(preferredSnippet, null, 2));
+    console.log('');
+    console.log('3) Global only (if installed):');
+    console.log(JSON.stringify(buildGlobalClientSnippet(indexConfig), null, 2));
+  } else {
+    console.log(`2) If your tool was not updated, run with ${c.cyan('--verbose')} to see config snippets.`);
+  }
+
   console.log('');
-  console.log('Next steps:');
-  console.log('1) Restart the AI tools that were updated above');
-  console.log('2) If your preferred tool was not updated automatically, copy-paste this MCP config block into its config:');
-  console.log('');
-  console.log(JSON.stringify(preferredSnippet, null, 2));
-  console.log('');
-  console.log('3) Use tools: localnest_index_status, localnest_index_project, localnest_search_hybrid, localnest_read_file');
-  console.log('');
-  console.log('Optional GLOBAL-only snippet:');
-  console.log(JSON.stringify(globalSnippet, null, 2));
-  console.log('');
-  console.log('Optional npx fallback snippet:');
-  console.log(`- ${snippetPath}`);
-  console.log(JSON.stringify(npxSnippet, null, 2));
+  console.log('Try: localnest doctor');
+  console.log(rule());
 }
 
 async function main() {
@@ -576,12 +581,12 @@ async function main() {
   const preflight = runPreflightChecks();
   if (preflight.errors.length > 0) {
     for (const err of preflight.errors) {
-      console.error(`[preflight:error] ${err}`);
+      console.error(`${symbol.fail()} ${c.red(err)}`);
     }
     process.exit(1);
   }
   for (const warning of preflight.warnings) {
-    console.error(`[preflight:warning] ${warning}`);
+    console.error(`${symbol.warn()} ${c.yellow(warning)}`);
   }
 
   // Resolve roots: explicit args > existing config > auto-detected > cwd fallback

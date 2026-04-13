@@ -11,6 +11,7 @@ import {
   resolveWritableModelCacheDir,
   installRuntimeWarningFilter
 } from '../../src/runtime/index.js';
+import { c, symbol, bar } from '../../src/cli/ansi.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';
@@ -317,28 +318,31 @@ function checkModelCacheWritable() {
 }
 
 function printText(results) {
-  console.log('LocalNest Doctor');
+  console.log(c.bold('LocalNest Doctor'));
   console.log('');
 
   for (const r of results) {
-    const mark = r.ok ? 'OK' : 'FAIL';
-    console.log(`[${mark}] ${r.id}: ${r.detail}`);
+    const mark = r.ok ? symbol.ok() : symbol.fail();
+    console.log(`${mark} ${c.bold(r.id)}: ${r.detail}`);
     if (!r.ok && r.fix) {
-      console.log(`  fix: ${r.fix}`);
+      console.log(`   ${c.yellow('fix:')} ${r.fix}`);
     }
   }
 
-  const failed = results.filter((r) => !r.ok).length;
+  const passed = results.filter((r) => r.ok).length;
+  const failed = results.length - passed;
+  console.log('');
+  console.log(`Health: ${bar(passed, results.length)}`);
   console.log('');
   if (failed === 0) {
-    console.log('Doctor result: healthy');
+    console.log(`${symbol.ok()} ${c.green('Doctor result: healthy')}`);
   } else {
-    console.log(`Doctor result: ${failed} issue(s) found`);
+    console.log(`${symbol.fail()} ${c.red(`Doctor result: ${failed} issue(s) found`)}`);
   }
 }
 
 function printHelp() {
-  process.stdout.write('LocalNest Doctor\n\n');
+  process.stdout.write(c.bold('LocalNest Doctor') + '\n\n');
   process.stdout.write('Usage:\n');
   process.stdout.write('  localnest doctor\n');
   process.stdout.write('  localnest doctor --verbose\n');

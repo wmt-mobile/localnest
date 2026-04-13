@@ -7,17 +7,6 @@
 
 **LocalNest** is the world’s first local-first MCP server that combines **Semantic Code Search**, **Persistent AI Memory**, and a **Temporal Knowledge Graph**. It enables your AI agents to build a "nest" of knowledge directly on your machine—ensuring privacy, speed, and cross-session intelligence without cloud dependencies.
 
-```text
- ┌── LocalNest Dashboard ──────────────────────────────────────────────────┐
- │                                                                         │
- │  AI Context: [ONLINE]  Tools: [74 ACTIVE]       Memory: [3.2GB INDEXED] │
- │                                                                         │
- │  Recent Events:                                                         │
- │  [15:34:01] localnest_search_hybrid: matched 12 chunks                  │
- │  [15:34:02] localnest_agent_prime: context rehydrated                   │
- │                                                                         │
- └─────────────────────────────────────────────────────────────────────────┘
-```
 
 ---
 

@@ -9,10 +9,7 @@
  */
 
 import { SERVER_VERSION } from '../runtime/version.js';
-import {
-  bold, dim, italic, cyan, green, yellow, magenta, blue, gray, badge,
-  B as BOX, boxTop, boxBottom, boxLine, separator,
-} from './ansi.js';
+import { c, B as BOX, boxTop, boxBottom, boxLine, separator } from './ansi.js';
 import { TOOL_COUNT } from './tool-count.js';
 
 /* ------------------------------------------------------------------ */
@@ -36,7 +33,7 @@ const CATEGORIES: CategoryDef[] = [
   {
     name: 'Core',
     icon: BOX.dot,
-    color: green,
+    color: c.green,
     commands: [
       { name: 'start', alias: 'serve', desc: 'Start MCP server (stdio)' },
       { name: 'setup', desc: 'Run interactive setup wizard' },
@@ -51,7 +48,7 @@ const CATEGORIES: CategoryDef[] = [
   {
     name: 'Memory',
     icon: '◆',
-    color: cyan,
+    color: c.cyan,
     commands: [
       { name: 'memory add', desc: 'Store a memory entry' },
       { name: 'memory search', desc: 'Search memories by query' },
@@ -63,7 +60,7 @@ const CATEGORIES: CategoryDef[] = [
   {
     name: 'Knowledge Graph',
     icon: '◇',
-    color: magenta,
+    color: c.magenta,
     commands: [
       { name: 'kg add', desc: 'Create a subject→predicate→object triple' },
       { name: 'kg query', desc: 'Query entity relationships' },
@@ -74,7 +71,7 @@ const CATEGORIES: CategoryDef[] = [
   {
     name: 'Organization',
     icon: '▸',
-    color: yellow,
+    color: c.yellow,
     commands: [
       { name: 'skill install', alias: 'install skills', desc: 'Install skills to AI clients' },
       { name: 'skill list', desc: 'Show installed skills' },
@@ -86,7 +83,7 @@ const CATEGORIES: CategoryDef[] = [
   {
     name: 'Tools',
     icon: '⚡',
-    color: blue,
+    color: c.blue,
     commands: [
       { name: 'mcp start', desc: 'Start MCP server' },
       { name: 'mcp status', desc: 'Server health and config' },
@@ -111,58 +108,58 @@ export function printHelp(): void {
   const lines: string[] = [];
 
   lines.push('');
-  lines.push(`  ${bold('LocalNest')} ${cyan(`v${SERVER_VERSION}`)} ${gray(BOX.h.repeat(2))} ${dim('local-first MCP memory server')}`);
+  lines.push(`  ${c.bold('LocalNest')} ${c.cyan(`v${SERVER_VERSION}`)} ${c.gray(BOX.h.repeat(2))} ${c.dim('local-first MCP memory server')}`);
   lines.push('');
   lines.push(boxTop(W));
-  lines.push(boxLine(`${bold('LocalNest')}  ${gray(`v${SERVER_VERSION}`)}  ${badge('MCP')}`, W));
-  lines.push(boxLine(`${italic(gray('Local-first AI memory, code retrieval & knowledge graph'))}`, W));
+  lines.push(boxLine(`${c.bold('LocalNest')}  ${c.gray(`v${SERVER_VERSION}`)}  ${c.badge('MCP')}`, W));
+  lines.push(boxLine(`${c.italic(c.gray('Local-first AI memory, code retrieval & knowledge graph'))}`, W));
   lines.push(boxLine('', W));
-  lines.push(boxLine(`${green(BOX.check)} ${dim(`${TOOL_COUNT} MCP tools`)}  ${cyan(BOX.dot)} ${dim('Zero cloud deps')}  ${magenta('◇')} ${dim('Temporal KG')}`, W));
+  lines.push(boxLine(`${c.green(BOX.check)} ${c.dim(`${TOOL_COUNT} MCP tools`)}  ${c.cyan(BOX.dot)} ${c.dim('Zero cloud deps')}  ${c.magenta('◇')} ${c.dim('Temporal KG')}`, W));
   lines.push(boxBottom(W));
   lines.push('');
 
-  lines.push(`  ${bold('USAGE')}  ${gray('localnest <command> [options]')}`);
+  lines.push(`  ${c.bold('USAGE')}  ${c.gray('localnest <command> [options]')}`);
   lines.push('');
 
   for (const cat of CATEGORIES) {
-    const header = `${cat.color(cat.icon)} ${bold(cat.color(cat.name))}`;
+    const header = `${cat.color(cat.icon)} ${c.bold(cat.color(cat.name))}`;
     lines.push(`  ${header}`);
 
     for (const cmd of cat.commands) {
       const cmdName = cat.color(cmd.name);
       const visible = cmd.name;
       const pad = Math.max(2, 26 - visible.length);
-      const aliasStr = cmd.alias ? gray(` (${cmd.alias})`) : '';
-      lines.push(`    ${cmdName}${' '.repeat(pad)}${dim(cmd.desc)}${aliasStr}`);
+      const aliasStr = cmd.alias ? c.gray(` (${cmd.alias})`) : '';
+      lines.push(`    ${cmdName}${' '.repeat(pad)}${c.dim(cmd.desc)}${aliasStr}`);
     }
     lines.push('');
   }
 
   lines.push(separator());
   lines.push('');
-  lines.push(`  ${bold('FLAGS')}`);
-  lines.push(`    ${green('--json')}                ${dim('Machine-readable JSON output')}`);
-  lines.push(`    ${green('--verbose')}             ${dim('Increase output detail')}`);
-  lines.push(`    ${green('--quiet')}               ${dim('Suppress non-essential output')}`);
-  lines.push(`    ${green('--config')} ${gray('<path>')}       ${dim('Custom config file path')}`);
-  lines.push(`    ${green('--version')}, ${green('-v')}        ${dim('Print version')}`);
-  lines.push(`    ${green('--help')}, ${green('-h')}           ${dim('Show this help')}`);
+  lines.push(`  ${c.bold('FLAGS')}`);
+  lines.push(`    ${c.green('--json')}                ${c.dim('Machine-readable JSON output')}`);
+  lines.push(`    ${c.green('--verbose')}             ${c.dim('Increase output detail')}`);
+  lines.push(`    ${c.green('--quiet')}               ${c.dim('Suppress non-essential output')}`);
+  lines.push(`    ${c.green('--config')} ${c.gray('<path>')}       ${c.dim('Custom config file path')}`);
+  lines.push(`    ${c.green('--version')}, ${c.green('-v')}        ${c.dim('Print version')}`);
+  lines.push(`    ${c.green('--help')}, ${c.green('-h')}           ${c.dim('Show this help')}`);
   lines.push('');
 
   lines.push(separator());
   lines.push('');
-  lines.push(`  ${bold('EXAMPLES')}`);
-  lines.push(`    ${cyan('localnest memory add')} ${gray('--content "JWT with refresh tokens" --kind decision')}`);
-  lines.push(`    ${cyan('localnest memory search')} ${gray('--query "authentication"')}`);
-  lines.push(`    ${cyan('localnest kg add')} ${gray('--subject "AuthService" --predicate "uses" --object "JWT"')}`);
-  lines.push(`    ${cyan('localnest selftest')} ${gray('--json')}`);
-  lines.push(`    ${cyan('localnest dashboard')}`);
+  lines.push(`  ${c.bold('EXAMPLES')}`);
+  lines.push(`    ${c.cyan('localnest memory add')} ${c.gray('--content "JWT with refresh tokens" --kind decision')}`);
+  lines.push(`    ${c.cyan('localnest memory search')} ${c.gray('--query "authentication"')}`);
+  lines.push(`    ${c.cyan('localnest kg add')} ${c.gray('--subject "AuthService" --predicate "uses" --object "JWT"')}`);
+  lines.push(`    ${c.cyan('localnest selftest')} ${c.gray('--json')}`);
+  lines.push(`    ${c.cyan('localnest dashboard')}`);
   lines.push('');
 
   lines.push(separator());
   lines.push('');
-  lines.push(`  ${gray('Quick start:')}  ${cyan('localnest setup')} ${gray(BOX.arrow)} ${cyan('localnest doctor')} ${gray(BOX.arrow)} ${cyan('localnest hooks install')}`);
-  lines.push(`  ${gray('Docs:')}         ${blue('https://wmt-mobile.github.io/localnest/')}`);
+  lines.push(`  ${c.gray('Quick start:')}  ${c.cyan('localnest setup')} ${c.gray(BOX.arrow)} ${c.cyan('localnest doctor')} ${c.gray(BOX.arrow)} ${c.cyan('localnest hooks install')}`);
+  lines.push(`  ${c.gray('Docs:')}         ${c.blue('https://wmt-mobile.github.io/localnest/')}`);
   lines.push('');
 
   process.stdout.write(lines.join('\n') + '\n');
@@ -179,13 +176,13 @@ export interface VerbDef {
 export function printSubcommandHelp(noun: string, verbs: VerbDef[]): void {
   const lines: string[] = [];
   lines.push('');
-  lines.push(`  ${bold(cyan('localnest ' + noun))} ${gray('<command> [options]')}`);
+  lines.push(`  ${c.bold(c.cyan('localnest ' + noun))} ${c.gray('<command> [options]')}`);
   lines.push('');
   for (const v of verbs) {
-    const nameStr = cyan(v.name);
+    const nameStr = c.cyan(v.name);
     const visible = v.name;
     const pad = Math.max(2, 26 - visible.length);
-    lines.push(`    ${nameStr}${' '.repeat(pad)}${dim(v.desc)}`);
+    lines.push(`    ${nameStr}${' '.repeat(pad)}${c.dim(v.desc)}`);
   }
   lines.push('');
   process.stdout.write(lines.join('\n') + '\n');
