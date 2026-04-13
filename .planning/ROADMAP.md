@@ -409,7 +409,7 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
   3. Delete tools have destructiveHint: true; write tools have destructiveHint: false
   4. Test validates annotations mapping for all 72 tools
 **Plans**: 2 plans
-- [ ] 39-01-PLAN.md — Fix 9 confirmed annotation mismatches + lift shared annotation constants to tool-utils.ts (ANNOT-01, ANNOT-02)
+- [x] 39-01-PLAN.md — Fix 9 confirmed annotation mismatches + lift shared annotation constants to tool-utils.ts (ANNOT-01, ANNOT-02)
 - [ ] 39-02-PLAN.md — New test/mcp-annotations.test.js validates all 72 tools against hardcoded expected map (ANNOT-03)
 
 ### Phase 40: Structured Output (MCP Spec)

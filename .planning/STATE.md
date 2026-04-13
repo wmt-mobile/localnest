@@ -2,17 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: MCP Spec Compliance & Production Hardening
-status: active
-stopped_at: "v0.3.0 milestone initialized — 7 phases (39-45), ready to research and plan"
-last_updated: "2026-04-10T12:30:00Z"
-last_activity: "2026-04-10 - v0.3.0 milestone created on release/0.3.0 branch"
+status: executing
+stopped_at: Completed 39-01-PLAN.md (tool annotations + 9 mismatch fixes + shared constant migration)
+last_updated: "2026-04-13T06:29:50.771Z"
+last_activity: 2026-04-13
 progress:
   total_phases: 7
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
-  next_phase: 39
+  total_plans: 2
+  completed_plans: 1
 ---
 
 # Project State
@@ -22,20 +20,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** v0.2.0 Memory-KG Fusion — ALL 13 PHASES COMPLETE. Ready for milestone audit. Branch: release/0.2.0.
+**Current focus:** Phase 39 — Tool Annotations (MCP Spec)
 
 ## Current Position
 
-Phase: All phases complete
-Plan: —
-Status: v0.2.0 milestone fully implemented; ready for lifecycle (audit -> complete -> cleanup)
-Last activity: 2026-04-10 - All 13 phases (26-38) shipped on release/0.2.0
+Phase: 39 (Tool Annotations (MCP Spec)) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-13
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 
 ## v0.2.0 Execution Plan
 
 **Lanes:**
+
 - Lane A (foundation, strict sequence): 26 -> 27 -> 28 -> 29
 - Lane B (retrieval, after 29): 30 and 31 in parallel
 - Lane C (code intel, after 26): 32 independent
@@ -83,6 +82,7 @@ Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 | 18 | 1 | 1m46s | 1m46s |
 
 *Updated after each plan completion. v0.2.0 phases (26-38) will populate as they execute.*
+| Phase 39 P01 | 960 | 3 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -104,6 +104,8 @@ Recent decisions affecting current work:
 - [Roadmap v0.2.0]: All schema changes across v0.2.0 are additive-only migrations; no column removals, no data backfills at migration time
 - [Roadmap v0.2.0]: MCP tool response shapes are additive — new fields are OK, removing or renaming existing fields is NOT
 - [Roadmap v0.2.0]: Phases 19-25 belong to release/0.1.0 branch and stay reserved — v0.2.0 skips from 18 to 26
+- [Phase 39]: Added IDEMPOTENT_WRITE_ANNOTATIONS as 4th annotation bucket (renamed DELETE→DESTRUCTIVE) for dedup-upsert writes
+- [Phase 39]: update_status and update_self kept as inline exceptions (both have openWorldHint:true, hitting npm registry)
 
 ### Pending Todos
 
@@ -126,7 +128,7 @@ None — autonomous execution in progress.
 
 ## Session Continuity
 
-Last session: 2026-04-10T06:10:00Z
-Stopped at: Phase 26 complete, autonomous mode continuing to Phase 27
+Last session: 2026-04-13T06:29:50.766Z
+Stopped at: Completed 39-01-PLAN.md (tool annotations + 9 mismatch fixes + shared constant migration)
 Resume file: None
 Next command: `/gsd:plan-phase 27`
