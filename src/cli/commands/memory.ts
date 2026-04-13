@@ -18,6 +18,8 @@ import { writeError as sharedWriteError } from '../output.js';
 import { buildRuntimeConfig } from '../../runtime/config.js';
 import { EmbeddingService } from '../../services/retrieval/embedding/service.js';
 import { MemoryService } from '../../services/memory/service.js';
+import { MemoryWorkflowService } from '../../services/memory/workflow.js';
+import { c, B } from '../ansi.js';
 import type { GlobalOptions } from '../options.js';
 
 const VERBS: VerbDef[] = [
@@ -26,6 +28,7 @@ const VERBS: VerbDef[] = [
   { name: 'list', desc: 'List stored memories' },
   { name: 'show', desc: 'Show a single memory by ID' },
   { name: 'delete', desc: 'Delete a memory by ID' },
+  { name: 'prime', desc: 'Graph-aware context rehydration (Agent Prime)' },
 ];
 
 /* ------------------------------------------------------------------ */
@@ -47,6 +50,13 @@ function createMemoryService(): MemoryService {
     autoCapture: runtime.memoryAutoCapture,
     consentDone: runtime.memoryConsentDone,
     embeddingService: embeddingService as any,
+  });
+}
+
+function createWorkflowService(): MemoryWorkflowService {
+  const svc = createMemoryService();
+  return new MemoryWorkflowService({
+    memory: svc,
   });
 }
 
@@ -332,6 +342,61 @@ async function handleDelete(args: string[], opts: GlobalOptions): Promise<void> 
   }
 }
 
+async function handlePrime(args: string[], opts: GlobalOptions): Promise<void> {
+  const { flags, positionals } = parseFlags(args, {
+    task: { alias: 't', type: 'string' },
+    project: { alias: 'p', type: 'string' },
+  });
+
+  const task = (flags.task as string) || positionals.join(' ').trim();
+  if (!task) {
+    writeError('Task is required. Usage: localnest memory prime "your task"', opts.json);
+    return;
+  }
+
+  const workflow = createWorkflowService();
+  const result = await workflow.agentPrime({
+    task,
+    project_path: (flags.project as string) || process.cwd(),
+  });
+
+  if (opts.json) {
+    writeJson(result);
+  } else {
+    process.stdout.write(`\n${c.bold('LocalNest Agent Prime')}\n`);
+    process.stdout.write(`${'='.repeat(60)}\n`);
+    process.stdout.write(`Task: ${result.task}\n\n`);
+
+    if (result.memories.length > 0) {
+      process.stdout.write(`${c.bold('Relevant Memories:')}\n`);
+      for (const m of result.memories) {
+        process.stdout.write(`  - ${m.title} (${m.kind}, score: ${m.score.toFixed(3)})\n`);
+        if (m.summary) process.stdout.write(`    ${c.dim(truncate(m.summary, 100))}\n`);
+      }
+      process.stdout.write('\n');
+    }
+
+    if (result.entities.length > 0) {
+      process.stdout.write(`${c.bold('Graph Entities:')}\n`);
+      for (const e of result.entities) {
+        process.stdout.write(`  - ${e.name} (${e.type})\n`);
+        if (e.predicates.length > 0) {
+          process.stdout.write(`    Relations: ${e.predicates.join(', ')}\n`);
+        }
+      }
+      process.stdout.write('\n');
+    }
+
+    if (result.suggested_actions.length > 0) {
+      process.stdout.write(`${c.bold('Suggested Actions:')}\n`);
+      for (const a of result.suggested_actions) {
+        process.stdout.write(`  ${c.B.arrow} ${a}\n`);
+      }
+      process.stdout.write('\n');
+    }
+  }
+}
+
 /* ------------------------------------------------------------------ */
 /*  Router                                                             */
 /* ------------------------------------------------------------------ */
@@ -344,6 +409,7 @@ const HANDLERS: Record<string, Handler> = {
   list: handleList,
   show: handleShow,
   delete: handleDelete,
+  prime: handlePrime,
 };
 
 export async function run(args: string[], opts: GlobalOptions): Promise<void> {
