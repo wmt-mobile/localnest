@@ -400,9 +400,9 @@ export function registerRetrievalTools({
         use_reranker: z.boolean().default(false)
       },
       annotations: {
-        readOnlyHint: false,
+        readOnlyHint: true,
         destructiveHint: false,
-        idempotentHint: false,
+        idempotentHint: true,
         openWorldHint: false
       }
     },

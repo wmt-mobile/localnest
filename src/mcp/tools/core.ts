@@ -151,8 +151,8 @@ export function registerCoreTools({
       },
       annotations: {
         readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
+        destructiveHint: true,
+        idempotentHint: true,
         openWorldHint: true
       }
     },

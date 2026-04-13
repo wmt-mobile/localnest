@@ -77,7 +77,7 @@ export function registerMemoryWorkflowTools({
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
-        idempotentHint: false,
+        idempotentHint: true,
         openWorldHint: false
       }
     },
@@ -119,7 +119,7 @@ export function registerMemoryWorkflowTools({
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
-        idempotentHint: false,
+        idempotentHint: true,
         openWorldHint: false
       }
     },
@@ -196,7 +196,7 @@ export function registerMemoryWorkflowTools({
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
-        idempotentHint: false,
+        idempotentHint: true,
         openWorldHint: false
       }
     },
@@ -219,7 +219,7 @@ export function registerMemoryWorkflowTools({
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
-        idempotentHint: false,
+        idempotentHint: true,
         openWorldHint: false
       }
     },

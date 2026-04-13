@@ -138,7 +138,7 @@ export function registerGraphTools({
         })).min(1).max(500),
         response_format: z.enum(['minimal', 'verbose']).default('minimal')
       },
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false }
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false }
     },
     async ({ triples, response_format }: Record<string, unknown>) =>
       memory.addTripleBatch({
