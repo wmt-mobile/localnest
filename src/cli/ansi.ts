@@ -121,6 +121,7 @@ Object.assign(box, {
   bottom: boxBottom,
   row: (text: string, w?: number) => boxLine(text, w),
   empty: boxEmpty,
+  divider: separator,
 });
 
 /** UI Utilities used by Dashboard */
