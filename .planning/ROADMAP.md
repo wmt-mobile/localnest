@@ -484,3 +484,13 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
 **Plans**: 1 plan
 Plans:
 - [ ] 45-01-PLAN.md — Schema migration v13 + type definitions + write/read/filter paths + MCP tool schemas (ACTOR-01, ACTOR-02, ACTOR-03, ACTOR-04)
+
+### Phase 46: Modern Interactive CLI
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 45
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 46 to break down)
