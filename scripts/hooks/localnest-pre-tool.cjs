@@ -57,6 +57,9 @@ process.stdin.on('end', () => {
         process.exit(0);
       }
     } catch { /* no debounce file or expired */ }
+    
+    // Save debounce timestamp EARLY to prevent race conditions during heavy spawning
+    try { fs.writeFileSync(DEBOUNCE_FILE, JSON.stringify({ ts: Date.now() })); } catch { /* ignore */ }
 
     // Extract context clues
     const filePath = toolInput.file_path || toolInput.path || toolInput.command || '';
@@ -105,9 +108,6 @@ process.stdin.on('end', () => {
         contextStr += `\nSUGGESTED ACTIONS:\n${actions.map(a => `-> ${a}`).join('\n')}\n`;
       }
     } catch { /* parsing failed */ }
-
-    // Save debounce timestamp
-    try { fs.writeFileSync(DEBOUNCE_FILE, JSON.stringify({ ts: Date.now() })); } catch { /* ignore */ }
 
     if (!contextStr.trim()) {
       process.stdout.write('{}');
