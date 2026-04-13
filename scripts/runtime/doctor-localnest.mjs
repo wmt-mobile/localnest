@@ -317,6 +317,51 @@ function checkModelCacheWritable() {
   };
 }
 
+function checkGlobalInstallStaleTempDirs() {
+  const fixFlag = argv.includes('--fix');
+  let nodeModulesDir;
+  try {
+    nodeModulesDir = spawnSync('npm', ['root', '-g'], { encoding: 'utf8' }).stdout.trim();
+  } catch { /* ignore */ }
+  if (!nodeModulesDir || !fs.existsSync(nodeModulesDir)) {
+    return { id: 'global_stale_temp', ok: true, detail: 'Could not locate global node_modules (skipped)' };
+  }
+
+  const entries = fs.readdirSync(nodeModulesDir);
+  const stalePrefix = '.localnest-mcp-';
+  const stale = entries.filter((e) => e.startsWith(stalePrefix));
+
+  if (stale.length === 0) {
+    return { id: 'global_stale_temp', ok: true, detail: 'No stale npm temp dirs found' };
+  }
+
+  if (fixFlag) {
+    let removed = 0;
+    for (const entry of stale) {
+      try {
+        fs.rmSync(path.join(nodeModulesDir, entry), { recursive: true, force: true });
+        removed++;
+      } catch { /* best-effort */ }
+    }
+    if (removed === stale.length) {
+      return { id: 'global_stale_temp', ok: true, detail: `Cleaned ${removed} stale npm temp dir(s)` };
+    }
+    return {
+      id: 'global_stale_temp',
+      ok: false,
+      detail: `Partially cleaned: ${removed}/${stale.length} temp dirs removed`,
+      fix: 'Manually remove remaining dirs or run with sudo: rm -rf ' + path.join(nodeModulesDir, stalePrefix) + '*'
+    };
+  }
+
+  return {
+    id: 'global_stale_temp',
+    ok: false,
+    detail: `${stale.length} stale npm temp dir(s) found (blocks global reinstall)`,
+    fix: 'Run: localnest doctor --fix  OR  rm -rf ' + path.join(nodeModulesDir, stalePrefix) + '*'
+  };
+}
+
 function printText(results) {
   console.log(c.bold('LocalNest Doctor'));
   console.log('');
@@ -352,6 +397,7 @@ function printHelp() {
   process.stdout.write('  localnest-mcp-doctor --json\n');
   process.stdout.write('Options:\n');
   process.stdout.write('  --json      print JSON output\n');
+  process.stdout.write('  --fix       auto-fix detected issues (e.g. stale npm temp dirs)\n');
   process.stdout.write('  --help,-h   show this help\n');
 }
 
@@ -369,7 +415,8 @@ async function main() {
     await checkSqliteBackend(),
     checkSqliteVecExtension(),
     checkConfigFile(),
-    checkModelCacheWritable()
+    checkModelCacheWritable(),
+    checkGlobalInstallStaleTempDirs()
   ];
 
   if (asJson) {
