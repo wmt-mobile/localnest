@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: MCP Spec Compliance & Production Hardening
-status: verifying
-stopped_at: Completed 41-02-PLAN.md
-last_updated: "2026-04-13T09:00:13.603Z"
+status: executing
+stopped_at: Completed 42-01-PLAN.md
+last_updated: "2026-04-13T09:19:13.465Z"
 last_activity: 2026-04-13
 progress:
   total_phases: 7
   completed_phases: 3
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 8
+  completed_plans: 7
 ---
 
 # Project State
@@ -20,13 +20,13 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** Phase 41 — Resource Links (MCP Spec)
+**Current focus:** Phase 42 — Bi-Temporal KG Model
 
 ## Current Position
 
-Phase: 41 (Resource Links (MCP Spec)) — EXECUTING
+Phase: 42 (Bi-Temporal KG Model) — EXECUTING
 Plan: 2 of 2
-Status: Phase complete — ready for verification
+Status: Ready to execute
 Last activity: 2026-04-13
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
@@ -88,6 +88,7 @@ Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 | Phase 40-structured-output-mcp-spec P02 | 21m | 3 tasks | 12 files |
 | Phase 41 P01 | 200 | 3 tasks | 3 files |
 | Phase 41 P02 | 221 | 2 tasks | 2 files |
+| Phase 42 P01 | 2m23s | 2 tasks | 4 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,10 @@ Recent decisions affecting current work:
 - [Phase 41]: Dedup by absolute path before buildResourceLink -- helpers stay per-path, not per-match
 - [Phase 41]: Description format strings locked to CONTEXT.md: chunk X-Y of N lines / path match: frag / N match(es) for query
 - [Phase 41]: Empty-result and error paths emit zero resource_links via natural code-flow (no defensive branch)
+- [Phase 42]: v12 migration is additive only: created_at stays as row metadata, recorded_at becomes canonical transaction-time axis
+- [Phase 42]: Both kg_triples INSERT sites stamp recorded_at from the same nowIso() now variable already in scope for created_at
+- [Phase 42]: addTriple response shape left at 12 fields in Plan 01 — Plan 02 owns the CARD-06 reconciliation for a 13th field
+- [Phase 42]: invalidateTriple UPDATE does not touch recorded_at — per CONTEXT.md it is permanently the row's original transaction time
 
 ### Pending Todos
 
@@ -144,7 +149,7 @@ None — autonomous execution in progress.
 
 ## Session Continuity
 
-Last session: 2026-04-13T09:00:13.597Z
-Stopped at: Completed 41-02-PLAN.md
+Last session: 2026-04-13T09:19:13.460Z
+Stopped at: Completed 42-01-PLAN.md
 Resume file: None
 Next command: `/gsd:plan-phase 27`
