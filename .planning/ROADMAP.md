@@ -6,7 +6,7 @@
 - Shipped: **v2.0 CLI-First Architecture** - Phases 10-18 (2026-04-08)
 - Deferred to release/0.1.0 branch: **v0.1.0 The Big Upgrade** - Phases 19-25
 - Shipped on release/0.2.0 branch: **v0.2.0 Memory-KG Fusion & Agent-First Surface** - Phases 26-38
-- Active on release/0.3.0 branch: **v0.3.0 MCP Spec Compliance & Production Hardening** - Phases 39-45
+- 🚧 **v0.3.0 MCP Spec Compliance & Production Hardening** — Phases 39-45 (active on release/0.3.0)
 
 ## Phases
 
@@ -39,6 +39,9 @@
 - [x] **Phase 18: Binary Deprecation** - Redirect old fragmented binaries to unified CLI with warnings
 
 </details>
+
+<details>
+<summary>Archived: v0.1.0 (deferred) + v0.2.0 (shipped) — Phase summaries and Phase Details for phases 10-38</summary>
 
 ### Deferred: v0.1.0 The Big Upgrade (release/0.1.0 branch)
 
@@ -377,7 +380,24 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
 | 37. Behavior Modification teach | v0.2.0 | 0/0 | Not started | - |
 | 38. Self-Audit Dashboard | v0.2.0 | 0/0 | Not started | - |
 
-# Active: v0.3.0 MCP Spec Compliance & Production Hardening
+</details>
+
+## Active: v0.3.0 MCP Spec Compliance & Production Hardening
+
+**Milestone Goal:** Bring LocalNest's 72 MCP tools into compliance with the MCP 2025-06-18 spec (annotations, structured output, resource links) and harden production basics (WAL mode, backup/restore, bi-temporal KG, actor-aware memories).
+
+**Parallel Lanes:**
+- Lane A (MCP Spec, strict sequence): 39 → 40 → 41
+- Lane B (Production, parallel after Lane A): 43 → 44
+- Lane C (KG Model): 42 → 45
+
+- [ ] **Phase 39: Tool Annotations (MCP Spec)** - Accurate readOnlyHint/destructiveHint/idempotentHint on every tool
+- [ ] **Phase 40: Structured Output (MCP Spec)** - structuredContent + outputSchema alongside text content
+- [ ] **Phase 41: Resource Links (MCP Spec)** - File-returning tools emit resource_link objects
+- [ ] **Phase 42: Bi-Temporal KG Model** - recorded_at transaction time alongside valid_from/valid_to
+- [ ] **Phase 43: WAL Mode & Performance Tuning** - WAL journal_mode + tuned PRAGMAs + regression guard
+- [ ] **Phase 44: Backup & Restore** - localnest_backup / localnest_restore MCP + CLI surface
+- [ ] **Phase 45: Actor-Aware Memories** - actor_id column, filter, and attribution in agent_prime
 
 ### Phase 39: Tool Annotations (MCP Spec)
 **Goal**: All 72 MCP tools have accurate readOnlyHint, destructiveHint, idempotentHint annotations per MCP 2025-06-18 spec
