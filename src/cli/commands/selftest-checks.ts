@@ -141,6 +141,7 @@ export async function checkMemoryCrud(memoryService: MemoryService): Promise<Che
       kind: 'knowledge',
       importance: 10,
       title: testId,
+      nest: 'selftest_nest',
     });
     const id = storeResult?.memory?.id;
     if (!id) throw new Error('store returned no id');
@@ -212,8 +213,11 @@ export async function checkKnowledgeGraph(memoryService: MemoryService): Promise
 
 export async function checkTaxonomy(memoryService: MemoryService): Promise<CheckResult> {
   try {
-    await memoryService.listNests();
-    await memoryService.listBranches('');
+    const nests = await memoryService.listNests();
+    // Only test listBranches if we have at least one nest
+    if (nests.nests.length > 0) {
+      await memoryService.listBranches(nests.nests[0].nest);
+    }
 
     return {
       name: 'Taxonomy',
