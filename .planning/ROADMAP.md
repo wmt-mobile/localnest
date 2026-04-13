@@ -425,14 +425,16 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
 - [x] 40-02-PLAN.md — Per-tool archetype assignment + EXPECTED_OUTPUT_SCHEMAS test (STRUCT-01, STRUCT-02, STRUCT-03)
 
 ### Phase 41: Resource Links (MCP Spec)
-**Goal**: File-returning tools use MCP resource links instead of inlining content, reducing token usage
+**Goal**: Three file-returning tools (read_file, search_code, search_files) emit MCP resource_link content blocks alongside their existing inline text responses, with file:// URIs and a test locking the behavior; clients without resource_link support continue working unchanged.
 **Depends on**: Phase 40
 **Requirements**: RLINK-01, RLINK-02, RLINK-03
 **Success Criteria** (what must be TRUE):
   1. read_file, search_code, search_files return resource_link objects pointing to file URIs
   2. Clients can dereference links via MCP resource protocol
   3. Fallback: clients without resource link support still receive inline content
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 41-01-PLAN.md — Mime helper + ToolResult/createToolResponse/toolResult resource_link channel (RLINK-03 framework)
+- [ ] 41-02-PLAN.md — Wire 3 retrieval handlers (read_file, search_files, search_code) + new mcp-resource-links.test.js (RLINK-01, RLINK-02, RLINK-03)
 
 ### Phase 42: Bi-Temporal KG Model
 **Goal**: KG triples track both event time (valid_from/valid_to) and transaction time (recorded_at) for full temporal provenance
