@@ -347,6 +347,7 @@ export interface KgTriple {
   source_memory_id: string | null;
   source_type: string;
   created_at: string;
+  recorded_at: string;
 }
 
 export interface KgTripleWithNames extends KgTriple {

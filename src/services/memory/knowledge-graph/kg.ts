@@ -218,9 +218,9 @@ export async function addTriple(adapter: Adapter, {
     }
 
     await ad.run(
-      `INSERT INTO kg_triples (id, subject_id, predicate, object_id, valid_from, valid_to, confidence, source_memory_id, source_type, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, subId, pred, objId, vFrom, vTo, conf, srcMemId, srcType, now]
+      `INSERT INTO kg_triples (id, subject_id, predicate, object_id, valid_from, valid_to, confidence, source_memory_id, source_type, created_at, recorded_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, subId, pred, objId, vFrom, vTo, conf, srcMemId, srcType, now, now]
     );
 
     const contradictions = conflicting.map(c => ({
