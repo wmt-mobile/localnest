@@ -2,6 +2,65 @@ import { z } from 'zod';
 
 export const RESPONSE_SCHEMA_VERSION = '1.0';
 
+/**
+ * Shared MCP tool annotation constants — MCP 2025-06-18 spec.
+ *
+ * These lift the inlined annotation blocks from individual tool registration
+ * files (39-RESEARCH.md § "Justification for lifting" counts:
+ *   READ_ONLY appears ~38 times across 8 files,
+ *   WRITE appears ~11 times across 4 files,
+ *   IDEMPOTENT_WRITE appears ~7 times across 3 files,
+ *   DESTRUCTIVE appears 5 times across 2 files).
+ *
+ * Naming note (CONTEXT.md drift — Claude's Discretion):
+ *   CONTEXT.md originally specified READ_ONLY / WRITE / DELETE. This file
+ *   exports four constants with two renames/additions:
+ *     - DELETE_ANNOTATIONS → DESTRUCTIVE_ANNOTATIONS (bucket also covers
+ *       update_self and memory_remove_relation, which are destructive but
+ *       not deletes; name mirrors the MCP SDK `destructiveHint` field).
+ *     - IDEMPOTENT_WRITE_ANNOTATIONS is a new fourth bucket for dedup-upsert
+ *       writes (kg_add_triples_batch, kg_add_entity, ingest_*, etc.) —
+ *       destructive=false, readOnly=false, idempotent=true.
+ *   See Plan 39-01 <constant_naming_rationale> for full justification.
+ *
+ * Source: MCP SDK ToolAnnotationsSchema (node_modules/@modelcontextprotocol/sdk
+ * dist/esm/types.js:1173-1207). Spec defaults are counter-intuitive
+ * (destructiveHint defaults to `true`, readOnlyHint defaults to `false`), so
+ * every tool MUST set all four fields explicitly — never rely on defaults.
+ */
+
+/** Pure read tools (search, get, list, status, query, timeline, tree, ...). */
+export const READ_ONLY_ANNOTATIONS = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false
+} as const;
+
+/** Additive writes that are NOT idempotent (each call creates new state: memory_store, diary_write, capture_outcome, teach, kg_add_triple single). */
+export const WRITE_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: false
+} as const;
+
+/** Additive writes that ARE idempotent (upserts dedup and return existing id: kg_add_entity, kg_add_triples_batch, ingest_*, kg_invalidate, kg_backfill_links, project_backfill, memory_add_relation). */
+export const IDEMPOTENT_WRITE_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false
+} as const;
+
+/** Destructive tools (every *_delete* + memory_remove_relation; update_self also destructive but keeps openWorldHint:true inline). idempotentHint: true because re-deleting a gone row is a no-op. */
+export const DESTRUCTIVE_ANNOTATIONS = {
+  readOnlyHint: false,
+  destructiveHint: true,
+  idempotentHint: true,
+  openWorldHint: false
+} as const;
+
 function renderMarkdown(value: unknown, heading: string = 'Result'): string {
   if (value === null || value === undefined) {
     return `## ${heading}\n\nnull`;
