@@ -242,8 +242,8 @@
 
 ### Bi-Temporal KG Model
 - [x] **BITEMP-01**: `kg_triples` table gains a `recorded_at` column (additive migration) tracking when the triple was stored
-- [ ] **BITEMP-02**: `kg_as_of` can query on either `valid_from`/`valid_to` (event time) or `recorded_at` (transaction time)
-- [ ] **BITEMP-03**: `kg_timeline` includes `recorded_at` in its output for each triple
+- [x] **BITEMP-02**: `kg_as_of` can query on either `valid_from`/`valid_to` (event time) or `recorded_at` (transaction time)
+- [x] **BITEMP-03**: `kg_timeline` includes `recorded_at` in its output for each triple
 
 ### WAL Mode & Performance
 - [ ] **WAL-01**: SQLite databases open in WAL mode by default (`PRAGMA journal_mode=WAL`)

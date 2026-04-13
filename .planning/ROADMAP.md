@@ -394,7 +394,7 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
 - [x] **Phase 39: Tool Annotations (MCP Spec)** - Accurate readOnlyHint/destructiveHint/idempotentHint on every tool (completed 2026-04-13)
 - [x] **Phase 40: Structured Output (MCP Spec)** - structuredContent + outputSchema alongside text content (completed 2026-04-13)
 - [x] **Phase 41: Resource Links (MCP Spec)** - File-returning tools emit resource_link objects (completed 2026-04-13)
-- [ ] **Phase 42: Bi-Temporal KG Model** - recorded_at transaction time alongside valid_from/valid_to
+- [x] **Phase 42: Bi-Temporal KG Model** - recorded_at transaction time alongside valid_from/valid_to (completed 2026-04-13)
 - [ ] **Phase 43: WAL Mode & Performance Tuning** - WAL journal_mode + tuned PRAGMAs + regression guard
 - [ ] **Phase 44: Backup & Restore** - localnest_backup / localnest_restore MCP + CLI surface
 - [ ] **Phase 45: Actor-Aware Memories** - actor_id column, filter, and attribution in agent_prime
@@ -446,7 +446,7 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
   3. kg_timeline output includes recorded_at for each triple
 **Plans**: 2 plans
 - [x] 42-01-PLAN.md — Schema v12 migration + KgTriple type + addTriple/addTripleBatch INSERT sites stamp recorded_at (BITEMP-01)
-- [ ] 42-02-PLAN.md — queryTriplesAsOf mode parameter + getEntityTimeline recorded_at sort + localnest_kg_as_of MCP mode wiring + addTriple 13th-field return + new test/kg-bi-temporal.test.js (BITEMP-01, BITEMP-02, BITEMP-03)
+- [x] 42-02-PLAN.md — queryTriplesAsOf mode parameter + getEntityTimeline recorded_at sort + localnest_kg_as_of MCP mode wiring + addTriple 13th-field return + new test/kg-bi-temporal.test.js (BITEMP-01, BITEMP-02, BITEMP-03)
 
 ### Phase 43: WAL Mode & Performance Tuning
 **Goal**: SQLite databases open in WAL mode with tuned PRAGMAs for production-grade performance

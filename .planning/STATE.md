@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: MCP Spec Compliance & Production Hardening
-status: executing
-stopped_at: Completed 42-01-PLAN.md
-last_updated: "2026-04-13T09:19:13.465Z"
+status: verifying
+stopped_at: Completed 42-02-PLAN.md — Phase 42 ready for verification
+last_updated: "2026-04-13T09:28:16.164Z"
 last_activity: 2026-04-13
 progress:
   total_phases: 7
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 8
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 Phase: 42 (Bi-Temporal KG Model) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-13
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
@@ -89,6 +89,7 @@ Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 | Phase 41 P01 | 200 | 3 tasks | 3 files |
 | Phase 41 P02 | 221 | 2 tasks | 2 files |
 | Phase 42 P01 | 2m23s | 2 tasks | 4 files |
+| Phase 42 P02 | 3m 56s | 2 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -127,6 +128,8 @@ Recent decisions affecting current work:
 - [Phase 42]: Both kg_triples INSERT sites stamp recorded_at from the same nowIso() now variable already in scope for created_at
 - [Phase 42]: addTriple response shape left at 12 fields in Plan 01 — Plan 02 owns the CARD-06 reconciliation for a 13th field
 - [Phase 42]: invalidateTriple UPDATE does not touch recorded_at — per CONTEXT.md it is permanently the row's original transaction time
+- [Phase 42]: CARD-06 reconciliation option (c): addTriple returns 13 fields with recorded_at at position 10, no existing test pins 12-field shape
+- [Phase 42]: queryTriplesAsOf event mode branch preserved byte-identical to pre-phase SQL so BATCH-06 tests pass unchanged; transaction mode is a dedicated SQL path on recorded_at with no valid_to interaction
 
 ### Pending Todos
 
@@ -149,7 +152,7 @@ None — autonomous execution in progress.
 
 ## Session Continuity
 
-Last session: 2026-04-13T09:19:13.460Z
-Stopped at: Completed 42-01-PLAN.md
+Last session: 2026-04-13T09:28:16.158Z
+Stopped at: Completed 42-02-PLAN.md — Phase 42 ready for verification
 Resume file: None
 Next command: `/gsd:plan-phase 27`
