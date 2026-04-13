@@ -1,6 +1,8 @@
 import { z } from 'zod';
 import { createToolResponse, READ_ONLY_ANNOTATIONS, WRITE_ANNOTATIONS } from '../common/tool-utils.js';
 import type { ToolResponsePayload, RegisterJsonToolFn, PaginatedResult } from '../common/tool-utils.js';
+import { buildResourceLink } from '../common/mime.js';
+import type { ResourceLink } from '../common/mime.js';
 import {
   normalizeEmbedStatus,
   normalizeIndexStatus,
@@ -280,7 +282,21 @@ export function registerRetrievalTools({
         maxResults: max_results,
         caseSensitive: case_sensitive
       });
-      if (results.length > 0) return results;
+      if (results.length > 0) {
+        // RLINK-01..03 per MCP 2025-06-18 spec — emit resource_link content blocks
+        // alongside text content. Dedup by absolute path so multiple matches in
+        // the same file produce one resource_link, not one per match.
+        const seen = new Set<string>();
+        const resourceLinks: ResourceLink[] = [];
+        for (const item of results as Array<{ file?: string; relative_path?: string; name?: string }>) {
+          const absPath = typeof item?.file === 'string' ? item.file : '';
+          if (!absPath || seen.has(absPath)) continue;
+          seen.add(absPath);
+          const fragment = item.relative_path || item.name || absPath;
+          resourceLinks.push(buildResourceLink(absPath, `path match: ${fragment}`));
+        }
+        return createToolResponse(results, { resourceLinks });
+      }
 
       return withSearchMissResponse(
         results,
@@ -331,7 +347,22 @@ export function registerRetrievalTools({
         contextLines: context_lines,
         useRegex: use_regex
       });
-      if (results.length > 0) return results;
+      if (results.length > 0) {
+        // RLINK-01..03 per MCP 2025-06-18 spec — dedup by absolute file path so
+        // 5 matches in 3 files emit 3 resource_links, not 5.
+        const counts = new Map<string, number>();
+        for (const item of results as Array<{ file?: string }>) {
+          const absPath = typeof item?.file === 'string' ? item.file : '';
+          if (!absPath) continue;
+          counts.set(absPath, (counts.get(absPath) || 0) + 1);
+        }
+        const resourceLinks: ResourceLink[] = [];
+        for (const [absPath, count] of counts) {
+          const noun = count === 1 ? 'match' : 'matches';
+          resourceLinks.push(buildResourceLink(absPath, `${count} ${noun} for ${query as string}`));
+        }
+        return createToolResponse(results, { resourceLinks });
+      }
 
       return withSearchMissResponse(
         results,
@@ -482,7 +513,14 @@ export function registerRetrievalTools({
           // HOOK-09: Non-blocking -- hint failure does not affect file read
         }
       }
-      return result;
+      // RLINK-01..03: emit one resource_link for the chunk; read errors throw
+      // above, so this branch is only reached on success (zero-link on error).
+      const rec = result as Record<string, unknown>;
+      const absPath = typeof rec.path === 'string' ? rec.path : (filePath as string);
+      const totalLines = typeof rec.total_lines === 'number' ? rec.total_lines : (typeof rec.end_line === 'number' ? rec.end_line : 0);
+      const description = `chunk ${rec.start_line}-${rec.end_line} of ${totalLines} lines`;
+      const resourceLinks: ResourceLink[] = absPath ? [buildResourceLink(absPath, description)] : [];
+      return createToolResponse(result, { resourceLinks });
     }
   );
 
