@@ -30,3 +30,7 @@ export { toMinimalWriteResponse, stripEmptyFields } from './terse-utils.js';
 export { createServerStatusBuilder, buildUsageGuide } from './status.js';
 export { startStalenessMonitor } from './staleness-monitor.js';
 export { startHealthMonitor } from './health-monitor.js';
+// Phase 41 (RLINK-01..03): mime helpers + ResourceLink type for the 3
+// file-returning retrieval tools.
+export { getMimeTypeFromPath, buildResourceLink } from './mime.js';
+export type { ResourceLink } from './mime.js';
