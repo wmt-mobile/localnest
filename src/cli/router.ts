@@ -28,6 +28,7 @@ const NOUN_MODULES: Map<string, string> = new Map([
   ['selftest', '../src/cli/commands/selftest.js'],
   ['onboard', '../src/cli/commands/onboard.js'],
   ['dashboard', '../src/cli/commands/dashboard.js'],
+  ['backup', '../src/cli/commands/backup.js'],
 ]);
 
 /** flat command -> script path (relative to bin/) */

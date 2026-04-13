@@ -62,6 +62,10 @@ export class MemoryService {
     });
   }
 
+  getAdapter(): import('./types.js').Adapter | null {
+    return this.store?.adapter ?? null;
+  }
+
   async detectBackend(): Promise<BackendDetection> {
     const requested = this.backend || 'auto';
     const nodeMajor = parseNodeMajor(process.versions?.node);

@@ -19,7 +19,7 @@ import {
  * Drives the full `registerAppTools()` pipeline against a fake MCP server that
  * captures (name, meta.annotations) for every `registerTool()` call. Compares
  * the captured map against a hardcoded `EXPECTED_ANNOTATIONS` ground-truth map
- * covering all 72 tools (see Plan 02 frontmatter for the full table).
+ * covering all 74 tools (see Plan 02 frontmatter for the full table).
  *
  * This is the authoritative enforcement point for the MCP 2025-06-18 spec
  * annotation semantics across LocalNest. Any drift — a new tool added without
@@ -194,7 +194,7 @@ function makeFakeServices() {
 }
 
 // ---------------------------------------------------------------------------
-// EXPECTED_ANNOTATIONS — hardcoded ground truth for all 72 tools.
+// EXPECTED_ANNOTATIONS — hardcoded ground truth for all 74 tools.
 // Alphabetically sorted so diffs are reviewable. Populated in Task 2.
 // ---------------------------------------------------------------------------
 const EXPECTED_ANNOTATIONS = {
@@ -203,6 +203,7 @@ const EXPECTED_ANNOTATIONS = {
   // Alphabetically sorted — any drift here fails the test with a diff.
   'localnest_agent_prime':              { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO  (fixed Plan 01)
   'localnest_audit':                    { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_backup':                   { readOnlyHint: false, destructiveHint: false, idempotentHint: true  }, // IW
   'localnest_capture_outcome':          { readOnlyHint: false, destructiveHint: false, idempotentHint: false }, // WR
   'localnest_diary_read':               { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
   'localnest_diary_write':              { readOnlyHint: false, destructiveHint: false, idempotentHint: false }, // WR
@@ -262,6 +263,7 @@ const EXPECTED_ANNOTATIONS = {
   'localnest_project_tree':             { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
   'localnest_read_file':                { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
   'localnest_rename_preview':           { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO (dry-run)
+  'localnest_restore':                  { readOnlyHint: false, destructiveHint: true,  idempotentHint: true  }, // DS
   'localnest_search_code':              { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
   'localnest_search_files':             { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
   'localnest_search_hybrid':            { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO  (fixed Plan 01)
@@ -276,7 +278,7 @@ const EXPECTED_ANNOTATIONS = {
 };
 
 // ---------------------------------------------------------------------------
-// EXPECTED_OUTPUT_SCHEMAS — Phase 40 STRUCT-02 ground truth for 72 tools.
+// EXPECTED_OUTPUT_SCHEMAS — Phase 40 STRUCT-02 ground truth for 74 tools.
 // Short labels resolve via ARCHETYPE_MAP to archetype objects; identity
 // equality is asserted. ENTITY dropped in Plan 01 revision.
 // ---------------------------------------------------------------------------
@@ -294,6 +296,7 @@ const ARCHETYPE_MAP = {
 const EXPECTED_OUTPUT_SCHEMAS = {
   'localnest_agent_prime':              'BUNDLE',
   'localnest_audit':                    'BUNDLE',
+  'localnest_backup':                   'ACK',
   'localnest_capture_outcome':          'MEMORY',
   'localnest_diary_read':               'FREEFORM',
   'localnest_diary_write':              'ACK',
@@ -353,6 +356,7 @@ const EXPECTED_OUTPUT_SCHEMAS = {
   'localnest_project_tree':             'BUNDLE',
   'localnest_read_file':                'BUNDLE',
   'localnest_rename_preview':           'SEARCH',
+  'localnest_restore':                  'ACK',
   'localnest_search_code':              'SEARCH',
   'localnest_search_files':             'SEARCH',
   'localnest_search_hybrid':            'SEARCH',
@@ -369,7 +373,7 @@ const EXPECTED_OUTPUT_SCHEMAS = {
 // ---------------------------------------------------------------------------
 // Test
 // ---------------------------------------------------------------------------
-test('mcp-annotations: all 72 tools match expected readOnly/destructive/idempotent hints', () => {
+test('mcp-annotations: all 74 tools match expected readOnly/destructive/idempotent hints', () => {
   const server = makeFakeServer();
   const fakeRuntime = {
     mcpMode: 'stdio',
@@ -424,7 +428,7 @@ test('mcp-annotations: all 72 tools match expected readOnly/destructive/idempote
 // ---------------------------------------------------------------------------
 // Test 2: output schema identity — STRUCT-02
 // ---------------------------------------------------------------------------
-test('mcp-annotations: all 72 tools declare expected outputSchema archetypes', () => {
+test('mcp-annotations: all 74 tools declare expected outputSchema archetypes', () => {
   const server = makeFakeServer();
   const fakeRuntime = {
     mcpMode: 'stdio', hasRipgrep: false, autoProjectSplit: false,
@@ -440,7 +444,7 @@ test('mcp-annotations: all 72 tools declare expected outputSchema archetypes', (
 
   // 1. Registered tool set matches expected set (defense-in-depth;
   //    the Test 1 assertion already covers this but the parallel check
-  //    locks the EXPECTED_OUTPUT_SCHEMAS map to 72 entries).
+  //    locks the EXPECTED_OUTPUT_SCHEMAS map to 74 entries).
   assert.deepEqual(
     expected.filter((n) => !registered.includes(n)), [],
     'Tools in EXPECTED_OUTPUT_SCHEMAS but not registered'

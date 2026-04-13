@@ -8,3 +8,4 @@ export { registerBackfillTools } from './backfill-tools.js';
 export { registerFindTools } from './find-tools.js';
 export { registerAuditTools } from './audit-tools.js';
 export { registerSymbolTools } from './symbol-tools.js';
+export { registerBackupTools } from './backup-tools.js';
