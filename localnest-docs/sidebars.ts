@@ -23,7 +23,7 @@ const sidebars: SidebarsConfig = {
       type: 'category',
       label: 'Tools',
       items: [
-        { type: 'doc', id: 'tools/overview', label: 'All Tools (52)' },
+        { type: 'doc', id: 'tools/overview', label: 'All Tools (74)' },
         { type: 'doc', id: 'tools/search', label: 'Search' },
         { type: 'doc', id: 'tools/indexing', label: 'Indexing' },
         { type: 'doc', id: 'tools/memory', label: 'Memory' },
@@ -39,7 +39,7 @@ const sidebars: SidebarsConfig = {
       label: 'Releases',
       collapsed: true,
       items: [
-        { type: 'doc', id: 'releases/current', label: 'Current (0.1.0)' },
+        { type: 'doc', id: 'releases/current', label: 'Current (0.3.0-beta.1)' },
         { type: 'doc', id: 'releases/version-selection', label: 'Version Selection' },
         { type: 'doc', id: 'releases/history', label: 'Release History' }
       ]
