@@ -48,8 +48,14 @@ localnest dashboard  # Open the interactive TUI (Beta only)
 6. [Security & Quality](#-security)
 7. [Full Documentation](https://wmt-mobile.github.io/localnest/)
 
----
+## 🚀 Release Tracks
 
+LocalNest maintains two active tracks to balance proven stability with rapid innovation.
+
+- **Stable (v0.2.0)**: Use for production-critical workflows. Focused on core stability and 74 tool reliability.
+- **Beta (v0.3.0-beta.1)**: Use for the **Modernization Update**. Includes the premium interactive TUI Dashboard, refactored diagnostics, and Expert SOP steering.
+
+---
 
 ## 🔧 Tool Suites
 

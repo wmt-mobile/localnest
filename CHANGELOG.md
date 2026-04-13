@@ -4,7 +4,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.3.0] - 2026-04-13
+## [0.3.0-beta.1] - 2026-04-13
+
+### 🔥 Expert Steering & Modernization Update
+
+This major update transforms LocalNest into an **Expert Steering** system for autonomous AI agents.
+
+- **Expert SOP (Standard Operating Procedure)**: Embedded mandatory AI workflow instructions directly into client-native instruction files (`.mdc`, `AGENTS.md`).
+- **AI Mentorship Tags**: Enriched all 74 tool descriptions with behavioral tags like `[MANDATORY_START]`, `[DEEP_ANALYSIS]`, and `[COMPLETE_MISSION]` to guide LLM selection logic.
+- **Modernized TUI Dashboard**: A premium, interactive terminal interface (`localnest dashboard`) for real-time monitoring of memory, KG, and system health.
+- **Smart Skill Installer**: Auto-detects Cursor, Windsurf, Cline, and Antigravity to install the zero-config LocalNest Expert skill.
 
 ### Added
 
