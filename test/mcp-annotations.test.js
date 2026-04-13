@@ -187,8 +187,81 @@ function makeFakeServices() {
 // Alphabetically sorted so diffs are reviewable. Populated in Task 2.
 // ---------------------------------------------------------------------------
 const EXPECTED_ANNOTATIONS = {
-  // PLACEHOLDER — Task 2 fills in all 72 entries
-  'localnest_audit': { readOnlyHint: true, destructiveHint: false, idempotentHint: true }
+  // Category legend: RO = read-only; WR = additive non-idempotent write;
+  //                  IW = additive idempotent write; DS = destructive.
+  // Alphabetically sorted — any drift here fails the test with a diff.
+  'localnest_agent_prime':              { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO  (fixed Plan 01)
+  'localnest_audit':                    { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_capture_outcome':          { readOnlyHint: false, destructiveHint: false, idempotentHint: false }, // WR
+  'localnest_diary_read':               { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_diary_write':              { readOnlyHint: false, destructiveHint: false, idempotentHint: false }, // WR
+  'localnest_embed_status':             { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO  (pure read per retrieval.ts:233-235)
+  'localnest_file_changed':             { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_find':                     { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_find_callers':             { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_find_definition':          { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_find_implementations':     { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_find_usages':              { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_get_symbol':               { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_graph_bridges':            { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_graph_traverse':           { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_health':                   { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_help':                     { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_hooks_list_events':        { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_hooks_stats':              { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_index_project':            { readOnlyHint: false, destructiveHint: false, idempotentHint: false }, // WR (builds index; force=true rebuilds)
+  'localnest_index_status':             { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_ingest_json':              { readOnlyHint: false, destructiveHint: false, idempotentHint: true  }, // IW (source_label + fingerprint dedup)
+  'localnest_ingest_markdown':          { readOnlyHint: false, destructiveHint: false, idempotentHint: true  }, // IW
+  'localnest_kg_add_entities_batch':    { readOnlyHint: false, destructiveHint: false, idempotentHint: true  }, // IW (dedups by name)
+  'localnest_kg_add_entity':            { readOnlyHint: false, destructiveHint: false, idempotentHint: true  }, // IW
+  'localnest_kg_add_triple':            { readOnlyHint: false, destructiveHint: false, idempotentHint: false }, // WR (single: UNCONDITIONAL INSERT in kg.ts:220-224 — intentionally non-idempotent)
+  'localnest_kg_add_triples_batch':     { readOnlyHint: false, destructiveHint: false, idempotentHint: true  }, // IW (batch DOES dedup at kg-batch.ts:198-206 — fixed Plan 01)
+  'localnest_kg_as_of':                 { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_kg_backfill_links':        { readOnlyHint: false, destructiveHint: false, idempotentHint: true  }, // IW
+  'localnest_kg_delete_entities_batch': { readOnlyHint: false, destructiveHint: true,  idempotentHint: true  }, // DS
+  'localnest_kg_delete_entity':         { readOnlyHint: false, destructiveHint: true,  idempotentHint: true  }, // DS
+  'localnest_kg_delete_triples_batch':  { readOnlyHint: false, destructiveHint: true,  idempotentHint: true  }, // DS
+  'localnest_kg_invalidate':            { readOnlyHint: false, destructiveHint: false, idempotentHint: true  }, // IW (sets valid_to; additive)
+  'localnest_kg_query':                 { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_kg_stats':                 { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_kg_timeline':              { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_list_projects':            { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_list_roots':               { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_memory_add_relation':      { readOnlyHint: false, destructiveHint: false, idempotentHint: true  }, // IW
+  'localnest_memory_capture_event':     { readOnlyHint: false, destructiveHint: false, idempotentHint: false }, // WR
+  'localnest_memory_check_duplicate':   { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_memory_delete':            { readOnlyHint: false, destructiveHint: true,  idempotentHint: true  }, // DS
+  'localnest_memory_delete_batch':      { readOnlyHint: false, destructiveHint: true,  idempotentHint: true  }, // DS
+  'localnest_memory_events':            { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_memory_get':               { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_memory_list':              { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_memory_recall':            { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO  (fixed Plan 01)
+  'localnest_memory_related':           { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_memory_remove_relation':   { readOnlyHint: false, destructiveHint: true,  idempotentHint: true  }, // DS (Open Q3 — kept destructive: junction row is gone, not invalidated)
+  'localnest_memory_status':            { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_memory_store':             { readOnlyHint: false, destructiveHint: false, idempotentHint: false }, // WR
+  'localnest_memory_store_batch':       { readOnlyHint: false, destructiveHint: false, idempotentHint: false }, // WR
+  'localnest_memory_suggest_relations': { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_memory_update':            { readOnlyHint: false, destructiveHint: false, idempotentHint: false }, // WR (appends revision)
+  'localnest_nest_branches':            { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_nest_list':                { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_nest_tree':                { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_project_backfill':         { readOnlyHint: false, destructiveHint: false, idempotentHint: true  }, // IW
+  'localnest_project_tree':             { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_read_file':                { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_rename_preview':           { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO (dry-run)
+  'localnest_search_code':              { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_search_files':             { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_search_hybrid':            { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO  (fixed Plan 01)
+  'localnest_server_status':            { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_summarize_project':        { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_task_context':             { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO  (fixed Plan 01)
+  'localnest_teach':                    { readOnlyHint: false, destructiveHint: false, idempotentHint: false }, // WR
+  'localnest_update_self':              { readOnlyHint: false, destructiveHint: true,  idempotentHint: true  }, // DS  (fixed Plan 01)
+  'localnest_update_status':            { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_usage_guide':              { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }, // RO
+  'localnest_whats_new':                { readOnlyHint: true,  destructiveHint: false, idempotentHint: true  }  // RO  (fixed Plan 01)
 };
 
 // ---------------------------------------------------------------------------
