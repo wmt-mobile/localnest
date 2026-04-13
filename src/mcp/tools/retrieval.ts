@@ -179,7 +179,7 @@ export function registerRetrievalTools({
     'localnest_search_files',
     {
       title: 'Search Files',
-      description: 'Search file paths and names matching a query. Use this first when looking for a module, feature, or component by name (e.g. "sso", "payment", "auth"). Much faster than content search for module discovery, and handles cases where the keyword only appears in file/directory names.',
+      description: '[FAST_DISCOVERY] Search file paths and names matching a query. Use this first when looking for a module, feature, or component by name (e.g. "sso", "payment", "auth").',
       inputSchema: {
         query: z.string().min(1),
         project_path: z.string().optional(),
@@ -222,7 +222,7 @@ export function registerRetrievalTools({
     'localnest_search_code',
     {
       title: 'Search Code',
-      description: 'Search text across files under a project/root and return matching lines. Best for exact symbol names, imports, or known identifiers. Use use_regex=true for patterns (e.g. "async\\s+function\\s+get\\w+"). Use context_lines to include surrounding lines with each match.',
+      description: '[EXACT_MATCH] Search text across files under a project/root and return matching lines. Best for exact symbol names, imports, or known identifiers.',
       inputSchema: {
         query: z.string().min(1),
         project_path: z.string().optional(),
@@ -271,7 +271,7 @@ export function registerRetrievalTools({
     'localnest_search_hybrid',
     {
       title: 'Search Hybrid',
-      description: 'Run lexical + semantic retrieval and return RRF-ranked results.',
+      description: '[DEEP_ANALYSIS] Run lexical + semantic retrieval and return RRF-ranked results. Best for queries where concepts and context matter as much as exact keywords.',
       inputSchema: {
         query: z.string().min(1),
         project_path: z.string().optional(),
@@ -300,7 +300,7 @@ export function registerRetrievalTools({
     'localnest_get_symbol',
     {
       title: 'Get Symbol',
-      description: 'Look up symbol definitions/exports by name using fast regex search.',
+      description: '[SYMBOL_INDEX] Look up symbol definitions/exports by name using fast regex search.',
       inputSchema: {
         symbol: z.string().min(1),
         project_path: z.string().optional(),
@@ -322,7 +322,7 @@ export function registerRetrievalTools({
     'localnest_find_usages',
     {
       title: 'Find Usages',
-      description: 'Find call sites and import usages of a symbol by name.',
+      description: '[USAGE_ANALYSIS] Find call sites and import usages of a symbol by name.',
       inputSchema: {
         symbol: z.string().min(1),
         project_path: z.string().optional(),

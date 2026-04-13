@@ -14,6 +14,27 @@ allowed-tools:
 
 Master the art of local AI engineering with LocalNest. This skill enables agents to maintain persistent intelligence across sessions, navigate vast codebases with semantic precision, and model complex relationships through a temporal knowledge graph.
 
+## 📋 Mandatory SOP for AI Agents
+
+To utilize LocalNest effectively, follow these procedural rules:
+
+1. **[COLD START] Task Initialization**:
+   - **Rule**: ALWAYS call `localnest_agent_prime` as your very first action for any new task.
+   - **Reason**: This rehydrates your project context and surfaces previous decisions/standardized rules via `teach`.
+
+2. **[REAL-TIME] Decision Capture**:
+   - **Rule**: When you find a bug root cause or choose an architectural pattern, call `localnest_capture_outcome` immediately.
+   - **Reason**: Prevents loss of context if the session resets or another agent takes over.
+
+3. **[LEARNING] Corrective Feedback**:
+   - **Rule**: If the user corrects your code style or logic pattern, use `localnest_teach` to store that preference.
+   - **Reason**: Ensures you don't repeat the mistake in future tasks.
+
+4. **[COMPLETION] Task Wrap-up**:
+   - **Rule**: Call `localnest_capture_outcome` with `status: "completed"` before ending the task.
+
+---
+
 ## Core Concepts
 
 ### 1. Context Rehydration (Agent Prime)

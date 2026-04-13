@@ -72,7 +72,7 @@ export function registerMemoryWorkflowTools({
     ['localnest_task_context'],
     {
       title: 'Task Context',
-      description: 'Bundle runtime status, memory state, and relevant recall for a non-trivial task in one call.',
+      description: '[QUICK_REHYDRATION] Bundle runtime status, memory state, and relevant recall for a non-trivial task in one call.',
       inputSchema: {
         query: z.string().optional(),
         task: z.string().optional(),
@@ -143,7 +143,7 @@ export function registerMemoryWorkflowTools({
     ['localnest_capture_outcome'],
     {
       title: 'Capture Outcome',
-      description: 'Capture a meaningful task outcome into the memory event pipeline with a simpler payload.',
+      description: '[COMPLETE_MISSION] One-call mission summary capture. Use this after completing a task, fixing a bug, or making a major architectural decision to persist the "Winner" state for future agents.',
       inputSchema: {
         task: z.string().optional(),
         title: z.string().optional(),
@@ -179,7 +179,7 @@ export function registerMemoryWorkflowTools({
     ['localnest_agent_prime'],
     {
       title: 'Agent Prime',
-      description: 'Get everything an agent needs to start a task in one call: recalled memories, KG entities, relevant files, recent changes, and suggested actions. Returns a compact <2KB context packet. Use this instead of calling task_context + memory_recall + search_hybrid separately.',
+      description: '[MANDATORY_START] The single most important tool for task initialization. Rehydrates project context, recalled memories, KG entities, relevant files, recent changes, and suggested actions in one call. Always call this BEFORE deeper research.',
       inputSchema: {
         task: z.string().min(1).max(500),
         project_path: z.string().optional(),

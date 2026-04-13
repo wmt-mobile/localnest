@@ -119,10 +119,19 @@ function generateClientNativeFiles(targetSkillDir, toolFamily, skillContent) {
   const parentDir = path.dirname(targetSkillDir);
   const grandparentDir = path.dirname(parentDir);
 
+  // Handle SOP-first generation for AI tools
+  const sopPath = path.join(targetSkillDir, 'SOP.md');
+  const hasSop = fs.existsSync(sopPath);
+  const sopContent = hasSop ? fs.readFileSync(sopPath, 'utf8') : '';
+
   // Extract the core instruction content (strip YAML frontmatter for non-Claude clients)
   const coreContent = skillContent.replace(/^---\n[\s\S]*?\n---\n\n?/, '');
   const toolLine = SKILL_TOOL_PREAMBLES[toolFamily] || '';
   const header = toolLine ? `${toolLine}\n\n` : '';
+
+  const finalInstructions = hasSop 
+    ? `${header}# MANDATORY PROCEDURES\n\n${sopContent}\n\n# SKILL OVERVIEW\n\n${coreContent}`
+    : header + coreContent;
 
   switch (toolFamily) {
     case 'cursor': {
@@ -130,13 +139,13 @@ function generateClientNativeFiles(targetSkillDir, toolFamily, skillContent) {
       fs.mkdirSync(rulesDir, { recursive: true });
       const ruleContent = [
         '---',
-        'description: LocalNest MCP — local code retrieval, knowledge graph, and persistent memory',
+        'description: LocalNest Expert — Persistent Memory, Code Search, and Knowledge Graph SOP',
         'globs:',
         '  - "**/*"',
         'alwaysApply: true',
         '---',
         '',
-        header + coreContent
+        finalInstructions
       ].join('\n');
       fs.writeFileSync(path.join(rulesDir, 'localnest.mdc'), ruleContent, 'utf8');
       break;
@@ -147,10 +156,10 @@ function generateClientNativeFiles(targetSkillDir, toolFamily, skillContent) {
       const wsContent = [
         '---',
         'trigger: always_on',
-        'description: LocalNest MCP — local code retrieval, knowledge graph, and persistent memory',
+        'description: LocalNest Expert — Persistent Memory, Code Search, and Knowledge Graph SOP',
         '---',
         '',
-        header + coreContent
+        finalInstructions
       ].join('\n');
       fs.writeFileSync(path.join(rulesDir, 'localnest.md'), wsContent, 'utf8');
       break;
@@ -158,13 +167,13 @@ function generateClientNativeFiles(targetSkillDir, toolFamily, skillContent) {
     case 'opencode': {
       const agentsContent = [
         '---',
-        'description: LocalNest MCP — local code retrieval, knowledge graph, and persistent memory',
+        'description: LocalNest Expert — Persistent Memory, Code Search, and Knowledge Graph SOP',
         'keywords: [localnest, memory, knowledge, graph, search, code, file, project, nest, branch, recall, ingest, diary, triple, entity]',
         'globs: ["**/*"]',
         'match: any',
         '---',
         '',
-        header + coreContent
+        finalInstructions
       ].join('\n');
       const agentsMdPath = path.join(grandparentDir, 'AGENTS.md');
       fs.writeFileSync(agentsMdPath, agentsContent, 'utf8');
@@ -172,7 +181,7 @@ function generateClientNativeFiles(targetSkillDir, toolFamily, skillContent) {
     }
     case 'copilot': {
       const instructionsPath = path.join(grandparentDir, 'copilot-instructions.md');
-      fs.writeFileSync(instructionsPath, header + coreContent, 'utf8');
+      fs.writeFileSync(instructionsPath, finalInstructions, 'utf8');
       break;
     }
     case 'cline': {
@@ -180,11 +189,11 @@ function generateClientNativeFiles(targetSkillDir, toolFamily, skillContent) {
       fs.mkdirSync(rulesDir, { recursive: true });
       const clineContent = [
         '---',
-        'description: LocalNest MCP — local code retrieval, knowledge graph, and persistent memory',
+        'description: LocalNest Expert — Persistent Memory, Code Search, and Knowledge Graph SOP',
         'tags: [mcp, memory, search, knowledge-graph]',
         '---',
         '',
-        header + coreContent
+        finalInstructions
       ].join('\n');
       fs.writeFileSync(path.join(rulesDir, 'localnest.md'), clineContent, 'utf8');
       break;
@@ -194,12 +203,12 @@ function generateClientNativeFiles(targetSkillDir, toolFamily, skillContent) {
       fs.mkdirSync(rulesDir, { recursive: true });
       const continueContent = [
         '---',
-        'name: LocalNest MCP',
-        'description: Local code retrieval, knowledge graph, and persistent memory',
+        'name: LocalNest Expert',
+        'description: Persistent Memory, Code Search, and Knowledge Graph SOP',
         'alwaysApply: true',
         '---',
         '',
-        header + coreContent
+        finalInstructions
       ].join('\n');
       fs.writeFileSync(path.join(rulesDir, 'localnest.md'), continueContent, 'utf8');
       break;
