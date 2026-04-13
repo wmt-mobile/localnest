@@ -23,6 +23,7 @@ export async function recall(adapter: Adapter, {
   nest,
   branch,
   agentId,
+  actorId,
   tags,
   limit = 10
 }: RecallInput): Promise<RecallResult> {
@@ -58,6 +59,11 @@ export async function recall(adapter: Adapter, {
   if (branch) {
     filters.push('branch = ?');
     params.push(branch);
+  }
+  if (actorId) {
+    // ACTOR-03: exact-match filter — not a scope-broadening rule like agentId
+    filters.push('actor_id = ?');
+    params.push(actorId);
   }
   if (tags && tags.length > 0) {
     // Require ALL specified tags to be present (AND semantics)

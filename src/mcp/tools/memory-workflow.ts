@@ -115,13 +115,14 @@ export function registerMemoryWorkflowTools({
         topic: z.string().optional(),
         feature: z.string().optional(),
         kind: MEMORY_KIND_SCHEMA.optional(),
+        actor_id: z.string().max(200).optional(),
         tags: z.array(z.string()).optional(),
         limit: z.number().int().min(1).max(50).default(10)
       },
       annotations: READ_ONLY_ANNOTATIONS,
       outputSchema: schemas.OUTPUT_SEARCH_RESULT_SCHEMA
     },
-    async ({ query, root_path, project_path, branch_name, topic, feature, kind, tags, limit }: Record<string, unknown>) => normalizeMemoryRecallResult(
+    async ({ query, root_path, project_path, branch_name, topic, feature, kind, actor_id, tags, limit }: Record<string, unknown>) => normalizeMemoryRecallResult(
       await memory.recall({
         query,
         rootPath: root_path,
@@ -130,6 +131,7 @@ export function registerMemoryWorkflowTools({
         topic,
         feature,
         kind,
+        actorId: actor_id as string | undefined,
         tags: tags as string[] | undefined,
         limit
       }),

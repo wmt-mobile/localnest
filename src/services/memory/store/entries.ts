@@ -79,6 +79,7 @@ export async function listEntries(store: MemoryStoreLike, {
   topic,
   nest,
   branch,
+  actorId,
   tags,
   limit = 20,
   offset = 0
@@ -93,6 +94,7 @@ export async function listEntries(store: MemoryStoreLike, {
   if (topic) { filters.push('topic = ?'); params.push(topic); }
   if (nest) { filters.push('nest = ?'); params.push(nest); }
   if (branch) { filters.push('branch = ?'); params.push(branch); }
+  if (actorId) { filters.push('actor_id = ?'); params.push(actorId); }
   if (Array.isArray(tags) && tags.length > 0) {
     for (const tag of tags) {
       filters.push('EXISTS (SELECT 1 FROM JSON_EACH(tags_json) WHERE JSON_EACH.value = ?)');
@@ -111,7 +113,7 @@ export async function listEntries(store: MemoryStoreLike, {
   const rows = await store.adapter.all<MemoryEntryRow>(
     `SELECT id, kind, title, summary, status, importance, confidence,
             scope_root_path, scope_project_path, scope_branch_name, topic, feature,
-            nest, branch,
+            nest, branch, agent_id, actor_id,
             tags_json, source_type, source_ref, created_at, updated_at, last_recalled_at, recall_count
        FROM memory_entries
        ${where}

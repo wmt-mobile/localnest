@@ -92,6 +92,7 @@ export function registerMemoryStoreTools({
         topic: z.string().optional(),
         nest: z.string().optional(),
         branch: z.string().optional(),
+        actor_id: z.string().max(200).optional(),
         tags: z.array(z.string()).optional(),
         limit: z.number().int().min(1).max(200).default(20),
         offset: z.number().int().min(0).default(0)
@@ -99,7 +100,7 @@ export function registerMemoryStoreTools({
       annotations: READ_ONLY_ANNOTATIONS,
       outputSchema: schemas.OUTPUT_SEARCH_RESULT_SCHEMA
     },
-    async ({ kind, status, project_path, topic, nest, branch, tags, limit, offset }: Record<string, unknown>) => normalizeMemoryRecallResult(
+    async ({ kind, status, project_path, topic, nest, branch, actor_id, tags, limit, offset }: Record<string, unknown>) => normalizeMemoryRecallResult(
       await memory.listEntries({
         kind,
         status,
@@ -107,6 +108,7 @@ export function registerMemoryStoreTools({
         topic,
         nest,
         branch,
+        actorId: actor_id as string | undefined,
         tags,
         limit,
         offset
@@ -152,6 +154,7 @@ export function registerMemoryStoreTools({
         scope: MEMORY_SCOPE_SCHEMA.optional(),
         nest: z.string().max(200).optional(),
         branch: z.string().max(200).optional(),
+        actor_id: z.string().max(200).optional(),
         source_type: z.string().max(60).optional(),
         source_ref: z.string().max(1000).optional(),
         change_note: z.string().max(400).optional(),
@@ -389,6 +392,7 @@ export function registerMemoryStoreTools({
           nest: z.string().max(200).optional(),
           branch: z.string().max(200).optional(),
           agent_id: z.string().max(200).optional(),
+          actor_id: z.string().max(200).optional(),
           source_type: z.string().max(60).optional(),
           source_ref: z.string().max(1000).optional(),
           change_note: z.string().max(400).optional(),
