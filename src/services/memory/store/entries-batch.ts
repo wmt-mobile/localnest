@@ -121,6 +121,7 @@ interface PreparedRow {
   nest: string;
   branch: string;
   agentId: string;
+  actorId: string;
   tags: string[];
   links: Link[];
   searchTerms: string[];
@@ -139,6 +140,8 @@ function preparePayload(input: StoreEntryInput, index: number): { prepared: Prep
   const nest = cleanString(input.nest || rawNestFallback, 200);
   const branch = cleanString(input.branch || rawBranchFallback, 200);
   const agentId = cleanString(input.agent_id || '', 200);
+  // ACTOR-02: auto-infer actor_id from agent_id when not provided
+  const actorId = cleanString(input.actor_id || agentId, 200);
   const kind = cleanString(input.kind || 'knowledge', 40) || 'knowledge';
   const content = cleanString(input.content, 20000);
   const summary = deriveSummary(input.summary, content);
@@ -175,6 +178,7 @@ function preparePayload(input: StoreEntryInput, index: number): { prepared: Prep
     nest,
     branch,
     agentId,
+    actorId,
     tags,
     links,
     searchTerms: buildSearchTerms({ title, summary, content, scope, tags, links, sourceRef }),
@@ -283,14 +287,14 @@ export async function storeEntryBatch(
         `INSERT INTO memory_entries(
           id, kind, title, summary, content, status, importance, confidence,
           scope_root_path, scope_project_path, scope_branch_name, topic, feature,
-          nest, branch, agent_id,
+          nest, branch, agent_id, actor_id,
           tags_json, search_terms_json, links_json, source_type, source_ref, fingerprint,
           created_at, updated_at, last_recalled_at, recall_count
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 0)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 0)`,
         [
           row.id, row.kind, row.title, row.summary, row.content, row.status, row.importance, row.confidence,
           row.scope.root_path, row.scope.project_path, row.scope.branch_name, row.scope.topic, row.scope.feature,
-          row.nest, row.branch, row.agentId,
+          row.nest, row.branch, row.agentId, row.actorId,
           stableJson(row.tags), stableJson(row.searchTerms), stableJson(row.links),
           row.sourceType, row.sourceRef, row.fingerprint, row.createdAt, row.createdAt
         ]

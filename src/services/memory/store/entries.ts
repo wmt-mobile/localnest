@@ -176,6 +176,8 @@ export async function storeEntry(store: MemoryStoreLike, input: StoreEntryInput)
   const nest = cleanString(input.nest || rawNestFallback, 200);
   const branch = cleanString(input.branch || rawBranchFallback, 200);
   const agentId = cleanString(input.agent_id || '', 200);
+  // ACTOR-02: auto-infer actor_id from agent_id when not provided
+  const actorId = cleanString(input.actor_id || agentId, 200);
   const kind = cleanString(input.kind || 'knowledge', 40) || 'knowledge';
   const content = cleanString(input.content, 20000);
   const summary = deriveSummary(input.summary, content);
@@ -240,14 +242,14 @@ export async function storeEntry(store: MemoryStoreLike, input: StoreEntryInput)
       `INSERT INTO memory_entries(
         id, kind, title, summary, content, status, importance, confidence,
         scope_root_path, scope_project_path, scope_branch_name, topic, feature,
-        nest, branch, agent_id,
+        nest, branch, agent_id, actor_id,
         tags_json, search_terms_json, links_json, source_type, source_ref, fingerprint,
         created_at, updated_at, last_recalled_at, recall_count
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 0)`,
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, 0)`,
       [
         id, kind, title, summary, content, status, importance, confidence,
         scope.root_path, scope.project_path, scope.branch_name, scope.topic, scope.feature,
-        nest, branch, agentId,
+        nest, branch, agentId, actorId,
         stableJson(tags), stableJson(searchTerms), stableJson(links),
         sourceType, sourceRef, fingerprint, createdAt, createdAt
       ]
