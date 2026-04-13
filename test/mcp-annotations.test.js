@@ -43,6 +43,7 @@ function makeFakeServer() {
   const tools = new Map();
   return {
     tools,
+    // eslint-disable-next-line no-unused-vars
     registerTool(name, meta, _handler) {
       tools.set(name, { meta });
     }
