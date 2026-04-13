@@ -1,3 +1,4 @@
+import { READ_ONLY_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 
 interface MemoryService {
@@ -23,12 +24,7 @@ export function registerAuditTools({
         'unpopulated nests, broken bridges, stale memories, a 0-100 health score, and actionable suggestions. ' +
         'Call once to get a full integrity dashboard.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async () => memory.audit()
   );

@@ -3,6 +3,7 @@ import {
   normalizeUpdateSelfResult,
   normalizeUpdateStatus
 } from '../common/response-normalizers.js';
+import { READ_ONLY_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import type { ServerStatus } from '../common/status.js';
 import { buildHelpGuide } from '../common/status.js';
@@ -46,12 +47,7 @@ export function registerCoreTools({
       title: 'Server Status',
       description: 'Return runtime status and active configuration summary for this MCP server.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async () => buildServerStatus()
   );
@@ -62,12 +58,7 @@ export function registerCoreTools({
       title: 'Health',
       description: 'Return a compact runtime health summary for fast smoke checks.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async () => {
       const status = await buildServerStatus();
@@ -89,12 +80,7 @@ export function registerCoreTools({
       title: 'Usage Guide',
       description: 'Return concise best-practice guidance for users and AI agents using this MCP.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async () => buildUsageGuide()
   );
@@ -107,12 +93,7 @@ export function registerCoreTools({
       inputSchema: {
         task: z.string().max(500).default('')
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async ({ task }: Record<string, unknown>) => buildHelpGuide(task as string)
   );
@@ -126,6 +107,9 @@ export function registerCoreTools({
         force_check: z.boolean().default(false),
         channel: z.enum(['stable', 'beta']).default('stable')
       },
+      // EXCEPTION: update_status queries the npm registry (openWorldHint: true).
+      // READ_ONLY_ANNOTATIONS sets openWorldHint: false, so this tool keeps an
+      // inline block. It is a read-only exception alongside update_self.
       annotations: {
         readOnlyHint: true,
         destructiveHint: false,
@@ -149,6 +133,10 @@ export function registerCoreTools({
         version: z.string().default('latest'),
         reinstall_skill: z.boolean().default(true)
       },
+      // EXCEPTION: update_self is destructive AND hits the npm registry
+      // (openWorldHint: true). DESTRUCTIVE_ANNOTATIONS sets openWorldHint: false,
+      // so this tool keeps an inline block. It is the only destructive exception
+      // in phase 39 (update_status is the sibling read-only exception).
       annotations: {
         readOnlyHint: false,
         destructiveHint: true,

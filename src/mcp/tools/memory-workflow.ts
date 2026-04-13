@@ -7,6 +7,7 @@ import {
   normalizeAgentPrimeResult
 } from '../common/response-normalizers.js';
 import { toMinimalWriteResponse } from '../common/terse-utils.js';
+import { READ_ONLY_ANNOTATIONS, WRITE_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import type {
   MemoryKind,
@@ -74,12 +75,7 @@ export function registerMemoryWorkflowTools({
         kind: MEMORY_KIND_SCHEMA.optional(),
         limit: z.number().int().min(1).max(20).default(8)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async (args: Record<string, unknown>) => normalizeTaskContextResult(await memoryWorkflow.getTaskContext(args), args)
   );
@@ -90,12 +86,7 @@ export function registerMemoryWorkflowTools({
       title: 'Memory Status',
       description: 'Return local memory feature status, consent state, and backend compatibility.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async () => normalizeMemoryStatus(await memory.getStatus())
   );
@@ -116,12 +107,7 @@ export function registerMemoryWorkflowTools({
         tags: z.array(z.string()).optional(),
         limit: z.number().int().min(1).max(50).default(10)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async ({ query, root_path, project_path, branch_name, topic, feature, kind, tags, limit }: Record<string, unknown>) => normalizeMemoryRecallResult(
       await memory.recall({
@@ -169,12 +155,7 @@ export function registerMemoryWorkflowTools({
         source_ref: z.string().max(1000).default(''),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: WRITE_ANNOTATIONS
     },
     async ({ terse, ...args }: Record<string, unknown>) => toMinimalWriteResponse(normalizeCaptureOutcomeResult(await memoryWorkflow.captureOutcome(args)), terse as string)
   );
@@ -193,12 +174,7 @@ export function registerMemoryWorkflowTools({
         max_entities: z.number().int().min(1).max(20).default(10),
         max_files: z.number().int().min(1).max(10).default(5)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async (args: Record<string, unknown>) => normalizeAgentPrimeResult(
       await memoryWorkflow.agentPrime(args as any)
@@ -216,12 +192,7 @@ export function registerMemoryWorkflowTools({
         project_path: z.string().optional(),
         limit: z.number().int().min(1).max(50).default(10)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async ({ since, agent_id, project_path, limit }: Record<string, unknown>) => {
       const result = await memory.whatsNew({
@@ -248,12 +219,7 @@ export function registerMemoryWorkflowTools({
         scope: MEMORY_SCOPE_SCHEMA.optional(),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: WRITE_ANNOTATIONS
     },
     async ({ terse, ...args }: Record<string, unknown>) => {
       const result = await memoryWorkflow.teach(args as any);

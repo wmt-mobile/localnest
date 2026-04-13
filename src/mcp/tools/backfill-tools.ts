@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { IDEMPOTENT_WRITE_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 
 interface MemoryService {
@@ -23,12 +24,7 @@ export function registerBackfillTools({
         root_path: z.string().min(1).max(1000),
         dry_run: z.boolean().default(false)
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: IDEMPOTENT_WRITE_ANNOTATIONS
     },
     async ({ root_path, dry_run }: Record<string, unknown>) =>
       memory.scanAndBackfillProjects({ rootPath: root_path, dryRun: dry_run })

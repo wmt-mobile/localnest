@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { READ_ONLY_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import {
   normalizeCallersResult,
@@ -57,12 +58,7 @@ export function registerSymbolTools({
         language: z.string().optional().describe('Filter by language: typescript, javascript, python, go, rust'),
         max_results: z.number().int().min(1).max(1000).default(100)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async ({ symbol, project_path, language, max_results }: Record<string, unknown>) =>
       normalizeCallersResult(
@@ -89,12 +85,7 @@ export function registerSymbolTools({
         project_path: z.string().optional().describe('Scope search to a specific project'),
         language: z.string().optional().describe('Filter by language: typescript, javascript, python, go, rust')
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async ({ symbol, project_path, language }: Record<string, unknown>) =>
       normalizeDefinitionResult(
@@ -121,12 +112,7 @@ export function registerSymbolTools({
         language: z.string().optional().describe('Filter by language: typescript, javascript, python, go, rust'),
         max_results: z.number().int().min(1).max(1000).default(100)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async ({ interface_name, project_path, language, max_results }: Record<string, unknown>) =>
       normalizeImplementationsResult(
@@ -154,12 +140,7 @@ export function registerSymbolTools({
         project_path: z.string().optional().describe('Scope search to a specific project'),
         max_results: z.number().int().min(1).max(2000).default(500)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS
     },
     async ({ old_name, new_name, project_path, max_results }: Record<string, unknown>) =>
       normalizeRenamePreviewResult(
