@@ -10,7 +10,17 @@ title: Welcome to LocalNest
 
 LocalNest is a powerful MCP server that gives your AI agents a durable "nest" on your machine. It combines context-aware code discovery with a temporal knowledge graph, ensuring your AI never loses the thread of a conversation or a codebase.
 
-![LocalNest TUI Dashboard](/img/tui-dashboard.png)
+```text
+ ┌── LocalNest Dashboard ──────────────────────────────────────────────────┐
+ │                                                                         │
+ │  AI Context: [ONLINE]  Tools: [74 ACTIVE]       Memory: [3.2GB INDEXED] │
+ │                                                                         │
+ │  Recent Events:                                                         │
+ │  [15:34:01] localnest_search_hybrid: matched 12 chunks                  │
+ │  [15:34:02] localnest_agent_prime: context rehydrated                   │
+ │                                                                         │
+ └─────────────────────────────────────────────────────────────────────────┘
+```
 
 ## ⚡ Quick Start
 
