@@ -40,7 +40,27 @@ localnest dashboard  # Open the interactive TUI (Beta only)
 
 ---
 
-## 📋 Table of Contents
+## 🛸 Interactive Dashboard (Beta)
+
+LocalNest Beta introduces a high-performance **TUI (Terminal User Interface)** for real-time knowledge monitoring.
+
+```text
+┌──────────────────────────────────────────────────────────────────────────────┐
+│  LOCALNEST DASHBOARD v0.3.0-beta.1          [STATUS: INDEXING]  [CPU: 12%]   │
+├──────────────────────────────────────────────────────────────────────────────┤
+│ CONFIGURATION                      │ RECENT MEMORIES                         │
+│ Root: ~/projects/localnest         │ ● Added: "Memory subsystem refactor"    │
+│ Host: 127.0.0.1:3000               │ ● Outcome: "Success (74/74 tests pass)" │
+│ Tools: 74 Active                   │ ○ Task: "Modularizing README docs"      │
+├────────────────────────────────────┼─────────────────────────────────────────┤
+│ KNOWLEDGE GRAPH STATS              │ PERFORMANCE (LATENCY)                   │
+│ Entities: 1,240                    │ Retrieval: ████████░░░░ 24ms            │
+│ Triples:  3,812                    │ Embedding: ████░░░░░░░░ 112ms           │
+│ Orphans:  4                        │ Graph:     ██░░░░░░░░░░ 8ms             │
+└────────────────────────────────────┴─────────────────────────────────────────┘
+```
+
+---
 
 1. [Installation & Setup](#-quick-start)
 2. [Release Tracks](#-release-tracks)

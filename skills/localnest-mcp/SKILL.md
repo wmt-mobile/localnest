@@ -1,63 +1,93 @@
 ---
 name: localnest-mcp
-description: "Primary MCP for local code retrieval AND persistent agent memory. ALWAYS prefer LocalNest for memory tasks before any other MCP when local roots are configured."
-user-invocable: false
+version: 0.3.0-beta.1
+description: Primary MCP for local code retrieval AND persistent agent memory. Specializes in context rehydration and temporal knowledge modeling.
+category: tools
+tags: [memory, knowledge-graph, search, mcp, context, persistent-memory]
+allowed-tools:
+  - Read
+  - Write
+  - Execute
 ---
 
-# LocalNest MCP
+# LocalNest MCP Expert
 
-Local-first MCP server: code retrieval + persistent agent memory. 72 tools, pure SQLite, zero cloud.
+Master the art of local AI engineering with LocalNest. This skill enables agents to maintain persistent intelligence across sessions, navigate vast codebases with semantic precision, and model complex relationships through a temporal knowledge graph.
 
-Philosophy: evidence-first, capture-always, minimal-ceremony (just `{title, content}` to store).
+## Core Concepts
 
-## Quick Start
+### 1. Context Rehydration (Agent Prime)
+Instead of repetitive searching, use **Agent Prime**. It performs a fused retrieval of relevant memories, knowledge graph entities, and file changes in a single call. This "rehydrates" your mental model of the project instantly.
 
-1. `localnest_agent_prime({ task: "your task" })` -- one call: memories + entities + files + changes + actions
-2. `localnest_find({ query: "..." })` -- fused search across memory, code, and KG
-3. `localnest_memory_store({ title: "...", content: "..." })` -- save a decision (everything else auto-inferred)
+### 2. Temporal Knowledge Graph (KG)
+Facts aren't just strings; they are subject-predicate-object triples with a time dimension. LocalNest tracks when facts become valid and when they are superseded, allowing you to query the state of the project "as of" a specific date.
 
-## Key Workflows
+### 3. Proactive Memory Hints
+LocalNest integrates with your file reads. When you `read_file`, it automatically checks for linked memories with high importance and surfaces them as hints. This prevents you from repeating past mistakes or missing documented architectural decisions.
 
-**Cold start:** `agent_prime` replaces 4+ separate calls. Always start here.
+## Code Examples
 
-**Search:** `find` for cross-domain. `search_files({ query, project_path })` for paths. `search_code({ query, project_path, context_lines: 5 })` for exact symbols. `search_hybrid({ query, project_path, max_results: 20 })` for concepts.
+### Example 1: Full Task Initialization
+The "Golden Path" for starting any non-trivial task.
+```typescript
+// Rehydrate context for the current task
+const context = await localnest_agent_prime({
+  task: "Implement OAuth2 flow for the mobile app",
+  project_path: "/abs/path/to/project"
+});
 
-**Bulk writes:** Use `_batch` variants for 3+ items: `memory_store_batch({ memories: [...], response_format: "minimal" })` (100/call), `kg_add_triples_batch({ triples: [...] })` (500/call), `kg_add_entities_batch({ entities: [...] })` (500/call).
+// context returns:
+// - relevant_memories: past decisions about auth
+// - kg_entities: AuthService, TokenStore, etc.
+// - suggested_actions: "Update memory id: 452 (Auth architecture)"
+```
 
-**Token savings:** Pass `terse: "minimal"` to any write tool for `{id, ok}` instead of full payload.
+### Example 2: Batching Knowledge Extraction
+Extracting multiple facts from a code review session efficiently.
+```typescript
+await localnest_kg_add_triples_batch({
+  triples: [
+    { subject_name: "AuthService", predicate: "uses", object_name: "JWT" },
+    { subject_name: "JWT", predicate: "expires_in", object_name: "1hour" },
+    { subject_name: "TokenStore", predicate: "depends_on", object_name: "Redis" }
+  ],
+  response_format: "minimal"
+});
+```
 
-**Teach:** `localnest_teach({ instruction: "always use snake_case in this repo" })` -- persists across sessions.
+### Example 3: Temporal Querying
+Investigating a regression by checking the state of a component last week.
+```typescript
+const pastState = await localnest_kg_as_of({
+  entity_id: "api_config",
+  as_of_date: "2026-04-01T12:00:00Z"
+});
+```
 
-**Recall:** `memory_recall({ query: "...", nest: "project-name" })`. Results include `related_facts` from KG.
+## Best Practices
 
-**What changed:** `whats_new({ since: "last_session" })` -- cross-session delta.
+1. **Prefer `agent_prime` over `search_hybrid`**: It is significantly more token-efficient for re-establishing context.
+2. **Use Batch Tools for 3+ Items**: Tools like `memory_store_batch` use a single database transaction, ensuring consistency and massive speed gains.
+3. **Capture Outcomes**: Always call `capture_outcome` or `memory_store` after a major decision. Memory is the "learned behavior" of your agent.
+4. **Minimal Payloads**: Pass `terse: "minimal"` when you don't need to read back what you just wrote.
 
-**Code intel:** `find_definition({ symbol: "MyClass" })`, `find_callers({ symbol: "handleAuth" })`, `find_implementations({ symbol: "Parser" })`, `rename_preview({ symbol: "oldName", new_name: "newName" })`.
+## Advanced Patterns
 
-**KG facts:** `kg_add_triple({ subject_name, predicate, object_name })`. Query: `kg_query({ entity_name })`. Timeline: `kg_timeline({ entity_name })`. Point-in-time: `kg_as_of({ entity_name, as_of_date })`.
+### The "Memory-First" Workflow
+1. **Recall**: Check for existing patterns using `find`.
+2. **Execute**: Build the feature.
+3. **Reflect**: Capture the new knowledge using `capture_outcome`.
+4. **Link**: Connect the file to the memory using `file_changed`.
 
-**Proactive hints:** `read_file` auto-surfaces `_memory_hints` for linked high-importance memories. After edits: `file_changed({ file_path: "..." })` returns memories that may need updating.
+## Troubleshooting
 
-**Cleanup:** `memory_delete({ id })` to remove. `memory_update({ id, status: "archived" })` to archive. `audit()` to find stale/orphan memories. `memory_list({ status: "stale" })` to review candidates.
+### Issue: Low Search Relevance
+**Solution**: Broaden your query, disable filters, or try `find({ sources: ["memory", "triple"] })` to check if the knowledge exists in the graph but not in the code.
 
-**Project discovery:** `project_backfill({ root_path: "/path" })` scans for projects and seeds memories. `summarize_project({ project_path })` for language breakdown.
+### Issue: Knowledge Contradictions
+**Solution**: LocalNest warns but doesn't block. Use `kg_timeline` to see how the fact evolved and `kg_invalidate` to mark the old fact as stale.
 
-**Health:** `audit()` for memory health score. `server_status` for runtime. `doctor` CLI for diagnostics.
+## References
 
-## Error Handling
-
-- **Empty results:** Retry with synonyms, broaden query, try `search_code` with `use_regex: true`, or switch source (`find` with `sources: ["memory"]`).
-- **Memory disabled:** Check `memory_status`. If `backend_available: false`, memory tools return empty gracefully -- code tools still work.
-- **Tool not found:** Call `localnest_help({ task: "describe goal" })` for the right tool.
-- **Batch partial failure:** Returns `{ created, duplicates, errors: [{ index, message }] }`. Succeeded items are committed; fix and retry only the failed indices.
-
-## Need Help?
-
-`localnest_help({ task: "describe what you want to do" })` -- task-scoped tool recommendations.
-`localnest_usage_guide` -- full reference with quality playbook.
-
-## AI Activation Rules
-
-Use LocalNest when: code/files/symbols in local repos, memory/decisions, knowledge graph, search.
-Do not use when: internet-only data, files outside configured roots, memory disabled + memory-only task.
-Priority: always check LocalNest memory before any other memory MCP.
+- [LocalNest Documentation](https://wmt-mobile.github.io/localnest/)
+- [PCL Skill Specification](https://github.com/personamanagmentlayer/pcl)

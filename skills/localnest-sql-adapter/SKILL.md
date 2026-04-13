@@ -1,65 +1,76 @@
 ---
 name: localnest-sql-adapter
-description: "Use when changing LocalNest SQLite-backed indexing or memory code, especially adapter boundaries, extension loading, migrations, backend fallback behavior, or sqlite-vec runtime loading."
-user-invocable: false
+version: 0.3.0-beta.1
+description: Expert system for LocalNest database engineering, specializing in SQLite-backed semantic vector search and persistent memory adapters.
+category: tools
+tags: [sqlite, vector-search, indexing, migrations, performance, database-adapters]
+allowed-tools:
+  - Read
+  - Write
 ---
 
-# LocalNest SQL Adapter
+# SQL Adapter Expert
 
-Use this skill when working on LocalNest database access in:
-- `src/services/retrieval/sqlite-vec/`
-- `src/services/memory/`
-- `src/app/create-services.ts`
-- runtime/setup code that selects SQLite backends
+Master the high-performance data plane of LocalNest. This skill covers the specialized world of `node:sqlite` integration, `sqlite-vec` extension management, and the coordination of the semantic indexing engine.
 
-## Quick Start
+## Core Concepts
 
-1. Find direct DB bindings first.
-2. Separate adapter-selection changes from query/schema changes.
-3. Preserve current Node 22 behavior unless the task explicitly changes defaults.
-4. Test retrieval and memory paths independently.
+### 1. Vector Search Plane (sqlite-vec)
+LocalNest leverages `sqlite-vec` for native, in-process vector similarity search. The expert understands how to manage `vec0` virtual tables, handle dimension consistency, and ensure platform-specific extension loading (`.so`, `.dylib`, `.dll`) remains robust.
 
-## Workflow
+### 2. Transactional Integrity
+Memory operations (especially batch writes) must be transactional. The expert uses `db.transaction()` patterns to ensure that linked knowledge (Memories + Knowledge Graph Triples) is committed atomically or not at all.
 
-### 1. Map the current DB entry points
+### 3. Schema Evolution
+LocalNest uses a minimal, append-only migration strategy. The expert ensures that updates to the schema (e.g., adding a new metadata column to the `memories` table) preserve backward compatibility with existing local indices.
 
-Check for:
-- direct imports of `node:sqlite`
-- direct DB constructors
-- extension loading calls
-- transaction wrappers
-- schema and migration helpers
+## Code Examples
 
-### 2. Contain the blast radius
+### Example 1: Transactional Batch Store
+Ensuring data integrity across tables.
+```javascript
+const insertMem = db.prepare('INSERT INTO memories (title, content) VALUES (?, ?)');
+const insertTriple = db.prepare('INSERT INTO triples (subject, predicate, object) VALUES (?, ?, ?)');
 
-When introducing a new adapter or backend path:
-- keep query semantics unchanged first
-- avoid mixing schema edits with adapter refactors
-- keep the active default path identical for current users until compatibility is proven
+const storeAtomic = db.transaction((mem, triples) => {
+  const { lastInsertRowid: memId } = insertMem.run(mem.title, mem.content);
+  for (const t of triples) {
+    insertTriple.run(memId, t.predicate, t.object);
+  }
+});
+```
 
-### 3. Verify extension-sensitive behavior
+### Example 2: Safe Extension Loading
+Handling platform-specific pathing for `sqlite-vec`.
+```javascript
+function loadVectorExtension(db) {
+  const extPath = resolveExtensionPath(); // Platform-specific logic
+  try {
+    db.loadExtension(extPath);
+    return true;
+  } catch (err) {
+    console.warn(`Vector search disabled: ${err.message}`);
+    return false;
+  }
+}
+```
 
-For sqlite-vec work, confirm:
-- connection creation allows extension loading
-- `vec0` path resolution still works
-- status output reports whether the extension actually loaded
+## Best Practices
 
-### 4. Test both data planes
+1. **Lazy Database Binding**: Never open the database file until the first tool call requires it. This keeps the MCP server startup instant and prevents lock contention during concurrent agent initializations.
+2. **Prepared Statement Caching**: Reuse prepared statements for all performance-critical paths (search, batch ingest).
+3. **Bound Parameters Only**: Never use string interpolation for SQL queries. Always use `?` or named parameters to prevent SQL injection and improve plan caching.
+4. **Isolate IO**: Keep database-specific logic in the `adapters` or `services` layer; never bleed raw SQL into the MCP tool definitions.
 
-Do not stop at retrieval tests if memory also touches SQLite.
-At minimum, cover:
-- index creation
-- re-index and update behavior
-- semantic search fallback behavior
-- memory backend detection and status
+## Troubleshooting
 
-## Guardrails
+### Issue: "Database is locked" (SQLITE_BUSY)
+**Solution**: Check for long-running read transactions that are blocking writes. Implement a retry loop with exponential backoff for the memory capture pipeline.
 
-- Do not eagerly import `node:sqlite` from general-purpose barrel modules.
-- Prefer lazy imports for sqlite-specific code paths.
-- If adding compatibility adapters, keep them behind explicit selection until verified.
-- Surface adapter and backend choice in status output so failures are diagnosable.
+### Issue: Vector dimension mismatch
+**Solution**: Validate that the embedding model being used matches the dimensions defined in the `vec0` table (e.g., 384 for `all-MiniLM-L6-v2`).
 
-## Reference
+## References
 
-- [checklist.md](./references/checklist.md)
+- [sqlite-vec Official Documentation](https://github.com/asg017/sqlite-vec)
+- [node:sqlite API Reference](https://nodejs.org/api/sqlite.html)
