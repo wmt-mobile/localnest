@@ -1,7 +1,7 @@
 import { buildSearchTerms, stableJson } from './utils.js';
 import type { Adapter, MigrationSpec, MigrationContext } from './types.js';
 
-export const SCHEMA_VERSION = 11;
+export const SCHEMA_VERSION = 12;
 
 export async function ensureSchema(adapter: Adapter): Promise<void> {
   await adapter.exec(`
@@ -329,6 +329,23 @@ export async function runMigrations({ adapter, getMeta }: MigrationContext): Pro
             updated_at TEXT NOT NULL
           )
         `);
+      }
+    },
+    {
+      version: 12,
+      migrate: async (ad) => {
+        // BITEMP-01: add recorded_at transaction-time column to kg_triples.
+        // Existing rows are backfilled from created_at so historical data has
+        // a non-empty recorded_at value. recorded_at becomes the canonical
+        // transaction-time axis; created_at stays as row metadata for
+        // backwards compat.
+        try {
+          await ad.exec(`ALTER TABLE kg_triples ADD COLUMN recorded_at TEXT NOT NULL DEFAULT ''`);
+        } catch {
+          // Column may already exist on a fresh schema or partially migrated db.
+        }
+        await ad.exec(`UPDATE kg_triples SET recorded_at = created_at WHERE recorded_at = ''`);
+        await ad.exec(`CREATE INDEX IF NOT EXISTS idx_kg_triples_recorded_at ON kg_triples(recorded_at)`);
       }
     }
   ];
