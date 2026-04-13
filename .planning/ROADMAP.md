@@ -400,7 +400,7 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
 - [ ] **Phase 45: Actor-Aware Memories** - actor_id column, filter, and attribution in agent_prime
 
 ### Phase 39: Tool Annotations (MCP Spec)
-**Goal**: All 72 MCP tools have accurate readOnlyHint, destructiveHint, idempotentHint annotations per MCP 2025-06-18 spec
+**Goal**: All 72 MCP tools have accurate readOnlyHint, destructiveHint, idempotentHint annotations per MCP 2025-06-18 spec AND a test validates the mapping
 **Depends on**: Nothing (first phase of v0.3.0)
 **Requirements**: ANNOT-01, ANNOT-02, ANNOT-03
 **Success Criteria** (what must be TRUE):
@@ -408,7 +408,9 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
   2. Read-only tools (search, get, list, status) have readOnlyHint: true
   3. Delete tools have destructiveHint: true; write tools have destructiveHint: false
   4. Test validates annotations mapping for all 72 tools
-**Plans**: TBD
+**Plans**: 2 plans
+- [ ] 39-01-PLAN.md — Fix 9 confirmed annotation mismatches + lift shared annotation constants to tool-utils.ts (ANNOT-01, ANNOT-02)
+- [ ] 39-02-PLAN.md — New test/mcp-annotations.test.js validates all 72 tools against hardcoded expected map (ANNOT-03)
 
 ### Phase 40: Structured Output (MCP Spec)
 **Goal**: All tool responses include structuredContent alongside text content, with outputSchema declared for typed parsing
