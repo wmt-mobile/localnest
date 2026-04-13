@@ -30,12 +30,21 @@ interface MemoryWorkflowService {
   teach(args: Record<string, unknown>): Promise<unknown>;
 }
 
+type OutputArchetype = { data: z.ZodTypeAny; meta: z.ZodTypeAny };
 interface SharedSchemas {
   MEMORY_KIND_SCHEMA: z.ZodType<MemoryKind>;
   MEMORY_SCOPE_SCHEMA: z.ZodType<MemoryScope>;
   MEMORY_LINK_SCHEMA: z.ZodType<MemoryLink>;
   MEMORY_EVENT_TYPE_SCHEMA: z.ZodType<MemoryEventType>;
   MEMORY_EVENT_STATUS_SCHEMA: z.ZodType<MemoryEventStatus>;
+  OUTPUT_SEARCH_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_TRIPLE_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_STATUS_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_BATCH_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_MEMORY_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_ACK_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_BUNDLE_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_FREEFORM_RESULT_SCHEMA: OutputArchetype;
 }
 
 export interface RegisterMemoryWorkflowToolsOptions {
@@ -75,7 +84,8 @@ export function registerMemoryWorkflowTools({
         kind: MEMORY_KIND_SCHEMA.optional(),
         limit: z.number().int().min(1).max(20).default(8)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async (args: Record<string, unknown>) => normalizeTaskContextResult(await memoryWorkflow.getTaskContext(args), args)
   );
@@ -86,7 +96,8 @@ export function registerMemoryWorkflowTools({
       title: 'Memory Status',
       description: 'Return local memory feature status, consent state, and backend compatibility.',
       inputSchema: {},
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_STATUS_RESULT_SCHEMA
     },
     async () => normalizeMemoryStatus(await memory.getStatus())
   );
@@ -107,7 +118,8 @@ export function registerMemoryWorkflowTools({
         tags: z.array(z.string()).optional(),
         limit: z.number().int().min(1).max(50).default(10)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_SEARCH_RESULT_SCHEMA
     },
     async ({ query, root_path, project_path, branch_name, topic, feature, kind, tags, limit }: Record<string, unknown>) => normalizeMemoryRecallResult(
       await memory.recall({
@@ -155,7 +167,8 @@ export function registerMemoryWorkflowTools({
         source_ref: z.string().max(1000).default(''),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: WRITE_ANNOTATIONS
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_MEMORY_RESULT_SCHEMA
     },
     async ({ terse, ...args }: Record<string, unknown>) => toMinimalWriteResponse(normalizeCaptureOutcomeResult(await memoryWorkflow.captureOutcome(args)), terse as string)
   );
@@ -174,7 +187,8 @@ export function registerMemoryWorkflowTools({
         max_entities: z.number().int().min(1).max(20).default(10),
         max_files: z.number().int().min(1).max(10).default(5)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async (args: Record<string, unknown>) => normalizeAgentPrimeResult(
       await memoryWorkflow.agentPrime(args as any)
@@ -192,7 +206,8 @@ export function registerMemoryWorkflowTools({
         project_path: z.string().optional(),
         limit: z.number().int().min(1).max(50).default(10)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async ({ since, agent_id, project_path, limit }: Record<string, unknown>) => {
       const result = await memory.whatsNew({
@@ -219,7 +234,8 @@ export function registerMemoryWorkflowTools({
         scope: MEMORY_SCOPE_SCHEMA.optional(),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: WRITE_ANNOTATIONS
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_MEMORY_RESULT_SCHEMA
     },
     async ({ terse, ...args }: Record<string, unknown>) => {
       const result = await memoryWorkflow.teach(args as any);

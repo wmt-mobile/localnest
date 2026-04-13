@@ -78,6 +78,16 @@ test('MCP registration: all 13 write tools include terse parameter', async () =>
   const { registerMemoryStoreTools } = await import('../src/mcp/tools/memory-store.js');
   const { registerMemoryWorkflowTools } = await import('../src/mcp/tools/memory-workflow.js');
   const { registerGraphTools } = await import('../src/mcp/tools/graph-tools.js');
+  const {
+    SEARCH_RESULT_SCHEMA,
+    TRIPLE_RESULT_SCHEMA,
+    STATUS_RESULT_SCHEMA,
+    BATCH_RESULT_SCHEMA,
+    MEMORY_RESULT_SCHEMA,
+    ACK_RESULT_SCHEMA,
+    BUNDLE_RESULT_SCHEMA,
+    FREEFORM_RESULT_SCHEMA
+  } = await import('../src/mcp/common/index.js');
   const { z } = await import('zod');
 
   const tools = new Map();
@@ -92,7 +102,16 @@ test('MCP registration: all 13 write tools include terse parameter', async () =>
     MEMORY_SCOPE_SCHEMA: z.object({}).default({}),
     MEMORY_LINK_SCHEMA: z.object({ path: z.string() }),
     MEMORY_EVENT_TYPE_SCHEMA: z.enum(['task', 'bugfix', 'decision', 'review', 'preference']).default('task'),
-    MEMORY_EVENT_STATUS_SCHEMA: z.enum(['in_progress', 'completed', 'resolved', 'ignored', 'merged']).default('completed')
+    MEMORY_EVENT_STATUS_SCHEMA: z.enum(['in_progress', 'completed', 'resolved', 'ignored', 'merged']).default('completed'),
+    // Phase 40 Plan 02: output archetypes consumed by Group A tool files
+    OUTPUT_SEARCH_RESULT_SCHEMA: SEARCH_RESULT_SCHEMA,
+    OUTPUT_TRIPLE_RESULT_SCHEMA: TRIPLE_RESULT_SCHEMA,
+    OUTPUT_STATUS_RESULT_SCHEMA: STATUS_RESULT_SCHEMA,
+    OUTPUT_BATCH_RESULT_SCHEMA: BATCH_RESULT_SCHEMA,
+    OUTPUT_MEMORY_RESULT_SCHEMA: MEMORY_RESULT_SCHEMA,
+    OUTPUT_ACK_RESULT_SCHEMA: ACK_RESULT_SCHEMA,
+    OUTPUT_BUNDLE_RESULT_SCHEMA: BUNDLE_RESULT_SCHEMA,
+    OUTPUT_FREEFORM_RESULT_SCHEMA: FREEFORM_RESULT_SCHEMA
   };
   const noop = async () => ({});
   const fakeMemory = new Proxy({}, { get: () => noop });
@@ -100,7 +119,7 @@ test('MCP registration: all 13 write tools include terse parameter', async () =>
 
   registerMemoryStoreTools({ registerJsonTool: fakeRegister, schemas, memory: fakeMemory });
   registerMemoryWorkflowTools({ registerJsonTool: fakeRegister, schemas, memory: fakeMemory, memoryWorkflow: fakeWorkflow });
-  registerGraphTools({ registerJsonTool: fakeRegister, memory: fakeMemory });
+  registerGraphTools({ registerJsonTool: fakeRegister, memory: fakeMemory, schemas });
 
   const writeToolNames = [
     'localnest_memory_store', 'localnest_memory_update', 'localnest_memory_delete',

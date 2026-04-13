@@ -42,6 +42,7 @@ interface MemoryService {
   getRelated(id: string): Promise<unknown>;
 }
 
+type OutputArchetype = { data: z.ZodTypeAny; meta: z.ZodTypeAny };
 interface SharedSchemas {
   MEMORY_KIND_SCHEMA: z.ZodType<MemoryKind>;
   MEMORY_STATUS_SCHEMA: z.ZodType<MemoryStatusType>;
@@ -49,6 +50,14 @@ interface SharedSchemas {
   MEMORY_LINK_SCHEMA: z.ZodType<MemoryLink>;
   MEMORY_EVENT_TYPE_SCHEMA: z.ZodType<MemoryEventType>;
   MEMORY_EVENT_STATUS_SCHEMA: z.ZodType<MemoryEventStatus>;
+  OUTPUT_SEARCH_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_TRIPLE_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_STATUS_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_BATCH_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_MEMORY_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_ACK_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_BUNDLE_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_FREEFORM_RESULT_SCHEMA: OutputArchetype;
 }
 
 export interface RegisterMemoryStoreToolsOptions {
@@ -87,7 +96,8 @@ export function registerMemoryStoreTools({
         limit: z.number().int().min(1).max(200).default(20),
         offset: z.number().int().min(0).default(0)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_SEARCH_RESULT_SCHEMA
     },
     async ({ kind, status, project_path, topic, nest, branch, tags, limit, offset }: Record<string, unknown>) => normalizeMemoryRecallResult(
       await memory.listEntries({
@@ -112,7 +122,8 @@ export function registerMemoryStoreTools({
       inputSchema: {
         id: z.string().min(1)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_MEMORY_RESULT_SCHEMA
     },
     async ({ id }: Record<string, unknown>) => {
       const item = await memory.getEntry(id as string);
@@ -146,7 +157,8 @@ export function registerMemoryStoreTools({
         change_note: z.string().max(400).optional(),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: WRITE_ANNOTATIONS
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_MEMORY_RESULT_SCHEMA
     },
     async ({ terse, ...args }: Record<string, unknown>) => {
       const result = await memory.storeEntry(args);
@@ -192,7 +204,8 @@ export function registerMemoryStoreTools({
         change_note: z.string().max(400).default('Memory updated'),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: WRITE_ANNOTATIONS
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_MEMORY_RESULT_SCHEMA
     },
     async ({ id, terse, ...patch }: Record<string, unknown>) => {
       const result = await memory.updateEntry(id as string, patch);
@@ -209,7 +222,8 @@ export function registerMemoryStoreTools({
         id: z.string().min(1),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: DESTRUCTIVE_ANNOTATIONS
+      annotations: DESTRUCTIVE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_ACK_RESULT_SCHEMA
     },
     async ({ id, terse }: Record<string, unknown>) => toMinimalWriteResponse(normalizeDeleteResult(await memory.deleteEntry(id as string), { id: id as string }), terse as string)
   );
@@ -222,7 +236,8 @@ export function registerMemoryStoreTools({
       inputSchema: {
         ids: z.array(z.string().min(1)).min(1).max(100)
       },
-      annotations: DESTRUCTIVE_ANNOTATIONS
+      annotations: DESTRUCTIVE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BATCH_RESULT_SCHEMA
     },
     async ({ ids }: Record<string, unknown>) => {
       return memory.deleteEntryBatch({ ids: ids as string[] });
@@ -253,7 +268,8 @@ export function registerMemoryStoreTools({
         source_ref: z.string().max(1000).default(''),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: WRITE_ANNOTATIONS
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_MEMORY_RESULT_SCHEMA
     },
     async ({ terse, ...args }: Record<string, unknown>) => toMinimalWriteResponse(await memory.captureEvent(args), terse as string)
   );
@@ -268,7 +284,8 @@ export function registerMemoryStoreTools({
         limit: z.number().int().min(1).max(200).default(20),
         offset: z.number().int().min(0).default(0)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_SEARCH_RESULT_SCHEMA
     },
     async ({ project_path, limit, offset }: Record<string, unknown>) => normalizeMemoryEventsResult(
       await memory.listEvents({
@@ -289,7 +306,8 @@ export function registerMemoryStoreTools({
         threshold: z.number().min(0).max(1).default(0.55),
         max_results: z.number().int().min(1).max(50).default(10)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_SEARCH_RESULT_SCHEMA
     },
     async ({ id, threshold, max_results }: Record<string, unknown>) => normalizeMemorySuggestionResult(
       await memory.suggestRelations(id as string, { threshold: threshold as number, maxResults: max_results as number }),
@@ -309,7 +327,8 @@ export function registerMemoryStoreTools({
         relation_type: z.string().min(1).max(60).default('related'),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: IDEMPOTENT_WRITE_ANNOTATIONS
+      annotations: IDEMPOTENT_WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_ACK_RESULT_SCHEMA
     },
     async ({ source_id, target_id, relation_type, terse }: Record<string, unknown>) => {
       const result = await memory.addRelation(source_id as string, target_id as string, relation_type as string);
@@ -327,7 +346,8 @@ export function registerMemoryStoreTools({
         target_id: z.string().min(1),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: DESTRUCTIVE_ANNOTATIONS
+      annotations: DESTRUCTIVE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_ACK_RESULT_SCHEMA
     },
     async ({ source_id, target_id, terse }: Record<string, unknown>) => {
       const result = await memory.removeRelation(source_id as string, target_id as string);
@@ -343,7 +363,8 @@ export function registerMemoryStoreTools({
       inputSchema: {
         id: z.string().min(1)
       },
-      annotations: READ_ONLY_ANNOTATIONS
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_SEARCH_RESULT_SCHEMA
     },
     async ({ id }: Record<string, unknown>) => normalizeRelatedMemoriesResult(await memory.getRelated(id as string), id as string)
   );
@@ -375,7 +396,8 @@ export function registerMemoryStoreTools({
         })).min(1).max(100),
         response_format: z.enum(['minimal', 'verbose']).default('minimal')
       },
-      annotations: WRITE_ANNOTATIONS
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BATCH_RESULT_SCHEMA
     },
     async ({ memories, response_format }: Record<string, unknown>) => {
       return memory.storeEntryBatch({
