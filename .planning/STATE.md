@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v0.3.0
 milestone_name: MCP Spec Compliance & Production Hardening
-status: executing
-stopped_at: Completed 40-01-PLAN.md (archetype library + registrar extension)
-last_updated: "2026-04-13T07:35:19.707Z"
+status: verifying
+stopped_at: Completed 40-02-PLAN.md — 72/72 tools wired, 165 tests green, Phase 40 ready for verification
+last_updated: "2026-04-13T08:02:56.399Z"
 last_activity: 2026-04-13
 progress:
   total_phases: 7
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 Phase: 40 (Structured Output (MCP Spec)) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-04-13
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
@@ -85,6 +85,7 @@ Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 | Phase 39 P01 | 960 | 3 tasks | 11 files |
 | Phase 39-tool-annotations-mcp-spec P02 | 182 | 2 tasks | 1 files |
 | Phase 40 P01 | 5m | 3 tasks | 4 files |
+| Phase 40-structured-output-mcp-spec P02 | 21m | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -112,6 +113,8 @@ Recent decisions affecting current work:
 - [Phase 40]: Dropped ENTITY_RESULT_SCHEMA from v0.3.0 — zero Plan 02 consumers per CONTEXT.md 'smallest set' rule
 - [Phase 40]: Exported toolResult() from tool-utils via single-token change so Plan 02 unit tests import from public barrel without framework reach-back
 - [Phase 40]: FREEFORM_RESULT_SCHEMA is the single named escape hatch — registrar fallback references it instead of inlining z.any(), zero orphans in tool-utils.ts
+- [Phase 40-structured-output-mcp-spec]: All 72 tools wired to 8 output archetypes (17 SEARCH, 10 STATUS, 11 BATCH, 6 MEMORY, 7 ACK, 4 TRIPLE, 14 BUNDLE, 3 FREEFORM); FREEFORM budget 3 of 5; ENTITY archetype confirmed unnecessary
+- [Phase 40-structured-output-mcp-spec]: graph-tools.ts schemas prop promoted from optional unknown to required SharedSchemas — harness test/terse-response.test.js updated to pass the 8 archetypes
 
 ### Pending Todos
 
@@ -134,7 +137,7 @@ None — autonomous execution in progress.
 
 ## Session Continuity
 
-Last session: 2026-04-13T07:35:19.703Z
-Stopped at: Completed 40-01-PLAN.md (archetype library + registrar extension)
+Last session: 2026-04-13T08:02:56.392Z
+Stopped at: Completed 40-02-PLAN.md — 72/72 tools wired, 165 tests green, Phase 40 ready for verification
 Resume file: None
 Next command: `/gsd:plan-phase 27`

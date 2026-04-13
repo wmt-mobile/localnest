@@ -392,7 +392,7 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
 - Lane C (KG Model): 42 → 45
 
 - [x] **Phase 39: Tool Annotations (MCP Spec)** - Accurate readOnlyHint/destructiveHint/idempotentHint on every tool (completed 2026-04-13)
-- [ ] **Phase 40: Structured Output (MCP Spec)** - structuredContent + outputSchema alongside text content
+- [x] **Phase 40: Structured Output (MCP Spec)** - structuredContent + outputSchema alongside text content (completed 2026-04-13)
 - [ ] **Phase 41: Resource Links (MCP Spec)** - File-returning tools emit resource_link objects
 - [ ] **Phase 42: Bi-Temporal KG Model** - recorded_at transaction time alongside valid_from/valid_to
 - [ ] **Phase 43: WAL Mode & Performance Tuning** - WAL journal_mode + tuned PRAGMAs + regression guard
@@ -422,7 +422,7 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
   3. Existing response_format: "json" behavior is preserved (backwards compat)
 **Plans**: 2 plans
 - [x] 40-01-PLAN.md — Shared output archetype library + registrar extension (STRUCT-02, STRUCT-03)
-- [ ] 40-02-PLAN.md — Per-tool archetype assignment + EXPECTED_OUTPUT_SCHEMAS test (STRUCT-01, STRUCT-02, STRUCT-03)
+- [x] 40-02-PLAN.md — Per-tool archetype assignment + EXPECTED_OUTPUT_SCHEMAS test (STRUCT-01, STRUCT-02, STRUCT-03)
 
 ### Phase 41: Resource Links (MCP Spec)
 **Goal**: File-returning tools use MCP resource links instead of inlining content, reducing token usage

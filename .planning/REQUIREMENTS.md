@@ -231,7 +231,7 @@
 - [x] **ANNOT-03**: Annotations are validated in the MCP tools test (tool name -> expected annotations mapping)
 
 ### Structured Output (MCP Spec)
-- [ ] **STRUCT-01**: All tool responses include `structuredContent` alongside text `content`
+- [x] **STRUCT-01**: All tool responses include `structuredContent` alongside text `content`
 - [x] **STRUCT-02**: Tools declare `outputSchema` in their registration for typed response parsing
 - [x] **STRUCT-03**: Existing `response_format: "json"` behavior preserved as backwards-compatible default
 
