@@ -456,7 +456,8 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
   1. All SQLite databases open with PRAGMA journal_mode=WAL
   2. Tuned PRAGMAs applied: cache_size=-64000, synchronous=NORMAL, mmap_size=268435456
   3. Batch insert of 500 triples completes in <2s (regression guard)
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 43-01-PLAN.md — Shared sqlite-tuning helper + 3 DB open sites + WAL-03 benchmark test (WAL-01, WAL-02, WAL-03)
 
 ### Phase 44: Backup & Restore
 **Goal**: Users can create and restore SQLite backups via MCP tools and CLI commands
@@ -466,7 +467,8 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
   1. localnest_backup creates a point-in-time SQLite backup to a specified path
   2. localnest_restore restores from a backup with integrity check
   3. CLI localnest backup and localnest restore wrap the MCP tools
-**Plans**: TBD
+**Plans**: 1 plan
+- [ ] 44-01-PLAN.md — Shared backup service + 2 MCP tools + CLI noun (BACKUP-01, BACKUP-02, BACKUP-03)
 
 ### Phase 45: Actor-Aware Memories
 **Goal**: Memories track who created them (user, agent, tool) for multi-agent attribution and filtering
