@@ -54,6 +54,7 @@
     "LICENSE",
     "CHANGELOG.md"
   ],
+  "bundleDependencies": false,
   "engines": {
     "node": ">=22.6.0"
   },
