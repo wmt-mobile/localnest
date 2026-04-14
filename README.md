@@ -21,6 +21,13 @@ npm install -g localnest-mcp
 npm install -g localnest-mcp@beta
 ```
 
+After install, enable semantic search (embeddings):
+```bash
+cd $(npm root -g)/localnest-mcp && npm install --no-save @huggingface/transformers
+```
+
+> **Installing from GitHub?** See the [Troubleshooting](#-troubleshooting) section below.
+
 ### 2. Initialize
 ```bash
 localnest setup
@@ -102,6 +109,46 @@ LocalNest follows the OSS security pipeline exactly:
 - **Static Analysis**: Continuous CodeQL scanning.
 - **Transparency**: OpenSSF Scorecard and Dependabot enabled.
 - **Compliance**: MIT Licensed and 100% Open Source.
+
+---
+
+## 🔍 Troubleshooting
+
+### Installing from GitHub (git+https://)
+
+Direct `npm install -g git+https://...` may fail with `TAR_ENTRY_ERRORS` or `spawn sh ENOENT`. This is a [known npm limitation](https://github.com/npm/cli/issues/3910) where git dependencies auto-bundle `node_modules` into the tarball, causing extraction failures for packages with large native binaries (onnxruntime, sharp).
+
+**Recommended: install from tarball instead**
+```bash
+git clone https://github.com/wmt-mobile/localnest.git
+cd localnest
+npm pack
+npm install -g ./localnest-mcp-*.tgz
+```
+
+**Alternative: use --ignore-scripts then rebuild**
+```bash
+npm install -g --ignore-scripts git+https://github.com/wmt-mobile/localnest.git#release/0.3.0
+cd $(npm root -g)/localnest-mcp && npm install
+```
+
+### Enabling Semantic Search
+
+`@huggingface/transformers` (used for local embeddings) is installed automatically by the postinstall script. If it wasn't installed (check with `localnest doctor`), install manually:
+```bash
+cd $(npm root -g)/localnest-mcp && npm install --no-save @huggingface/transformers
+```
+
+### Common Issues
+
+| Issue | Fix |
+|-------|-----|
+| `TAR_ENTRY_ERROR ENOENT` during install | Use `npm pack` + `npm install -g ./file.tgz` instead of `git+https://` |
+| `spawn sh ENOENT` | Same as above — npm concurrent extraction bug |
+| `tarball data (null) seems corrupted` | Clear cache: `npm cache clean --force` then retry |
+| Semantic search not working | Run `cd $(npm root -g)/localnest-mcp && npm install --no-save @huggingface/transformers` |
+| `localnest: command not found` | Verify: `npm root -g` is in your PATH |
+| `tsx not found` | Run `cd $(npm root -g)/localnest-mcp && npm install` |
 
 ---
 

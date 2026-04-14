@@ -85,12 +85,60 @@ After setup, copy the `mcpServers` block from `~/.localnest/config/mcp.localnest
 }
 ```
 
+## Enabling Semantic Search
+
+LocalNest uses `@huggingface/transformers` for local embedding generation (MiniLM-L6-v2). This is installed automatically during postinstall. If it wasn't installed, add it manually:
+
+```bash
+cd $(npm root -g)/localnest-mcp
+npm install --no-save @huggingface/transformers
+```
+
+Run `localnest doctor` to verify embedding status.
+
+## Installing from GitHub
+
+:::caution Known npm Limitation
+Direct `npm install -g git+https://...` may fail with `TAR_ENTRY_ERRORS`. This is a [known npm bug](https://github.com/npm/cli/issues/3910) where git dependencies auto-bundle `node_modules` into the tarball, causing extraction failures for packages with large native binaries (onnxruntime, sharp).
+:::
+
+**Recommended: clone, pack, then install**
+```bash
+git clone https://github.com/wmt-mobile/localnest.git
+cd localnest
+git checkout release/0.3.0  # or main for stable
+npm pack
+npm install -g ./localnest-mcp-*.tgz
+```
+
+**Alternative: install with --ignore-scripts, then rebuild**
+```bash
+npm install -g --ignore-scripts git+https://github.com/wmt-mobile/localnest.git#release/0.3.0
+cd $(npm root -g)/localnest-mcp && npm install
+```
+
+After either method, enable semantic search:
+```bash
+cd $(npm root -g)/localnest-mcp && npm install --no-save @huggingface/transformers
+```
+
 ## Troubleshooting
 
 - **Startup Timeout**: Keep `startup_timeout_sec` at `30` or higher.
 - **Diagnostics**: Run `localnest doctor --verbose` for a full health scan.
 - **Model Warmup**: Setup downloads embedding models to `~/.localnest/cache`. Ensure this path is writable.
 - **Beta Features**: If `localnest dashboard` is not found, ensure you installed `@beta`.
+
+### Common Install Issues
+
+| Issue | Cause | Fix |
+|-------|-------|-----|
+| `TAR_ENTRY_ERROR ENOENT` | npm git-dep auto-bundling bug | Use `npm pack` + `npm install -g ./file.tgz` |
+| `spawn sh ENOENT` | Concurrent extraction race | Same as above |
+| `tarball data (null) corrupted` | Stale npm cache | `npm cache clean --force` then retry |
+| Semantic search disabled | `@huggingface/transformers` not installed | `cd $(npm root -g)/localnest-mcp && npm install --no-save @huggingface/transformers` |
+| `localnest: command not found` | Global bin not in PATH | Check `npm root -g` is accessible |
+| `tsx not found` | Incomplete install | `cd $(npm root -g)/localnest-mcp && npm install` |
 
 ---
 
