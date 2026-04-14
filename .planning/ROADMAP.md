@@ -494,3 +494,21 @@ Plans:
 
 Plans:
 - [ ] TBD (run /gsd-plan-phase 46 to break down)
+
+### Phase 47: Rewrite CI/CD pipelines with auto-publish for beta and stable releases
+
+**Goal:** Replace 5 GitHub Actions workflows with clean CI/CD pipeline: quality checks on all branches (including release/*), OIDC trusted publishing replacing deprecated NPM_TOKEN, and branch-based release tracks (beta from release/*, stable from main)
+**Requirements**: CICD-01, CICD-02, CICD-03, CICD-04, CICD-05, CICD-06, CICD-07
+**Depends on:** Phase 46
+**Success Criteria** (what must be TRUE):
+  1. Pushing code to a release/* branch triggers the quality pipeline (lint, typecheck, test)
+  2. Pushing a version bump to a release/* branch publishes to npm with @beta tag via OIDC
+  3. Pushing a version bump to main publishes to npm with @latest tag via OIDC
+  4. CodeQL scans run on release/* branches, not just main
+  5. No workflow references the stale beta branch
+  6. Quality pipeline runs ~60-120s faster by skipping postinstall for lint/typecheck
+**Plans:** 2 plans
+
+Plans:
+- [ ] 47-01-PLAN.md — Rewrite quality.yml + update codeql.yml branch triggers (CICD-01, CICD-02, CICD-03)
+- [ ] 47-02-PLAN.md — Rewrite release.yml with OIDC trusted publishing + release/** triggers (CICD-04, CICD-05, CICD-06, CICD-07)
