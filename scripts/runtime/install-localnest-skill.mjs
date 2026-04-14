@@ -261,6 +261,8 @@ export function getKnownToolSkillDirs(homeDir = os.homedir()) {
     path.join(homeDir, '.cursor', 'skills'),
     path.join(homeDir, '.codeium', 'windsurf', 'skills'),
     path.join(homeDir, '.opencode', 'skills'),
+    path.join(homeDir, '.config', 'opencode', 'skills'),
+    path.join(homeDir, '.gemini', 'skills'),
     path.join(homeDir, '.gemini', 'antigravity', 'skills'),
     path.join(homeDir, '.cline', 'skills'),
     path.join(homeDir, '.continue', 'skills'),
@@ -284,7 +286,7 @@ export function detectSkillToolFamily(targetSkillDir) {
   if (normalized.includes('/.claude/')) return 'claude';
   if (normalized.includes('/.cursor/')) return 'cursor';
   if (normalized.includes('/.windsurf/') || normalized.includes('/.codeium/windsurf/')) return 'windsurf';
-  if (normalized.includes('/.opencode/')) return 'opencode';
+  if (normalized.includes('/.opencode/') || normalized.includes('/.config/opencode/')) return 'opencode';
   if (normalized.includes('/.gemini/antigravity/')) return 'antigravity';
   if (normalized.includes('/.gemini/')) return 'gemini';
   if (normalized.includes('/.cline/')) return 'cline';

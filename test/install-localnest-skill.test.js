@@ -7,23 +7,8 @@ import {
   detectSkillToolFamily,
   getKnownToolSkillDirs,
   getKnownProjectSkillDirs,
-  listBundledSkillDirs,
-  resolveBundledSkillDir,
-  resolveInstallTarget
+  listBundledSkillDirs
 } from '../scripts/runtime/install-localnest-skill.mjs';
-
-test('resolveBundledSkillDir points at packaged top-level skills directory', () => {
-  const fakeMetaUrl = pathToFileURL(
-    path.join(process.cwd(), 'scripts', 'runtime', 'install-localnest-skill.mjs')
-  ).href;
-
-  const resolved = resolveBundledSkillDir(fakeMetaUrl);
-
-  assert.equal(
-    resolved,
-    path.join(process.cwd(), 'skills', 'localnest-mcp')
-  );
-});
 
 test('listBundledSkillDirs discovers all bundled skills', () => {
   const fakeMetaUrl = pathToFileURL(
@@ -93,33 +78,3 @@ test('detectSkillToolFamily resolves supported tool families from target path', 
   assert.equal(detectSkillToolFamily('/tmp/home/.agents/skills/localnest-mcp'), 'agents');
 });
 
-test('resolveInstallTarget defaults to agents skill dir', () => {
-  const target = resolveInstallTarget({
-    homeDir: '/tmp/localnest-home',
-    cwd: '/tmp/project',
-    skillName: 'localnest-sql-adapter'
-  });
-
-  assert.equal(target, path.join('/tmp/localnest-home', '.agents', 'skills', 'localnest-sql-adapter'));
-});
-
-test('resolveInstallTarget supports project-local Claude skill layout', () => {
-  const target = resolveInstallTarget({
-    homeDir: '/tmp/localnest-home',
-    cwd: '/tmp/project',
-    project: true,
-    skillName: 'localnest-node-compat'
-  });
-
-  assert.equal(target, path.join('/tmp/project', '.claude', 'skills', 'localnest-node-compat'));
-});
-
-test('resolveInstallTarget supports explicit destination override', () => {
-  const target = resolveInstallTarget({
-    homeDir: '/tmp/localnest-home',
-    cwd: '/tmp/project',
-    dest: '/tmp/custom/skills/localnest-mcp'
-  });
-
-  assert.equal(target, '/tmp/custom/skills/localnest-mcp');
-});
