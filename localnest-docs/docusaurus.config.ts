@@ -1,7 +1,7 @@
 import type { Config } from '@docusaurus/types'
 import type * as Preset from '@docusaurus/preset-classic'
 
-const VERSION = '0.3.0-beta.1'
+const VERSION = '0.3.0-beta.2'
 const STABLE_VERSION = '0.2.0'
 const TOOL_COUNT = '74'
 
@@ -185,7 +185,7 @@ const config: Config = {
         },
         {
           href: 'https://www.npmjs.com/package/localnest-mcp',
-          label: 'v0.3.0-beta.1',
+          label: 'v0.3.0-beta.2',
           position: 'right'
         }
       ]
@@ -205,7 +205,7 @@ const config: Config = {
         {
           title: 'Releases',
           items: [
-            { label: 'Current (0.3.0-beta.1)', to: '/docs/releases/current' },
+            { label: 'Current (0.3.0-beta.2)', to: '/docs/releases/current' },
             { label: 'Release History', to: '/docs/releases/history' }
           ]
         },

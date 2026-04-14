@@ -1,6 +1,6 @@
 ---
 name: localnest-sql-adapter
-version: 0.3.0-beta.1
+version: 0.3.0-beta.2
 description: Expert system for LocalNest database engineering, specializing in SQLite-backed semantic vector search and persistent memory adapters.
 category: tools
 tags: [sqlite, vector-search, indexing, migrations, performance, database-adapters]

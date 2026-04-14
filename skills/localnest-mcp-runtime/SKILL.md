@@ -1,6 +1,6 @@
 ---
 name: localnest-mcp-runtime
-version: 0.3.0-beta.1
+version: 0.3.0-beta.2
 description: Expert system for LocalNest runtime architecture, installation orchestration, and diagnostic systems.
 category: tools
 tags: [lifecycle, installation, diagnostics, configuration, startup-performance]

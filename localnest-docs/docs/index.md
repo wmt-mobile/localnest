@@ -73,7 +73,7 @@ LocalNest is built for **100% privacy**. No data leaves your machine—embedding
     </div>
     <div className="col col--6">
       ### 🚀 [Release Notes](/docs/releases/current)
-      What's new in the latest v0.3.0-beta.1 modernization update.
+      What's new in the latest v0.3.0-beta.2 update.
     </div>
   </div>
 </div>

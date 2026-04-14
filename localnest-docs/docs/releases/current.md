@@ -1,10 +1,10 @@
 ---
-description: Current release notes for localnest-mcp, including the modern interactive CLI, TUI dashboard, and improved diagnostics. Current release is 0.3.0-beta.1.
+description: Current release notes for localnest-mcp, including the modern interactive CLI, TUI dashboard, and improved diagnostics. Current release is 0.3.0-beta.2.
 ---
 
 # Current Release
 
-Current package documentation for `localnest-mcp@0.3.0-beta.1`, covering the modernization update, interactive TUI dashboard, refactored CLI infrastructure, and the active canonical `localnest_*` tool contract.
+Current package documentation for `localnest-mcp@0.3.0-beta.2`, covering the modernization update, interactive TUI dashboard, refactored CLI infrastructure, and the active canonical `localnest_*` tool contract.
 
 <div className="docGrid docGrid--3">
   <div className="docPanel">
@@ -19,7 +19,7 @@ Current package documentation for `localnest-mcp@0.3.0-beta.1`, covering the mod
   </div>
   <div className="docPanel">
     <span className="docEyebrow">Current</span>
-    <h3>0.3.0-beta.1 — The Modernization Update</h3>
+    <h3>0.3.0-beta.2 — The Modernization Update</h3>
     <p>Full visual overhaul with a premium ANSI styling engine, interactive TUI dashboard, and structured diagnostics.</p>
   </div>
 </div>
@@ -54,7 +54,7 @@ Current package documentation for `localnest-mcp@0.3.0-beta.1`, covering the mod
 - setup-time memory consent and config migration
 - `localnest` top-level CLI command path (`dashboard`, `setup`, `doctor`, `upgrade`)
 
-## What changed in `0.3.0-beta.1`
+## What changed in `0.3.0-beta.2`
 
 - **Visual Overhaul**: Replaced hardcoded escape sequences with a centralized ANSI styling utility.
 - **TUI Dashboard**: Added a real-time terminal interface to monitor the LocalNest state.
@@ -94,7 +94,7 @@ Current package documentation for `localnest-mcp@0.3.0-beta.1`, covering the mod
 
 This page is based on the current beta package version and maintained changelog in the repository.
 
-- package version: `0.3.0-beta.1`
+- package version: `0.3.0-beta.2`
 - release date: `2026-04-13`
 - changelog sections document the changes shipped in this beta package
 - production-ready stable published release docs remain archived under `0.1.0`

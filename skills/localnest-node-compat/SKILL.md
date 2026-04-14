@@ -1,6 +1,6 @@
 ---
 name: localnest-node-compat
-version: 0.3.0-beta.1
+version: 0.3.0-beta.2
 description: Expert system for maintaining Node.js version compatibility and graceful feature degradation in LocalNest.
 category: tools
 tags: [node-js, compatibility, version-gating, native-dependencies, polyfills]

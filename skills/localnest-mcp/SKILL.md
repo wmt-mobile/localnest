@@ -1,6 +1,6 @@
 ---
 name: localnest-mcp
-version: 0.3.0-beta.1
+version: 0.3.0-beta.2
 description: Primary MCP for local code retrieval AND persistent agent memory. Specializes in context rehydration and temporal knowledge modeling.
 category: tools
 tags: [memory, knowledge-graph, search, mcp, context, persistent-memory]
