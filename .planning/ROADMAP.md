@@ -507,8 +507,8 @@ Plans:
   4. CodeQL scans run on release/* branches, not just main
   5. No workflow references the stale beta branch
   6. Quality pipeline runs ~60-120s faster by skipping postinstall for lint/typecheck
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 47-01-PLAN.md — Rewrite quality.yml + update codeql.yml branch triggers (CICD-01, CICD-02, CICD-03)
-- [ ] 47-02-PLAN.md — Rewrite release.yml with OIDC trusted publishing + release/** triggers (CICD-04, CICD-05, CICD-06, CICD-07)
+- [x] 47-02-PLAN.md — Rewrite release.yml with OIDC trusted publishing + release/** triggers (CICD-04, CICD-05, CICD-06, CICD-07)
