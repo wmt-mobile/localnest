@@ -133,8 +133,10 @@ jobs:
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish to npm (OIDC)
+      - name: Publish to npm
         if: steps.changed.outputs.should_release == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
         run: |
           npm publish --provenance --access public --tag ${{ steps.tag.outputs.tag }} || \
           npm publish --access public --tag ${{ steps.tag.outputs.tag }}
