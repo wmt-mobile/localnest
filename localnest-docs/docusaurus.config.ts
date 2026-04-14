@@ -142,7 +142,20 @@ const config: Config = {
           sidebarCollapsible: true,
           sidebarCollapsed: false
         },
-        blog: false,
+        blog: {
+          showReadingTime: true,
+          blogTitle: 'LocalNest Blog',
+          blogDescription: 'Insights on AI memory, code intelligence, knowledge graphs, and the MCP ecosystem from the LocalNest team.',
+          blogSidebarTitle: 'Recent posts',
+          blogSidebarCount: 5,
+          postsPerPage: 10,
+          feedOptions: {
+            type: ['rss', 'atom'],
+            title: 'LocalNest Blog',
+            description: 'AI memory, code intelligence, and MCP server insights',
+            copyright: `Copyright ${new Date().getFullYear()} LocalNest`,
+          },
+        },
         sitemap: {
           lastmod: 'date',
           changefreq: 'weekly',
@@ -172,6 +185,11 @@ const config: Config = {
           sidebarId: 'docsSidebar',
           position: 'left',
           label: 'Docs'
+        },
+        {
+          to: '/blog',
+          label: 'Blog',
+          position: 'left'
         },
         {
           to: '/docs/releases/current',

@@ -36,35 +36,34 @@ const guides = [
     description: 'Package, skill, MCP config, and doctor checks.'
   },
   {
-    title: 'Configuration',
-    href: '/docs/setup/configuration',
-    description: 'Roots, env vars, index backends, memory.'
+    title: 'vs Alternatives',
+    href: '/docs/comparison',
+    description: 'How LocalNest compares to Mem0, GitNexus, Graphiti, and more.'
   },
   {
     title: 'Tools Reference',
     href: '/docs/tools/overview',
-    description: 'All 72 MCP tools across 11 groups.'
+    description: 'All 74 MCP tools across 11 groups.'
   },
   {
-    title: 'Architecture',
-    href: '/docs/architecture',
-    description: 'Boot flow, retrieval pipeline, memory graph.'
+    title: 'Blog',
+    href: '/blog',
+    description: 'Insights on AI memory, code intelligence, and the MCP ecosystem.'
   }
 ]
 
 export default function Home(): React.JSX.Element {
   return (
     <Layout
-      title="LocalNest — Your AI's home base"
-      description="Local-first MCP server with 72 tools, temporal knowledge graph, persistent AI memory, and semantic code search. No cloud, no leaks."
+      title="LocalNest — Code Intelligence + Knowledge Graph + AI Memory in One MCP Server"
+      description="The only MCP server combining semantic code search, temporal knowledge graph, and persistent AI memory. 74 tools, zero cloud. Alternative to Mem0, GitNexus, Graphiti."
     >
       <main className="siteHome">
         <section className="siteHome__hero">
-          <p className="siteHome__eyebrow">Your AI's home base</p>
-          <h1>Local memory and code search for AI agents.</h1>
+          <p className="siteHome__eyebrow">The only MCP server with all three</p>
+          <h1>Code intelligence. Knowledge graph. AI memory.</h1>
           <p>
-            72 MCP tools, temporal knowledge graph, and persistent memory — running entirely on your machine.
-            No cloud, no leaks, no surprises.
+            74 MCP tools combining semantic code search, temporal knowledge graph, and persistent memory in one local-first package. Zero cloud, pure SQLite.
           </p>
           <div className="siteHome__actions">
             <Link className="button button--primary button--lg" to="/docs">
@@ -82,20 +81,20 @@ export default function Home(): React.JSX.Element {
 
         <div className="siteHome__stats">
           <div className="siteHome__stat">
-            <strong>52</strong>
+            <strong>74</strong>
             <span>MCP Tools</span>
+          </div>
+          <div className="siteHome__stat">
+            <strong>3 Pillars</strong>
+            <span>Code + KG + Memory</span>
           </div>
           <div className="siteHome__stat">
             <strong>Zero</strong>
             <span>Cloud deps</span>
           </div>
           <div className="siteHome__stat">
-            <strong>v0.1.0</strong>
+            <strong>v0.3.0</strong>
             <span>Latest</span>
-          </div>
-          <div className="siteHome__stat">
-            <strong>MIT</strong>
-            <span>License</span>
           </div>
         </div>
 
