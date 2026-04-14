@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 
 /**
- * Preinstall cleanup — removes stale npm temp directories that cause ENOTEMPTY errors
- * during global install. npm renames old packages to .<name>-<hash> before replacing,
- * and if a previous install failed, those temp dirs persist and block the rename.
+ * Preinstall cleanup — removes blockers that cause errors during global install:
+ *   1. Stale npm temp dirs (.localnest-mcp-<hash>) → ENOTEMPTY on retry
+ *   2. Symlinked package entry (from `npm link`) → ENOTDIR because npm tries to
+ *      rename the entry to a temp dir and a symlink is not a directory
  */
 
 import fs from 'node:fs';
@@ -51,6 +52,23 @@ function cleanupStaleTempDirs(nodeModulesDir) {
   return removed;
 }
 
+function removeSymlinkedPackage(nodeModulesDir) {
+  const pkgPath = path.join(nodeModulesDir, PKG_NAME);
+  let stat;
+  try {
+    stat = fs.lstatSync(pkgPath);
+  } catch {
+    return; // doesn't exist — nothing to do
+  }
+  if (stat.isSymbolicLink()) {
+    try {
+      fs.unlinkSync(pkgPath);
+    } catch {
+      // Best-effort — don't block install if unlink fails
+    }
+  }
+}
+
 // Only run for global installs (npm install -g)
 const isGlobal = process.env.npm_config_global === 'true';
 if (!isGlobal) process.exit(0);
@@ -58,4 +76,5 @@ if (!isGlobal) process.exit(0);
 const nodeModulesDir = getGlobalNodeModulesDir();
 if (!nodeModulesDir) process.exit(0);
 
+removeSymlinkedPackage(nodeModulesDir);
 cleanupStaleTempDirs(nodeModulesDir);
