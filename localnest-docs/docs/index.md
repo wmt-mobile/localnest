@@ -1,85 +1,101 @@
 ---
 slug: /
 sidebar_position: 1
-title: Welcome to LocalNest
+title: LocalNest — Code Intelligence + Knowledge Graph + AI Memory
+description: The only MCP server combining semantic code search, temporal knowledge graph, and persistent AI memory. 74 tools, zero cloud, pure SQLite.
+keywords:
+  - MCP server
+  - AI memory
+  - knowledge graph
+  - code search
+  - local-first
+  - Mem0 alternative
+  - GitNexus alternative
 ---
 
 # LocalNest MCP
 
-**Local-first AI Context, Semantic Code Search, and Persistent Memory.**
+**The only MCP server that combines code intelligence, knowledge graph, and AI memory in one local-first package.**
 
-LocalNest is a powerful MCP server that gives your AI agents a durable "nest" on your machine. It combines context-aware code discovery with a temporal knowledge graph, ensuring your AI never loses the thread of a conversation or a codebase.
+Every other MCP server forces you to choose: memory **or** code intelligence. LocalNest is the first to unify all three pillars — 74 tools, zero cloud, pure SQLite.
 
-```text
- ┌── LocalNest Dashboard ──────────────────────────────────────────────────┐
- │                                                                         │
- │  AI Context: [ONLINE]  Tools: [74 ACTIVE]       Memory: [3.2GB INDEXED] │
- │                                                                         │
- │  Recent Events:                                                         │
- │  [15:34:01] localnest_search_hybrid: matched 12 chunks                  │
- │  [15:34:02] localnest_agent_prime: context rehydrated                   │
- │                                                                         │
- └─────────────────────────────────────────────────────────────────────────┘
-```
+| Pillar | What it does |
+|:---|:---|
+| **Code Intelligence** | Hybrid BM25+vector search, AST-aware chunking, symbol finding (defs/usages/callers) |
+| **Knowledge Graph** | Temporal entity-triple store with multi-hop traversal and time-travel queries |
+| **Persistent Memory** | Cross-session recall, semantic dedup, agent-scoped isolation |
 
-## ⚡ Quick Start
+:::info 100% Private
+No data leaves your machine. Embeddings, index, and memory stay local.
+:::
 
-Choose your release track and get started in seconds:
+## Quick Start
 
-| Track | Install Command | Best for... |
-|---|---|---|
-| **Stable** | `npm install -g localnest-mcp` | Production reliability & 74 core tools. |
-| **Beta** | `npm install -g localnest-mcp@beta` | **Modern TUI Dashboard** & Premium UI. |
-
-Then initialize your environment:
 ```bash
+npm install -g localnest-mcp
 localnest setup
 localnest doctor
 ```
 
----
-
-## 🏗️ Core Pillars
-
-:::info Key Value
-LocalNest is built for **100% privacy**. No data leaves your machine—embeddings, index, and memory stay local.
-:::
-
-- **[74 Specialized Tools](/docs/tools/overview)**: Comprehensive coverage for search, memory, and graph traversal.
-- **[Interactive TUI Dashboard](/docs/tools/cli)**: Real-time monitoring of your knowledge base state.
-- **[Temporal Knowledge Graph](/docs/tools/knowledge-graph)**: Subject-predicate-object triples with time-validity (`as_of`).
-- **[Fused Retrieval](/docs/tools/search)**: Lexical + semantic fused with RRF ranking for high-precision results.
-- **[Agent Isolation](/docs/tools/organization)**: Per-agent diary and memory scoping to prevent contamination.
+**Beta track** (interactive TUI dashboard):
+```bash
+npm install -g localnest-mcp@beta
+localnest dashboard
+```
 
 ---
 
-## 🚦 Next Steps
+## How We Compare
+
+No other MCP server covers all three pillars:
+
+| Feature | LocalNest | Memory Servers | Code Servers |
+|:---|:---:|:---:|:---:|
+| Semantic code search | **Yes** | No | Yes |
+| Knowledge graph | **Yes** | No | Partial |
+| Persistent AI memory | **Yes** | Yes | No |
+| 74 MCP tools | **Yes** | 8-43 | 5-16 |
+| Local-first / no cloud | **Yes** | Mixed | Mixed |
+
+See the full breakdown: **[LocalNest vs Alternatives](/docs/comparison)**
+
+---
+
+## Next Steps
 
 <div className="container">
   <div className="row">
     <div className="col col--6">
-      ### 🏁 [Getting Started](/docs/setup/install)
-      Full walkthrough for installing and connecting to your favorite AI client.
-    </div>
+
+### [Getting Started](/docs/setup/install)
+Install and connect to Claude Code, Cursor, Windsurf, or any MCP client.
+
+</div>
     <div className="col col--6">
-      ### 🧱 [Tool Reference](/docs/tools/overview)
-      Deep dive into the 74 tools available for your AI agents.
-    </div>
+
+### [Tool Reference](/docs/tools/overview)
+All 74 tools — search, memory, graph, organization, and system.
+
+</div>
   </div>
   <div className="row">
     <div className="col col--6">
-      ### 🧬 [Architecture](/docs/architecture)
-      Understand the retrieval pipeline and memory graph internals.
-    </div>
+
+### [vs Alternatives](/docs/comparison)
+Detailed competitive analysis against Mem0, GitNexus, Graphiti, and more.
+
+</div>
     <div className="col col--6">
-      ### 🚀 [Release Notes](/docs/releases/current)
-      What's new in the latest v0.3.0-beta.2 update.
-    </div>
+
+### [Architecture](/docs/architecture)
+Retrieval pipeline, memory graph internals, and SQLite design.
+
+</div>
   </div>
 </div>
 
 ---
 
 <p align="center">
-  <b>Empower your AI. Own your Context.</b>
+  <b>Code intelligence. Knowledge graph. AI memory. One server. Your machine.</b>
 </p>
