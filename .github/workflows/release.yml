@@ -56,9 +56,6 @@ jobs:
           cache: npm
           registry-url: 'https://registry.npmjs.org'
 
-      - name: Upgrade npm for OIDC support
-        run: npm install -g npm@latest
-
       - name: Read local version
         id: local
         run: echo "version=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
