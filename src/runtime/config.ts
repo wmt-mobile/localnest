@@ -468,13 +468,13 @@ export function buildRuntimeConfig(env: Record<string, string | undefined> = pro
         .map((x) => x.trim())
         .filter(Boolean)
     ),
-    memoryEnabled: parseBoolean(env.LOCALNEST_MEMORY_ENABLED, fileSettings.memoryEnabled || false),
+    memoryEnabled: parseBoolean(env.LOCALNEST_MEMORY_ENABLED, fileSettings.memoryEnabled ?? true),
     memoryBackend: parseStringEnv(env.LOCALNEST_MEMORY_BACKEND, fileSettings.memoryBackend || 'auto'),
     memoryDbPath: path.resolve(
       env.LOCALNEST_MEMORY_DB_PATH || fileSettings.memoryDbPath || layout.memoryDbPath
     ),
-    memoryAutoCapture: parseBoolean(env.LOCALNEST_MEMORY_AUTO_CAPTURE, fileSettings.memoryAutoCapture || false),
-    memoryConsentDone: parseBoolean(env.LOCALNEST_MEMORY_CONSENT_DONE, fileSettings.memoryConsentDone || false),
+    memoryAutoCapture: parseBoolean(env.LOCALNEST_MEMORY_AUTO_CAPTURE, fileSettings.memoryAutoCapture ?? true),
+    memoryConsentDone: parseBoolean(env.LOCALNEST_MEMORY_CONSENT_DONE, fileSettings.memoryConsentDone ?? true),
     roots: resolveRoots({
       projectRoots: env.PROJECT_ROOTS,
       localnestConfigPath: configPath

@@ -219,7 +219,62 @@
 
 **Coverage:**
 - v2.0: 32/32 mapped, shipped
-- v0.2.0: 63/63 mapped across 13 phases (26-38), pending execution
+- v0.2.0: 63/63 mapped across 13 phases (26-38), complete
 
 ---
-*Requirements defined: 2026-04-08 (v2.0), updated 2026-04-09 (v0.2.0)*
+
+## v0.3.0 Requirements — MCP Spec Compliance & Production Hardening
+
+### Tool Annotations (MCP Spec)
+- [x] **ANNOT-01**: All 72 MCP tools have `readOnlyHint`, `destructiveHint`, `idempotentHint` annotations matching their actual behavior
+- [x] **ANNOT-02**: Write tools marked `destructiveHint: false` (additive), delete tools marked `destructiveHint: true`
+- [x] **ANNOT-03**: Annotations are validated in the MCP tools test (tool name -> expected annotations mapping)
+
+### Structured Output (MCP Spec)
+- [x] **STRUCT-01**: All tool responses include `structuredContent` alongside text `content`
+- [x] **STRUCT-02**: Tools declare `outputSchema` in their registration for typed response parsing
+- [x] **STRUCT-03**: Existing `response_format: "json"` behavior preserved as backwards-compatible default
+
+### Resource Links (MCP Spec)
+- [x] **RLINK-01**: `read_file`, `search_code`, `search_files` return `resource_link` objects instead of inlining full file content
+- [x] **RLINK-02**: Clients can dereference resource links via MCP resource protocol
+- [x] **RLINK-03**: Fallback: when client doesn't support resource links, inline content as before
+
+### Bi-Temporal KG Model
+- [x] **BITEMP-01**: `kg_triples` table gains a `recorded_at` column (additive migration) tracking when the triple was stored
+- [x] **BITEMP-02**: `kg_as_of` can query on either `valid_from`/`valid_to` (event time) or `recorded_at` (transaction time)
+- [x] **BITEMP-03**: `kg_timeline` includes `recorded_at` in its output for each triple
+
+### WAL Mode & Performance
+- [ ] **WAL-01**: SQLite databases open in WAL mode by default (`PRAGMA journal_mode=WAL`)
+- [ ] **WAL-02**: Tuned PRAGMAs applied at DB init: `cache_size=-64000`, `synchronous=NORMAL`, `mmap_size=268435456`
+- [ ] **WAL-03**: Performance regression guard: batch insert of 500 triples completes in <2s
+
+### Backup & Restore
+- [ ] **BACKUP-01**: `localnest_backup` MCP tool creates a point-in-time SQLite backup to a specified path
+- [ ] **BACKUP-02**: `localnest_restore` MCP tool restores from a backup file with integrity verification
+- [ ] **BACKUP-03**: CLI `localnest backup` and `localnest restore` commands wrap the MCP tools
+
+### Actor-Aware Memories
+- [x] **ACTOR-01**: `memory_entries` gains `actor_id` column (additive migration) — who created this memory
+- [x] **ACTOR-02**: `memory_store` and `memory_store_batch` accept `actor_id` parameter, auto-inferred from agent_id if omitted
+- [x] **ACTOR-03**: `memory_recall` and `memory_list` accept `actor_id` filter
+- [x] **ACTOR-04**: `agent_prime` surfaces actor attribution in recalled memory items
+
+### v0.3.0 Tracking
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| ANNOT-01, ANNOT-02, ANNOT-03 | Phase 39 | Pending |
+| STRUCT-01, STRUCT-02, STRUCT-03 | Phase 40 | Pending |
+| RLINK-01, RLINK-02, RLINK-03 | Phase 41 | Pending |
+| BITEMP-01, BITEMP-02, BITEMP-03 | Phase 42 | Pending |
+| WAL-01, WAL-02, WAL-03 | Phase 43 | Pending |
+| BACKUP-01, BACKUP-02, BACKUP-03 | Phase 44 | Pending |
+| ACTOR-01, ACTOR-02, ACTOR-03, ACTOR-04 | Phase 45 | Pending |
+
+**Coverage:**
+- v0.3.0: 22 requirements mapped across 7 phases (39-45)
+
+---
+*Requirements defined: 2026-04-08 (v2.0), updated 2026-04-09 (v0.2.0), updated 2026-04-10 (v0.3.0)*

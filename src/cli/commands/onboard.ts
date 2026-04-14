@@ -15,10 +15,7 @@ import os from 'node:os';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { SERVER_VERSION } from '../../runtime/version.js';
-import {
-  bold, dim, italic, cyan, green, yellow, red, gray,
-  B as BOX, boxTop, boxBottom, boxLine, boxEmpty,
-} from '../ansi.js';
+import { c, symbol, box } from '../ansi.js';
 import { startSpinner } from '../spinner.js';
 import { TOOL_COUNT } from '../tool-count.js';
 import type { GlobalOptions } from '../options.js';
@@ -44,13 +41,13 @@ function writeLines(lines: string[]): void {
 /* ------------------------------------------------------------------ */
 
 function stepHeader(num: number, total: number, label: string): void {
-  const progress = gray(`[${num}/${total}]`);
+  const progress = c.gray(`[${num}/${total}]`);
   write('');
-  write(`  ${progress} ${bold(label)}`);
+  write(`  ${progress} ${c.bold(label)}`);
 }
 
 function resultLine(ok: boolean, label: string): void {
-  const icon = ok ? green(BOX.check) : yellow(BOX.circle);
+  const icon = ok ? c.green(c.B.check) : c.yellow(c.B.circle);
   write(`  ${icon} ${label}`);
 }
 
@@ -197,15 +194,12 @@ async function runOnboard(): Promise<void> {
   const totalSteps = 5;
 
   // Welcome
-  writeLines([
+  writeLines(box([
+    `${c.bold('Welcome to LocalNest')}  ${c.gray(`v${SERVER_VERSION}`)}`,
+    c.italic(c.gray('Local-first AI memory & code retrieval')),
     '',
-    boxTop(),
-    boxLine(`${bold('Welcome to LocalNest')}  ${gray(`v${SERVER_VERSION}`)}`),
-    boxLine(italic(gray('Local-first AI memory & code retrieval'))),
-    boxEmpty(),
-    boxLine(`Let's get you set up in under a minute.`),
-    boxBottom(),
-  ]);
+    `Let's get you set up in under a minute.`,
+  ], { padding: 1 }));
 
   // Step 1: Detect environment
   stepHeader(1, totalSteps, 'Detecting environment...');
@@ -215,12 +209,12 @@ async function runOnboard(): Promise<void> {
   write('');
 
   resultLine(env.nodeOk,
-    `Node.js ${cyan(env.nodeVersion)} ${dim('(memory support available)')}`);
+    `Node.js ${c.cyan(env.nodeVersion)} ${c.dim('(memory support available)')}`);
 
   resultLine(env.rgOk,
     env.rgOk
-      ? `ripgrep ${cyan(env.rgVersion!)} ${dim('(fast search enabled)')}`
-      : `ripgrep ${dim('not found — install for faster search')}`);
+      ? `ripgrep ${c.cyan(env.rgVersion!)} ${c.dim('(fast search enabled)')}`
+      : `ripgrep ${c.dim('not found — install for faster search')}`);
 
   // AI clients
   const clients: Array<{ key: string; label: string }> = [
@@ -235,9 +229,9 @@ async function runOnboard(): Promise<void> {
 
   for (const cl of clients) {
     if (env[cl.key]) {
-      resultLine(true, `${cl.label} ${dim('detected')}`);
+      resultLine(true, `${cl.label} ${c.dim('detected')}`);
     } else {
-      resultLine(false, `${cl.label} ${dim('not found')}`);
+      resultLine(false, `${cl.label} ${c.dim('not found')}`);
     }
   }
 
@@ -249,7 +243,7 @@ async function runOnboard(): Promise<void> {
   else setupSpinner.fail('Setup encountered issues');
   resultLine(setupOk, setupOk
     ? 'Configuration and databases initialized'
-    : red('Setup encountered issues — run `localnest setup` manually'));
+    : c.red('Setup encountered issues — run `localnest setup` manually'));
 
   // Step 3: Install skills
   stepHeader(3, totalSteps, 'Installing skills to AI clients...');
@@ -259,10 +253,10 @@ async function runOnboard(): Promise<void> {
   else skillSpinner.warn('Skill install had warnings');
   if (skillsOk) {
     resultLine(true, env.clientCount > 0
-      ? `Skills installed to ${cyan(String(env.clientCount))} AI client(s)`
+      ? `Skills installed to ${c.cyan(String(env.clientCount))} AI client(s)`
       : 'Skills bundled (no AI clients detected)');
   } else {
-    resultLine(false, yellow('Skill install had warnings — run `localnest skill install` to retry'));
+    resultLine(false, c.yellow('Skill install had warnings — run `localnest skill install` to retry'));
   }
 
   // Step 4: Install hooks
@@ -274,9 +268,9 @@ async function runOnboard(): Promise<void> {
     else hookSpinner.fail('Hook install had issues');
     resultLine(hooksOk, hooksOk
       ? 'Memory hooks active in Claude Code'
-      : yellow('Hook install had issues — run `localnest hooks install`'));
+      : c.yellow('Hook install had issues — run `localnest hooks install`'));
   } else {
-    resultLine(false, dim('Claude Code not detected — skipping hooks'));
+    resultLine(false, c.dim('Claude Code not detected — skipping hooks'));
   }
 
   // Step 5: Doctor
@@ -287,33 +281,29 @@ async function runOnboard(): Promise<void> {
   else doctorSpinner.warn('Some checks need attention');
   resultLine(doctorOk, doctorOk
     ? 'All health checks passed'
-    : yellow('Some checks failed — run `localnest doctor` for details'));
+    : c.yellow('Some checks failed — run `localnest doctor` for details'));
 
   // Completion summary
   const allOk = setupOk && doctorOk;
 
-  writeLines([
+  writeLines(box([
+    allOk
+      ? `${c.green(c.B.check)} ${c.bold('LocalNest is ready!')}`
+      : `${c.yellow('!')} ${c.bold('LocalNest is partially configured')}`,
     '',
-    boxTop(),
-    boxLine(allOk
-      ? `${green(BOX.check)} ${bold('LocalNest is ready!')}`
-      : `${yellow('!')} ${bold('LocalNest is partially configured')}`),
-    boxEmpty(),
-    boxLine(`${green(BOX.check)} ${dim(`${TOOL_COUNT} MCP tools available`)}`),
-    boxLine(env.clientCount > 0
-      ? `${green(BOX.check)} ${dim(`Skills installed in ${env.clientCount} AI client(s)`)}`
-      : `${yellow(BOX.circle)} ${dim('No AI clients detected for skill install')}`),
-    boxLine(env.claudeCode
-      ? `${green(BOX.check)} ${dim('Memory hooks active in Claude Code')}`
-      : `${yellow(BOX.circle)} ${dim('Claude Code hooks skipped')}`),
-    boxEmpty(),
-    boxLine(`${bold('Try these commands:')}`),
-    boxLine(`  ${cyan('/localnest:recall')}    ${gray(BOX.arrow)} ${dim('recall memories for a task')}`),
-    boxLine(`  ${cyan('/localnest:remember')}  ${gray(BOX.arrow)} ${dim('save something to memory')}`),
-    boxLine(`  ${cyan('/localnest:fact')}      ${gray(BOX.arrow)} ${dim('add a knowledge graph fact')}`),
-    boxBottom(),
+    `${c.green(c.B.check)} ${c.dim(`${TOOL_COUNT} MCP tools available`)}`,
+    env.clientCount > 0
+      ? `${c.green(c.B.check)} ${c.dim(`Skills installed in ${env.clientCount} AI client(s)`)}`
+      : `${c.yellow(c.B.circle)} ${c.dim('No AI clients detected for skill install')}`,
+    env.claudeCode
+      ? `${c.green(c.B.check)} ${c.dim('Memory hooks active in Claude Code')}`
+      : `${c.yellow(c.B.circle)} ${c.dim('Claude Code hooks skipped')}`,
     '',
-  ]);
+    c.bold('Try these commands:'),
+    `  ${c.cyan('/localnest:recall')}    ${c.gray(c.B.arrow)} ${c.dim('recall memories for a task')}`,
+    `  ${c.cyan('/localnest:remember')}  ${c.gray(c.B.arrow)} ${c.dim('save something to memory')}`,
+    `  ${c.cyan('/localnest:fact')}      ${c.gray(c.B.arrow)} ${c.dim('add a knowledge graph fact')}`,
+  ], { padding: 1 }));
 
   process.exitCode = allOk ? 0 : 1;
 }

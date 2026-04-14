@@ -4,6 +4,41 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0-beta.1] - 2026-04-13
+
+### 🔥 Expert Steering & Modernization Update
+
+This major update transforms LocalNest into an **Expert Steering** system for autonomous AI agents.
+
+- **Expert SOP (Standard Operating Procedure)**: Embedded mandatory AI workflow instructions directly into client-native instruction files (`.mdc`, `AGENTS.md`).
+- **AI Mentorship Tags**: Enriched all 74 tool descriptions with behavioral tags like `[MANDATORY_START]`, `[DEEP_ANALYSIS]`, and `[COMPLETE_MISSION]` to guide LLM selection logic.
+- **Modernized TUI Dashboard**: A premium, interactive terminal interface (`localnest dashboard`) for real-time monitoring of memory, KG, and system health.
+- **Smart Skill Installer**: Auto-detects Cursor, Windsurf, Cline, and Antigravity to install the zero-config LocalNest Expert skill.
+
+### Added
+
+- `localnest_backup` — Point-in-time SQLite backup via VACUUM INTO with integrity check
+- `localnest_restore` — Restore memory database from backup (integrity-verified before replace)
+- `localnest backup create/restore/list` — CLI subcommands for backup management
+- `actor_id` column on `memory_entries` — attribution axis for multi-agent systems
+- `actor_id` filter on `memory_recall` and `memory_list` — exact-match attribution filtering
+- `actor_id` field on `agent_prime` CompactMemory items
+
+### Features
+
+- **MCP 2025-06-18 spec compliance** — All 74 tools carry accurate `readOnlyHint`, `destructiveHint`, `idempotentHint` annotations
+- **Structured output** — Every tool response includes `structuredContent` + `outputSchema` for typed parsing
+- **Resource links** — File-returning tools emit `resource_link` objects (MCP resource protocol)
+- **Bi-temporal KG** — `recorded_at` transaction-time axis alongside `valid_from`/`valid_to` on all KG triples
+- **WAL mode** — Uniform SQLite production tuning across all 3 databases via shared `applySqliteTuning` helper. Batch insert benchmark: ~115ms for 500 triples
+- **Backup/restore** — Atomic point-in-time backups using `VACUUM INTO`; integrity-verified restore with `restart_required` signal
+- **Actor-aware memories** — `actor_id` attribution column auto-inferred from `agent_id`; filterable on recall and list
+
+### Changed
+
+- Tool count 72 → 74 (`localnest_backup`, `localnest_restore`)
+- Schema version 12 → 13 (`actor_id` column on `memory_entries`)
+
 ## [0.2.0] - 2026-04-10
 
 ### Added

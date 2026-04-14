@@ -1,209 +1,117 @@
-# Tools Overview
+# Tools Overview (74 Tools)
 
 <div className="docPanel docPanel--compact">
   <p>
-    Use the tools in layers: discover files first, then run exact or semantic search, then confirm
-    with file reads. When memory is enabled, recall it before analysis and capture meaningful outcomes
-    after the work is done. For structured facts, use the knowledge graph. For organized retrieval,
-    scope memories into nests and branches.
+    LocalNest provides a comprehensive suite of <strong>74 MCP tools</strong> designed for local-first AI engineering. Use them in layers: start with <strong>Agent Prime</strong> for unified context, use <strong>Fused Search</strong> to find information across domains, and leverage <strong>Batch Operations</strong> for high-performance memory management.
   </p>
 </div>
 
-## Main tools
+## 🏗️ Core Toolsets
 
 <div className="docGrid docGrid--2">
   <div className="docPanel">
-    <h3>Discovery</h3>
+    <h3>🚀 Agentic Workflow (NEW)</h3>
+    <p>Unified context and proactive guidance.</p>
     <ul>
-      <li>`localnest_usage_guide`</li>
-      <li>`localnest_server_status`</li>
-      <li>`localnest_health`</li>
-      <li>`localnest_list_roots`</li>
-      <li>`localnest_list_projects`</li>
-      <li>`localnest_project_tree`</li>
+      <li>`localnest_agent_prime` — Context in 1 call</li>
+      <li>`localnest_find` — Fused cross-domain search</li>
+      <li>`localnest_whats_new` — Session deltas</li>
+      <li>`localnest_help` — Task-scoped guidance</li>
+      <li>`localnest_teach` — Behavior modifiers</li>
+      <li>`localnest_audit` — Health dashboard</li>
+      <li>`localnest_file_changed` — Proactive hints</li>
     </ul>
   </div>
   <div className="docPanel">
-    <h3>Indexing and updates</h3>
+    <h3>🔍 Code Intelligence</h3>
+    <p>Symbol-aware analysis and navigation.</p>
     <ul>
-      <li>`localnest_update_status`</li>
-      <li>`localnest_update_self`</li>
-      <li>`localnest_index_status`</li>
-      <li>`localnest_index_project`</li>
-      <li>`localnest_summarize_project`</li>
-    </ul>
-  </div>
-  <div className="docPanel">
-    <h3>Search</h3>
-    <ul>
-      <li>`localnest_search_files`</li>
-      <li>`localnest_search_code`</li>
-      <li>`localnest_search_hybrid`</li>
+      <li>`localnest_find_callers`</li>
+      <li>`localnest_find_definition`</li>
+      <li>`localnest_find_implementations`</li>
+      <li>`localnest_rename_preview`</li>
       <li>`localnest_get_symbol`</li>
       <li>`localnest_find_usages`</li>
-      <li>`localnest_embed_status`</li>
     </ul>
   </div>
   <div className="docPanel">
-    <h3>Memory</h3>
+    <h3>📦 Batch Operations</h3>
+    <p>High-performance bulk writes (500/call).</p>
+    <ul>
+      <li>`localnest_kg_add_entities_batch`</li>
+      <li>`localnest_kg_add_triples_batch`</li>
+      <li>`localnest_memory_store_batch`</li>
+      <li>`localnest_memory_delete_batch`</li>
+      <li>`localnest_kg_delete_entities_batch`</li>
+      <li>`localnest_kg_delete_triples_batch`</li>
+    </ul>
+  </div>
+  <div className="docPanel">
+    <h3>🧠 Persistent Memory</h3>
+    <p>Durable knowledge base for AI agents.</p>
     <ul>
       <li>`localnest_task_context`</li>
-      <li>`localnest_memory_status`</li>
       <li>`localnest_memory_recall`</li>
-      <li>`localnest_memory_list`</li>
-      <li>`localnest_memory_get`</li>
-      <li>`localnest_memory_store`</li>
-      <li>`localnest_memory_update`</li>
-      <li>`localnest_memory_delete`</li>
+      <li>`localnest_memory_get` / `list`</li>
+      <li>`localnest_memory_store` / `update`</li>
       <li>`localnest_capture_outcome`</li>
-      <li>`localnest_memory_capture_event`</li>
-      <li>`localnest_memory_events`</li>
-      <li>`localnest_memory_add_relation`</li>
-      <li>`localnest_memory_remove_relation`</li>
       <li>`localnest_memory_related`</li>
       <li>`localnest_memory_suggest_relations`</li>
     </ul>
   </div>
   <div className="docPanel">
-    <h3>Knowledge Graph</h3>
+    <h3>🕸️ Knowledge Graph</h3>
+    <p>Temporal facts and multi-hop relationships.</p>
     <ul>
       <li>`localnest_kg_add_entity`</li>
       <li>`localnest_kg_add_triple`</li>
-      <li>`localnest_kg_query`</li>
+      <li>`localnest_kg_query` / `timeline`</li>
       <li>`localnest_kg_invalidate`</li>
       <li>`localnest_kg_as_of`</li>
-      <li>`localnest_kg_timeline`</li>
-      <li>`localnest_kg_stats`</li>
-    </ul>
-  </div>
-  <div className="docPanel">
-    <h3>Nest/Branch Organization</h3>
-    <ul>
-      <li>`localnest_nest_list`</li>
-      <li>`localnest_nest_branches`</li>
-      <li>`localnest_nest_tree`</li>
-    </ul>
-  </div>
-  <div className="docPanel">
-    <h3>Graph Traversal</h3>
-    <ul>
       <li>`localnest_graph_traverse`</li>
       <li>`localnest_graph_bridges`</li>
     </ul>
   </div>
   <div className="docPanel">
-    <h3>Agent Diary</h3>
+    <h3>📂 Workspace & Discovery</h3>
+    <p>File system and project awareness.</p>
     <ul>
-      <li>`localnest_diary_write`</li>
-      <li>`localnest_diary_read`</li>
-    </ul>
-  </div>
-  <div className="docPanel">
-    <h3>Conversation Ingestion</h3>
-    <ul>
-      <li>`localnest_ingest_markdown`</li>
-      <li>`localnest_ingest_json`</li>
-      <li>`localnest_memory_check_duplicate`</li>
-    </ul>
-  </div>
-  <div className="docPanel">
-    <h3>Hooks</h3>
-    <ul>
-      <li>`localnest_hooks_stats`</li>
-      <li>`localnest_hooks_list_events`</li>
-    </ul>
-  </div>
-  <div className="docPanel">
-    <h3>Verification</h3>
-    <ul>
+      <li>`localnest_list_roots`</li>
+      <li>`localnest_list_projects`</li>
+      <li>`localnest_project_tree`</li>
       <li>`localnest_read_file`</li>
+      <li>`localnest_summarize_project`</li>
+      <li>`localnest_project_backfill`</li>
     </ul>
   </div>
 </div>
 
-## Choose by goal
+---
 
-| Goal | Start with | Then use |
+## 🚦 Choosing the Right Tool
+
+| Goal | Primary Tool | Advantage |
 | --- | --- | --- |
-| Find feature/module location | `localnest_search_files` | `localnest_project_tree`, `localnest_read_file` |
-| Find symbol definition/export | `localnest_get_symbol` | `localnest_read_file` |
-| Find symbol call/import usage | `localnest_find_usages` | `localnest_read_file` |
-| Match exact code/symbol | `localnest_search_code` | `localnest_read_file` |
-| Retrieve by concept/intent | `localnest_index_status`, `localnest_index_project` | `localnest_search_hybrid`, `localnest_read_file` |
-| Rehydrate prior context | `localnest_task_context` | `localnest_memory_recall` (if needed) |
-| Capture outcome for future tasks | `localnest_capture_outcome` | `localnest_memory_events` |
-| Store structured facts | `localnest_kg_add_entity`, `localnest_kg_add_triple` | `localnest_kg_query`, `localnest_kg_as_of` |
-| Track fact evolution over time | `localnest_kg_timeline` | `localnest_kg_as_of` |
-| Discover indirect connections | `localnest_graph_traverse` | `localnest_graph_bridges` |
-| Organize memories by domain | `localnest_nest_list`, `localnest_nest_tree` | `localnest_memory_recall` (with nest/branch filter) |
-| Import conversation history | `localnest_ingest_markdown`, `localnest_ingest_json` | `localnest_memory_recall` |
-| Check for duplicate memories | `localnest_memory_check_duplicate` | `localnest_memory_store` |
-| Private agent scratchpad | `localnest_diary_write` | `localnest_diary_read` |
-| Monitor hook activity | `localnest_hooks_stats` | `localnest_hooks_list_events` |
+| **Start a task** | `localnest_agent_prime` | Returns memories, entities, files, and actions in one call. |
+| **Search everything** | `localnest_find` | Fused RRF ranking across memory, code, and KG. |
+| **Navigate code** | `localnest_find_definition` | Jumps straight to the source of any symbol. |
+| **Set a preference** | `localnest_teach` | Stores a behavior modifier that surfaces in future tasks. |
+| **Bulk migration** | `localnest_kg_add_triples_batch` | Processes up to 500 facts in a single transaction. |
+| **Check health** | `localnest_audit` | Comprehensive visual score of your AI's knowledge base. |
 
-## Response format
+---
 
-Tools support `response_format: "json"` or `"markdown"`.
-Responses also include `meta.schema_version` so MCP clients can detect contract revisions explicitly.
+## 🛠️ Typical Agentic Workflow
 
-## Tool success vs meaningful evidence
+1.  **Context Rehydration**: Use `localnest_agent_prime` to get up to speed on the current task.
+2.  **Discovery**: Use `localnest_find` to locate relevant modules or memories.
+3.  **Deep Dive**: Use `localnest_find_callers` or `localnest_read_file` for implementation details.
+4.  **Action**: Perform the task (edit files, fix bugs).
+5.  **Documentation**: Use `localnest_capture_outcome` to persist what was learned.
+6.  **Refinement**: Use `localnest_teach` to store new behavioral rules for next time.
 
-A successful MCP call means the tool executed. It does not always mean the response contains useful evidence.
+---
 
-- `localnest_search_code` returning no matches is a successful call, but weak evidence for the current task.
-- `localnest_read_file` returning line content is meaningful evidence.
-- Retrieval misses now include a `recommended_next_action` so the client can pivot immediately instead of stopping at an empty result.
-
-## Typical workflow
-
-<div className="docSteps">
-  <div className="docStep">
-    <span>1</span>
-    <div>
-      <strong>Check runtime state</strong>
-      <p>`localnest_server_status`, `localnest_task_context`, and `localnest_update_status` confirm active backend, memory state, relevant recall, and version state.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>2</span>
-    <div>
-      <strong>Scope the workspace</strong>
-      <p>`localnest_list_roots` and `localnest_list_projects` tell you where to search.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>3</span>
-    <div>
-      <strong>Recall prior context</strong>
-      <p>If memory is enabled, prefer `localnest_task_context` before indexing or deep analysis.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>4</span>
-    <div>
-      <strong>Prepare the index</strong>
-      <p>`localnest_index_status` and `localnest_index_project` make hybrid retrieval useful.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>5</span>
-    <div>
-      <strong>Retrieve and verify</strong>
-      <p>`localnest_search_hybrid` narrows candidates, then `localnest_read_file` confirms exact lines.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>6</span>
-    <div>
-      <strong>Query the knowledge graph</strong>
-      <p>Use `localnest_kg_query` for direct relationships and `localnest_graph_traverse` for multi-hop discovery across domains.</p>
-    </div>
-  </div>
-  <div className="docStep">
-    <span>7</span>
-    <div>
-      <strong>Capture durable outcomes</strong>
-      <p>After a fix, decision, review, or preference discovery, emit `localnest_capture_outcome` when memory is enabled. Store structured facts with `localnest_kg_add_triple`.</p>
-    </div>
-  </div>
-</div>
+:::tip Maintainer Note
+This list is a summary. For the full technical specification of all 74 tools, including input schemas and return types, please refer to the individual tool documentation pages.
+:::

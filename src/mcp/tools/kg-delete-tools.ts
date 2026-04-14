@@ -1,5 +1,7 @@
 import { z } from 'zod';
+import { DESTRUCTIVE_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
+import { BATCH_RESULT_SCHEMA } from '../common/schemas.js';
 
 interface MemoryService {
   deleteEntity(entityId: string): Promise<unknown>;
@@ -24,12 +26,8 @@ export function registerKgDeleteTools({
       inputSchema: {
         entity_id: z.string().min(1)
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: true,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: DESTRUCTIVE_ANNOTATIONS,
+      outputSchema: BATCH_RESULT_SCHEMA
     },
     async ({ entity_id }: Record<string, unknown>) =>
       memory.deleteEntity(entity_id as string)
@@ -43,12 +41,8 @@ export function registerKgDeleteTools({
       inputSchema: {
         entity_ids: z.array(z.string().min(1)).min(1).max(100)
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: true,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: DESTRUCTIVE_ANNOTATIONS,
+      outputSchema: BATCH_RESULT_SCHEMA
     },
     async ({ entity_ids }: Record<string, unknown>) =>
       memory.deleteEntityBatch({ entity_ids: entity_ids as string[] })
@@ -62,12 +56,8 @@ export function registerKgDeleteTools({
       inputSchema: {
         triple_ids: z.array(z.string().min(1)).min(1).max(100)
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: true,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: DESTRUCTIVE_ANNOTATIONS,
+      outputSchema: BATCH_RESULT_SCHEMA
     },
     async ({ triple_ids }: Record<string, unknown>) =>
       memory.deleteTripleBatch({ triple_ids: triple_ids as string[] })

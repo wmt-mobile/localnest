@@ -3,7 +3,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
-import { green, red, yellow } from '../ansi.js';
+import { c, symbol } from '../ansi.js';
 import { writeError } from '../output.js';
 import { startSpinner } from '../spinner.js';
 import type { GlobalOptions } from '../options.js';
@@ -26,8 +26,8 @@ export async function run(args: string[], opts: GlobalOptions): Promise<void> {
   if (!handler) {
     process.stdout.write([
       '',
-      '  localnest hooks install    Install Claude Code hooks for auto memory retrieval/capture',
-      '  localnest hooks status     Show installed hook status',
+      `  localnest hooks ${c.cyan('install')}    Install Claude Code hooks for auto memory retrieval/capture`,
+      `  localnest hooks ${c.cyan('status')}     Show installed hook status`,
       '',
     ].join('\n'));
     return;
@@ -73,10 +73,10 @@ async function handleStatus(): Promise<void> {
     const preInstalled = preHooks.length > 0;
     const postInstalled = postHooks.length > 0;
 
-    process.stdout.write(`\n  LocalNest Claude Code Hooks\n\n`);
-    process.stdout.write(`  Pre-tool (memory retrieval):  ${preInstalled ? green('INSTALLED') : red('NOT INSTALLED')}\n`);
-    process.stdout.write(`  Post-tool (outcome capture):  ${postInstalled ? green('INSTALLED') : red('NOT INSTALLED')}\n`);
-    process.stdout.write(`  Settings file: ${settingsPath}\n\n`);
+    process.stdout.write(`\n  ${c.bold('LocalNest Claude Code Hooks')}\n\n`);
+    process.stdout.write(`  Pre-tool (memory retrieval):  ${preInstalled ? c.green('INSTALLED') : c.red('NOT INSTALLED')}\n`);
+    process.stdout.write(`  Post-tool (outcome capture):  ${postInstalled ? c.green('INSTALLED') : c.red('NOT INSTALLED')}\n`);
+    process.stdout.write(`  Settings file: ${c.dim(settingsPath)}\n\n`);
 
     if (!preInstalled || !postInstalled) {
       process.stdout.write('  Run: localnest hooks install\n\n');
@@ -90,8 +90,8 @@ async function handleStatus(): Promise<void> {
           const scriptPath = cmdMatch[1];
           const exists = fs.existsSync(scriptPath);
           if (!exists) {
-            process.stdout.write(`  ${yellow('WARNING')}: Hook script missing: ${scriptPath}\n`);
-            process.stdout.write('  Re-run: localnest hooks install\n\n');
+            process.stdout.write(`  ${symbol.warn()} ${c.yellow('WARNING')}: Hook script missing: ${scriptPath}\n`);
+            process.stdout.write(`  Run: ${c.cyan('localnest hooks install')}\n\n`);
           }
         }
       }

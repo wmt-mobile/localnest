@@ -1,59 +1,73 @@
 ---
 name: localnest-node-compat
-description: "Use when making LocalNest work cleanly across different Node versions, especially around built-in modules, optional native dependencies, version gating, and compatibility fallbacks."
-user-invocable: false
+version: 0.3.0-beta.1
+description: Expert system for maintaining Node.js version compatibility and graceful feature degradation in LocalNest.
+category: tools
+tags: [node-js, compatibility, version-gating, native-dependencies, polyfills]
+allowed-tools:
+  - Read
+  - Write
 ---
 
-# LocalNest Node Compat
+# Node Compatibility Expert
 
-Use this skill for Node-version compatibility work, especially when a feature depends on:
-- `node:sqlite`
-- optional native packages
-- Node-specific built-ins or API availability
+Master cross-version Node.js engineering for LocalNest. This skill ensures that the application remains stable from Node 18 through Node 23+, handling native dependency variations and API availability boundaries with precision.
 
-## Quick Start
+## Core Concepts
 
-1. Determine the exact API and version boundary first.
-2. Keep newer Node behavior unchanged unless the task explicitly changes it.
-3. Prefer capability gating and fallback over broad engine bumps when the product should still work in reduced mode.
+### 1. Capability Gating
+Instead of hard engine bumps, LocalNest prefers gating specific features (like the SQLite-backed memory subsystem) based on the availability of built-in modules or specific method signatures.
 
-## Workflow
+### 2. Lazy Import Isolation
+Compatibility is protected by isolating version-sensitive imports behind `async import()` or lazy-loading patterns. This prevents top-level crashes in shared entry points like the CLI or common utilities.
 
-### 1. Identify the real boundary
+### 3. Graceful Degradation
+When a runtime requirement isn't met (e.g., missing `node:sqlite`), LocalNest identifies the gap, disables only the affected tools, and provides a clear, actionable diagnostic through `localnest doctor`.
 
-Do not stop at package `engines`.
-Find the exact API dependency:
-- module availability
-- method availability
-- extension-loading support
-- native package install and runtime requirements
+## Code Examples
 
-### 2. Separate install-time from runtime failures
+### Example 1: Safe Feature Gating
+Checking for module availability without crashing the process.
+```javascript
+async function isMemorySupported() {
+  try {
+    // node:sqlite is available in Node 22.5+
+    await import('node:sqlite');
+    return true;
+  } catch {
+    return false;
+  }
+}
+```
 
-Check both:
-- package install failures from native deps
-- runtime crashes from unsupported built-ins or imports
+### Example 2: Version-Agnostic Error Handling
+Handling differences in error properties across Node versions.
+```javascript
+try {
+  // sensitive operation
+} catch (err) {
+  // Compatibility: code property might be missing or different in older Node
+  const errorCode = err.code || (err.message.includes('MODULE_NOT_FOUND') ? 'MODULE_NOT_FOUND' : 'UNKNOWN');
+  handleError(errorCode);
+}
+```
 
-### 3. Gate features, not the whole product
+## Best Practices
 
-When possible:
-- keep core MCP and search functionality working
-- disable only incompatible features
-- print a precise warning with version and action
+1. **Gate Features, Not the Engine**: Keep core search working on Node 18 even if memory requires Node 22.
+2. **Avoid Top-Level Versioned Imports**: Never import a module that might be missing at the top level of a shared utility file.
+3. **Actionable Status**: If a feature is disabled, the `doctor` output must state: Feature name, Reason, Required Version, and Update command.
+4. **Test the Published Shape**: High-version features often behave differently when bundled/published via npm than in the development tree.
 
-### 4. Verify the published shape
+## Troubleshooting
 
-Compatibility fixes are incomplete until you inspect:
-- installed package metadata
-- optional vs hard dependencies
-- global CLI behavior
+### Issue: "Module not found" at startup
+**Solution**: Scan for static imports in `src/cli/index.ts` or barrel exports that are pulling in version-gated modules too early.
 
-## Guardrails
+### Issue: Native build failures
+**Solution**: Ensure that optional dependencies are correctly marked in `package.json` and that the code handles their absence at runtime.
 
-- Avoid static imports of version-gated modules in shared entry points.
-- Do not claim support for a Node range unless setup and startup both degrade cleanly there.
-- If optional native dependencies are used, status output must explain missing capability.
+## References
 
-## Reference
-
-- [version-boundaries.md](./references/version-boundaries.md)
+- [Node.js Compatibility Table](https://node.green/)
+- [LocalNest Version Boundaries](./references/version-boundaries.md)

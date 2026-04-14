@@ -5,7 +5,8 @@
 - Shipped: **v1.0 Memory Enhancement** - Phases 1-9 (2026-04-08)
 - Shipped: **v2.0 CLI-First Architecture** - Phases 10-18 (2026-04-08)
 - Deferred to release/0.1.0 branch: **v0.1.0 The Big Upgrade** - Phases 19-25
-- Active on release/0.2.0 branch: **v0.2.0 Memory-KG Fusion & Agent-First Surface** - Phases 26-38
+- Shipped on release/0.2.0 branch: **v0.2.0 Memory-KG Fusion & Agent-First Surface** - Phases 26-38
+- Shipped on release/0.3.0 branch: **v0.3.0 MCP Spec Compliance & Production Hardening** — Phases 39-45 (2026-04-13)
 
 ## Phases
 
@@ -38,6 +39,9 @@
 - [x] **Phase 18: Binary Deprecation** - Redirect old fragmented binaries to unified CLI with warnings
 
 </details>
+
+<details>
+<summary>Archived: v0.1.0 (deferred) + v0.2.0 (shipped) — Phase summaries and Phase Details for phases 10-38</summary>
 
 ### Deferred: v0.1.0 The Big Upgrade (release/0.1.0 branch)
 
@@ -199,7 +203,9 @@
   2. Default format is `verbose` for single writes and `minimal` for batches without the caller specifying anything
   3. Calling `memory_recall` or `search_hybrid` on an entry with empty `nest`/`branch`/`topic`/`feature` returns a response that omits those keys entirely, and drops `raw_score` when `score` is present
   4. A reproducible benchmark conversation run shows at least 70% token reduction on the write portion compared to the pre-Phase-27 baseline
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [x] 45-01-PLAN.md — Schema migration v13 + type definitions + write/read/filter paths + MCP tool schemas (ACTOR-01, ACTOR-02, ACTOR-03, ACTOR-04)
 
 ### Phase 28: Predicate Cardinality & Contradiction Fix
 **Goal**: Contradiction detection only fires for functional predicates; multi-valued and unknown predicates no longer produce false positives, and users can override cardinality via a DB table (absorbs quick task 260409-ohq plan as starting point)
@@ -375,3 +381,134 @@ Shortest critical path: 26 -> 27 -> 28 -> 29 -> 30 -> 37 -> 38 (7 phases sequent
 | 36. Proactive Hooks | v0.2.0 | 0/0 | Not started | - |
 | 37. Behavior Modification teach | v0.2.0 | 0/0 | Not started | - |
 | 38. Self-Audit Dashboard | v0.2.0 | 0/0 | Not started | - |
+
+</details>
+
+## Active: v0.3.0 MCP Spec Compliance & Production Hardening
+
+**Milestone Goal:** Bring LocalNest's 72 MCP tools into compliance with the MCP 2025-06-18 spec (annotations, structured output, resource links) and harden production basics (WAL mode, backup/restore, bi-temporal KG, actor-aware memories).
+
+**Parallel Lanes:**
+- Lane A (MCP Spec, strict sequence): 39 → 40 → 41
+- Lane B (Production, parallel after Lane A): 43 → 44
+- Lane C (KG Model): 42 → 45
+
+- [x] **Phase 39: Tool Annotations (MCP Spec)** - Accurate readOnlyHint/destructiveHint/idempotentHint on every tool (completed 2026-04-13)
+- [x] **Phase 40: Structured Output (MCP Spec)** - structuredContent + outputSchema alongside text content (completed 2026-04-13)
+- [x] **Phase 41: Resource Links (MCP Spec)** - File-returning tools emit resource_link objects (completed 2026-04-13)
+- [x] **Phase 42: Bi-Temporal KG Model** - recorded_at transaction time alongside valid_from/valid_to (completed 2026-04-13)
+- [x] **Phase 43: WAL Mode & Performance Tuning** - WAL journal_mode + tuned PRAGMAs + regression guard (completed 2026-04-13)
+- [x] **Phase 44: Backup & Restore** - localnest_backup / localnest_restore MCP + CLI surface (completed 2026-04-13)
+- [x] **Phase 45: Actor-Aware Memories** - actor_id column, filter, and attribution in agent_prime (completed 2026-04-13)
+
+### Phase 39: Tool Annotations (MCP Spec)
+**Goal**: All 72 MCP tools have accurate readOnlyHint, destructiveHint, idempotentHint annotations per MCP 2025-06-18 spec AND a test validates the mapping
+**Depends on**: Nothing (first phase of v0.3.0)
+**Requirements**: ANNOT-01, ANNOT-02, ANNOT-03
+**Success Criteria** (what must be TRUE):
+  1. Every tool registration includes an annotations object with readOnlyHint, destructiveHint, and idempotentHint
+  2. Read-only tools (search, get, list, status) have readOnlyHint: true
+  3. Delete tools have destructiveHint: true; write tools have destructiveHint: false
+  4. Test validates annotations mapping for all 72 tools
+**Plans**: 2 plans
+- [x] 39-01-PLAN.md — Fix 9 confirmed annotation mismatches + lift shared annotation constants to tool-utils.ts (ANNOT-01, ANNOT-02)
+- [x] 39-02-PLAN.md — New test/mcp-annotations.test.js validates all 72 tools against hardcoded expected map (ANNOT-03)
+
+### Phase 40: Structured Output (MCP Spec)
+**Goal**: All tool responses include structuredContent alongside text content, with outputSchema declared for typed parsing
+**Depends on**: Phase 39
+**Requirements**: STRUCT-01, STRUCT-02, STRUCT-03
+**Success Criteria** (what must be TRUE):
+  1. Every tool result includes a structuredContent field with the JSON response object
+  2. Every tool declares an outputSchema in its registration
+  3. Existing response_format: "json" behavior is preserved (backwards compat)
+**Plans**: 2 plans
+- [x] 40-01-PLAN.md — Shared output archetype library + registrar extension (STRUCT-02, STRUCT-03)
+- [x] 40-02-PLAN.md — Per-tool archetype assignment + EXPECTED_OUTPUT_SCHEMAS test (STRUCT-01, STRUCT-02, STRUCT-03)
+
+### Phase 41: Resource Links (MCP Spec)
+**Goal**: Three file-returning tools (read_file, search_code, search_files) emit MCP resource_link content blocks alongside their existing inline text responses, with file:// URIs and a test locking the behavior; clients without resource_link support continue working unchanged.
+**Depends on**: Phase 40
+**Requirements**: RLINK-01, RLINK-02, RLINK-03
+**Success Criteria** (what must be TRUE):
+  1. read_file, search_code, search_files return resource_link objects pointing to file URIs
+  2. Clients can dereference links via MCP resource protocol
+  3. Fallback: clients without resource link support still receive inline content
+**Plans**: 2 plans
+- [x] 41-01-PLAN.md — Mime helper + ToolResult/createToolResponse/toolResult resource_link channel (RLINK-03 framework)
+- [x] 41-02-PLAN.md — Wire 3 retrieval handlers (read_file, search_files, search_code) + new mcp-resource-links.test.js (RLINK-01, RLINK-02, RLINK-03)
+
+### Phase 42: Bi-Temporal KG Model
+**Goal**: KG triples track both event time (valid_from/valid_to) and transaction time (recorded_at) for full temporal provenance
+**Depends on**: Nothing (independent of MCP phases)
+**Requirements**: BITEMP-01, BITEMP-02, BITEMP-03
+**Success Criteria** (what must be TRUE):
+  1. Schema migration adds recorded_at column to kg_triples with default NOW()
+  2. kg_as_of supports querying on recorded_at via a new mode parameter
+  3. kg_timeline output includes recorded_at for each triple
+**Plans**: 2 plans
+- [x] 42-01-PLAN.md — Schema v12 migration + KgTriple type + addTriple/addTripleBatch INSERT sites stamp recorded_at (BITEMP-01)
+- [x] 42-02-PLAN.md — queryTriplesAsOf mode parameter + getEntityTimeline recorded_at sort + localnest_kg_as_of MCP mode wiring + addTriple 13th-field return + new test/kg-bi-temporal.test.js (BITEMP-01, BITEMP-02, BITEMP-03)
+
+### Phase 43: WAL Mode & Performance Tuning
+**Goal**: SQLite databases open in WAL mode with tuned PRAGMAs for production-grade performance
+**Depends on**: Nothing (independent)
+**Requirements**: WAL-01, WAL-02, WAL-03
+**Success Criteria** (what must be TRUE):
+  1. All SQLite databases open with PRAGMA journal_mode=WAL
+  2. Tuned PRAGMAs applied: cache_size=-64000, synchronous=NORMAL, mmap_size=268435456
+  3. Batch insert of 500 triples completes in <2s (regression guard)
+**Plans**: 1 plan
+- [ ] 43-01-PLAN.md — Shared sqlite-tuning helper + 3 DB open sites + WAL-03 benchmark test (WAL-01, WAL-02, WAL-03)
+
+### Phase 44: Backup & Restore
+**Goal**: Users can create and restore SQLite backups via MCP tools and CLI commands
+**Depends on**: Phase 43
+**Requirements**: BACKUP-01, BACKUP-02, BACKUP-03
+**Success Criteria** (what must be TRUE):
+  1. localnest_backup creates a point-in-time SQLite backup to a specified path
+  2. localnest_restore restores from a backup with integrity check
+  3. CLI localnest backup and localnest restore wrap the MCP tools
+**Plans**: 1 plan
+- [ ] 44-01-PLAN.md — Shared backup service + 2 MCP tools + CLI noun (BACKUP-01, BACKUP-02, BACKUP-03)
+
+### Phase 45: Actor-Aware Memories
+**Goal**: Memories track who created them (user, agent, tool) for multi-agent attribution and filtering
+**Depends on**: Phase 42
+**Requirements**: ACTOR-01, ACTOR-02, ACTOR-03, ACTOR-04
+**Success Criteria** (what must be TRUE):
+  1. memory_entries has actor_id column (additive migration)
+  2. memory_store and memory_store_batch accept actor_id, auto-inferred from agent_id if omitted
+  3. memory_recall and memory_list accept actor_id filter
+  4. agent_prime surfaces actor attribution in recalled memories
+**Plans**: 1 plan
+Plans:
+- [ ] 45-01-PLAN.md — Schema migration v13 + type definitions + write/read/filter paths + MCP tool schemas (ACTOR-01, ACTOR-02, ACTOR-03, ACTOR-04)
+
+### Phase 46: Modern Interactive CLI
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 45
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 46 to break down)
+
+### Phase 47: Rewrite CI/CD pipelines with auto-publish for beta and stable releases
+
+**Goal:** Replace 5 GitHub Actions workflows with clean CI/CD pipeline: quality checks on all branches (including release/*), OIDC trusted publishing replacing deprecated NPM_TOKEN, and branch-based release tracks (beta from release/*, stable from main)
+**Requirements**: CICD-01, CICD-02, CICD-03, CICD-04, CICD-05, CICD-06, CICD-07
+**Depends on:** Phase 46
+**Success Criteria** (what must be TRUE):
+  1. Pushing code to a release/* branch triggers the quality pipeline (lint, typecheck, test)
+  2. Pushing a version bump to a release/* branch publishes to npm with @beta tag via OIDC
+  3. Pushing a version bump to main publishes to npm with @latest tag via OIDC
+  4. CodeQL scans run on release/* branches, not just main
+  5. No workflow references the stale beta branch
+  6. Quality pipeline runs ~60-120s faster by skipping postinstall for lint/typecheck
+**Plans:** 2/2 plans complete
+
+Plans:
+- [x] 47-01-PLAN.md — Rewrite quality.yml + update codeql.yml branch triggers (CICD-01, CICD-02, CICD-03)
+- [x] 47-02-PLAN.md — Rewrite release.yml with OIDC trusted publishing + release/** triggers (CICD-04, CICD-05, CICD-06, CICD-07)

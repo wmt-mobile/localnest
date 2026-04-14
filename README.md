@@ -1,595 +1,163 @@
-<!-- cspell:ignore localnest LOCALNEST winget MSVC choco HuggingFace huggingface reranker RERANKER Kiro duplicative refreshable SARIF reranking ripgrep -->
+<h1 align="center">LocalNest MCP</h1>
 
-# LocalNest MCP
+<p align="center">
+  <strong>The ultimate Local-First AI Context Engine & Persistent Memory</strong>
+</p>
 
-[![stable](https://img.shields.io/npm/v/localnest-mcp?label=stable)](https://www.npmjs.com/package/localnest-mcp)
-[![nightly](https://img.shields.io/npm/v/localnest-mcp/beta?label=nightly&color=blueviolet)](https://www.npmjs.com/package/localnest-mcp?activeTab=versions)
-[![Node.js](https://img.shields.io/node/v/localnest-mcp)](https://nodejs.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Quality](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml)
-[![CodeQL](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml/badge.svg?branch=beta)](https://github.com/wmt-mobile/localnest/actions/workflows/codeql.yml)
-[![Socket](https://badge.socket.dev/npm/package/localnest-mcp)](https://socket.dev/npm/package/localnest-mcp)
+<p align="center">
+  <a href="https://www.npmjs.com/package/localnest-mcp"><img src="https://img.shields.io/npm/v/localnest-mcp.svg?style=for-the-badge&color=success" alt="npm version"></a>
+  <a href="https://www.npmjs.com/package/localnest-mcp/v/beta"><img src="https://img.shields.io/npm/v/localnest-mcp/beta?style=for-the-badge&label=beta&color=blue" alt="beta track"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-gold.svg?style=for-the-badge" alt="License: MIT"></a>
+  <a href="https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml"><img src="https://img.shields.io/github/actions/workflow/status/wmt-mobile/localnest/quality.yml?branch=main&style=for-the-badge&label=Quality" alt="Quality"></a>
+</p>
 
-**Your AI's home base.**
+<br />
 
-LocalNest is a local-first MCP server where your AI builds its nest — right on your machine. It learns your codebase, remembers decisions across sessions, and protects your code with persistent AI memory and a temporal knowledge graph that never leaves home. No cloud subscriptions, no data leaks, no surprises. The nest grows with you, and it's entirely yours.
-
-A private AI coding assistant with semantic code search, offline AI code tools, and an AI knowledge graph — all running locally. No-cloud AI tools for local-first development.
-
-**72 MCP tools** | **TypeScript** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
-
-📖 [Full documentation](https://wmt-mobile.github.io/localnest/) · [Architecture deep dive](./localnest-docs/docs/guides/architecture.md)
-
-## README Languages
-
-English · [العربية الفصحى](./localnest-docs/docs/i18n/README.ar-001.md) · [বাংলা (বাংলাদেশ)](./localnest-docs/docs/i18n/README.bn-BD.md) · [Deutsch (Deutschland)](./localnest-docs/docs/i18n/README.de-DE.md) · [Español (Latinoamérica)](./localnest-docs/docs/i18n/README.es-419.md) · [Français (France)](./localnest-docs/docs/i18n/README.fr-FR.md) · [हिन्दी (भारत)](./localnest-docs/docs/i18n/README.hi-IN.md) · [Bahasa Indonesia](./localnest-docs/docs/i18n/README.id-ID.md) · [日本語](./localnest-docs/docs/i18n/README.ja-JP.md) · [한국어](./localnest-docs/docs/i18n/README.ko-KR.md) · [Português (Brasil)](./localnest-docs/docs/i18n/README.pt-BR.md) · [Русский](./localnest-docs/docs/i18n/README.ru-RU.md) · [Türkçe](./localnest-docs/docs/i18n/README.tr-TR.md) · [简体中文](./localnest-docs/docs/i18n/README.zh-CN.md)
-
-These translated files are locale-specific full README translations. See [translation policy](./localnest-docs/docs/i18n/TRANSLATION_POLICY.md) for the target locale matrix and terminology rules. The English [README.md](./README.md) remains the source of truth for the newest commands, release notes, and full details.
+**LocalNest** is the world’s first local-first Model Context Protocol (MCP) server that seamlessly integrates **Semantic Code Search**, **Persistent AI Memory**, and a **Temporal Knowledge Graph**. It enables your AI agents to build a "nest" of knowledge directly on your machine—ensuring complete privacy, lightning-fast speed, and cross-session intelligence without relying on cloud embeddings.
 
 ---
 
-## What's New in 0.2.0
+## ✨ Why LocalNest?
 
-> Full changelog: [CHANGELOG.md](./CHANGELOG.md)
+Modern AI agents suffer from amnesia. They forget your architectural decisions, bug fixes, and preferences the moment you close the session.
 
-- **Batch operations** — `kg_add_entities_batch`, `kg_add_triples_batch`, `memory_store_batch` turn 300 API calls into 3
-- **Fused search** — `localnest_find` searches memory, code, and KG in one call with RRF ranking
-- **Agent prime** — `localnest_agent_prime` returns memories + entities + files + changes + actions in a single call
-- **Terse responses** — `terse: 'minimal'` on all write tools, 70%+ token reduction
-- **Auto-inference** — `memory_store` needs only {title, content}, everything else inferred
-- **Memory-KG fusion** — memories auto-extract entities and create KG triples
-- **Recall enrichment** — top results include related_facts from 1-hop KG neighbors
-- **Symbol-aware code intel** — `find_callers`, `find_definition`, `find_implementations`, `rename_preview`
-- **Teach memories** — `localnest_teach` creates durable behavior modifiers surfaced through agent_prime
-- **Self-audit** — `localnest_audit` reports health score, coverage, density, orphans, stale memories
-- **Proactive hooks** — `localnest_file_changed` surfaces memory hints on file edits
-- **Cross-session deltas** — `localnest_whats_new` shows new memories, triples, files since last session
-- **20 new MCP tools** (72 total)
+LocalNest solves this by giving your agents **74 specialized tools** to read, write, and traverse a permanent local knowledge base—backed by high-performance SQLite-vec and HuggingFace local embeddings.
+
+| 🧠 **Persistent Intelligence** | ⚡ **Instant Recall** | 🔒 **100% Private** |
+|:---|:---|:---|
+| Agents remember decisions and workflows across every session. | Fused lexical + semantic search powered by `sqlite-vec`. | Zero cloud dependencies. Your code and embeddings stay local. |
 
 ---
 
-## Why LocalNest?
+## 🚀 Quick Start
 
-Most AI code tools phone home. LocalNest doesn't — it's your private code assistant that stays local.
+Get up and running in seconds. Choose your preferred release track:
 
-Everything — file reads, vector embeddings, persistent AI memory — runs in-process on your machine. No cloud subscription, no rate limits, no data leaving your box. LocalNest is built for local-first development: your AI nests where your code lives, learns what matters, and keeps it safe. And because it speaks MCP, any compatible client (Cursor, Windsurf, Codex, Kiro, Gemini CLI) can plug in with one config block.
+### 1. Installation
 
-| What you get | How it works |
-|---|---|
-| **Safe file access** | Scoped reads under your configured roots — nothing outside |
-| **Instant lexical search** | ripgrep-backed symbol and pattern search (JS fallback if missing) |
-| **Semantic search** | Local vector embeddings via `all-MiniLM-L6-v2` — no GPU needed |
-| **Hybrid retrieval** | Lexical + semantic fused with RRF ranking for best-of-both results |
-| **Project awareness** | Auto-detects projects from marker files, scopes every tool call |
-| **Agent memory** | Durable, queryable knowledge graph — your AI remembers what it learned |
-| **Batch operations** | 300 API calls become 3 — bulk write entities, triples, and memories |
-| **One-call context** | `agent_prime` returns memories + entities + files + changes in a single call |
-| **Fused search** | `find` searches memory, code, and KG together with RRF cross-ranking |
-| **Teach your AI** | `teach("always use snake_case")` — durable behavior modifiers that persist |
-| **Terse responses** | 70%+ token reduction on write tools with `terse: 'minimal'` |
-| **Auto-inference** | `memory_store` needs only `{title, content}` — scope, tags, topic auto-derived |
-| **Symbol intelligence** | Find callers, definitions, implementations, and rename preview across files |
-| **Temporal knowledge graph** | Subject-predicate-object triples with time validity — query what was true when |
-| **Multi-hop graph traversal** | Walk relationships 2-5 hops deep via recursive CTEs — no other local tool does this |
-| **Memory-KG fusion** | Memories auto-extract entities and create KG triples with provenance links |
-| **Proactive hints** | File-linked memory hints surface automatically when reading related code |
-| **Self-audit** | Health score with coverage, density, orphan, and stale memory detection |
-| **Conversation ingestion** | Import Markdown/JSON chat exports into structured memory + KG triples |
-| **Agent isolation** | Per-agent diary and memory scoping — multiple agents, zero cross-contamination |
-| **Hooks system** | Pre/post operation hooks for memory, KG, traversal, ingestion — plug in your own logic |
-
----
-
-## Quick Start
-
+**Stable Track** *(Recommended for production workflows)*
 ```bash
 npm install -g localnest-mcp
+```
+
+**Beta Track** *(Access the new Interactive TUI Dashboard)*
+```bash
+npm install -g localnest-mcp@beta
+```
+
+### 2. Enable Local Embeddings (One-Time Setup)
+```bash
+cd $(npm root -g)/localnest-mcp && npm install --no-save @huggingface/transformers
+```
+
+### 3. Initialize Workspace
+```bash
 localnest setup
-localnest doctor
+# (Beta only) Open the interactive memory viewer:
+localnest dashboard
 ```
 
-**3. Drop this into your MCP client config**
-
-Setup auto-writes the config for detected tools. You'll also find a ready-to-paste block at `~/.localnest/config/mcp.localnest.json`:
-
-```json
-{
-  "mcpServers": {
-    "localnest": {
-      "command": "localnest-mcp",
-      "startup_timeout_sec": 30,
-      "env": {
-        "MCP_MODE": "stdio",
-        "LOCALNEST_CONFIG": "~/.localnest/config/localnest.config.json",
-        "LOCALNEST_INDEX_BACKEND": "sqlite-vec",
-        "LOCALNEST_DB_PATH": "~/.localnest/data/localnest.db",
-        "LOCALNEST_INDEX_PATH": "~/.localnest/data/localnest.index.json",
-        "LOCALNEST_EMBED_PROVIDER": "huggingface",
-        "LOCALNEST_EMBED_MODEL": "sentence-transformers/all-MiniLM-L6-v2",
-        "LOCALNEST_EMBED_CACHE_DIR": "~/.localnest/cache",
-        "LOCALNEST_EMBED_DIMS": "384",
-        "LOCALNEST_RERANKER_PROVIDER": "huggingface",
-        "LOCALNEST_RERANKER_MODEL": "cross-encoder/ms-marco-MiniLM-L-6-v2",
-        "LOCALNEST_RERANKER_CACHE_DIR": "~/.localnest/cache",
-        "LOCALNEST_MEMORY_ENABLED": "true",
-        "LOCALNEST_MEMORY_BACKEND": "auto",
-        "LOCALNEST_MEMORY_DB_PATH": "~/.localnest/data/localnest.memory.db"
-      }
-    }
-  }
-}
-```
-
-> **Windows:** Use the config written by `localnest setup` — it sets the correct command for your platform automatically.
-
-Restart your MCP client. If it times out, set `startup_timeout_sec: 30` in your client config.
-
-**Requirements:** Node.js `>=18` · ripgrep recommended but optional
-
-AST-aware chunking ships by default for `TypeScript`, `JavaScript`, `Python`, `Go`, `Bash`, `Lua`, and `Dart`. Other languages still index cleanly with line-based fallback chunking.
-
-The current stable runtime uses `@huggingface/transformers` for local embeddings and reranking. New setup defaults use `huggingface`, and older `xenova` configs remain accepted as a compatibility alias.
-
-```bash
-# macOS
-brew install ripgrep
-
-# Ubuntu/Debian
-sudo apt-get install ripgrep
-
-# Windows
-winget install BurntSushi.ripgrep.MSVC
-```
+> **Note:** If you are installing directly from GitHub and encounter errors, please see the [Troubleshooting](#-troubleshooting) section for workarounds related to npm native binary extraction.
 
 ---
 
-## Upgrade
+## 🛠️ Tool Suites
 
-```bash
-localnest upgrade              # latest stable
-localnest upgrade stable       # latest stable
-localnest upgrade beta         # latest beta
-localnest upgrade <version>    # pin to a specific version
-localnest version              # check current
-```
-
----
-
-## How Agents Use It
-
-Six workflows cover almost everything:
-
-### Cold start — one call to get everything
-
-```
-localnest_agent_prime     → memories + entities + files + changes + actions in 1 call
-```
-
-### Fast lookup — find it, read it, done
-
-```
-localnest_find            → fused search across memory, code, and KG
-localnest_search_files    → find the module by path/name
-localnest_read_file       → read the relevant lines
-```
-
-### Deep task — debug, refactor, review with context
-
-```
-localnest_agent_prime     → one call: everything needed to start work
-localnest_search_hybrid   → concept-level search across your codebase
-localnest_read_file       → read the relevant sections
-localnest_capture_outcome → persist what you learned for next time
-```
-
-### Knowledge graph — structured facts about the project
-
-```
-localnest_kg_add_triples_batch → bulk import facts in one call
-localnest_kg_query             → what does "auth-service" relate to?
-localnest_kg_as_of             → what was true about this on March 1st?
-localnest_graph_traverse       → walk 2-3 hops to discover connections
-```
-
-### Teach and recall — your AI learns your preferences
-
-```
-localnest_teach           → "always use snake_case in this repo"
-localnest_memory_store    → just {title, content} — everything else auto-inferred
-localnest_whats_new       → what changed since my last session?
-localnest_audit           → health check: coverage, orphans, stale memories
-```
-
-### Conversation memory — learn from past chats
-
-```
-localnest_ingest_markdown → import a conversation export
-localnest_memory_recall   → what do I already know about this?
-localnest_diary_write     → private scratchpad for this agent
-```
-
----
-
-## CLI Reference
-
-LocalNest is a full CLI tool. Everything is managed from the terminal:
-
-```bash
-localnest setup                     # configure roots, backends, AI clients
-localnest doctor                    # health check
-localnest upgrade                   # self-update
-localnest version                   # current version
-localnest status                    # runtime status
-
-localnest memory add "content"      # store a memory
-localnest memory search "query"     # find memories
-localnest memory list               # list all memories
-localnest memory show <id>          # view one memory
-localnest memory delete <id>        # remove a memory
-
-localnest kg add Alice works_on ProjectX    # add a fact
-localnest kg query Alice                     # query relationships
-localnest kg timeline Alice                  # fact evolution
-localnest kg stats                           # graph statistics
-
-localnest skill install             # install skills to AI clients
-localnest skill list                # show installed skills
-localnest skill remove <name>       # uninstall a skill
-
-localnest mcp start                 # start MCP server
-localnest mcp status                # server health
-localnest mcp config                # config JSON for AI clients
-
-localnest ingest ./chat.md          # import conversation
-localnest ingest ./export.json      # import JSON chat
-
-localnest completion bash           # shell completions
-```
-
-**Global flags** work on every command: `--json` (machine output), `--verbose`, `--quiet`, `--config <path>`
-
----
-
-## Tools
-
-### Workspace & Discovery
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_list_roots` | List configured roots |
-| `localnest_list_projects` | List projects under a root |
-| `localnest_project_tree` | File/folder tree for a project |
-| `localnest_summarize_project` | Language and extension breakdown |
-| `localnest_read_file` | Read a bounded line window from a file |
-
-### Search & Index
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_search_files` | File/path name search — start here for module discovery |
-| `localnest_search_code` | Lexical search — exact symbols, regex, identifiers |
-| `localnest_search_hybrid` | Hybrid search — lexical + semantic, RRF-ranked |
-| `localnest_get_symbol` | Find definition/export locations for a symbol |
-| `localnest_find_usages` | Find import and call-site usages for a symbol |
-| `localnest_index_project` | Build or refresh the semantic index |
-| `localnest_index_status` | Index metadata — exists, stale, backend |
-| `localnest_embed_status` | Embedding backend and vector-search readiness |
-
-### Memory
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_task_context` | One-call runtime + memory context for a task |
-| `localnest_memory_recall` | Recall relevant memories for a query |
-| `localnest_capture_outcome` | Capture a task outcome into memory |
-| `localnest_memory_capture_event` | Background event ingest with auto-promotion |
-| `localnest_memory_store` | Store a memory manually |
-| `localnest_memory_update` | Update a memory and append a revision |
-| `localnest_memory_delete` | Delete a memory |
-| `localnest_memory_get` | Fetch one memory with revision history |
-| `localnest_memory_list` | List stored memories |
-| `localnest_memory_events` | Inspect recent memory events |
-| `localnest_memory_add_relation` | Link two memories with a named relation |
-| `localnest_memory_remove_relation` | Remove a relation |
-| `localnest_memory_related` | Traverse the knowledge graph one hop |
-| `localnest_memory_suggest_relations` | Auto-suggest related memories by similarity |
-| `localnest_memory_status` | Memory consent, backend, and database status |
-
-### Knowledge Graph
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_kg_add_entity` | Create entities (people, projects, concepts, tools) |
-| `localnest_kg_add_triple` | Add subject-predicate-object facts with temporal validity |
-| `localnest_kg_query` | Query entity relationships with direction filtering |
-| `localnest_kg_invalidate` | Mark a fact as no longer valid (archival, not deletion) |
-| `localnest_kg_as_of` | Point-in-time queries — what was true on date X? |
-| `localnest_kg_timeline` | Chronological fact evolution for an entity |
-| `localnest_kg_stats` | Entity count, triple count, predicate breakdown |
-
-### Nest/Branch Organization
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_nest_list` | List all nests (top-level memory domains) with counts |
-| `localnest_nest_branches` | List branches (topics) within a nest |
-| `localnest_nest_tree` | Full hierarchy: nests, branches, and counts |
-
-### Graph Traversal
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_graph_traverse` | Multi-hop traversal with path tracking (recursive CTEs) |
-| `localnest_graph_bridges` | Find cross-nest bridges — connections across domains |
-
-### Agent Diary
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_diary_write` | Write a private scratchpad entry (agent-isolated) |
-| `localnest_diary_read` | Read your own recent diary entries |
-
-### Conversation Ingestion
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_ingest_markdown` | Import Markdown conversation exports into memory + KG |
-| `localnest_ingest_json` | Import JSON conversation exports into memory + KG |
-| `localnest_memory_check_duplicate` | Semantic duplicate detection before filing |
-
-### Batch Operations
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_kg_add_entities_batch` | Batch entity creation (up to 500 entities per call) |
-| `localnest_kg_add_triples_batch` | Batch triple creation with dedup |
-| `localnest_memory_store_batch` | Batch memory storage (up to 100 entries per call) |
-| `localnest_memory_delete_batch` | Batch delete up to 100 memories with cascade |
-| `localnest_kg_delete_entity` | Delete entity + cascade all its triples |
-| `localnest_kg_delete_entities_batch` | Batch delete up to 100 entities with cascade |
-| `localnest_kg_delete_triples_batch` | Hard-delete up to 100 triples by ID |
-
-### Agentic Workflow
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_agent_prime` | Unified context: memories + entities + files + changes + actions in 1 call |
-| `localnest_find` | Fused search across memory, code, and KG with RRF ranking |
-| `localnest_whats_new` | Cross-session delta: new memories, triples, files since timestamp |
-| `localnest_help` | Just-in-time task-scoped tool guidance |
-| `localnest_teach` | Durable behavior modifier via feedback memories |
-| `localnest_audit` | Self-audit dashboard: coverage, density, orphans, stale memories |
-| `localnest_file_changed` | Proactive memory hints when files are edited |
-| `localnest_kg_backfill_links` | Retroactive memory-to-KG entity linking |
-| `localnest_project_backfill` | Scan directory for projects, seed memories |
-
-### Code Intelligence
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_find_callers` | Find all callers of a symbol |
-| `localnest_find_definition` | Find symbol definition |
-| `localnest_find_implementations` | Find interface/trait implementations |
-| `localnest_rename_preview` | Preview all references before renaming |
-
-### Hook Introspection
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_hooks_stats` | Hook execution counts and timing statistics |
-| `localnest_hooks_list_events` | List all available hook event names |
-
-### Server & Updates
-
-| Tool | What it does |
-|------|-------------|
-| `localnest_server_status` | Runtime config, roots, ripgrep, index backend |
-| `localnest_health` | Compact health summary with background monitor report |
-| `localnest_usage_guide` | Best-practice guidance for agents |
-| `localnest_update_status` | Check npm for latest version (cached) |
-| `localnest_update_self` | Update globally and sync bundled skill (approval required) |
-
-**72 tools total.** All support `response_format: "json"` (default) or `"markdown"`. List tools return `total_count`, `has_more`, `next_offset` for pagination.
-
----
-
-## How LocalNest Compares
-
-LocalNest is the only local-first MCP server that combines code retrieval AND structured memory in a single tool. Here's where it stands:
-
-| Capability | LocalNest | MemPalace | Zep | Graphiti | Mem0 |
-|---|---|---|---|---|---|
-| **Local-first (no cloud)** | Yes | Yes | No ($25+/mo) | No (Neo4j) | No ($20-200/mo) |
-| **Code retrieval** | 72 MCP tools, AST-aware, hybrid search | None | None | None | None |
-| **Knowledge graph** | SQLite triples with temporal validity | SQLite triples | Neo4j | Neo4j | Key-value |
-| **Multi-hop traversal** | Yes (recursive CTEs, 2-5 hops) | No (flat lookup only) | No | Yes (requires Neo4j) | No |
-| **Temporal queries (as_of)** | Yes | Yes | Yes | Yes | No |
-| **Contradiction detection** | Yes (cardinality-aware, functional vs multi-valued) | Exists but not wired in | No | No | No |
-| **Batch operations** | Yes (500 entities/triples, 100 memories per call) | No | No | No | No |
-| **Memory-KG fusion** | Auto-link memories to KG entities on write | No | No | No | No |
-| **Behavior modifiers** | `teach` — durable instructions that persist across sessions | No | No | No | No |
-| **Terse responses** | 70%+ token reduction on write tools | No | No | No | No |
-| **Fused cross-domain search** | Memory + code + KG in one call with RRF ranking | No | No | No | No |
-| **Symbol intelligence** | Find callers, definitions, implementations, rename preview | No | No | No | No |
-| **Self-audit** | Coverage, density, orphan, stale memory health scoring | No | No | No | No |
-| **Conversation ingestion** | Markdown + JSON | Markdown + JSON + Slack | No | No | No |
-| **Agent isolation** | Per-agent scoping + private diary | Wing-per-agent | User/session scoping | No | User/agent/run/session |
-| **Semantic dedup** | 0.92 cosine gate on all writes | 0.9 threshold | No | No | No |
-| **Memory hierarchy** | Nest/Branch (original) | Wing/Room/Hall (palace) | Flat | Flat | Flat |
-| **Hooks system** | Pre/post + proactive file-change hints | None | Webhooks | None | None |
-| **Runtime** | Node.js + TypeScript (lightweight) | Python + ChromaDB | Python + Neo4j | Python + Neo4j | Python (cloud) |
-| **Dependencies** | 0 new (pure SQLite) | ChromaDB (heavy) | Neo4j ($25+/mo) | Neo4j | Cloud API |
-| **MCP tools** | 72 | 19 | 0 | 0 | 0 |
-| **Cost** | Free | Free | $25+/mo | $25+/mo | $20-200/mo |
-
-**LocalNest's unique position:** The only tool that gives your AI both deep code understanding AND structured persistent memory — entirely local, zero cloud, zero cost.
-
----
-
-## Memory — Your AI Doesn't Forget
-
-Enable persistent AI memory during `localnest setup` and LocalNest starts building a durable AI knowledge graph in a local SQLite database. Every bug fix, architectural decision, and preference your AI agent touches can be recalled on the next session — the nest remembers so your AI doesn't have to start over.
-
-- Requires **Node 22.13+** — search and file tools work fine on Node 18/20 without it
-- Memory failure never blocks other tools — everything degrades independently
-
-**How auto-promotion works:** events captured via `localnest_memory_capture_event` are scored for signal strength. High-signal events — bug fixes, decisions, preferences — get promoted into durable memories. Weak exploratory events are recorded and quietly discarded after 30 days.
-
-**One-call context:** `localnest_agent_prime({ task })` returns recalled memories, matched KG entities, relevant files, recent git changes, and suggested next actions — everything an agent needs to start work, in a single call.
-
-**Teach your AI:** `localnest_teach({ instruction: "always use snake_case" })` stores durable behavior modifiers that surface automatically in future sessions via `agent_prime`. Your AI remembers your preferences.
-
-**Batch operations:** `memory_store_batch` (100/call), `kg_add_triples_batch` (500/call), `kg_add_entities_batch` (500/call). Turn 300 API calls into 3.
-
-**Auto-inference:** `localnest_memory_store` needs only `{title, content}`. Project path, branch, topic, tags, nest, and branch are all auto-derived.
-
-**Memory-KG fusion:** Every memory write auto-extracts entities and creates KG triples with `source_memory_id` provenance. Recall includes 1-hop KG neighbors as `related_facts`.
-
-**Knowledge graph:** Store structured facts as subject-predicate-object triples with temporal validity. Contradiction detection is cardinality-aware — only functional predicates (e.g. `status_is`) trigger warnings, multi-valued predicates (e.g. `uses`) coexist freely.
-
-**Cross-session deltas:** `localnest_whats_new({ since: "last_session" })` returns new memories, triples, changed files, and commits since your last session.
-
-**Self-audit:** `localnest_audit()` scores memory health (0-100) with per-domain coverage, KG density, orphan detection, stale memory flagging, and actionable suggestions.
-
-**Terse responses:** Pass `terse: "minimal"` to any write tool for `{id, ok}` instead of full payloads — 70%+ token reduction. Batch tools default to minimal.
-
-**Semantic dedup:** Every write passes through an embedding similarity gate (default 0.92 cosine threshold). Near-duplicates are caught before storage — your memory stays clean.
-
-**Proactive hints:** When you read or edit a file linked to high-importance memories, LocalNest surfaces memory hints automatically — push, don't pull.
-
-**Agent isolation:** Each agent gets its own memory scope and private diary. Recall returns own + global memories, never another agent's private data.
-
-**Hooks:** Register pre/post callbacks on any memory operation — store, recall, KG writes, traversal, ingestion, file reads. Build custom pipelines without modifying core code.
-
----
-
-## Index Backend
-
-| Backend | When to use |
-|---------|-------------|
-| `sqlite-vec` | **Recommended.** Persistent SQLite, fast and efficient for large repos. Requires Node 22+. |
-| `json` | Compatibility fallback. Auto-selected if sqlite-vec is unavailable. |
-
-Check `localnest_server_status` → `upgrade_recommended` to know when to migrate.
-
----
-
-## Configuration
-
-Setup writes everything to `~/.localnest/`:
-
-```
-~/.localnest/
-├── config/   → localnest.config.json, mcp.localnest.json
-├── data/     → SQLite index + memory databases
-├── cache/    → Model weights, update status
-├── backups/  → Config migration history
-└── vendor/   → Managed native deps (sqlite-vec)
-```
-
-**Config priority:** `PROJECT_ROOTS` env → `LOCALNEST_CONFIG` file → current directory
-
-**Key environment variables:**
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `LOCALNEST_INDEX_BACKEND` | `sqlite-vec` | `sqlite-vec` or `json` |
-| `LOCALNEST_DB_PATH` | `~/.localnest/data/localnest.db` | SQLite database path |
-| `LOCALNEST_VECTOR_CHUNK_LINES` | `60` | Lines per index chunk |
-| `LOCALNEST_VECTOR_CHUNK_OVERLAP` | `15` | Overlap between chunks |
-| `LOCALNEST_VECTOR_MAX_FILES` | `20000` | Max files per index run |
-| `LOCALNEST_EMBED_MODEL` | `sentence-transformers/all-MiniLM-L6-v2` | Embedding model |
-| `LOCALNEST_EMBED_CACHE_DIR` | `~/.localnest/cache` | Model cache path |
-| `LOCALNEST_RERANKER_MODEL` | `cross-encoder/ms-marco-MiniLM-L-6-v2` | Cross-encoder reranker model |
-| `LOCALNEST_MEMORY_ENABLED` | `false` | Enable local memory subsystem |
-| `LOCALNEST_MEMORY_DB_PATH` | `~/.localnest/data/localnest.memory.db` | Memory database path |
-| `LOCALNEST_MEMORY_AUTO_CAPTURE` | `false` | Auto-promote background events |
-| `LOCALNEST_UPDATE_CHECK_INTERVAL_MINUTES` | `120` | npm update check interval |
+LocalNest exposes **74 specialized MCP tools** to your AI, meticulously categorized for agentic efficiency. For the complete parameter reference, explore the [Full Tool Documentation](https://wmt-mobile.github.io/localnest/docs/tools/overview).
 
 <details>
-<summary>All environment variables</summary>
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `LOCALNEST_INDEX_PATH` | `~/.localnest/data/localnest.index.json` | JSON index path |
-| `LOCALNEST_SQLITE_VEC_EXTENSION` | auto-detected | Native `vec0` extension path |
-| `LOCALNEST_VECTOR_MAX_TERMS` | `80` | Max terms per chunk |
-| `LOCALNEST_EMBED_PROVIDER` | `huggingface` | Embedding backend |
-| `LOCALNEST_EMBED_DIMS` | `384` | Embedding vector dimensions |
-| `LOCALNEST_RERANKER_PROVIDER` | `huggingface` | Reranker backend |
-| `LOCALNEST_RERANKER_CACHE_DIR` | `~/.localnest/cache` | Reranker cache path |
-| `LOCALNEST_MEMORY_BACKEND` | `auto` | `auto`, `node-sqlite`, or `sqlite3` |
-| `LOCALNEST_MEMORY_CONSENT_DONE` | `false` | Suppress consent prompt |
-| `LOCALNEST_UPDATE_PACKAGE` | `localnest-mcp` | npm package name to check |
-| `LOCALNEST_UPDATE_FAILURE_BACKOFF_MINUTES` | `15` | Retry on failed npm check |
-
+<summary><b>📂 Workspace & Discovery</b></summary>
+<p>Tools for navigating file structures, scoping read operations, and generating high-level project summaries.</p>
 </details>
 
-## Install Note
+<details>
+<summary><b>🧠 Semantic Search & Core Intelligence</b></summary>
+<p>Fused lexical/semantic search with RRF ranking, plus deep AST-aware queries for callers, definitions, implementations, and rename previews.</p>
+</details>
 
-`0.2.0` adds 20 new MCP tools (72 total): batch operations for entities/triples/memories, fused cross-domain search, unified agent context, symbol-aware code intelligence, teach memories, self-audit, proactive file-change hooks, and cross-session deltas. Terse responses on all write tools cut token usage by 70%+. Auto-inference on memory_store means only {title, content} is required. Memory-KG fusion auto-extracts entities and creates triples on every write. Schema migrations remain additive and backward-compatible.
-
-**Performance tips:**
-- Scope queries with `project_path` + a narrow `glob` whenever possible
-- Start with `max_results: 20–40`, widen only when needed
-- Leave reranking off by default — enable only for final precision passes
+<details>
+<summary><b>🕸️ Graph & Temporal Memory</b></summary>
+<p>Cross-session task context, recall capabilities, and entity management over a multi-hop subject-predicate-object knowledge graph.</p>
+</details>
 
 ---
 
-## Skill Distribution
+## 🤖 Agentic Integrations
 
-LocalNest ships bundled AI agent skills from one canonical source and installs tool-specific variants for supported clients. Current user-level targets include generic agents directories plus Codex, Copilot, Claude Code, Cursor, Windsurf, OpenCode, Gemini, Antigravity, Cline, and Continue.
+LocalNest is designed to be the foundational context layer for AI coding assistants (like Claude Code, Cursor, and custom MCP clients).
 
+- 🏁 **Cold Start:** Agents trigger `agent_prime` to instantly hydrate their context window with relevant memories and recent changes.
+- 🔍 **Deep Investigation:** Agents use `find` to run fused searches across codebase fragments and historical design decisions.
+- 🎓 **Continuous Learning:** Agents call `teach` to proactively save new architectural rules, ensuring they never repeat the same mistake twice.
+
+---
+
+## ⚖️ How We Compare
+
+| Feature | **LocalNest** | Leading Memory MCPs | Standard Code Search |
+|:---|:---:|:---:|:---:|
+| **Local-First Embeddings** | ✅ | ❌ | ❌ |
+| **AST-Aware Intelligence** | ✅ | ❌ | ✅ |
+| **Knowledge Graph** | ✅ | ❌ | ❌ |
+| **Interactive Terminal UI** | ✅ | ❌ | ❌ |
+
+---
+
+## 🛡️ Enterprise-Grade Quality
+
+We treat LocalNest with the same rigorous standard as production infrastructure. Our fully automated OSS security pipeline includes:
+
+- 🛂 **OIDC Trusted Publishing** for verifiable `npm` provenance.
+- 🔬 **Continuous CodeQL** static analysis on all branches.
+- 📦 **OpenSSF Scorecard** monitoring and proactive Dependabot updates.
+
+---
+
+## 🆘 Troubleshooting
+
+<details>
+<summary><b>Installing from GitHub (git+https://) Fails</b></summary>
+
+<br/>
+Direct `npm install -g git+https://...` may fail with `TAR_ENTRY_ERRORS` or `spawn sh ENOENT`. This is a <a href="https://github.com/npm/cli/issues/3910">known npm limitation</a> where git dependencies auto-bundle `node_modules` into the tarball.
+
+**Fix 1: Install from tarball**
 ```bash
-localnest install skills             # install or update bundled skills
-localnest install skills --force     # force reinstall
-localnest-mcp-install-skill          # deprecated compatibility alias
+git clone https://github.com/wmt-mobile/localnest.git
+cd localnest
+npm pack
+npm install -g ./localnest-mcp-*.tgz
 ```
 
-**Shell CLI tools** for automation and hooks:
+**Fix 2: Bypass Scripts**
+```bash
+npm install -g --ignore-scripts git+https://github.com/wmt-mobile/localnest.git#release/0.3.0
+cd $(npm root -g)/localnest-mcp && npm install
+```
+</details>
+
+<details>
+<summary><b>Semantic Search Not Working</b></summary>
+<br/>
+Ensure the HuggingFace transformers module is installed in the global `localnest-mcp` directory:
 
 ```bash
-localnest task-context --task "debug auth" --project-path /path/to/project
-localnest capture-outcome --task "fix auth" --summary "..." --files-changed 2
+cd $(npm root -g)/localnest-mcp && npm install --no-save @huggingface/transformers
 ```
-
-Legacy aliases `localnest-mcp-task-context` and `localnest-mcp-capture-outcome` still work for compatibility. Both commands accept JSON on stdin. Install from GitHub:
-
-```bash
-npx skills add https://github.com/wmt-mobile/localnest --skill localnest-mcp
-```
+</details>
 
 ---
 
-## Auto-Migration
+## 📚 Resources & Community
 
-Upgrade without ceremony. On startup, LocalNest automatically migrates older config schemas and the flat `~/.localnest` layout into the new `config/`, `data/`, `cache/`, and `backups/` structure. No manual reruns, no broken configs after upgrades.
-
----
-
-## Security
-
-LocalNest follows the OSS security pipeline pattern:
-
-- **CI quality gate** — [quality.yml](./.github/workflows/quality.yml)
-- **CodeQL static analysis** — [codeql.yml](./.github/workflows/codeql.yml)
-- **OpenSSF Scorecard** — [scorecards.yml](./.github/workflows/scorecards.yml)
-- **Dependabot** — [.github/dependabot.yml](./.github/dependabot.yml)
-- **Public scorecard** — https://scorecard.dev/viewer/?uri=github.com/wmt-mobile/localnest
+- 📖 **[Official Documentation](https://wmt-mobile.github.io/localnest/)** – Deep dives into all 74 tools.
+- 🏗️ **[Architecture Guide](./localnest-docs/docs/guides/architecture.md)** – Understand the engine beneath.
+- 📜 **[CHANGELOG](./CHANGELOG.md)** – See what's new.
+- 🛡️ **[SECURITY](./SECURITY.md)** – Our vulnerability disclosure policy.
 
 ---
 
-## Contributing
-
-See [CONTRIBUTING.md](./CONTRIBUTING.md) · [CHANGELOG.md](./CHANGELOG.md) · [SECURITY.md](./SECURITY.md)
-
-> **New to the codebase?** Start with the **[Architecture Overview](./localnest-docs/docs/guides/architecture.md)** — covers how the server boots, how search and memory work, and where everything lives.
-
----
-
-## Contributors
-
-[![Contributors](https://contrib.rocks/image?repo=wmt-mobile/localnest)](https://github.com/wmt-mobile/localnest/graphs/contributors)
-
-
-Thanks to everyone who contributes code, docs, reviews, testing, and issue reports.
+<div align="center">
+  Built with ❤️ by the LocalNest Team. <br />
+  <strong>Empower your AI. Own your context.</strong>
+</div>

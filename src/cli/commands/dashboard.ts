@@ -10,8 +10,7 @@ import { buildRuntimeConfig } from '../../runtime/config.js';
 import { EmbeddingService } from '../../services/retrieval/embedding/service.js';
 import { MemoryService } from '../../services/memory/service.js';
 import {
-  bold, dim, cyan, green, yellow, magenta, red, gray, inverse,
-  B, padRight, panel, progressBar, truncate,
+  c, padRight, panel, progressBar, truncate,
 } from '../ansi.js';
 import { writeError } from '../output.js';
 import { TOOL_COUNT } from '../tool-count.js';
@@ -97,21 +96,21 @@ const VIEWS = { OVERVIEW: 'overview', MEMORY: 'memory', KG: 'kg', RECENT: 'recen
 type ViewKey = typeof VIEWS[keyof typeof VIEWS];
 
 function renderHeader(W: number, _view: ViewKey, refreshing: boolean): string[] {
-  const title = bold('LocalNest Dashboard');
-  const ver = dim(`v${SERVER_VERSION}`);
-  const refreshLabel = refreshing ? green('refreshing...') : dim(`\u21bb every 5s`);
-  const meta = `${ver}  ${gray(B.v)}  ${dim(`${TOOL_COUNT} tools`)}  ${gray(B.v)}  ${refreshLabel}`;
-  const content = `${title}  ${gray(B.v)}  ${meta}`;
+  const title = c.bold('LocalNest Dashboard');
+  const ver = c.dim(`v${SERVER_VERSION}`);
+  const refreshLabel = refreshing ? c.green('refreshing...') : c.dim(`\u21bb every 5s`);
+  const meta = `${ver}  ${c.gray(c.B.v)}  ${c.dim(`${TOOL_COUNT} tools`)}  ${c.gray(c.B.v)}  ${refreshLabel}`;
+  const content = `${title}  ${c.gray(c.B.v)}  ${meta}`;
   return [
-    `  ${gray(B.tl + B.h.repeat(W - 2) + B.tr)}`,
-    `  ${gray(B.v)} ${padRight(content, W - 4)} ${gray(B.v)}`,
-    `  ${gray(B.bl + B.h.repeat(W - 2) + B.br)}`,
+    `  ${c.gray(c.B.tl + c.B.h.repeat(W - 2) + c.B.tr)}`,
+    `  ${c.gray(c.B.v)} ${padRight(content, W - 4)} ${c.gray(c.B.v)}`,
+    `  ${c.gray(c.B.bl + c.B.h.repeat(W - 2) + c.B.br)}`,
     '',
   ];
 }
 
 function renderDisabled(W: number): string[] {
-  return panel('Status', [red('Memory is not enabled.'), '', `Run ${cyan('localnest setup')} to enable.`], W, red);
+  return panel('Status', [c.red('Memory is not enabled.'), '', `Run ${c.cyan('localnest setup')} to enable.`], W, c.red);
 }
 
 function renderStatsRow(data: DashboardData, W: number): string[] {
@@ -119,20 +118,20 @@ function renderStatsRow(data: DashboardData, W: number): string[] {
   const st = data.status?.store || {};
   const kg = data.kgStats || {};
   const memRows = [
-    `${dim('Entries:')}    ${bold(String(st.total_entries ?? 0))}`,
-    `${dim('Active:')}     ${bold(String(st.total_entries ?? 0))}`,
-    `${dim('Events:')}     ${bold(String(st.total_events ?? 0))}`,
-    `${dim('Relations:')}  ${bold(String(st.total_relations ?? 0))}`,
+    `${c.dim('Entries:')}    ${c.bold(String(st.total_entries ?? 0))}`,
+    `${c.dim('Active:')}     ${c.bold(String(st.total_entries ?? 0))}`,
+    `${c.dim('Events:')}     ${c.bold(String(st.total_events ?? 0))}`,
+    `${c.dim('Relations:')}  ${c.bold(String(st.total_relations ?? 0))}`,
   ];
   const predCount = Array.isArray(kg.by_predicate) ? kg.by_predicate.length : 0;
   const kgRows = [
-    `${dim('Entities:')}   ${bold(String(kg.entities ?? 0))}`,
-    `${dim('Triples:')}    ${bold(String(kg.triples ?? 0))}`,
-    `${dim('Active:')}     ${bold(String(kg.active_triples ?? 0))}`,
-    `${dim('Predicates:')} ${bold(String(predCount))}`,
+    `${c.dim('Entities:')}   ${c.bold(String(kg.entities ?? 0))}`,
+    `${c.dim('Triples:')}    ${c.bold(String(kg.triples ?? 0))}`,
+    `${c.dim('Active:')}     ${c.bold(String(kg.active_triples ?? 0))}`,
+    `${c.dim('Predicates:')} ${c.bold(String(predCount))}`,
   ];
-  const memP = panel('Memory', memRows, halfW, cyan);
-  const kgP = panel('Knowledge Graph', kgRows, halfW, magenta);
+  const memP = panel('Memory', memRows, halfW, c.cyan);
+  const kgP = panel('Knowledge Graph', kgRows, halfW, c.magenta);
   const maxL = Math.max(memP.length, kgP.length);
   const merged: string[] = [];
   for (let i = 0; i < maxL; i++) {
@@ -148,58 +147,58 @@ function renderServerRow(data: DashboardData, W: number): string[] {
   const store = st.store || {};
   const backend = st.backend || {};
   const hookCount = data.hookStats?.total_listeners ?? 0;
-  const statusStr = store.initialized ? green('Running') : red('Stopped');
-  const backendStr = backend.selected || dim('none');
-  const indexStr = store.initialized ? green('Fresh') : dim('N/A');
+  const statusStr = store.initialized ? c.green('Running') : c.red('Stopped');
+  const backendStr = backend.selected || c.dim('none');
+  const indexStr = store.initialized ? c.green('Fresh') : c.dim('N/A');
   const rows = [
-    `${dim('Status:')} ${statusStr}  ${gray(B.v)}  ${dim('Backend:')} ${bold(backendStr)}  ${gray(B.v)}  ${dim('Index:')} ${indexStr}`,
-    `${dim('Memory:')} ${st.enabled ? green('Enabled') : red('Disabled')}  ${gray(B.v)}  ${dim('Hooks:')} ${bold(String(hookCount))}  ${gray(B.v)}  ${dim('Tools:')} ${bold(String(TOOL_COUNT))}`,
+    `${c.dim('Status:')} ${statusStr}  ${c.gray(c.B.v)}  ${c.dim('Backend:')} ${c.bold(backendStr)}  ${c.gray(c.B.v)}  ${c.dim('Index:')} ${indexStr}`,
+    `${c.dim('Memory:')} ${st.enabled ? c.green('Enabled') : c.red('Disabled')}  ${c.gray(c.B.v)}  ${c.dim('Hooks:')} ${c.bold(String(hookCount))}  ${c.gray(c.B.v)}  ${c.dim('Tools:')} ${c.bold(String(TOOL_COUNT))}`,
   ];
-  return panel('Server', rows, W, green);
+  return panel('Server', rows, W, c.green);
 }
 
 function renderNests(data: DashboardData, W: number): string[] {
   const nests = data.nests?.nests || [];
-  if (!nests.length) return panel('Nests', [dim('No nests created yet.')], W, yellow);
+  if (!nests.length) return panel('Nests', [c.dim('No nests created yet.')], W, c.yellow);
   const total = nests.reduce((s: number, n: any) => s + n.count, 0) || 1;
   const rows: string[] = [];
   for (const nest of nests.slice(0, 6)) {
     const ratio = nest.count / total;
-    rows.push(`${yellow(padRight(nest.nest, 14))} ${progressBar(ratio, 20)}  ${dim(String(nest.count) + ' entries')} ${dim(`(${Math.round(ratio * 100)}%)`)}`);
+    rows.push(`${c.yellow(padRight(nest.nest, 14))} ${progressBar(ratio, 20)}  ${c.dim(String(nest.count) + ' entries')} ${c.dim(`(${Math.round(ratio * 100)}%)`)}`);
   }
-  if (nests.length > 6) rows.push(dim(`  ... and ${nests.length - 6} more`));
-  return panel('Nests', rows, W, yellow);
+  if (nests.length > 6) rows.push(c.dim(`  ... and ${nests.length - 6} more`));
+  return panel('Nests', rows, W, c.yellow);
 }
 
 function renderRecentShort(data: DashboardData, W: number): string[] {
   const entries = data.recentEntries?.items?.slice(0, 5) || [];
-  if (!entries.length) return panel('Recent Memories', [dim('No memories stored yet.')], W, cyan);
+  if (!entries.length) return panel('Recent Memories', [c.dim('No memories stored yet.')], W, c.cyan);
   const rows = entries.map((e: any) => {
     const ago = padRight(timeAgo(e.updated_at), 7);
     const kind = padRight(e.kind || 'unknown', 12);
-    return `${dim(ago)} ${yellow(kind)} ${cyan(truncate(e.title || e.summary || '', W - 32))}`;
+    return `${c.dim(ago)} ${c.yellow(kind)} ${c.cyan(truncate(e.title || e.summary || '', W - 32))}`;
   });
-  return panel('Recent Memories', rows, W, cyan);
+  return panel('Recent Memories', rows, W, c.cyan);
 }
 
 function renderFooter(W: number, view: ViewKey): string[] {
   const keys = [
-    view === VIEWS.OVERVIEW ? inverse(' 0 Overview ') : dim('[0] Overview'),
-    view === VIEWS.MEMORY ? inverse(' 1 Memory ') : dim('[1] Memory'),
-    view === VIEWS.KG ? inverse(' 2 KG ') : dim('[2] KG'),
-    view === VIEWS.RECENT ? inverse(' 3 Recent ') : dim('[3] Recent'),
-    dim('[r] Refresh'),
-    dim('[?] Help'),
-    dim('[q] Quit'),
+    view === VIEWS.OVERVIEW ? c.inverse(' 0 Overview ') : c.dim('[0] Overview'),
+    view === VIEWS.MEMORY ? c.inverse(' 1 Memory ') : c.dim('[1] Memory'),
+    view === VIEWS.KG ? c.inverse(' 2 KG ') : c.dim('[2] KG'),
+    view === VIEWS.RECENT ? c.inverse(' 3 Recent ') : c.dim('[3] Recent'),
+    c.dim('[r] Refresh'),
+    c.dim('[?] Help'),
+    c.dim('[q] Quit'),
   ];
   return [`  ${keys.join('  ')}`, ''];
 }
 
 function renderStatusBar(view: ViewKey, lastRefresh: string, _W: number): string[] {
-  const viewName = bold(view.charAt(0).toUpperCase() + view.slice(1));
-  const ts = dim(`Last refresh: ${lastRefresh}`);
-  const content = `  ${viewName}  ${gray(B.v)}  ${ts}`;
-  return [gray('  ' + B.h.repeat(_W - 2)), content];
+  const viewName = c.bold(view.charAt(0).toUpperCase() + view.slice(1));
+  const ts = c.dim(`Last refresh: ${lastRefresh}`);
+  const content = `  ${viewName}  ${c.gray(c.B.v)}  ${ts}`;
+  return [c.gray('  ' + c.B.h.repeat(_W - 2)), content];
 }
 
 function renderOverview(data: DashboardData, W: number): string[] {
@@ -214,10 +213,10 @@ function renderOverview(data: DashboardData, W: number): string[] {
 
 function renderMemoryDetail(data: DashboardData, W: number): string[] {
   const entries = data.allEntries?.items || [];
-  if (!entries.length) return panel('Memory Entries', [dim('No memory entries found.')], W, cyan);
+  if (!entries.length) return panel('Memory Entries', [c.dim('No memory entries found.')], W, c.cyan);
   const rows: string[] = [
-    `${bold(padRight('ID', 8))} ${bold(padRight('Kind', 12))} ${bold(padRight('Imp', 4))} ${bold('Title')}`,
-    gray(B.h.repeat(W - 6)),
+    `${c.bold(padRight('ID', 8))} ${c.bold(padRight('Kind', 12))} ${c.bold(padRight('Imp', 4))} ${c.bold('Title')}`,
+    c.gray(c.B.h.repeat(W - 6)),
   ];
   const maxShow = Math.min(entries.length, 30);
   for (let i = 0; i < maxShow; i++) {
@@ -226,42 +225,42 @@ function renderMemoryDetail(data: DashboardData, W: number): string[] {
     const kind = padRight(e.kind || '?', 12);
     const imp = padRight(String(e.importance ?? '-'), 4);
     const title = truncate(e.title || e.summary || '', W - 34);
-    rows.push(`${dim(id)} ${yellow(kind)} ${cyan(imp)} ${title}`);
+    rows.push(`${c.dim(id)} ${c.yellow(kind)} ${c.cyan(imp)} ${title}`);
   }
-  if (entries.length > maxShow) rows.push(dim(`  ... ${entries.length - maxShow} more entries`));
-  return panel('Memory Entries (detail)', rows, W, cyan);
+  if (entries.length > maxShow) rows.push(c.dim(`  ... ${entries.length - maxShow} more entries`));
+  return panel('Memory Entries (detail)', rows, W, c.cyan);
 }
 
 function renderKgDetail(data: DashboardData, W: number): string[] {
   const kg = data.kgStats || {};
   const preds = Array.isArray(kg.by_predicate) ? kg.by_predicate : [];
   const summaryRows = [
-    `${dim('Entities:')}      ${bold(String(kg.entities ?? 0))}`,
-    `${dim('Total triples:')} ${bold(String(kg.triples ?? 0))}`,
-    `${dim('Active:')}        ${bold(String(kg.active_triples ?? 0))}`,
-    `${dim('Predicates:')}    ${bold(String(preds.length))}`,
+    `${c.dim('Entities:')}      ${c.bold(String(kg.entities ?? 0))}`,
+    `${c.dim('Total triples:')} ${c.bold(String(kg.triples ?? 0))}`,
+    `${c.dim('Active:')}        ${c.bold(String(kg.active_triples ?? 0))}`,
+    `${c.dim('Predicates:')}    ${c.bold(String(preds.length))}`,
   ];
-  const lines: string[] = [...panel('Knowledge Graph Summary', summaryRows, W, magenta), ''];
+  const lines: string[] = [...panel('Knowledge Graph Summary', summaryRows, W, c.magenta), ''];
 
   if (preds.length) {
     const predRows: string[] = [
-      `${bold(padRight('Predicate', 30))} ${bold('Count')}`,
-      gray(B.h.repeat(W - 6)),
+      `${c.bold(padRight('Predicate', 30))} ${c.bold('Count')}`,
+      c.gray(c.B.h.repeat(W - 6)),
     ];
     for (const p of preds.slice(0, 20)) {
-      predRows.push(`${magenta(padRight(p.predicate || '?', 30))} ${bold(String(p.count))}`);
+      predRows.push(`${c.magenta(padRight(p.predicate || '?', 30))} ${c.bold(String(p.count))}`);
     }
-    if (preds.length > 20) predRows.push(dim(`  ... ${preds.length - 20} more`));
-    lines.push(...panel('Predicate Breakdown', predRows, W, magenta));
+    if (preds.length > 20) predRows.push(c.dim(`  ... ${preds.length - 20} more`));
+    lines.push(...panel('Predicate Breakdown', predRows, W, c.magenta));
   } else {
-    lines.push(...panel('Predicate Breakdown', [dim('No predicates yet.')], W, magenta));
+    lines.push(...panel('Predicate Breakdown', [c.dim('No predicates yet.')], W, c.magenta));
   }
   return lines;
 }
 
 function renderRecentDetail(data: DashboardData, W: number): string[] {
   const entries = data.recentEntries?.items || [];
-  if (!entries.length) return panel('Recent Memories', [dim('No memories stored yet.')], W, cyan);
+  if (!entries.length) return panel('Recent Memories', [c.dim('No memories stored yet.')], W, c.cyan);
   const rows: string[] = [];
   const maxShow = Math.min(entries.length, 25);
   for (let i = 0; i < maxShow; i++) {
@@ -269,29 +268,29 @@ function renderRecentDetail(data: DashboardData, W: number): string[] {
     const ago = padRight(timeAgo(e.updated_at), 8);
     const kind = padRight(e.kind || 'unknown', 12);
     const title = truncate(e.title || e.summary || '', W - 30);
-    rows.push(`${dim(ago)} ${yellow(kind)} ${cyan(title)}`);
+    rows.push(`${c.dim(ago)} ${c.yellow(kind)} ${c.cyan(title)}`);
   }
-  if (entries.length > maxShow) rows.push(dim(`  ... ${entries.length - maxShow} more`));
-  return panel('Recent Memories (all)', rows, W, cyan);
+  if (entries.length > maxShow) rows.push(c.dim(`  ... ${entries.length - maxShow} more`));
+  return panel('Recent Memories (all)', rows, W, c.cyan);
 }
 
 function renderHelp(W: number): string[] {
   const rows = [
-    `${bold(cyan('Key'))}       ${bold('Action')}`,
-    gray(B.h.repeat(W - 6)),
-    `${cyan('0')} / ${cyan('h')}     Return to main overview`,
-    `${cyan('1')}         Memory detail panel`,
-    `${cyan('2')}         Knowledge Graph detail panel`,
-    `${cyan('3')}         Recent memories list`,
-    `${cyan('r')}         Force refresh data`,
-    `${cyan('?')}         Toggle this help overlay`,
-    `${cyan('q')}         Quit dashboard`,
-    `${cyan('Ctrl+C')}    Quit dashboard`,
+    `${c.bold(c.cyan('Key'))}       ${c.bold('Action')}`,
+    c.gray(c.B.h.repeat(W - 6)),
+    `${c.cyan('0')} / ${c.cyan('h')}     Return to main overview`,
+    `${c.cyan('1')}         Memory detail panel`,
+    `${c.cyan('2')}         Knowledge Graph detail panel`,
+    `${c.cyan('3')}         Recent memories list`,
+    `${c.cyan('r')}         Force refresh data`,
+    `${c.cyan('?')}         Toggle this help overlay`,
+    `${c.cyan('q')}         Quit dashboard`,
+    `${c.cyan('Ctrl+C')}    Quit dashboard`,
     '',
-    dim('Dashboard auto-refreshes every 5 seconds.'),
-    dim('All data is read-only from your local memory store.'),
+    c.dim('Dashboard auto-refreshes every 5 seconds.'),
+    c.dim('All data is read-only from your local memory store.'),
   ];
-  return panel('Help', rows, W, cyan);
+  return panel('Help', rows, W, c.cyan);
 }
 
 /* -- JSON output ----------------------------------------------------- */
@@ -377,7 +376,7 @@ async function runInteractive(svc: MemoryService): Promise<void> {
     }
     showCursor();
     process.stdout.write('\x1b[2J\x1b[H');
-    process.stdout.write(dim('Dashboard closed.') + '\n');
+    process.stdout.write(c.dim('Dashboard closed.') + '\n');
   }
 
   // Set up raw-mode keyboard input

@@ -1,18 +1,22 @@
 import { z } from 'zod';
-import { createToolResponse } from '../common/tool-utils.js';
+import { createToolResponse, READ_ONLY_ANNOTATIONS, WRITE_ANNOTATIONS } from '../common/tool-utils.js';
 import type { ToolResponsePayload, RegisterJsonToolFn, PaginatedResult } from '../common/tool-utils.js';
+import { buildResourceLink } from '../common/mime.js';
+import type { ResourceLink } from '../common/mime.js';
 import {
   normalizeEmbedStatus,
   normalizeIndexStatus,
   normalizeIndexProjectResult,
-  normalizeProjectSummaryResult,
-  normalizeProjectTreeResult,
-  normalizeReadFileChunkResult,
   normalizeSearchHybridResult,
   normalizeSymbolResult,
   normalizeUsageResult
 } from '../common/response-normalizers.js';
+import {
+  SEARCH_RESULT_SCHEMA,
+  STATUS_RESULT_SCHEMA
+} from '../common/schemas.js';
 import type { RootEntry } from '../../runtime/config.js';
+import { registerWorkspaceTools } from './retrieval-workspace.js';
 
 interface WorkspaceService {
   listRoots(): RootEntry[];
@@ -76,18 +80,16 @@ export function registerRetrievalTools({
   defaultMaxResults,
   memory
 }: RegisterRetrievalToolsOptions): void {
+  // Workspace tools (list, tree, read, file-changed, summarize)
+  registerWorkspaceTools({ registerJsonTool, paginateItems, workspace, defaultMaxReadLines, memory });
+
   async function emitProgress(extra: unknown, progress: number, total: number, message: string): Promise<void> {
     const mcpExtra = extra as McpExtra | undefined;
     const token = mcpExtra?._meta?.progressToken;
     if (token === undefined || typeof mcpExtra?.sendNotification !== 'function') return;
     await mcpExtra.sendNotification({
       method: 'notifications/progress',
-      params: {
-        progressToken: token,
-        progress,
-        total,
-        message
-      }
+      params: { progressToken: token, progress, total, message }
     });
   }
 
@@ -97,109 +99,24 @@ export function registerRetrievalTools({
   }): Record<string, unknown> {
     const searched_bases = workspace.resolveSearchBases(project_path as string | undefined, all_roots as boolean | undefined);
     return {
-      tool,
-      query,
-      count: 0,
+      tool, query, count: 0,
       scope: {
-        project_path: project_path || '',
-        all_roots: Boolean(all_roots),
-        glob,
-        max_results,
-        case_sensitive: Boolean(case_sensitive),
-        context_lines,
-        use_regex: Boolean(use_regex),
-        searched_bases
+        project_path: project_path || '', all_roots: Boolean(all_roots), glob,
+        max_results, case_sensitive: Boolean(case_sensitive), context_lines,
+        use_regex: Boolean(use_regex), searched_bases
       }
     };
   }
 
   function withSearchMissResponse(
-    data: unknown,
-    meta: Record<string, unknown>,
-    note: string,
-    guidance: string[],
-    recommendedNextAction: string
+    data: unknown, meta: Record<string, unknown>, note: string,
+    guidance: string[], recommendedNextAction: string
   ): ToolResponsePayload {
     return createToolResponse(data, {
-      meta: {
-        ...meta,
-        guidance,
-        recommended_next_action: recommendedNextAction
-      },
+      meta: { ...meta, guidance, recommended_next_action: recommendedNextAction },
       note: `${note} ${guidance.join(' ')} Next: ${recommendedNextAction}`
     });
   }
-
-  registerJsonTool(
-    'localnest_list_roots',
-    {
-      title: 'List Roots',
-      description: 'List configured local roots available to this MCP server.',
-      inputSchema: {
-        limit: z.number().int().min(1).max(1000).default(100),
-        offset: z.number().int().min(0).default(0)
-      },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
-    },
-    async ({ limit, offset }: Record<string, unknown>) => paginateItems(workspace.listRoots(), limit as number, offset as number)
-  );
-
-  registerJsonTool(
-    'localnest_list_projects',
-    {
-      title: 'List Projects',
-      description: 'List first-level project directories under a root.',
-      inputSchema: {
-        root_path: z.string().optional(),
-        max_entries: z.number().int().min(1).max(1000).optional(),
-        limit: z.number().int().min(1).max(1000).default(100),
-        offset: z.number().int().min(0).default(0)
-      },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
-    },
-    async ({ root_path, max_entries, limit, offset }: Record<string, unknown>) => {
-      const effectiveLimit = (max_entries || limit) as number;
-      const projects = workspace.listProjects(root_path as string | undefined, 2000);
-      const paged = paginateItems(projects, effectiveLimit, offset as number);
-      return {
-        ...paged,
-        truncated_total: projects.length === 2000
-      };
-    }
-  );
-
-  registerJsonTool(
-    'localnest_project_tree',
-    {
-      title: 'Project Tree',
-      description: 'Return a compact tree of files/directories for a project path.',
-      inputSchema: {
-        project_path: z.string(),
-        max_depth: z.number().int().min(1).max(8).default(3),
-        max_entries: z.number().int().min(1).max(10000).default(1500)
-      },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
-    },
-    async ({ project_path, max_depth, max_entries }: Record<string, unknown>) => normalizeProjectTreeResult(
-      workspace.projectTree(project_path as string, max_depth as number, max_entries as number),
-      project_path as string
-    )
-  );
 
   registerJsonTool(
     'localnest_index_status',
@@ -207,12 +124,8 @@ export function registerRetrievalTools({
       title: 'Index Status',
       description: 'Return local semantic index status and metadata.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: STATUS_RESULT_SCHEMA
     },
     async () => normalizeIndexStatus(vectorIndex.getStatus())
   );
@@ -223,17 +136,10 @@ export function registerRetrievalTools({
       title: 'Embedding Status',
       description: 'Return active embedding backend/model status and vector-search readiness.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: STATUS_RESULT_SCHEMA
     },
-    async () => {
-      const status = vectorIndex.getStatus();
-      return normalizeEmbedStatus(status);
-    }
+    async () => normalizeEmbedStatus(vectorIndex.getStatus())
   );
 
   registerJsonTool(
@@ -247,21 +153,14 @@ export function registerRetrievalTools({
         force: z.boolean().default(false),
         max_files: z.number().int().min(1).max(200000).default(20000)
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: STATUS_RESULT_SCHEMA
     },
     async ({ project_path, all_roots, force, max_files }: Record<string, unknown>, extra: unknown) => {
       const maxFilesNum = max_files as number;
       await emitProgress(extra, 0, maxFilesNum, 'index_project started');
       const out = await vectorIndex.indexProject({
-        projectPath: project_path,
-        allRoots: all_roots,
-        force,
-        maxFiles: maxFilesNum,
+        projectPath: project_path, allRoots: all_roots, force, maxFiles: maxFilesNum,
         onProgress: async ({ scanned = 0, total = maxFilesNum, phase = 'indexing' }: { scanned?: number; total?: number; phase?: string }) => {
           await emitProgress(extra, scanned, total, phase);
         }
@@ -280,7 +179,7 @@ export function registerRetrievalTools({
     'localnest_search_files',
     {
       title: 'Search Files',
-      description: 'Search file paths and names matching a query. Use this first when looking for a module, feature, or component by name (e.g. "sso", "payment", "auth"). Much faster than content search for module discovery, and handles cases where the keyword only appears in file/directory names.',
+      description: '[FAST_DISCOVERY] Search file paths and names matching a query. Use this first when looking for a module, feature, or component by name (e.g. "sso", "payment", "auth").',
       inputSchema: {
         query: z.string().min(1),
         project_path: z.string().optional(),
@@ -288,38 +187,32 @@ export function registerRetrievalTools({
         max_results: z.number().int().min(1).max(1000).default(defaultMaxResults),
         case_sensitive: z.boolean().default(false)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ query, project_path, all_roots, max_results, case_sensitive }: Record<string, unknown>) => {
       const results = search.searchFiles({
-        query,
-        projectPath: project_path,
-        allRoots: all_roots,
-        maxResults: max_results,
-        caseSensitive: case_sensitive
+        query, projectPath: project_path, allRoots: all_roots,
+        maxResults: max_results, caseSensitive: case_sensitive
       });
-      if (results.length > 0) return results;
+      if (results.length > 0) {
+        const seen = new Set<string>();
+        const resourceLinks: ResourceLink[] = [];
+        for (const item of results as Array<{ file?: string; relative_path?: string; name?: string }>) {
+          const absPath = typeof item?.file === 'string' ? item.file : '';
+          if (!absPath || seen.has(absPath)) continue;
+          seen.add(absPath);
+          const fragment = item.relative_path || item.name || absPath;
+          resourceLinks.push(buildResourceLink(absPath, `path match: ${fragment}`));
+        }
+        return createToolResponse(results, { resourceLinks });
+      }
 
       return withSearchMissResponse(
         results,
-        buildSearchMeta({
-          tool: 'localnest_search_files',
-          query: query as string,
-          project_path,
-          all_roots,
-          max_results: max_results as number,
-          case_sensitive
-        }),
+        buildSearchMeta({ tool: 'localnest_search_files', query: query as string, project_path, all_roots, max_results: max_results as number, case_sensitive }),
         'No file-path matches found.',
-        [
-          'Verify project_path or broaden the query to a path fragment.',
-          'Try synonyms or module names instead of full phrases.'
-        ],
+        ['Verify project_path or broaden the query to a path fragment.', 'Try synonyms or module names instead of full phrases.'],
         'Retry localnest_search_files with a broader path fragment or switch to localnest_search_code for an exact symbol.'
       );
     }
@@ -329,7 +222,7 @@ export function registerRetrievalTools({
     'localnest_search_code',
     {
       title: 'Search Code',
-      description: 'Search text across files under a project/root and return matching lines. Best for exact symbol names, imports, or known identifiers. Use use_regex=true for patterns (e.g. "async\\s+function\\s+get\\w+"). Use context_lines to include surrounding lines with each match.',
+      description: '[EXACT_MATCH] Search text across files under a project/root and return matching lines. Best for exact symbol names, imports, or known identifiers.',
       inputSchema: {
         query: z.string().min(1),
         project_path: z.string().optional(),
@@ -340,44 +233,35 @@ export function registerRetrievalTools({
         context_lines: z.number().int().min(0).max(10).default(0),
         use_regex: z.boolean().default(false)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ query, project_path, all_roots, glob, max_results, case_sensitive, context_lines, use_regex }: Record<string, unknown>) => {
       const results = search.searchCode({
-        query,
-        projectPath: project_path,
-        allRoots: all_roots,
-        glob,
-        maxResults: max_results,
-        caseSensitive: case_sensitive,
-        contextLines: context_lines,
-        useRegex: use_regex
+        query, projectPath: project_path, allRoots: all_roots, glob,
+        maxResults: max_results, caseSensitive: case_sensitive,
+        contextLines: context_lines, useRegex: use_regex
       });
-      if (results.length > 0) return results;
+      if (results.length > 0) {
+        const counts = new Map<string, number>();
+        for (const item of results as Array<{ file?: string }>) {
+          const absPath = typeof item?.file === 'string' ? item.file : '';
+          if (!absPath) continue;
+          counts.set(absPath, (counts.get(absPath) || 0) + 1);
+        }
+        const resourceLinks: ResourceLink[] = [];
+        for (const [absPath, count] of counts) {
+          const noun = count === 1 ? 'match' : 'matches';
+          resourceLinks.push(buildResourceLink(absPath, `${count} ${noun} for ${query as string}`));
+        }
+        return createToolResponse(results, { resourceLinks });
+      }
 
       return withSearchMissResponse(
         results,
-        buildSearchMeta({
-          tool: 'localnest_search_code',
-          query: query as string,
-          project_path,
-          all_roots,
-          glob: glob as string,
-          max_results: max_results as number,
-          case_sensitive,
-          context_lines: context_lines as number,
-          use_regex: use_regex as boolean
-        }),
+        buildSearchMeta({ tool: 'localnest_search_code', query: query as string, project_path, all_roots, glob: glob as string, max_results: max_results as number, case_sensitive, context_lines: context_lines as number, use_regex: use_regex as boolean }),
         'No code matches found in the current scope.',
-        [
-          'Verify the scope and try a broader query or synonyms.',
-          'If you need pattern matching, retry with use_regex=true.'
-        ],
+        ['Verify the scope and try a broader query or synonyms.', 'If you need pattern matching, retry with use_regex=true.'],
         'Retry localnest_search_code with a broader query or use_regex=true, or switch to localnest_search_hybrid for concept lookup.'
       );
     }
@@ -387,7 +271,7 @@ export function registerRetrievalTools({
     'localnest_search_hybrid',
     {
       title: 'Search Hybrid',
-      description: 'Run lexical + semantic retrieval and return RRF-ranked results.',
+      description: '[DEEP_ANALYSIS] Run lexical + semantic retrieval and return RRF-ranked results. Best for queries where concepts and context matter as much as exact keywords.',
       inputSchema: {
         query: z.string().min(1),
         project_path: z.string().optional(),
@@ -399,24 +283,14 @@ export function registerRetrievalTools({
         auto_index: z.boolean().default(true),
         use_reranker: z.boolean().default(false)
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ query, project_path, all_roots, glob, max_results, case_sensitive, min_semantic_score, auto_index, use_reranker }: Record<string, unknown>) => normalizeSearchHybridResult(
       await search.searchHybrid({
-        query,
-        projectPath: project_path,
-        allRoots: all_roots,
-        glob,
-        maxResults: max_results,
-        caseSensitive: case_sensitive,
-        minSemanticScore: min_semantic_score,
-        autoIndex: auto_index,
-        useReranker: use_reranker
+        query, projectPath: project_path, allRoots: all_roots, glob,
+        maxResults: max_results, caseSensitive: case_sensitive,
+        minSemanticScore: min_semantic_score, autoIndex: auto_index, useReranker: use_reranker
       }),
       query as string
     )
@@ -426,7 +300,7 @@ export function registerRetrievalTools({
     'localnest_get_symbol',
     {
       title: 'Get Symbol',
-      description: 'Look up symbol definitions/exports by name using fast regex search.',
+      description: '[SYMBOL_INDEX] Look up symbol definitions/exports by name using fast regex search.',
       inputSchema: {
         symbol: z.string().min(1),
         project_path: z.string().optional(),
@@ -435,22 +309,11 @@ export function registerRetrievalTools({
         max_results: z.number().int().min(1).max(1000).default(defaultMaxResults),
         case_sensitive: z.boolean().default(false)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ symbol, project_path, all_roots, glob, max_results, case_sensitive }: Record<string, unknown>) => normalizeSymbolResult(
-      search.getSymbol({
-        symbol,
-        projectPath: project_path,
-        allRoots: all_roots,
-        glob,
-        maxResults: max_results,
-        caseSensitive: case_sensitive
-      }),
+      search.getSymbol({ symbol, projectPath: project_path, allRoots: all_roots, glob, maxResults: max_results, caseSensitive: case_sensitive }),
       symbol as string
     )
   );
@@ -459,7 +322,7 @@ export function registerRetrievalTools({
     'localnest_find_usages',
     {
       title: 'Find Usages',
-      description: 'Find call sites and import usages of a symbol by name.',
+      description: '[USAGE_ANALYSIS] Find call sites and import usages of a symbol by name.',
       inputSchema: {
         symbol: z.string().min(1),
         project_path: z.string().optional(),
@@ -469,118 +332,12 @@ export function registerRetrievalTools({
         case_sensitive: z.boolean().default(false),
         context_lines: z.number().int().min(0).max(10).default(0)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({ symbol, project_path, all_roots, glob, max_results, case_sensitive, context_lines }: Record<string, unknown>) => normalizeUsageResult(
-      search.findUsages({
-        symbol,
-        projectPath: project_path,
-        allRoots: all_roots,
-        glob,
-        maxResults: max_results,
-        caseSensitive: case_sensitive,
-        contextLines: context_lines
-      }),
+      search.findUsages({ symbol, projectPath: project_path, allRoots: all_roots, glob, maxResults: max_results, caseSensitive: case_sensitive, contextLines: context_lines }),
       symbol as string
-    )
-  );
-
-  registerJsonTool(
-    'localnest_read_file',
-    {
-      title: 'Read File',
-      description: 'Read a bounded chunk of a file with line numbers.',
-      inputSchema: {
-        path: z.string(),
-        start_line: z.number().int().min(1).default(1),
-        end_line: z.number().int().min(1).default(defaultMaxReadLines)
-      },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
-    },
-    async ({ path: filePath, start_line, end_line }: Record<string, unknown>) => {
-      const result = normalizeReadFileChunkResult(
-        await workspace.readFileChunk(filePath as string, start_line as number, end_line as number, 800),
-        filePath as string,
-        start_line as number,
-        end_line as number
-      );
-      // HOOK-07: Proactive memory hints for linked files
-      if (memory) {
-        try {
-          const hintResult = await memory.getFileMemoryHints(filePath as string, false);
-          if (hintResult.hints.length > 0) {
-            (result as Record<string, unknown>)._memory_hints = hintResult.hints;
-          }
-        } catch {
-          // HOOK-09: Non-blocking -- hint failure does not affect file read
-        }
-      }
-      return result;
-    }
-  );
-
-  // HOOK-08: Report file changes and receive proactive memory hints
-  registerJsonTool(
-    'localnest_file_changed',
-    {
-      title: 'File Changed',
-      description: 'Report that a file was edited and receive proactive hints about high-importance memories linked to it. Memories with importance >= 70 that reference the file are flagged with suggest_update=true, indicating the memory may need updating to reflect the file change.',
-      inputSchema: {
-        path: z.string()
-      },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
-    },
-    async ({ path: filePath }: Record<string, unknown>) => {
-      if (!memory) {
-        return { file_path: filePath, hints: [] };
-      }
-      try {
-        return await memory.getFileMemoryHints(filePath as string, true);
-      } catch (err) {
-        // HOOK-09: Non-blocking -- return empty hints on failure
-        return {
-          file_path: filePath,
-          hints: [],
-          error: err instanceof Error ? err.message : 'hint lookup failed'
-        };
-      }
-    }
-  );
-
-  registerJsonTool(
-    'localnest_summarize_project',
-    {
-      title: 'Summarize Project',
-      description: 'Return a high-level summary of a project directory.',
-      inputSchema: {
-        project_path: z.string(),
-        max_files: z.number().int().min(100).max(20000).default(3000)
-      },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
-    },
-    async ({ project_path, max_files }: Record<string, unknown>) => normalizeProjectSummaryResult(
-      workspace.summarizeProject(project_path as string, max_files as number),
-      project_path as string
     )
   );
 }

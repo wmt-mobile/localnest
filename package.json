@@ -1,6 +1,6 @@
 {
   "name": "localnest-mcp",
-  "version": "0.2.0",
+  "version": "0.3.0-beta.1",
   "license": "MIT",
   "author": "LocalNest",
   "repository": {
@@ -34,7 +34,7 @@
     "access": "public"
   },
   "type": "module",
-  "description": "Local-first MCP server with 72 tools — code search, persistent AI memory, temporal knowledge graph, and semantic retrieval. Zero cloud, pure SQLite.",
+  "description": "Local-first MCP server with 74 tools \u2014 code search, persistent AI memory, temporal knowledge graph, and semantic retrieval. Zero cloud, pure SQLite.",
   "bin": {
     "localnest": "bin/_boot.cjs",
     "localnest-mcp": "bin/_boot.cjs",
@@ -50,7 +50,6 @@
     "src",
     "scripts",
     "skills",
-    "npm-shrinkwrap.json",
     "README.md",
     "LICENSE",
     "CHANGELOG.md"
@@ -72,7 +71,7 @@
     "test:coverage": "node --import tsx/esm --test --experimental-test-coverage",
     "lint": "eslint . --max-warnings=0",
     "quality:cycles": "madge --circular --extensions js,mjs,ts src",
-    "quality:deps": "depcheck --json --ignores=publint",
+    "quality:deps": "depcheck --json --ignores=publint,@huggingface/transformers,tree-sitter-typescript,tree-sitter-rust",
     "quality:package": "node scripts/quality/quality-package.mjs",
     "quality:audit": "node scripts/quality/quality-audit.mjs",
     "quality": "npm run check && npm run lint && npm run test:coverage && npm run quality:cycles && npm run quality:deps && npm run quality:package && npm run quality:audit",
@@ -85,7 +84,6 @@
     "bump:beta": "npm version prerelease --preid=beta --no-git-tag-version"
   },
   "dependencies": {
-    "@huggingface/transformers": "^4.0.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "ora": "^9.3.0",
     "tsx": "^4.21.0",

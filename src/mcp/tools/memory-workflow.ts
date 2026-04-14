@@ -7,6 +7,7 @@ import {
   normalizeAgentPrimeResult
 } from '../common/response-normalizers.js';
 import { toMinimalWriteResponse } from '../common/terse-utils.js';
+import { READ_ONLY_ANNOTATIONS, WRITE_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import type {
   MemoryKind,
@@ -29,12 +30,21 @@ interface MemoryWorkflowService {
   teach(args: Record<string, unknown>): Promise<unknown>;
 }
 
+type OutputArchetype = { data: z.ZodTypeAny; meta: z.ZodTypeAny };
 interface SharedSchemas {
   MEMORY_KIND_SCHEMA: z.ZodType<MemoryKind>;
   MEMORY_SCOPE_SCHEMA: z.ZodType<MemoryScope>;
   MEMORY_LINK_SCHEMA: z.ZodType<MemoryLink>;
   MEMORY_EVENT_TYPE_SCHEMA: z.ZodType<MemoryEventType>;
   MEMORY_EVENT_STATUS_SCHEMA: z.ZodType<MemoryEventStatus>;
+  OUTPUT_SEARCH_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_TRIPLE_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_STATUS_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_BATCH_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_MEMORY_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_ACK_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_BUNDLE_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_FREEFORM_RESULT_SCHEMA: OutputArchetype;
 }
 
 export interface RegisterMemoryWorkflowToolsOptions {
@@ -62,7 +72,7 @@ export function registerMemoryWorkflowTools({
     ['localnest_task_context'],
     {
       title: 'Task Context',
-      description: 'Bundle runtime status, memory state, and relevant recall for a non-trivial task in one call.',
+      description: '[QUICK_REHYDRATION] Bundle runtime status, memory state, and relevant recall for a non-trivial task in one call.',
       inputSchema: {
         query: z.string().optional(),
         task: z.string().optional(),
@@ -74,12 +84,8 @@ export function registerMemoryWorkflowTools({
         kind: MEMORY_KIND_SCHEMA.optional(),
         limit: z.number().int().min(1).max(20).default(8)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async (args: Record<string, unknown>) => normalizeTaskContextResult(await memoryWorkflow.getTaskContext(args), args)
   );
@@ -90,12 +96,8 @@ export function registerMemoryWorkflowTools({
       title: 'Memory Status',
       description: 'Return local memory feature status, consent state, and backend compatibility.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_STATUS_RESULT_SCHEMA
     },
     async () => normalizeMemoryStatus(await memory.getStatus())
   );
@@ -113,17 +115,14 @@ export function registerMemoryWorkflowTools({
         topic: z.string().optional(),
         feature: z.string().optional(),
         kind: MEMORY_KIND_SCHEMA.optional(),
+        actor_id: z.string().max(200).optional(),
         tags: z.array(z.string()).optional(),
         limit: z.number().int().min(1).max(50).default(10)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_SEARCH_RESULT_SCHEMA
     },
-    async ({ query, root_path, project_path, branch_name, topic, feature, kind, tags, limit }: Record<string, unknown>) => normalizeMemoryRecallResult(
+    async ({ query, root_path, project_path, branch_name, topic, feature, kind, actor_id, tags, limit }: Record<string, unknown>) => normalizeMemoryRecallResult(
       await memory.recall({
         query,
         rootPath: root_path,
@@ -132,6 +131,7 @@ export function registerMemoryWorkflowTools({
         topic,
         feature,
         kind,
+        actorId: actor_id as string | undefined,
         tags: tags as string[] | undefined,
         limit
       }),
@@ -143,7 +143,7 @@ export function registerMemoryWorkflowTools({
     ['localnest_capture_outcome'],
     {
       title: 'Capture Outcome',
-      description: 'Capture a meaningful task outcome into the memory event pipeline with a simpler payload.',
+      description: '[COMPLETE_MISSION] One-call mission summary capture. Use this after completing a task, fixing a bug, or making a major architectural decision to persist the "Winner" state for future agents.',
       inputSchema: {
         task: z.string().optional(),
         title: z.string().optional(),
@@ -169,12 +169,8 @@ export function registerMemoryWorkflowTools({
         source_ref: z.string().max(1000).default(''),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_MEMORY_RESULT_SCHEMA
     },
     async ({ terse, ...args }: Record<string, unknown>) => toMinimalWriteResponse(normalizeCaptureOutcomeResult(await memoryWorkflow.captureOutcome(args)), terse as string)
   );
@@ -183,7 +179,7 @@ export function registerMemoryWorkflowTools({
     ['localnest_agent_prime'],
     {
       title: 'Agent Prime',
-      description: 'Get everything an agent needs to start a task in one call: recalled memories, KG entities, relevant files, recent changes, and suggested actions. Returns a compact <2KB context packet. Use this instead of calling task_context + memory_recall + search_hybrid separately.',
+      description: '[MANDATORY_START] The single most important tool for task initialization. Rehydrates project context, recalled memories, KG entities, relevant files, recent changes, and suggested actions in one call. Always call this BEFORE deeper research.',
       inputSchema: {
         task: z.string().min(1).max(500),
         project_path: z.string().optional(),
@@ -193,12 +189,8 @@ export function registerMemoryWorkflowTools({
         max_entities: z.number().int().min(1).max(20).default(10),
         max_files: z.number().int().min(1).max(10).default(5)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async (args: Record<string, unknown>) => normalizeAgentPrimeResult(
       await memoryWorkflow.agentPrime(args as any)
@@ -216,12 +208,8 @@ export function registerMemoryWorkflowTools({
         project_path: z.string().optional(),
         limit: z.number().int().min(1).max(50).default(10)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async ({ since, agent_id, project_path, limit }: Record<string, unknown>) => {
       const result = await memory.whatsNew({
@@ -248,12 +236,8 @@ export function registerMemoryWorkflowTools({
         scope: MEMORY_SCOPE_SCHEMA.optional(),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_MEMORY_RESULT_SCHEMA
     },
     async ({ terse, ...args }: Record<string, unknown>) => {
       const result = await memoryWorkflow.teach(args as any);

@@ -2,56 +2,65 @@
 
 import process from 'node:process';
 import { SERVER_NAME, SERVER_VERSION } from '../../src/runtime/version.js';
+import { c, symbol } from '../../src/cli/ansi.js';
+
+export { c, symbol };
 
 export function hasHelpFlag(argv = process.argv.slice(2)) {
   return argv.includes('--help') || argv.includes('-h');
 }
 
 export function printTaskContextHelp() {
-  process.stdout.write('LocalNest task-context helper\n\n');
-  process.stdout.write('Usage:\n');
-  process.stdout.write('  localnest task-context --task "investigate issue" --project-path "/abs/project"\n');
-  process.stdout.write('  localnest task-context --query "search terms" --root-path "/abs/root"\n');
-  process.stdout.write('  localnest task-context --json \'{"task":"investigate issue"}\'\n');
-  process.stdout.write('\nCompatibility alias (deprecated):\n');
-  process.stdout.write('  localnest-mcp-task-context\n');
-  process.stdout.write('Options:\n');
-  process.stdout.write('  --task=<text>            task description\n');
-  process.stdout.write('  --query=<text>           recall query\n');
-  process.stdout.write('  --project-path=<path>    project scope\n');
-  process.stdout.write('  --root-path=<path>       root scope\n');
-  process.stdout.write('  --branch-name=<name>     optional branch scope\n');
-  process.stdout.write('  --topic=<text>           optional topic scope\n');
-  process.stdout.write('  --feature=<text>         optional feature scope\n');
-  process.stdout.write('  --kind=<text>            optional memory kind filter\n');
-  process.stdout.write('  --limit=<n>              result limit\n');
-  process.stdout.write('  --json=<json>            JSON input payload\n');
+  console.log(c.bold('LocalNest task-context helper'));
+  console.log('');
+  console.log(c.bold('Usage:'));
+  console.log(`  localnest task-context ${c.cyan('--task')} "investigate issue" ${c.cyan('--project-path')} "/abs/project"`);
+  console.log(`  localnest task-context ${c.cyan('--query')} "search terms" ${c.cyan('--root-path')} "/abs/root"`);
+  console.log(`  localnest task-context ${c.cyan('--json')} '{"task":"investigate issue"}'`);
+  console.log('');
+  console.log(c.dim('Compatibility alias (deprecated):'));
+  console.log(c.dim('  localnest-mcp-task-context'));
+  console.log('');
+  console.log(c.bold('Options:'));
+  console.log(`  ${c.cyan('--task')}=<text>            task description`);
+  console.log(`  ${c.cyan('--query')}=<text>           recall query`);
+  console.log(`  ${c.cyan('--project-path')}=<path>    project scope`);
+  console.log(`  ${c.cyan('--root-path')}=<path>       root scope`);
+  console.log(`  ${c.cyan('--branch-name')}=<name>     optional branch scope`);
+  console.log(`  ${c.cyan('--topic')}=<text>           optional topic scope`);
+  console.log(`  ${c.cyan('--feature')}=<text>         optional feature scope`);
+  console.log(`  ${c.cyan('--kind')}=<text>            optional memory kind filter`);
+  console.log(`  ${c.cyan('--limit')}=<n>              result limit`);
+  console.log(`  ${c.cyan('--json')}=<json>            JSON input payload`);
 }
 
 export function printCaptureOutcomeHelp() {
-  process.stdout.write('LocalNest capture-outcome helper\n\n');
-  process.stdout.write('Usage:\n');
-  process.stdout.write('  localnest capture-outcome --task "fix issue" --status completed --summary "what changed"\n');
-  process.stdout.write('  localnest capture-outcome --json \'{"task":"fix issue","summary":"what changed"}\'\n');
-  process.stdout.write('\nCompatibility alias (deprecated):\n');
-  process.stdout.write('  localnest-mcp-capture-outcome\n');
-  process.stdout.write('Options:\n');
-  process.stdout.write('  --task=<text>             task title\n');
-  process.stdout.write('  --title=<text>            explicit event title\n');
-  process.stdout.write('  --summary=<text>          short summary\n');
-  process.stdout.write('  --details=<text>          longer detail text\n');
-  process.stdout.write('  --content=<text>          explicit content body\n');
-  process.stdout.write('  --status=<text>           task status\n');
-  process.stdout.write('  --event-type=<text>       event type override\n');
-  process.stdout.write('  --project-path=<path>     project scope\n');
-  process.stdout.write('  --root-path=<path>        root scope\n');
-  process.stdout.write('  --branch-name=<name>      optional branch scope\n');
-  process.stdout.write('  --topic=<text>            optional topic scope\n');
-  process.stdout.write('  --feature=<text>          optional feature scope\n');
-  process.stdout.write('  --tags=<a,b,c>            tags list\n');
-  process.stdout.write('  --files-changed=<n>       files changed count\n');
-  process.stdout.write('  --has-tests=<true|false>  whether tests were added/run\n');
-  process.stdout.write('  --json=<json>             JSON input payload\n');
+  console.log(c.bold('LocalNest capture-outcome helper'));
+  console.log('');
+  console.log(c.bold('Usage:'));
+  console.log(`  localnest capture-outcome ${c.cyan('--task')} "fix issue" ${c.cyan('--status')} completed ${c.cyan('--summary')} "what changed"`);
+  console.log(`  localnest capture-outcome ${c.cyan('--json')} '{"task":"fix issue","summary":"what changed"}'`);
+  console.log('');
+  console.log(c.dim('Compatibility alias (deprecated):'));
+  console.log(c.dim('  localnest-mcp-capture-outcome'));
+  console.log('');
+  console.log(c.bold('Options:'));
+  console.log(`  ${c.cyan('--task')}=<text>             task title`);
+  console.log(`  ${c.cyan('--title')}=<text>            explicit event title`);
+  console.log(`  ${c.cyan('--summary')}=<text>          short summary`);
+  console.log(`  ${c.cyan('--details')}=<text>          longer detail text`);
+  console.log(`  ${c.cyan('--content')}=<text>          explicit content body`);
+  console.log(`  ${c.cyan('--status')}=<text>           task status`);
+  console.log(`  ${c.cyan('--event-type')}=<text>       event type override`);
+  console.log(`  ${c.cyan('--project-path')}=<path>     project scope`);
+  console.log(`  ${c.cyan('--root-path')}=<path>        root scope`);
+  console.log(`  ${c.cyan('--branch-name')}=<name>      optional branch scope`);
+  console.log(`  ${c.cyan('--topic')}=<text>            optional topic scope`);
+  console.log(`  ${c.cyan('--feature')}=<text>          optional feature scope`);
+  console.log(`  ${c.cyan('--tags')}=<a,b,c>            tags list`);
+  console.log(`  ${c.cyan('--files-changed')}=<n>       files changed count`);
+  console.log(`  ${c.cyan('--has-tests')}=<true|false>  whether tests were added/run`);
+  console.log(`  ${c.cyan('--json')}=<json>             JSON input payload`);
 }
 
 export function parseArg(argv, name) {

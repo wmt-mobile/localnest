@@ -1,40 +1,85 @@
 ---
 slug: /
 sidebar_position: 1
-title: Getting Started
+title: Welcome to LocalNest
 ---
 
-# Getting Started
+# LocalNest MCP
 
-LocalNest is a local-first MCP server that gives AI agents safe, scoped access to your codebase — with hybrid search, semantic indexing, a temporal knowledge graph, and persistent memory that never leaves your machine.
+**Local-first AI Context, Semantic Code Search, and Persistent Memory.**
 
-**72 MCP tools. Zero cloud dependencies. Pure SQLite.**
+LocalNest is a powerful MCP server that gives your AI agents a durable "nest" on your machine. It combines context-aware code discovery with a temporal knowledge graph, ensuring your AI never loses the thread of a conversation or a codebase.
 
-## Quick start
+```text
+ ┌── LocalNest Dashboard ──────────────────────────────────────────────────┐
+ │                                                                         │
+ │  AI Context: [ONLINE]  Tools: [74 ACTIVE]       Memory: [3.2GB INDEXED] │
+ │                                                                         │
+ │  Recent Events:                                                         │
+ │  [15:34:01] localnest_search_hybrid: matched 12 chunks                  │
+ │  [15:34:02] localnest_agent_prime: context rehydrated                   │
+ │                                                                         │
+ └─────────────────────────────────────────────────────────────────────────┘
+```
 
+## ⚡ Quick Start
+
+Choose your release track and get started in seconds:
+
+| Track | Install Command | Best for... |
+|---|---|---|
+| **Stable** | `npm install -g localnest-mcp` | Production reliability & 74 core tools. |
+| **Beta** | `npm install -g localnest-mcp@beta` | **Modern TUI Dashboard** & Premium UI. |
+
+Then initialize your environment:
 ```bash
-npm install -g localnest-mcp
 localnest setup
 localnest doctor
 ```
 
-Then paste the generated `mcpServers.localnest` block into your MCP client config (Cursor, Windsurf, Codex, Kiro, Gemini CLI, or any MCP-compatible client).
+---
 
-## What you get
+## 🏗️ Core Pillars
 
-| Capability | What it does |
-|---|---|
-| **Hybrid search** | Lexical + semantic fused with RRF ranking |
-| **Knowledge graph** | Temporal triples with `as_of` queries and multi-hop traversal |
-| **Agent memory** | Durable, queryable knowledge that persists across sessions |
-| **Semantic dedup** | Embedding similarity gate prevents near-duplicate pollution |
-| **Conversation ingestion** | Import Markdown/JSON chat exports with entity extraction |
-| **Hooks** | Pre/post operation callbacks for memory, KG, traversal |
+:::info Key Value
+LocalNest is built for **100% privacy**. No data leaves your machine—embeddings, index, and memory stay local.
+:::
 
-## Next steps
+- **[74 Specialized Tools](/docs/tools/overview)**: Comprehensive coverage for search, memory, and graph traversal.
+- **[Interactive TUI Dashboard](/docs/tools/cli)**: Real-time monitoring of your knowledge base state.
+- **[Temporal Knowledge Graph](/docs/tools/knowledge-graph)**: Subject-predicate-object triples with time-validity (`as_of`).
+- **[Fused Retrieval](/docs/tools/search)**: Lexical + semantic fused with RRF ranking for high-precision results.
+- **[Agent Isolation](/docs/tools/organization)**: Per-agent diary and memory scoping to prevent contamination.
 
-- **[Install](/docs/setup/install)** — full install walkthrough with skill setup and doctor checks
-- **[Configuration](/docs/setup/configuration)** — roots, env vars, index backends, memory toggle
-- **[Architecture](/docs/architecture)** — boot flow, retrieval pipeline, memory graph internals
-- **[Tools](/docs/tools/overview)** — all 72 MCP tools across 11 groups
-- **[Current Release](/docs/releases/current)** — what changed in 0.1.0
+---
+
+## 🚦 Next Steps
+
+<div className="container">
+  <div className="row">
+    <div className="col col--6">
+      ### 🏁 [Getting Started](/docs/setup/install)
+      Full walkthrough for installing and connecting to your favorite AI client.
+    </div>
+    <div className="col col--6">
+      ### 🧱 [Tool Reference](/docs/tools/overview)
+      Deep dive into the 74 tools available for your AI agents.
+    </div>
+  </div>
+  <div className="row">
+    <div className="col col--6">
+      ### 🧬 [Architecture](/docs/architecture)
+      Understand the retrieval pipeline and memory graph internals.
+    </div>
+    <div className="col col--6">
+      ### 🚀 [Release Notes](/docs/releases/current)
+      What's new in the latest v0.3.0-beta.1 modernization update.
+    </div>
+  </div>
+</div>
+
+---
+
+<p align="center">
+  <b>Empower your AI. Own your Context.</b>
+</p>

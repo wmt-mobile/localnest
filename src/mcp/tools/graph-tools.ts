@@ -1,7 +1,24 @@
 import { z } from 'zod';
 import { MemoryHooks } from '../../services/memory/hooks.js';
+import {
+  READ_ONLY_ANNOTATIONS,
+  WRITE_ANNOTATIONS,
+  IDEMPOTENT_WRITE_ANNOTATIONS
+} from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import { toMinimalWriteResponse } from '../common/terse-utils.js';
+
+type OutputArchetype = { data: z.ZodTypeAny; meta: z.ZodTypeAny };
+interface SharedSchemas {
+  OUTPUT_SEARCH_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_TRIPLE_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_STATUS_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_BATCH_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_MEMORY_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_ACK_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_BUNDLE_RESULT_SCHEMA: OutputArchetype;
+  OUTPUT_FREEFORM_RESULT_SCHEMA: OutputArchetype;
+}
 
 interface MemoryService {
   addEntity(opts: Record<string, unknown>): Promise<unknown>;
@@ -10,7 +27,7 @@ interface MemoryService {
   addTripleBatch(opts: Record<string, unknown>): Promise<unknown>;
   queryEntityRelationships(entityId: string, opts: Record<string, unknown>): Promise<unknown>;
   invalidateTriple(tripleId: string, validTo?: string | null): Promise<unknown>;
-  queryTriplesAsOf(entityId: string, asOfDate: string): Promise<unknown>;
+  queryTriplesAsOf(entityId: string, asOfDate: string, mode?: 'event' | 'transaction'): Promise<unknown>;
   getEntityTimeline(entityId: string): Promise<unknown>;
   getKgStats(): Promise<unknown>;
   listNests(): Promise<unknown>;
@@ -32,15 +49,14 @@ interface MemoryService {
 export interface RegisterGraphToolsOptions {
   registerJsonTool: RegisterJsonToolFn;
   memory: MemoryService;
-  schemas?: unknown;
+  schemas: SharedSchemas;
 }
 
 export function registerGraphTools({
   registerJsonTool,
-  memory
+  memory,
+  schemas
 }: RegisterGraphToolsOptions): void {
-  const readOnlyAnnotations = { readOnlyHint: true, destructiveHint: false, idempotentHint: true, openWorldHint: false } as const;
-
   // --- KG Tools (localnest_kg_*) ---
 
   registerJsonTool(
@@ -55,12 +71,8 @@ export function registerGraphTools({
         memory_id: z.string().optional(),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: IDEMPOTENT_WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_ACK_RESULT_SCHEMA
     },
     async ({ name, type, properties, memory_id, terse }: Record<string, unknown>) =>
       toMinimalWriteResponse(await memory.addEntity({ name, type, properties, memoryId: memory_id }), terse as string)
@@ -84,12 +96,8 @@ export function registerGraphTools({
         source_type: z.string().max(100).default('manual'),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_TRIPLE_RESULT_SCHEMA
     },
     async ({ subject_name, predicate, object_name, subject_id, object_id, valid_from, valid_to, confidence, source_memory_id, source_type, terse }: Record<string, unknown>) =>
       toMinimalWriteResponse(await memory.addTriple({
@@ -112,7 +120,8 @@ export function registerGraphTools({
         })).min(1).max(500),
         response_format: z.enum(['minimal', 'verbose']).default('minimal')
       },
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false }
+      annotations: IDEMPOTENT_WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BATCH_RESULT_SCHEMA
     },
     async ({ entities, response_format }: Record<string, unknown>) =>
       memory.addEntityBatch({
@@ -138,7 +147,8 @@ export function registerGraphTools({
         })).min(1).max(500),
         response_format: z.enum(['minimal', 'verbose']).default('minimal')
       },
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false }
+      annotations: IDEMPOTENT_WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BATCH_RESULT_SCHEMA
     },
     async ({ triples, response_format }: Record<string, unknown>) =>
       memory.addTripleBatch({
@@ -162,7 +172,8 @@ export function registerGraphTools({
         direction: z.enum(['outgoing', 'incoming', 'both']).default('both'),
         include_invalid: z.boolean().default(false)
       },
-      annotations: readOnlyAnnotations
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_TRIPLE_RESULT_SCHEMA
     },
     async ({ entity_id, direction, include_invalid }: Record<string, unknown>) =>
       memory.queryEntityRelationships(entity_id as string, { direction, includeInvalid: include_invalid })
@@ -178,12 +189,8 @@ export function registerGraphTools({
         valid_to: z.string().nullable().optional(),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: IDEMPOTENT_WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_ACK_RESULT_SCHEMA
     },
     async ({ triple_id, valid_to, terse }: Record<string, unknown>) =>
       toMinimalWriteResponse(await memory.invalidateTriple(triple_id as string, valid_to as string | null | undefined), terse as string)
@@ -193,15 +200,17 @@ export function registerGraphTools({
     ['localnest_kg_as_of'],
     {
       title: 'KG As-Of Query',
-      description: 'Query triples for an entity at a specific point in time. Returns only facts valid at the given date (valid_from <= date, valid_to > date or NULL).',
+      description: 'Query triples for an entity at a specific point in time. mode="event" (default) returns facts whose valid_from/valid_to bracket the date (event-time axis). mode="transaction" returns every triple LocalNest knew at that time via recorded_at, regardless of valid_to (transaction-time axis).',
       inputSchema: {
         entity_id: z.string().min(1).max(400),
-        as_of_date: z.string().min(1)
+        as_of_date: z.string().min(1),
+        mode: z.enum(['event', 'transaction']).default('event')
       },
-      annotations: readOnlyAnnotations
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_TRIPLE_RESULT_SCHEMA
     },
-    async ({ entity_id, as_of_date }: Record<string, unknown>) =>
-      memory.queryTriplesAsOf(entity_id as string, as_of_date as string)
+    async ({ entity_id, as_of_date, mode }: Record<string, unknown>) =>
+      memory.queryTriplesAsOf(entity_id as string, as_of_date as string, mode as 'event' | 'transaction' | undefined)
   );
 
   registerJsonTool(
@@ -212,12 +221,8 @@ export function registerGraphTools({
       inputSchema: {
         entity_id: z.string().min(1).max(400)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_TRIPLE_RESULT_SCHEMA
     },
     async ({ entity_id }: Record<string, unknown>) =>
       memory.getEntityTimeline(entity_id as string)
@@ -229,12 +234,8 @@ export function registerGraphTools({
       title: 'KG Statistics',
       description: 'Get knowledge graph statistics: total entity count, total triple count, active triple count, and breakdown by predicate type.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_STATUS_RESULT_SCHEMA
     },
     async () => memory.getKgStats()
   );
@@ -250,7 +251,8 @@ export function registerGraphTools({
         nest: z.string().max(200).optional(),
         branch: z.string().max(200).optional()
       },
-      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false }
+      annotations: IDEMPOTENT_WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BATCH_RESULT_SCHEMA
     },
     async ({ limit, offset, nest, branch }: Record<string, unknown>) =>
       memory.backfillMemoryKgLinks({ limit, offset, nest, branch })
@@ -264,12 +266,8 @@ export function registerGraphTools({
       title: 'Nest List',
       description: 'List all nests (top-level memory domains) with their memory entry counts.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async () => memory.listNests()
   );
@@ -282,12 +280,8 @@ export function registerGraphTools({
       inputSchema: {
         nest: z.string().min(1).max(200)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async ({ nest }: Record<string, unknown>) => memory.listBranches(nest as string)
   );
@@ -298,12 +292,8 @@ export function registerGraphTools({
       title: 'Nest Taxonomy Tree',
       description: 'Get the full taxonomy tree: all nests, their branches, and memory counts at each level.',
       inputSchema: {},
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async () => memory.getTaxonomyTree()
   );
@@ -320,12 +310,8 @@ export function registerGraphTools({
         max_hops: z.number().int().min(1).max(5).default(2),
         direction: z.enum(['outgoing', 'incoming', 'both']).default('both')
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async ({ start_entity_id, max_hops, direction }: Record<string, unknown>) =>
       memory.traverseGraph({ startEntityId: start_entity_id, maxHops: max_hops, direction })
@@ -340,12 +326,8 @@ export function registerGraphTools({
         nest: z.string().max(200).optional(),
         mode: z.enum(['cross-nest', 'cross-branch']).default('cross-nest')
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async ({ nest, mode }: Record<string, unknown>) => memory.discoverBridges({ nest, mode: mode as 'cross-nest' | 'cross-branch' | undefined })
   );
@@ -363,12 +345,8 @@ export function registerGraphTools({
         topic: z.string().max(200).optional(),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: false,
-        openWorldHint: false
-      }
+      annotations: WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_ACK_RESULT_SCHEMA
     },
     async ({ agent_id, content, topic, terse }: Record<string, unknown>) =>
       toMinimalWriteResponse(await memory.writeDiaryEntry({ agentId: agent_id, content, topic }), terse as string)
@@ -385,12 +363,8 @@ export function registerGraphTools({
         limit: z.number().int().min(1).max(100).default(20),
         offset: z.number().int().min(0).default(0)
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_FREEFORM_RESULT_SCHEMA
     },
     async ({ agent_id, topic, limit, offset }: Record<string, unknown>) =>
       memory.readDiaryEntries({ agentId: agent_id, topic, limit, offset })
@@ -411,12 +385,8 @@ export function registerGraphTools({
         agent_id: z.string().max(200).default(''),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: IDEMPOTENT_WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BATCH_RESULT_SCHEMA
     },
     async ({ content, source_label, nest, branch, agent_id, terse }: Record<string, unknown>) =>
       toMinimalWriteResponse(await memory.ingestMarkdown({ content, filePath: source_label || '', nest, branch, agentId: agent_id }), terse as string)
@@ -435,12 +405,8 @@ export function registerGraphTools({
         agent_id: z.string().max(200).default(''),
         terse: z.enum(['minimal', 'verbose']).default('verbose')
       },
-      annotations: {
-        readOnlyHint: false,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: IDEMPOTENT_WRITE_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BATCH_RESULT_SCHEMA
     },
     async ({ content, source_label, nest, branch, agent_id, terse }: Record<string, unknown>) =>
       toMinimalWriteResponse(await memory.ingestJson({ content, filePath: source_label || '', nest, branch, agentId: agent_id }), terse as string)
@@ -460,7 +426,8 @@ export function registerGraphTools({
         branch: z.string().max(200).optional(),
         project_path: z.string().max(1000).optional()
       },
-      annotations: readOnlyAnnotations
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async ({ content, threshold, nest, branch, project_path }: Record<string, unknown>) =>
       memory.checkDuplicate(content as string, { threshold, nest, branch, projectPath: project_path })
@@ -474,7 +441,8 @@ export function registerGraphTools({
       title: 'Hooks Stats',
       description: 'Returns hook system statistics: whether hooks are enabled, total registered listener count, and a breakdown of listener counts per event type.',
       inputSchema: {},
-      annotations: readOnlyAnnotations
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_STATUS_RESULT_SCHEMA
     },
     async () => memory.store.hooks.getStats()
   );
@@ -485,7 +453,8 @@ export function registerGraphTools({
       title: 'Hooks List Events',
       description: 'Returns all valid hook event names that listeners can subscribe to. Covers memory lifecycle (store, update, delete, recall), knowledge graph operations (addEntity, addTriple, invalidate), graph traversal, diary, ingestion, dedup, taxonomy, and catch-all wildcards.',
       inputSchema: {},
-      annotations: readOnlyAnnotations
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: schemas.OUTPUT_STATUS_RESULT_SCHEMA
     },
     async () => ({ events: MemoryHooks.validEvents() })
   );

@@ -7,7 +7,9 @@ import {
   parseNumberArg,
   printTaskContextHelp,
   readJsonInput,
-  printJson
+  printJson,
+  c,
+  symbol
 } from './memory-workflow-cli-utils.mjs';
 
 async function main() {
@@ -37,6 +39,6 @@ async function main() {
 }
 
 main().catch((error) => {
-  process.stderr.write(`${error?.message || String(error)}\n`);
+  console.error(`${symbol.fail()} ${c.red.bold('Error:')} ${error?.message || String(error)}`);
   process.exit(1);
 });

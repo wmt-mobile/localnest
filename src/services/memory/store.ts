@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { NodeSqliteAdapter } from './adapter.js';
+import { applySqliteTuning } from './sqlite-tuning.js';
 import {
   ensureSchema as ensureMemorySchema,
   runMigrations as runMemoryMigrations
@@ -132,8 +133,7 @@ export class MemoryStore {
 
     this.adapter = selected.adapter;
     this.selectedBackend = selected.name;
-    await this.adapter.exec('PRAGMA journal_mode=WAL;');
-    await this.adapter.exec('PRAGMA synchronous=NORMAL;');
+    await applySqliteTuning(this.adapter);
     await this.ensureSchema();
 
     return {
@@ -317,9 +317,9 @@ export class MemoryStore {
     return queryEntityRelationshipsFn(this.adapter!, entityId, opts);
   }
 
-  async queryTriplesAsOf(entityId: string, asOfDate: string) {
+  async queryTriplesAsOf(entityId: string, asOfDate: string, mode?: 'event' | 'transaction') {
     await this.init();
-    return queryTriplesAsOfFn(this.adapter!, entityId, asOfDate);
+    return queryTriplesAsOfFn(this.adapter!, entityId, asOfDate, mode);
   }
 
   async getEntityTimeline(entityId: string) {

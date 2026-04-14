@@ -10,473 +10,28 @@
  * @module src/cli/commands/selftest
  */
 
-import fs from 'node:fs';
-import path from 'node:path';
-import os from 'node:os';
-import { spawnSync } from 'node:child_process';
-import { buildRuntimeConfig } from '../../runtime/config.js';
 import { EmbeddingService } from '../../services/retrieval/embedding/service.js';
 import { MemoryService } from '../../services/memory/service.js';
-import { SCHEMA_VERSION } from '../../services/memory/schema.js';
 import { SERVER_VERSION } from '../../runtime/version.js';
-import {
-  bold, dim, green, red, yellow,
-  boxTop, boxBottom, boxLine, separator,
-} from '../ansi.js';
+import { c, symbol, boxTop, boxBottom, boxLine, separator } from '../ansi.js';
 import { startSpinner } from '../spinner.js';
 import type { Ora } from 'ora';
 import type { GlobalOptions } from '../options.js';
-
-/* ------------------------------------------------------------------ */
-/*  Result tracking                                                    */
-/* ------------------------------------------------------------------ */
-
-type CheckStatus = 'pass' | 'warn' | 'fail';
-
-interface CheckResult {
-  name: string;
-  status: CheckStatus;
-  detail: string;
-  runtime?: any;
-}
-
-const ICON: Record<CheckStatus, string> = {
-  pass: '\u2713',
-  warn: '\u26A0',
-  fail: '\u2717',
-};
-
-function statusIcon(status: CheckStatus): string {
-  switch (status) {
-    case 'pass': return green(ICON.pass);
-    case 'warn': return yellow(ICON.warn);
-    case 'fail': return red(ICON.fail);
-    default: return ' ';
-  }
-}
-
-function formatLine(result: CheckResult): string {
-  const icon = statusIcon(result.status);
-  const nameCol = result.name.padEnd(24);
-  const detailCol = dim(result.detail);
-  return `  ${icon} ${nameCol} ${detailCol}`;
-}
-
-/* ------------------------------------------------------------------ */
-/*  Service bootstrap                                                  */
-/* ------------------------------------------------------------------ */
-
-function createServices(runtime: any): { embeddingService: EmbeddingService; memoryService: MemoryService } {
-  const embeddingService = new EmbeddingService({
-    provider: runtime.embeddingProvider,
-    model: runtime.embeddingModel,
-    cacheDir: runtime.embeddingCacheDir,
-  });
-  const memoryService = new MemoryService({
-    localnestHome: runtime.localnestHome,
-    enabled: true,
-    backend: runtime.memoryBackend,
-    dbPath: runtime.memoryDbPath,
-    autoCapture: runtime.memoryAutoCapture,
-    consentDone: runtime.memoryConsentDone,
-    embeddingService: embeddingService as any,
-  });
-  return { embeddingService, memoryService };
-}
-
-/* ------------------------------------------------------------------ */
-/*  Individual checks                                                  */
-/* ------------------------------------------------------------------ */
-
-async function checkRuntime(): Promise<CheckResult> {
-  try {
-    const runtime = buildRuntimeConfig();
-    const nodeVer = process.version;
-    let sqliteAvail = false;
-    try {
-      const mod = await import('node:sqlite');
-      sqliteAvail = Boolean((mod as any)?.DatabaseSync);
-    } catch { /* not available */ }
-
-    if (!sqliteAvail) {
-      return {
-        name: 'Runtime config',
-        status: 'warn',
-        detail: `Node ${nodeVer}, sqlite NOT available`,
-        runtime,
-      };
-    }
-
-    return {
-      name: 'Runtime config',
-      status: 'pass',
-      detail: `Node ${nodeVer}, sqlite available`,
-      runtime,
-    };
-  } catch (err: unknown) {
-    return {
-      name: 'Runtime config',
-      status: 'fail',
-      detail: (err as Error).message || String(err),
-      runtime: null,
-    };
-  }
-}
-
-async function checkMemoryBackend(memoryService: MemoryService): Promise<CheckResult> {
-  try {
-    const backendInfo: any = await memoryService.detectBackend();
-    if (!backendInfo.available) {
-      return {
-        name: 'Memory backend',
-        status: 'fail',
-        detail: backendInfo.reason || 'no backend available',
-      };
-    }
-    return {
-      name: 'Memory backend',
-      status: 'pass',
-      detail: `Schema v${SCHEMA_VERSION}, ${backendInfo.selected} backend`,
-    };
-  } catch (err: unknown) {
-    return {
-      name: 'Memory backend',
-      status: 'fail',
-      detail: (err as Error).message || String(err),
-    };
-  }
-}
-
-async function checkMemoryCrud(memoryService: MemoryService): Promise<CheckResult> {
-  const testId = `__selftest_${Date.now()}`;
-  try {
-    // Store
-    const storeResult: any = await memoryService.storeEntry({
-      content: `selftest entry ${testId}`,
-      kind: 'knowledge',
-      importance: 10,
-      title: testId,
-    });
-    const id = storeResult?.memory?.id;
-    if (!id) throw new Error('store returned no id');
-
-    // Recall
-    const recalled = await memoryService.getEntry(id);
-    if (!recalled) throw new Error('recall returned nothing');
-
-    // Update
-    await memoryService.updateEntry(id, { importance: 20 });
-
-    // Delete (cleanup)
-    await memoryService.deleteEntry(id);
-
-    return {
-      name: 'Memory CRUD',
-      status: 'pass',
-      detail: 'store \u2192 recall \u2192 update \u2192 delete',
-    };
-  } catch (err: unknown) {
-    // Attempt cleanup just in case
-    try {
-      const entries: any = await memoryService.listEntries({ limit: 50 });
-      for (const e of entries?.items || []) {
-        if (e.title === testId) await memoryService.deleteEntry(e.id);
-      }
-    } catch { /* ignore cleanup errors */ }
-
-    return {
-      name: 'Memory CRUD',
-      status: 'fail',
-      detail: (err as Error).message || String(err),
-    };
-  }
-}
-
-async function checkKnowledgeGraph(memoryService: MemoryService): Promise<CheckResult> {
-  const entityName = `__selftest_entity_${Date.now()}`;
-  try {
-    // Add entity
-    const entity: any = await memoryService.addEntity({
-      name: entityName,
-      type: 'test',
-    });
-    const entityId = entity?.id || entity?.entity?.id;
-    if (!entityId) throw new Error('addEntity returned no id');
-
-    // Add triple
-    const triple: any = await memoryService.addTriple({
-      subjectId: entityId,
-      predicate: 'tested_by',
-      objectName: 'selftest',
-    } as any);
-    const tripleId = triple?.id || triple?.triple?.id;
-
-    // Query
-    const rels = await memoryService.queryEntityRelationships(entityId);
-    if (!rels) throw new Error('queryEntityRelationships returned nothing');
-
-    // Invalidate triple
-    if (tripleId) {
-      await memoryService.invalidateTriple(tripleId, new Date().toISOString());
-    }
-
-    return {
-      name: 'Knowledge Graph',
-      status: 'pass',
-      detail: 'entity + triple + query + invalidate',
-    };
-  } catch (err: unknown) {
-    return {
-      name: 'Knowledge Graph',
-      status: 'fail',
-      detail: (err as Error).message || String(err),
-    };
-  }
-}
-
-async function checkTaxonomy(memoryService: MemoryService): Promise<CheckResult> {
-  try {
-    await memoryService.listNests();
-    await memoryService.listBranches('');
-
-    return {
-      name: 'Taxonomy',
-      status: 'pass',
-      detail: 'nests and branches working',
-    };
-  } catch (err: unknown) {
-    return {
-      name: 'Taxonomy',
-      status: 'fail',
-      detail: (err as Error).message || String(err),
-    };
-  }
-}
-
-async function checkDedup(memoryService: MemoryService): Promise<CheckResult> {
-  const testContent = `selftest dedup content ${Date.now()}`;
-  let firstId: string | null = null;
-  try {
-    // Store first entry
-    const first: any = await memoryService.storeEntry({
-      content: testContent,
-      kind: 'knowledge',
-      importance: 10,
-      title: '__selftest_dedup',
-    });
-    firstId = first?.memory?.id;
-
-    // Try storing duplicate
-    const second: any = await memoryService.storeEntry({
-      content: testContent,
-      kind: 'knowledge',
-      importance: 10,
-      title: '__selftest_dedup_2',
-    });
-
-    const isDup = second?.duplicate === true;
-
-    // Cleanup
-    if (firstId) await memoryService.deleteEntry(firstId);
-    if (second?.memory?.id && second.memory.id !== firstId) {
-      await memoryService.deleteEntry(second.memory.id);
-    }
-
-    if (isDup) {
-      return {
-        name: 'Dedup',
-        status: 'pass',
-        detail: 'duplicate detection active (0.92 threshold)',
-      };
-    }
-
-    return {
-      name: 'Dedup',
-      status: 'warn',
-      detail: 'stored but duplicate not caught (embeddings may not be loaded)',
-    };
-  } catch (err: unknown) {
-    // Cleanup on failure
-    if (firstId) {
-      try { await memoryService.deleteEntry(firstId); } catch { /* ignore */ }
-    }
-    return {
-      name: 'Dedup',
-      status: 'fail',
-      detail: (err as Error).message || String(err),
-    };
-  }
-}
-
-async function checkEmbeddings(embeddingService: EmbeddingService): Promise<CheckResult> {
-  try {
-    if (!embeddingService.isEnabled()) {
-      return {
-        name: 'Embeddings',
-        status: 'warn',
-        detail: 'embedding provider disabled',
-      };
-    }
-
-    const vec = await embeddingService.embed('selftest embedding probe');
-    if (!Array.isArray(vec) || vec.length === 0) {
-      return {
-        name: 'Embeddings',
-        status: 'warn',
-        detail: 'model not loaded (first use downloads ~30MB)',
-      };
-    }
-
-    return {
-      name: 'Embeddings',
-      status: 'pass',
-      detail: `${(embeddingService as any).model}, ${vec.length}d vectors`,
-    };
-  } catch {
-    return {
-      name: 'Embeddings',
-      status: 'warn',
-      detail: 'model not loaded (first use downloads ~30MB)',
-    };
-  }
-}
-
-function checkFileSearch(): CheckResult {
-  try {
-    const result = spawnSync('rg', ['--version'], { stdio: 'pipe', encoding: 'utf8' });
-    if (result.status === 0) {
-      const ver = (result.stdout || '').split('\n')[0] || 'available';
-      return {
-        name: 'File search',
-        status: 'pass',
-        detail: `ripgrep ${ver.replace('ripgrep ', '').trim()}`,
-      };
-    }
-    return {
-      name: 'File search',
-      status: 'warn',
-      detail: 'ripgrep not found (file search will use fallback)',
-    };
-  } catch {
-    return {
-      name: 'File search',
-      status: 'warn',
-      detail: 'ripgrep not found (file search will use fallback)',
-    };
-  }
-}
-
-function checkSkills(): CheckResult {
-  try {
-    const homeDir = os.homedir();
-    const SKILL_META = '.localnest-skill.json';
-
-    const knownDirs = [
-      path.join(homeDir, '.agents', 'skills'),
-      path.join(homeDir, '.codex', 'skills'),
-      path.join(homeDir, '.copilot', 'skills'),
-      path.join(homeDir, '.claude', 'skills'),
-      path.join(homeDir, '.cursor', 'skills'),
-      path.join(homeDir, '.codeium', 'windsurf', 'skills'),
-      path.join(homeDir, '.opencode', 'skills'),
-      path.join(homeDir, '.config', 'opencode', 'skills'),
-      path.join(homeDir, '.gemini', 'skills'),
-      path.join(homeDir, '.gemini', 'antigravity', 'skills'),
-      path.join(homeDir, '.cline', 'skills'),
-      path.join(homeDir, '.continue', 'skills'),
-      path.join(homeDir, '.kiro', 'skills'),
-    ];
-
-    const clientsWithSkills = new Set<string>();
-
-    for (const skillsDir of knownDirs) {
-      if (!fs.existsSync(skillsDir)) continue;
-      let entries: fs.Dirent[];
-      try {
-        entries = fs.readdirSync(skillsDir, { withFileTypes: true });
-      } catch { continue; }
-
-      for (const entry of entries) {
-        if (!entry.isDirectory()) continue;
-        const metaPath = path.join(skillsDir, entry.name, SKILL_META);
-        if (fs.existsSync(metaPath)) {
-          // Extract client name from the path
-          const relative = skillsDir.replace(homeDir, '');
-          const clientName = relative.split(path.sep).filter(Boolean)[0] || 'unknown';
-          clientsWithSkills.add(clientName.replace(/^\./, ''));
-          break;
-        }
-      }
-    }
-
-    if (clientsWithSkills.size === 0) {
-      return {
-        name: 'Skills',
-        status: 'warn',
-        detail: 'not installed (run: localnest skill install)',
-      };
-    }
-
-    return {
-      name: 'Skills',
-      status: 'pass',
-      detail: `installed in ${clientsWithSkills.size} AI client${clientsWithSkills.size === 1 ? '' : 's'}`,
-    };
-  } catch (err: unknown) {
-    return {
-      name: 'Skills',
-      status: 'fail',
-      detail: (err as Error).message || String(err),
-    };
-  }
-}
-
-function checkHooks(): CheckResult {
-  try {
-    const settingsPath = path.join(os.homedir(), '.claude', 'settings.json');
-    if (!fs.existsSync(settingsPath)) {
-      return {
-        name: 'Hooks',
-        status: 'fail',
-        detail: 'not installed (run: localnest hooks install)',
-      };
-    }
-
-    const settings: any = JSON.parse(fs.readFileSync(settingsPath, 'utf8'));
-    const hooks = settings.hooks || {};
-    const preHooks = (hooks.PreToolUse || []).filter(
-      (e: any) => e.hooks?.some((h: any) => h.command?.includes('localnest'))
-    );
-    const postHooks = (hooks.PostToolUse || []).filter(
-      (e: any) => e.hooks?.some((h: any) => h.command?.includes('localnest'))
-    );
-
-    const count = preHooks.length + postHooks.length;
-    if (count === 0) {
-      return {
-        name: 'Hooks',
-        status: 'fail',
-        detail: 'not installed (run: localnest hooks install)',
-      };
-    }
-
-    return {
-      name: 'Hooks',
-      status: 'pass',
-      detail: `${count} hook${count === 1 ? '' : 's'} active (pre: ${preHooks.length}, post: ${postHooks.length})`,
-    };
-  } catch {
-    return {
-      name: 'Hooks',
-      status: 'fail',
-      detail: 'not installed (run: localnest hooks install)',
-    };
-  }
-}
-
-/* ------------------------------------------------------------------ */
-/*  Main runner                                                        */
-/* ------------------------------------------------------------------ */
+import {
+  type CheckResult,
+  formatLine,
+  createServices,
+  checkRuntime,
+  checkMemoryBackend,
+  checkMemoryCrud,
+  checkKnowledgeGraph,
+  checkTaxonomy,
+  checkDedup,
+  checkEmbeddings,
+  checkFileSearch,
+  checkSkills,
+  checkHooks,
+} from './selftest-checks.js';
 
 export async function run(args: string[], opts: GlobalOptions): Promise<void> {
   const jsonOutput = opts.json || args.includes('--json');
@@ -588,32 +143,29 @@ export async function run(args: string[], opts: GlobalOptions): Promise<void> {
   }
 
   const lines: string[] = [];
-  const W = 60;
 
-  lines.push('');
-  lines.push(boxTop(W));
-  lines.push(boxLine(`${bold('LocalNest Self-Test')}  ${dim(`v${SERVER_VERSION}`)}`, W));
-  lines.push(boxBottom(W));
-  lines.push('');
+  process.stdout.write(`\n  ${c.bold('LocalNest Self-Check')}  ${c.gray(`v${SERVER_VERSION}`)}\n`);
+  process.stdout.write(`  ${c.dim('Running system diagnostics and integration tests...')}\n\n`);
 
   for (const r of results) {
     lines.push(formatLine(r));
   }
 
-  lines.push('');
-  lines.push(separator());
+  process.stdout.write(lines.join('\n') + '\n\n');
+  process.stdout.write(separator() + '\n');
 
   const passed = results.filter(r => r.status === 'pass').length;
-  const warnings = results.filter(r => r.status === 'warn').length;
+  const warned = results.filter(r => r.status === 'warn').length;
   const failed = results.filter(r => r.status === 'fail').length;
 
-  const parts: string[] = [];
-  if (passed > 0) parts.push(green(`${passed} passed`));
-  if (warnings > 0) parts.push(yellow(`${warnings} warning${warnings === 1 ? '' : 's'}`));
-  if (failed > 0) parts.push(red(`${failed} action${failed === 1 ? '' : 's'} needed`));
+  process.stdout.write(`  ${c.bold('Summary')}\n`);
+  process.stdout.write(`  ${c.green(`${passed} passed`)}, ${c.red(`${failed} failed`)}, ${c.yellow(`${warned} warnings`)}\n\n`);
 
-  lines.push(`  ${bold('Result:')} ${parts.join(', ')}`);
-  lines.push('');
-
-  process.stdout.write(lines.join('\n') + '\n');
+  if (failed > 0) {
+    process.stdout.write(`  ${c.red('FAILED')}: Self-check encountered critical issues.\n\n`);
+  } else if (warned > 0) {
+    process.stdout.write(`  ${c.yellow('PASSED WITH WARNINGS')}: System is operational but needs attention.\n\n`);
+  } else {
+    process.stdout.write(`  ${c.green('PASSED')}: System is healthy.\n\n`);
+  }
 }

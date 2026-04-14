@@ -33,6 +33,7 @@ export interface CompactMemory {
   summary: string;
   kind: string;
   score: number;
+  actor_id: string;
 }
 
 export interface CompactEntity {
@@ -138,7 +139,8 @@ export async function agentPrime(
       title: truncate(item.memory.title, 80),
       summary: truncate(item.memory.summary, MAX_SUMMARY_LEN),
       kind: item.memory.kind || 'note',
-      score: Number(item.score.toFixed(3))
+      score: Number(item.score.toFixed(3)),
+      actor_id: item.memory.actor_id || ''
     }));
   } catch {
     // Non-blocking

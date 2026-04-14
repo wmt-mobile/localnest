@@ -218,9 +218,9 @@ export async function addTriple(adapter: Adapter, {
     }
 
     await ad.run(
-      `INSERT INTO kg_triples (id, subject_id, predicate, object_id, valid_from, valid_to, confidence, source_memory_id, source_type, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [id, subId, pred, objId, vFrom, vTo, conf, srcMemId, srcType, now]
+      `INSERT INTO kg_triples (id, subject_id, predicate, object_id, valid_from, valid_to, confidence, source_memory_id, source_type, created_at, recorded_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [id, subId, pred, objId, vFrom, vTo, conf, srcMemId, srcType, now, now]
     );
 
     const contradictions = conflicting.map(c => ({
@@ -240,6 +240,7 @@ export async function addTriple(adapter: Adapter, {
       source_memory_id: srcMemId,
       source_type: srcType,
       created_at: now,
+      recorded_at: now,
       contradictions,
       has_contradiction: contradictions.length > 0
     };
@@ -341,8 +342,9 @@ export async function queryEntityRelationships(
 export async function queryTriplesAsOf(
   adapter: Adapter,
   entityId: string,
-  asOfDate: string
-): Promise<{ entity_id: string; as_of: string; count: number; triples: KgTripleWithNames[] }> {
+  asOfDate: string,
+  mode: 'event' | 'transaction' = 'event'
+): Promise<{ entity_id: string; as_of: string; mode: 'event' | 'transaction'; count: number; triples: KgTripleWithNames[] }> {
   const id = cleanString(entityId, 400);
   if (!id) throw new Error('entityId is required');
   if (!asOfDate) throw new Error('asOfDate is required');
@@ -351,21 +353,42 @@ export async function queryTriplesAsOf(
   // end-of-day so that triples created at any time during that day are included.
   const resolvedDate = !asOfDate.includes('T') ? `${asOfDate}T23:59:59.999Z` : asOfDate;
 
-  const triples = await adapter.all<KgTripleWithNames>(
-    `SELECT t.*, s.name AS subject_name, o.name AS object_name
-       FROM kg_triples t
-       JOIN kg_entities s ON s.id = t.subject_id
-       JOIN kg_entities o ON o.id = t.object_id
-      WHERE (t.subject_id = ? OR t.object_id = ?)
-        AND (t.valid_from IS NULL OR t.valid_from <= ?)
-        AND (t.valid_to IS NULL OR t.valid_to > ?)
-      ORDER BY t.valid_from ASC`,
-    [id, id, resolvedDate, resolvedDate]
-  );
+  let triples: KgTripleWithNames[];
+  if (mode === 'transaction') {
+    // Transaction-time: return every triple LocalNest knew at the given
+    // time, regardless of whether the fact was true in the world. No
+    // valid_to interaction — recorded_at is the row's permanent original
+    // transaction time, never touched by invalidateTriple.
+    triples = await adapter.all<KgTripleWithNames>(
+      `SELECT t.*, s.name AS subject_name, o.name AS object_name
+         FROM kg_triples t
+         JOIN kg_entities s ON s.id = t.subject_id
+         JOIN kg_entities o ON o.id = t.object_id
+        WHERE (t.subject_id = ? OR t.object_id = ?)
+          AND t.recorded_at <= ?
+        ORDER BY t.recorded_at ASC`,
+      [id, id, resolvedDate]
+    );
+  } else {
+    // Event-time (default): byte-identical to the pre-Phase-42 behavior so
+    // the existing BATCH-06 queryTriplesAsOf test keeps passing unchanged.
+    triples = await adapter.all<KgTripleWithNames>(
+      `SELECT t.*, s.name AS subject_name, o.name AS object_name
+         FROM kg_triples t
+         JOIN kg_entities s ON s.id = t.subject_id
+         JOIN kg_entities o ON o.id = t.object_id
+        WHERE (t.subject_id = ? OR t.object_id = ?)
+          AND (t.valid_from IS NULL OR t.valid_from <= ?)
+          AND (t.valid_to IS NULL OR t.valid_to > ?)
+        ORDER BY t.valid_from ASC`,
+      [id, id, resolvedDate, resolvedDate]
+    );
+  }
 
   return {
     entity_id: id,
     as_of: asOfDate,
+    mode,
     count: triples.length,
     triples
   };
@@ -384,7 +407,7 @@ export async function getEntityTimeline(
        JOIN kg_entities s ON s.id = t.subject_id
        JOIN kg_entities o ON o.id = t.object_id
       WHERE t.subject_id = ? OR t.object_id = ?
-      ORDER BY t.valid_from ASC, t.created_at ASC`,
+      ORDER BY t.valid_from ASC, t.recorded_at ASC`,
     [id, id]
   );
 

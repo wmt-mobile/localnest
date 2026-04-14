@@ -309,6 +309,7 @@ export function deserializeEntry(row: MemoryEntryRow): MemoryEntry {
     nest: row.nest || '',
     branch: row.branch || '',
     agent_id: row.agent_id || '',
+    actor_id: row.actor_id || '',
     tags: JSON.parse(row.tags_json || '[]'),
     links: JSON.parse(row.links_json || '[]'),
     source_type: row.source_type,

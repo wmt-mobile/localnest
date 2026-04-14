@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
+import { applySqliteTuning } from '../../memory/sqlite-tuning.js';
 import { buildBaseScopeClause, makeFileSignature, isUnderBase } from './helpers.js';
 import { INDEX_SCHEMA_SQL, runInTransaction, runMigrations } from './schema.js';
 import {
@@ -159,9 +160,9 @@ export class SqliteVecIndexService {
       this.db = new DatabaseSync(this.dbPath, {
         allowExtension: Boolean(this.sqliteVecExtensionPath)
       } as Record<string, unknown>);
-      this.db.exec('PRAGMA journal_mode=WAL;');
-      this.db.exec('PRAGMA synchronous=NORMAL;');
-      this.db.exec('PRAGMA cache_size=-8000;');
+      // fire-and-forget: DatabaseSync.exec is synchronous; the promise
+      // resolves on the next microtask but all PRAGMAs are already applied.
+      void applySqliteTuning(this.db);
       this.db.exec(INDEX_SCHEMA_SQL);
 
       this._stmtGetDf = this.db.prepare('SELECT df FROM term_df WHERE term = ?') as unknown as DbStatement;

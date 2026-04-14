@@ -2,11 +2,11 @@
 
 ## What This Is
 
-LocalNest is a local-first MCP server that gives AI agents safe, scoped access to code — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory that never leaves your machine. 50 MCP tools, zero cloud dependencies, pure SQLite.
+LocalNest is a local-first MCP server that gives AI agents safe, scoped access to code — with hybrid search, semantic indexing, temporal knowledge graph, and persistent memory that never leaves your machine. 72 MCP tools, zero cloud dependencies, pure SQLite.
 
-## Current Milestone: v0.2.0 — Memory-KG Fusion & Agent-First Surface
+## Current Milestone: v0.3.0 — MCP Spec Compliance & Production Hardening
 
-**Goal:** Make LocalNest the single primitive an agent calls at the start of every task and at the end of every outcome, with batch writes, terse responses, fused search, and a connected memory-KG graph.
+**Goal:** Bring LocalNest up to the 2025-06-18 MCP spec (structured output, tool annotations, resource links), add production essentials (WAL mode, backup/restore, bi-temporal KG, actor-aware memories), and close competitive gaps identified in the v0.2.0 stress test.
 
 **Target features:**
 - Batch write variants for every write tool (`kg_add_triples_batch`, `memory_store_batch`) — turn 300 calls into 3

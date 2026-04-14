@@ -1,6 +1,8 @@
 import { z } from 'zod';
+import { READ_ONLY_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import { unifiedFind } from '../../services/unified-find/find.js';
+import { SEARCH_RESULT_SCHEMA } from '../common/schemas.js';
 
 interface MemoryServiceForFind {
   recall(args: Record<string, unknown>): Promise<unknown>;
@@ -41,12 +43,8 @@ export function registerFindTools({
           .min(1)
           .default(['memory', 'code', 'triple'])
       },
-      annotations: {
-        readOnlyHint: true,
-        destructiveHint: false,
-        idempotentHint: true,
-        openWorldHint: false
-      }
+      annotations: READ_ONLY_ANNOTATIONS,
+      outputSchema: SEARCH_RESULT_SCHEMA
     },
     async ({
       query,

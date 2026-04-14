@@ -4,8 +4,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
-import readline from 'node:readline/promises';
-import { stdin as input, stdout as output } from 'node:process';
 import {
   ensureSqliteVecExtension,
   migrateLocalnestHomeLayout,
@@ -16,6 +14,8 @@ import {
   buildLocalnestServerConfig,
   installLocalnestIntoDetectedClients
 } from '../../src/setup/client-installer.js';
+import ora from 'ora';
+import { c, symbol, box, rule } from '../../src/cli/ansi.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';
@@ -181,17 +181,7 @@ function buildClientSnippet(packageRef, indexConfig) {
   };
 }
 
-function buildNpxClientSnippet(packageRef, indexConfig) {
-  return {
-    mcpServers: {
-      localnest: buildLocalnestServerConfig({
-        command: getNpxCommand(),
-        args: ['-y', packageRef],
-        env: buildLocalnestEnv(indexConfig)
-      })
-    }
-  };
-}
+
 
 function buildGlobalClientSnippet(indexConfig) {
   return {
@@ -344,19 +334,12 @@ function buildExistingDefaults(existingConfig) {
     rerankerCachePreferred: typeof existingIndex.rerankerCacheDir === 'string' && existingIndex.rerankerCacheDir.trim()
       ? path.resolve(expandHome(existingIndex.rerankerCacheDir))
       : layout.dirs.cache,
-    memoryEnabled: typeof existingMemory.enabled === 'boolean' ? existingMemory.enabled : false,
     memoryBackend: typeof existingMemory.backend === 'string' && existingMemory.backend.trim()
       ? existingMemory.backend.trim()
       : 'auto',
     memoryDbPath: typeof existingMemory.dbPath === 'string' && existingMemory.dbPath.trim()
       ? path.resolve(expandHome(existingMemory.dbPath))
-      : defaultMemoryDbPath,
-    memoryAutoCapture: typeof existingMemory.autoCapture === 'boolean'
-      ? existingMemory.autoCapture
-      : (typeof existingMemory.enabled === 'boolean' ? existingMemory.enabled : false),
-    memoryConsentDone: typeof existingMemory.askForConsentDone === 'boolean'
-      ? existingMemory.askForConsentDone
-      : false
+      : defaultMemoryDbPath
   };
 }
 
@@ -458,7 +441,7 @@ function saveOutputs(roots, packageRef, indexConfig) {
       backend: indexConfig.memory.backend,
       dbPath: indexConfig.memory.dbPath,
       autoCapture: indexConfig.memory.autoCapture,
-      askForConsentDone: indexConfig.memory.askForConsentDone
+      askForConsentDone: true
     }
   };
 
@@ -479,7 +462,7 @@ async function warmupModels(indexConfig) {
   const { EmbeddingService, RerankerService } = await import('../../src/services/retrieval/index.js');
 
   if (indexConfig?.embedding?.provider && indexConfig.embedding.provider !== 'none') {
-    process.stdout.write('[setup] warming up embedding model (first run downloads model files)...\n');
+    const embedSpinner = ora('Warming up embedding model (first run downloads ~90MB)…').start();
     try {
       const embedding = new EmbeddingService({
         provider: indexConfig.embedding.provider,
@@ -487,13 +470,14 @@ async function warmupModels(indexConfig) {
         cacheDir: indexConfig.embedding.cacheDir
       });
       await embedding.embed('localnest embedding warmup');
+      embedSpinner.succeed('Embedding model ready');
     } catch (error) {
-      process.stderr.write(`[setup] warning: embedding warmup failed: ${error?.message || error}\n`);
+      embedSpinner.warn(`Embedding warmup failed: ${error?.message || error}`);
     }
   }
 
   if (indexConfig?.reranker?.provider && indexConfig.reranker.provider !== 'none') {
-    process.stdout.write('[setup] warming up reranker model (first run downloads model files)...\n');
+    const rerankSpinner = ora('Warming up reranker model…').start();
     try {
       const reranker = new RerankerService({
         provider: indexConfig.reranker.provider,
@@ -501,65 +485,67 @@ async function warmupModels(indexConfig) {
         cacheDir: indexConfig.reranker.cacheDir
       });
       await reranker.score('warmup query', 'warmup candidate');
+      rerankSpinner.succeed('Reranker model ready');
     } catch (error) {
-      process.stderr.write(`[setup] warning: reranker warmup failed: ${error?.message || error}\n`);
+      rerankSpinner.warn(`Reranker warmup failed: ${error?.message || error}`);
     }
   }
 }
 
 function printSuccess(packageRef, indexConfig) {
   const launch = resolveLaunchPreference(packageRef);
-  const globalSnippet = buildGlobalClientSnippet(indexConfig);
-  const preferredSnippet = buildClientSnippet(packageRef, indexConfig);
-  const npxSnippet = buildNpxClientSnippet(packageRef, indexConfig);
   const clientInstall = installClientConfigs(packageRef, indexConfig);
+  const verbose = argv.includes('--verbose') || argv.includes('-v');
 
   console.log('');
-  console.log(`Saved root config: ${configPath}`);
-  console.log(`Saved client snippet: ${snippetPath}`);
-  console.log(`Preferred LocalNest launcher: ${launch.command}${launch.args.length ? ` ${launch.args.join(' ')}` : ''}`);
-  if (indexConfig.backend === 'sqlite-vec') {
-    if (indexConfig.sqliteVecExtensionPath) {
-      console.log(`Configured sqlite-vec native extension: ${indexConfig.sqliteVecExtensionPath}`);
-    } else {
-      console.log('sqlite-vec native extension not configured. LocalNest will not have vec0 acceleration until setup can detect or install it.');
-    }
-  }
-  console.log('');
+  console.log(box.top(60));
+  console.log(box.row(c.bold('LocalNest Setup Complete ✓'), 60));
+  console.log(box.divider(60));
+  console.log(box.row(`Launcher: ${launch.command}${launch.args.length ? ' ' + launch.args.join(' ') : ''}`, 60));
+  console.log(box.row(`Backend:  ${indexConfig.backend}`, 60));
+  console.log(box.row(`Config:   ${configPath}`, 60));
+
   if (clientInstall.installed.length > 0) {
-    console.log('Auto-installed LocalNest into detected AI tools:');
+    console.log(box.divider(60));
+    console.log(box.row('Auto-installed into:', 60));
     for (const result of clientInstall.installed) {
-      console.log(`- ${result.tool}: ${result.status} (${result.configPath})`);
+      console.log(box.row(`  ${symbol.ok()} ${result.tool}: ${result.status}`, 60));
     }
-    console.log('');
   }
+  console.log(box.bottom(60));
+  console.log('');
+
   if (clientInstall.unsupported.length > 0) {
-    console.log('Detected but not auto-configured:');
+    console.log(c.yellow('Detected but not auto-configured:'));
     for (const item of clientInstall.unsupported) {
-      console.log(`- ${item.label}: ${item.reason}`);
+      console.log(`  ${symbol.warn()} ${item.label}: ${item.reason}`);
     }
     console.log('');
   }
+
+  console.log(rule('Next steps'));
+  console.log('1) Restart AI tools that were updated above');
+
+  if (verbose) {
+    console.log('2) Client configuration snippet:');
+    const preferredSnippet = buildClientSnippet(packageRef, indexConfig);
+    console.log('');
+    console.log(JSON.stringify(preferredSnippet, null, 2));
+    console.log('');
+    console.log('3) Global only (if installed):');
+    console.log(JSON.stringify(buildGlobalClientSnippet(indexConfig), null, 2));
+  } else {
+    console.log(`2) If your tool was not updated, run with ${c.cyan('--verbose')} to see config snippets.`);
+  }
+
   console.log('');
-  console.log('Next steps:');
-  console.log('1) Restart the AI tools that were updated above');
-  console.log('2) If your preferred tool was not updated automatically, copy-paste this MCP config block into its config:');
-  console.log('');
-  console.log(JSON.stringify(preferredSnippet, null, 2));
-  console.log('');
-  console.log('3) Use tools: localnest_index_status, localnest_index_project, localnest_search_hybrid, localnest_read_file');
-  console.log('');
-  console.log('Optional GLOBAL-only snippet:');
-  console.log(JSON.stringify(globalSnippet, null, 2));
-  console.log('');
-  console.log('Optional npx fallback snippet:');
-  console.log(`- ${snippetPath}`);
-  console.log(JSON.stringify(npxSnippet, null, 2));
+  console.log('Try: localnest doctor');
+  console.log(rule());
 }
 
 async function main() {
   if (argv.includes('--help') || argv.includes('-h')) {
-    console.log('LocalNest setup wizard');
+    console.log('LocalNest setup');
     console.log('');
     console.log('Usage:');
     console.log('  localnest setup');
@@ -569,11 +555,11 @@ async function main() {
     console.log('  localnest setup --skip-model-download=true');
     console.log('  localnest setup --skip-sqlite-vec-install=true');
     console.log('  localnest setup --sqlite-vec-extension="/abs/path/to/vec0.so"');
-    console.log('  localnest setup --memory-enabled=true');
-    console.log('  localnest setup --memory-backend=auto');
+    console.log('  localnest setup --index-backend=sqlite-vec');
     console.log('  localnest setup --memory-db-path="/abs/path/to/memory.db"');
-    console.log('  localnest setup --memory-auto-capture=true');
-    console.log('  localnest setup --memory-consent-done=true');
+    console.log('');
+    console.log('Memory, SQLite backend, and knowledge graph are always enabled.');
+    console.log('Roots are auto-detected from ~/projects, ~/code, ~/workspace, and cwd.');
     return;
   }
 
@@ -585,357 +571,105 @@ async function main() {
   const preflight = runPreflightChecks();
   if (preflight.errors.length > 0) {
     for (const err of preflight.errors) {
-      console.error(`[preflight:error] ${err}`);
+      console.error(`${symbol.fail()} ${c.red(err)}`);
     }
     process.exit(1);
   }
   for (const warning of preflight.warnings) {
-    console.error(`[preflight:warning] ${warning}`);
+    console.error(`${symbol.warn()} ${c.yellow(warning)}`);
   }
 
+  // Resolve roots: explicit args > existing config > auto-detected > cwd fallback
+  let roots;
   const rootsJsonArg = parseArg('roots-json');
   const pathsArg = parseArg('paths');
-  if (pathsArg || rootsJsonArg) {
-    const roots = rootsJsonArg ? parseRootsFromJsonArg(rootsJsonArg) : parseRootsFromPathsArg(pathsArg);
+  if (rootsJsonArg) {
+    roots = parseRootsFromJsonArg(rootsJsonArg);
+    if (roots.length === 0) throw new Error('No valid directories provided in --roots-json');
+  } else if (pathsArg) {
+    roots = parseRootsFromPathsArg(pathsArg);
+    if (roots.length === 0) throw new Error('No valid directories provided in --paths');
+  } else {
+    roots = [...existingDefaults.roots];
     if (roots.length === 0) {
-      throw new Error('No valid directories provided in --paths/--roots-json');
-    }
-
-    const requestedBackend = parseArg('index-backend') || existingDefaults.backend;
-    const dbPath = path.resolve(expandHome(parseArg('db-path') || existingDefaults.dbPath));
-    const indexPath = path.resolve(expandHome(parseArg('index-path') || existingDefaults.indexPath));
-    const chunkLines = parseIntegerArg('chunk-lines', existingDefaults.chunkLines);
-    const chunkOverlap = parseIntegerArg('chunk-overlap', existingDefaults.chunkOverlap);
-    const maxTermsPerChunk = parseIntegerArg('max-terms-per-chunk', existingDefaults.maxTermsPerChunk);
-    const maxIndexedFiles = parseIntegerArg('max-indexed-files', existingDefaults.maxIndexedFiles);
-    const embeddingProvider = parseArg('embed-provider') || existingDefaults.embeddingProvider;
-    const embeddingModel = parseArg('embed-model') || existingDefaults.embeddingModel;
-    const embedCachePreferred = path.resolve(expandHome(parseArg('embed-cache-dir') || existingDefaults.embedCachePreferred));
-    const embeddingDimensions = parseIntegerArg('embed-dims', existingDefaults.embeddingDimensions);
-    const rerankerProvider = parseArg('reranker-provider') || existingDefaults.rerankerProvider;
-    const rerankerModel = parseArg('reranker-model') || existingDefaults.rerankerModel;
-    const rerankerCachePreferred = path.resolve(expandHome(parseArg('reranker-cache-dir') || existingDefaults.rerankerCachePreferred));
-    const skipModelDownload = parseBooleanArg('skip-model-download') ?? false;
-    const { embeddingCacheDir, rerankerCacheDir } = resolveModelCacheDirs(
-      embedCachePreferred,
-      rerankerCachePreferred
-    );
-    const requestedMemoryEnabled = parseBooleanArg('memory-enabled') ?? existingDefaults.memoryEnabled;
-    const memoryBackend = parseArg('memory-backend') || existingDefaults.memoryBackend;
-    const memoryDbPath = path.resolve(expandHome(parseArg('memory-db-path') || existingDefaults.memoryDbPath));
-    const memoryAutoCapture = parseBooleanArg('memory-auto-capture') ?? existingDefaults.memoryAutoCapture;
-    const memoryConsentDone = parseBooleanArg('memory-consent-done') ?? existingDefaults.memoryConsentDone;
-    const compatibility = resolveCompatibleSetupOptions({
-      backend: requestedBackend,
-      memoryEnabled: requestedMemoryEnabled
-    });
-    for (const warning of compatibility.warnings) {
-      process.stderr.write(`[setup] warning: ${warning}\n`);
-    }
-    const backend = compatibility.backend;
-    const memoryEnabled = compatibility.memoryEnabled;
-    const { sqliteVecExtensionPath, sqliteVecInstallStatus } = resolveSqliteVecPreference({ backend });
-
-    saveOutputs(roots, packageRef, {
-      backend,
-      dbPath,
-      indexPath,
-      chunkLines,
-      chunkOverlap,
-      maxTermsPerChunk,
-      maxIndexedFiles,
-      sqliteVecExtensionPath,
-      embedding: {
-        provider: embeddingProvider,
-        model: embeddingModel,
-        cacheDir: embeddingCacheDir,
-        dimensions: embeddingDimensions
-      },
-      reranker: {
-        provider: rerankerProvider,
-        model: rerankerModel,
-        cacheDir: rerankerCacheDir
-      },
-      memory: {
-        enabled: memoryEnabled,
-        backend: memoryBackend,
-        dbPath: memoryDbPath,
-        autoCapture: memoryAutoCapture,
-        askForConsentDone: memoryConsentDone
+      const suggestions = collectSuggestions();
+      roots = suggestions.map((s, i) => ({ label: toLabel(s, `root${i + 1}`), path: s }));
+      if (roots.length > 0) {
+        process.stdout.write(`[setup] auto-detected ${roots.length} root(s): ${roots.map((r) => r.path).join(', ')}\n`);
       }
-    });
-    printSuccess(packageRef, {
-      backend,
-      dbPath,
-      indexPath,
-      sqliteVecExtensionPath,
-      embedding: {
-        provider: embeddingProvider,
-        model: embeddingModel,
-        cacheDir: embeddingCacheDir,
-        dimensions: embeddingDimensions
-      },
-      reranker: {
-        provider: rerankerProvider,
-        model: rerankerModel,
-        cacheDir: rerankerCacheDir
-      },
-      memory: {
-        enabled: memoryEnabled,
-        backend: memoryBackend,
-        dbPath: memoryDbPath
-      }
-    });
-    if (backend === 'sqlite-vec' && !sqliteVecInstallStatus.ok) {
-      process.stderr.write(`[setup] warning: sqlite-vec native extension missing: ${sqliteVecInstallStatus.reason || 'unknown reason'}\n`);
     }
-    if (!skipModelDownload) {
-      await warmupModels({
-        embedding: {
-          provider: embeddingProvider,
-          model: embeddingModel,
-          cacheDir: embeddingCacheDir,
-          dimensions: embeddingDimensions
-        },
-        reranker: {
-          provider: rerankerProvider,
-          model: rerankerModel,
-          cacheDir: rerankerCacheDir
-        }
-      });
+    if (roots.length === 0) {
+      process.stdout.write(`[setup] no roots found — using current directory: ${cwd}\n`);
+      roots = [{ label: toLabel(cwd, 'cwd'), path: cwd }];
     }
-    return;
   }
 
-  const rl = readline.createInterface({ input, output });
-  try {
-    console.log('LocalNest setup wizard');
-    console.log('This will configure project/data folders and indexing backend for LocalNest MCP.');
-    console.log('');
+  // Index backend — always prefer sqlite-vec, fall back to json on Node < 22
+  const requestedBackend = parseArg('index-backend') || 'sqlite-vec';
+  const dbPath = path.resolve(expandHome(parseArg('db-path') || existingDefaults.dbPath));
+  const indexPath = path.resolve(expandHome(parseArg('index-path') || existingDefaults.indexPath));
+  const chunkLines = parseIntegerArg('chunk-lines', existingDefaults.chunkLines);
+  const chunkOverlap = parseIntegerArg('chunk-overlap', existingDefaults.chunkOverlap);
+  const maxTermsPerChunk = parseIntegerArg('max-terms-per-chunk', existingDefaults.maxTermsPerChunk);
+  const maxIndexedFiles = parseIntegerArg('max-indexed-files', existingDefaults.maxIndexedFiles);
+  const skipModelDownload = parseBooleanArg('skip-model-download') ?? false;
+  const { embeddingCacheDir, rerankerCacheDir } = resolveModelCacheDirs(
+    existingDefaults.embedCachePreferred,
+    existingDefaults.rerankerCachePreferred
+  );
 
-    if (existingConfig) {
-      console.log(`Existing config detected: ${configPath}`);
-      console.log('Press Enter to keep current values where shown.');
-      console.log('');
+  // Memory — always enabled; power users can override via CLI arg only
+  const requestedMemoryEnabled = parseBooleanArg('memory-enabled') ?? true;
+  const memoryBackend = parseArg('memory-backend') || existingDefaults.memoryBackend;
+  const memoryDbPath = path.resolve(expandHome(parseArg('memory-db-path') || existingDefaults.memoryDbPath));
+
+  const compatibility = resolveCompatibleSetupOptions({
+    backend: requestedBackend,
+    memoryEnabled: requestedMemoryEnabled
+  });
+  for (const warning of compatibility.warnings) {
+    process.stderr.write(`[setup] warning: ${warning}\n`);
+  }
+  const backend = compatibility.backend;
+  const memoryEnabled = compatibility.memoryEnabled;
+  const { sqliteVecExtensionPath, sqliteVecInstallStatus } = resolveSqliteVecPreference({ backend });
+
+  const indexConfig = {
+    backend,
+    dbPath,
+    indexPath,
+    chunkLines,
+    chunkOverlap,
+    maxTermsPerChunk,
+    maxIndexedFiles,
+    sqliteVecExtensionPath,
+    embedding: {
+      provider: existingDefaults.embeddingProvider,
+      model: existingDefaults.embeddingModel,
+      cacheDir: embeddingCacheDir,
+      dimensions: existingDefaults.embeddingDimensions
+    },
+    reranker: {
+      provider: existingDefaults.rerankerProvider,
+      model: existingDefaults.rerankerModel,
+      cacheDir: rerankerCacheDir
+    },
+    memory: {
+      enabled: memoryEnabled,
+      backend: memoryBackend,
+      dbPath: memoryDbPath,
+      autoCapture: memoryEnabled,
+      askForConsentDone: true
     }
+  };
 
-    const suggestions = collectSuggestions();
-    if (suggestions.length > 0) {
-      console.log('Suggested folders:');
-      suggestions.forEach((s, i) => {
-        console.log(`  ${i + 1}. ${s}`);
-      });
-      console.log('');
-    }
-
-    let roots = [...existingDefaults.roots];
-    let reuseExistingRoots = false;
-    if (roots.length > 0) {
-      console.log('Existing roots:');
-      roots.forEach((root, i) => {
-        console.log(`  ${i + 1}. ${root.label}: ${root.path}`);
-      });
-      console.log('');
-      const reuseAnswer = (await rl.question('Keep existing roots? [Y/n]: ')).trim().toLowerCase();
-      reuseExistingRoots = reuseAnswer === '' || reuseAnswer === 'y' || reuseAnswer === 'yes';
-      if (!reuseExistingRoots) {
-        roots = [];
-      }
-    }
-
-    if (!reuseExistingRoots) {
-      for (let i = 0; i < suggestions.length; i += 1) {
-        const answer = (await rl.question(`Add suggested folder ${i + 1} (${suggestions[i]})? [y/N]: `)).trim().toLowerCase();
-        if (answer !== 'y' && answer !== 'yes') continue;
-
-        const defaultLabel = toLabel(suggestions[i], `root${roots.length + 1}`);
-        const labelInput = (await rl.question(`Label for ${suggestions[i]} [${defaultLabel}]: `)).trim();
-        roots.push({
-          label: labelInput || defaultLabel,
-          path: suggestions[i]
-        });
-      }
-
-      while (true) {
-        const rawPath = (await rl.question('Add another folder path (or press Enter to finish): ')).trim();
-        if (!rawPath) break;
-
-        const resolved = path.resolve(expandHome(rawPath));
-        if (!isDir(resolved)) {
-          console.log(`Skipping: not a directory -> ${resolved}`);
-          continue;
-        }
-
-        if (roots.some((r) => r.path === resolved)) {
-          console.log(`Skipping: already added -> ${resolved}`);
-          continue;
-        }
-
-        const defaultLabel = toLabel(resolved, `root${roots.length + 1}`);
-        const labelInput = (await rl.question(`Label for ${resolved} [${defaultLabel}]: `)).trim();
-        roots.push({
-          label: labelInput || defaultLabel,
-          path: resolved
-        });
-      }
-    }
-
-    if (roots.length === 0) {
-      const fallback = cwd;
-      console.log('No folders selected. Using current directory as fallback.');
-      roots.push({ label: toLabel(fallback, 'cwd'), path: fallback });
-    }
-
-    console.log('');
-    console.log('Index backend options:');
-    console.log('1) sqlite-vec (recommended): low-resource SQLite DB, durable, future-upgradable');
-    console.log('2) json: simplest file-based index (fallback compatibility mode)');
-    const defaultBackendChoice = !supportsNodeSqlite() || existingDefaults.backend === 'json' ? '2' : '1';
-    const backendAnswer = (await rl.question(`Choose backend [1/2] (default ${defaultBackendChoice}): `)).trim();
-    const requestedBackend = backendAnswer === '2'
-      ? 'json'
-      : backendAnswer === '1'
-        ? 'sqlite-vec'
-        : (!supportsNodeSqlite() ? 'json' : existingDefaults.backend);
-
-    const suggestedDbPath = existingDefaults.dbPath;
-    const dbPathInput = (await rl.question(`SQLite DB path [${suggestedDbPath}]: `)).trim();
-    const dbPath = path.resolve(expandHome(dbPathInput || suggestedDbPath));
-
-    const suggestedIndexPath = existingDefaults.indexPath;
-    const indexPathInput = (await rl.question(`JSON index path (fallback) [${suggestedIndexPath}]: `)).trim();
-    const indexPath = path.resolve(expandHome(indexPathInput || suggestedIndexPath));
-
-    const chunkLinesInput = (await rl.question(`Chunk lines [${existingDefaults.chunkLines}]: `)).trim();
-    const chunkOverlapInput = (await rl.question(`Chunk overlap [${existingDefaults.chunkOverlap}]: `)).trim();
-    const maxTermsInput = (await rl.question(`Max terms per chunk [${existingDefaults.maxTermsPerChunk}]: `)).trim();
-    const maxFilesInput = (await rl.question(`Max indexed files [${existingDefaults.maxIndexedFiles}]: `)).trim();
-
-    const chunkLines = Number.parseInt(chunkLinesInput || String(existingDefaults.chunkLines), 10) || existingDefaults.chunkLines;
-    const chunkOverlap = Number.parseInt(chunkOverlapInput || String(existingDefaults.chunkOverlap), 10) || existingDefaults.chunkOverlap;
-    const maxTermsPerChunk = Number.parseInt(maxTermsInput || String(existingDefaults.maxTermsPerChunk), 10) || existingDefaults.maxTermsPerChunk;
-    const maxIndexedFiles = Number.parseInt(maxFilesInput || String(existingDefaults.maxIndexedFiles), 10) || existingDefaults.maxIndexedFiles;
-    const embeddingProvider = existingDefaults.embeddingProvider;
-    const embeddingModel = existingDefaults.embeddingModel;
-    const embedCachePreferred = existingDefaults.embedCachePreferred;
-    const embeddingDimensions = existingDefaults.embeddingDimensions;
-    const rerankerProvider = existingDefaults.rerankerProvider;
-    const rerankerModel = existingDefaults.rerankerModel;
-    const rerankerCachePreferred = existingDefaults.rerankerCachePreferred;
-    const { embeddingCacheDir, rerankerCacheDir } = resolveModelCacheDirs(
-      embedCachePreferred,
-      rerankerCachePreferred
-    );
-    console.log('');
-    console.log('Local memory setup:');
-    console.log('LocalNest can keep automatic local memory for future agent sessions.');
-    console.log('This is opt-in and stays on your machine.');
-    let memoryEnabled = supportsNodeSqlite() ? existingDefaults.memoryEnabled : false;
-    let memoryConsentDone = existingDefaults.memoryConsentDone;
-    if (!supportsNodeSqlite()) {
-      console.log(`Node ${process.versions.node} does not support built-in node:sqlite, so LocalNest will use the json backend and disable local memory.`);
-      memoryConsentDone = true;
-    } else if (!existingDefaults.memoryConsentDone) {
-      const memoryConsentAnswer = (await rl.question(`Enable automatic local memory capture? [${existingDefaults.memoryEnabled ? 'Y/n' : 'y/N'}]: `)).trim().toLowerCase();
-      if (memoryConsentAnswer === 'y' || memoryConsentAnswer === 'yes') {
-        memoryEnabled = true;
-      } else if (memoryConsentAnswer === 'n' || memoryConsentAnswer === 'no') {
-        memoryEnabled = false;
-      }
-      memoryConsentDone = true;
-    } else {
-      const memoryToggleAnswer = (await rl.question(`Automatic local memory is currently ${existingDefaults.memoryEnabled ? 'enabled' : 'disabled'}. Change it? [y/N]: `)).trim().toLowerCase();
-      if (memoryToggleAnswer === 'y' || memoryToggleAnswer === 'yes') {
-        const enableAnswer = (await rl.question(`Enable automatic local memory capture? [${existingDefaults.memoryEnabled ? 'Y/n' : 'y/N'}]: `)).trim().toLowerCase();
-        if (enableAnswer === 'y' || enableAnswer === 'yes' || (enableAnswer === '' && existingDefaults.memoryEnabled)) {
-          memoryEnabled = true;
-        } else if (enableAnswer === 'n' || enableAnswer === 'no' || (enableAnswer === '' && !existingDefaults.memoryEnabled)) {
-          memoryEnabled = false;
-        }
-      }
-    }
-    const suggestedMemoryDbPath = existingDefaults.memoryDbPath;
-    const memoryDbPathInput = (await rl.question(`Memory SQLite DB path [${suggestedMemoryDbPath}]: `)).trim();
-    const memoryDbPath = path.resolve(expandHome(memoryDbPathInput || suggestedMemoryDbPath));
-    const compatibility = resolveCompatibleSetupOptions({
-      backend: requestedBackend,
-      memoryEnabled
-    });
-    for (const warning of compatibility.warnings) {
-      process.stderr.write(`[setup] warning: ${warning}\n`);
-    }
-    const backend = compatibility.backend;
-    memoryEnabled = compatibility.memoryEnabled;
-    const { sqliteVecExtensionPath, sqliteVecInstallStatus } = resolveSqliteVecPreference({ backend });
-
-    saveOutputs(roots, packageRef, {
-      backend,
-      dbPath,
-      indexPath,
-      chunkLines,
-      chunkOverlap,
-      maxTermsPerChunk,
-      maxIndexedFiles,
-      sqliteVecExtensionPath,
-      embedding: {
-        provider: embeddingProvider,
-        model: embeddingModel,
-        cacheDir: embeddingCacheDir,
-        dimensions: embeddingDimensions
-      },
-      reranker: {
-        provider: rerankerProvider,
-        model: rerankerModel,
-        cacheDir: rerankerCacheDir
-      },
-      memory: {
-        enabled: memoryEnabled,
-        backend: existingDefaults.memoryBackend,
-        dbPath: memoryDbPath,
-        autoCapture: memoryEnabled,
-        askForConsentDone: memoryConsentDone
-      }
-    });
-    printSuccess(packageRef, {
-      backend,
-      dbPath,
-      indexPath,
-      sqliteVecExtensionPath,
-      embedding: {
-        provider: embeddingProvider,
-        model: embeddingModel,
-        cacheDir: embeddingCacheDir,
-        dimensions: embeddingDimensions
-      },
-      reranker: {
-        provider: rerankerProvider,
-        model: rerankerModel,
-        cacheDir: rerankerCacheDir
-      },
-      memory: {
-        enabled: memoryEnabled,
-        backend: existingDefaults.memoryBackend,
-        dbPath: memoryDbPath
-      }
-    });
-    if (backend === 'sqlite-vec' && !sqliteVecInstallStatus.ok) {
-      process.stderr.write(`[setup] warning: sqlite-vec native extension missing: ${sqliteVecInstallStatus.reason || 'unknown reason'}\n`);
-    }
-    await warmupModels({
-      embedding: {
-        provider: embeddingProvider,
-        model: embeddingModel,
-        cacheDir: embeddingCacheDir,
-        dimensions: embeddingDimensions
-      },
-      reranker: {
-        provider: rerankerProvider,
-        model: rerankerModel,
-        cacheDir: rerankerCacheDir
-      }
-    });
-  } finally {
-    rl.close();
+  saveOutputs(roots, packageRef, indexConfig);
+  printSuccess(packageRef, indexConfig);
+  if (backend === 'sqlite-vec' && !sqliteVecInstallStatus.ok) {
+    process.stderr.write(`[setup] warning: sqlite-vec native extension missing: ${sqliteVecInstallStatus.reason || 'unknown reason'}\n`);
+  }
+  if (!skipModelDownload) {
+    await warmupModels(indexConfig);
   }
 }
 

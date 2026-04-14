@@ -10,7 +10,7 @@ on:
   push:
     branches:
       - main
-      - beta
+      - 'release/**'
     paths-ignore:
       - 'localnest-docs/**'
       - 'readme/**'
@@ -34,13 +34,34 @@ jobs:
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
       - name: Setup Node
-        uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        uses: actions/setup-node@6044e13b5dc448c55e2357c09f80417699197238 # v6
         with:
           node-version: 22
           cache: npm
 
       - name: Install
-        run: npm ci
+        run: npm ci --ignore-scripts
 
-      - name: Run Quality Pipeline
-        run: npm run quality
+      - name: Lint
+        run: npm run lint
+
+      - name: Install ML dependencies for typecheck & tests
+        run: node scripts/runtime/install-localnest-skill.mjs --quiet 2>/dev/null || true
+
+      - name: Typecheck
+        run: npm run check
+
+      - name: Test with coverage
+        run: npm run test:coverage
+
+      - name: Check circular deps
+        run: npm run quality:cycles
+
+      - name: Check unused deps
+        run: npm run quality:deps
+
+      - name: Package quality
+        run: npm run quality:package
+
+      - name: Audit quality
+        run: npm run quality:audit

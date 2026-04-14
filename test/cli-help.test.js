@@ -27,7 +27,7 @@ test('setup help prints usage without runtime warning noise', (t) => {
   if (!result) return;
 
   assert.equal(result.status, 0);
-  assert.match(result.stdout, /LocalNest setup wizard/);
+  assert.match(result.stdout, /LocalNest setup/);
   assert.doesNotMatch(result.stderr, /ExperimentalWarning/);
 });
 
@@ -76,7 +76,7 @@ test('legacy setup wrapper prints deprecation warning and forwards to canonical 
 
   assert.equal(result.status, 0);
   assert.match(result.stderr, /deprecated/i);
-  assert.match(result.stdout, /LocalNest setup wizard/);
+  assert.match(result.stdout, /LocalNest setup/);
 });
 
 test('task-context help prints usage without executing workflow', (t) => {

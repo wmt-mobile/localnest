@@ -250,6 +250,10 @@ interface TaskRule {
 /* eslint-disable @typescript-eslint/no-unused-vars -- data table */
 const t = (name: string, description: string, example?: Record<string, unknown>): HelpGuideTool => ({ name, description, ...(example ? { example } : {}) });
 const HELP_RULES: TaskRule[] = [
+  { pattern: /\b(start|begin|initialize|cold start|first|new task|setup task|rehydrate|resume)\b/i, type: 'task_initialization',
+    tools: [t('localnest_agent_prime', 'Get everything an agent needs to start a task in one call: memories, entities, files, changes, and suggestions')],
+    workflow: ['1. Call localnest_agent_prime with your task description.', '2. Review the rehydrated memories and KG entities.', '3. Examine recent changes and suggested files.', '4. Follow the tailored "suggested actions" returned by the tool.'],
+    tip: 'ALWAYS call agent_prime first. It prevents redundant research and gives you the "State of the Union" for the project.' },
   { pattern: /\b(store|save|remember|capture|log|record|preserve|decision|outcome)\b/i, type: 'memory_capture',
     tools: [t('localnest_memory_store', 'Store a durable memory entry', { title: 'Auth uses JWT', content: 'Decided to use JWT with refresh tokens' }),
       t('localnest_capture_outcome', 'One-call outcome capture after meaningful work'),

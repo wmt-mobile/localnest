@@ -13,6 +13,8 @@ import {
   findMissingRequiredSetupFields,
   normalizeUpgradeConfig
 } from '../../src/services/update/index.js';
+import ora from 'ora';
+import { c, symbol, rule, box } from '../../src/cli/ansi.js';
 
 if (!process.env.DART_SUPPRESS_ANALYTICS) {
   process.env.DART_SUPPRESS_ANALYTICS = 'true';
@@ -76,14 +78,18 @@ function readExistingConfig() {
 }
 
 function runCommand(command, args, label) {
-  process.stdout.write(`[upgrade] ${label}: ${[command, ...args].join(' ')}\n`);
-  const run = spawnSync(command, args, { stdio: 'inherit' });
+  const spinner = ora(`${label}…`).start();
+  const run = spawnSync(command, args, { stdio: 'pipe', encoding: 'utf8' });
   if (run.error) {
+    spinner.fail(`${label} failed: ${run.error.message || run.error}`);
     throw new Error(`${label} failed: ${run.error.message || run.error}`);
   }
   if (run.status !== 0) {
+    spinner.fail(`${label} failed (exit ${run.status})`);
+    if (run.stderr) process.stderr.write(run.stderr + '\n');
     throw new Error(`${label} failed with exit code ${run.status}`);
   }
+  spinner.succeed(`${label} complete`);
 }
 
 function runCommandCapture(command, args, label) {
@@ -113,21 +119,22 @@ function parseVersionsJson(raw) {
 }
 
 function printUpgradeError({ title, detailLines = [], suggestionLines = [] }) {
-  process.stderr.write('\n[localnest-upgrade] ERROR\n');
-  process.stderr.write(`${title}\n`);
+  console.error('');
+  console.error(`${symbol.fail()} ${c.red.bold('UPGRADE ERROR')}`);
+  console.error(c.bold(title));
   if (detailLines.length > 0) {
-    process.stderr.write('\nDetails:\n');
+    console.error('\nDetails:');
     for (const line of detailLines) {
-      process.stderr.write(`- ${line}\n`);
+      console.error(` ${c.dim('•')} ${line}`);
     }
   }
   if (suggestionLines.length > 0) {
-    process.stderr.write('\nTry:\n');
+    console.error('\nTry:');
     for (const line of suggestionLines) {
-      process.stderr.write(`- ${line}\n`);
+      console.error(` ${c.cyan('➜')} ${line}`);
     }
   }
-  process.stderr.write('\n');
+  console.error('');
 }
 
 function ensureVersionExists({ npmCmd, packageName, targetVersion }) {
@@ -207,9 +214,10 @@ async function fillMissingFields(baseConfig, missingFields) {
   const rl = readline.createInterface({ input, output });
   try {
     process.stdout.write('\n');
-    process.stdout.write('[upgrade] New required setup fields need your input:\n');
+    console.log(rule('Action required'));
+    console.log('New required setup fields need your input:');
     for (const field of missingFields) {
-      process.stdout.write(`- ${field.label} (${field.path})\n`);
+      console.log(` ${c.yellow('•')} ${c.bold(field.label)} (${c.dim(field.path)})`);
     }
     process.stdout.write('\n');
 
@@ -244,21 +252,21 @@ async function fillMissingFields(baseConfig, missingFields) {
 
 async function main() {
   if (hasFlag('help') || hasShortFlag('h')) {
-    process.stdout.write('LocalNest upgrade helper\n\n');
-    process.stdout.write('Usage:\n');
-    process.stdout.write('  localnest upgrade\n');
-    process.stdout.write('  localnest upgrade stable\n');
-    process.stdout.write('  localnest upgrade beta\n');
-    process.stdout.write(`  localnest upgrade ${SERVER_VERSION}\n`);
-    process.stdout.write(`  localnest upgrade install ${SERVER_VERSION}\n`);
-    process.stdout.write(`  localnest upgrade --version=${SERVER_VERSION}\n`);
-    process.stdout.write('  localnest upgrade --dry-run\n');
-    process.stdout.write('Options:\n');
-    process.stdout.write('  --version=<semver|latest|stable|beta>  target package version or channel\n');
-    process.stdout.write('  --package=<npm-package>    package name (default localnest-mcp)\n');
-    process.stdout.write('  --skip-skill               skip skill sync step\n');
-    process.stdout.write('  --yes                      continue without confirmation prompts\n');
-    process.stdout.write('  --dry-run                  print actions only\n');
+    console.log(c.bold('LocalNest upgrade helper'));
+    console.log('');
+    console.log(c.bold('Usage:'));
+    console.log('  localnest upgrade');
+    console.log('  localnest upgrade stable');
+    console.log('  localnest upgrade beta');
+    console.log(`  localnest upgrade ${c.cyan(SERVER_VERSION)}`);
+    console.log(`  localnest upgrade ${c.cyan('install')} ${c.cyan(SERVER_VERSION)}`);
+    console.log('');
+    console.log(c.bold('Options:'));
+    console.log(`  ${c.cyan('--version')}=<semver|latest|stable|beta>  target package version`);
+    console.log(`  ${c.cyan('--package')}=<npm-package>              package name (default localnest-mcp)`);
+    console.log(`  ${c.cyan('--skip-skill')}                         skip skill sync step`);
+    console.log(`  ${c.cyan('--yes')}                                continue without confirmation`);
+    console.log(`  ${c.cyan('--dry-run')}                           print actions only`);
     return;
   }
 
@@ -348,16 +356,30 @@ async function main() {
   if (!skipSkill) {
     runCommand(skillCmd, ['install', 'skills', '--force'], 'sync skill');
   }
-  runCommand(process.execPath, setupArgs, 'migrate setup');
+  // Use --import tsx/esm so setup can import .ts source files
+  let tsxImportArgs = [];
+  try {
+    const { createRequire } = await import('node:module');
+    const { pathToFileURL } = await import('node:url');
+    const req = createRequire(path.resolve(scriptsDir, '..', '..', 'package.json'));
+    tsxImportArgs = ['--import', pathToFileURL(req.resolve('tsx/esm')).href];
+  } catch { /* tsx unavailable — try without */ }
+  runCommand(process.execPath, [...tsxImportArgs, ...setupArgs], 'migrate setup');
 
   const doctorScript = path.resolve(scriptsDir, 'doctor-localnest.mjs');
   try {
-    runCommand(process.execPath, [doctorScript], 'post-upgrade doctor');
+    runCommand(process.execPath, [...tsxImportArgs, doctorScript], 'post-upgrade doctor');
   } catch (error) {
-    process.stderr.write(`[upgrade] warning: ${error.message}\n`);
+    console.error(`${symbol.warn()} ${c.yellow(error.message)}`);
   }
 
-  process.stdout.write('\n[upgrade] completed. Restart your MCP client to apply the updated runtime.\n');
+  console.log('');
+  console.log(box.top(60));
+  console.log(box.row(c.bold('LocalNest Upgrade Completed ✓'), 60));
+  console.log(box.divider(60));
+  console.log(box.row('Next: Restart your MCP client to apply changes.', 60));
+  console.log(box.bottom(60));
+  console.log('');
 }
 
 main().catch((error) => {

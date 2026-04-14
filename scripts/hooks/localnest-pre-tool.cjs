@@ -43,13 +43,13 @@ process.stdin.on('end', () => {
     const toolName = data.tool_name || '';
     const toolInput = data.tool_input || {};
 
-    // Only trigger on substantive tools
-    if (!['Edit', 'Write', 'Bash', 'MultiEdit'].includes(toolName)) {
+    // Include Read and Grep tools for proactive awareness
+    if (!['Edit', 'Write', 'Bash', 'MultiEdit', 'Read', 'Grep'].includes(toolName)) {
       process.stdout.write('{}');
       process.exit(0);
     }
 
-    // Debounce — don't call task-context on every single tool use
+    // Debounce — don't call every single tool use
     try {
       const last = JSON.parse(fs.readFileSync(DEBOUNCE_FILE, 'utf8'));
       if (Date.now() - last.ts < DEBOUNCE_MS) {
@@ -57,20 +57,23 @@ process.stdin.on('end', () => {
         process.exit(0);
       }
     } catch { /* no debounce file or expired */ }
+    
+    // Save debounce timestamp EARLY to prevent race conditions during heavy spawning
+    try { fs.writeFileSync(DEBOUNCE_FILE, JSON.stringify({ ts: Date.now() })); } catch { /* ignore */ }
 
-    // Extract context clues from tool input
-    const filePath = toolInput.file_path || toolInput.command || '';
-    const query = filePath.split('/').pop() || '';
+    // Extract context clues
+    const filePath = toolInput.file_path || toolInput.path || toolInput.command || '';
+    const query = toolInput.task || toolInput.query || filePath.split('/').pop() || '';
 
     if (!query) {
       process.stdout.write('{}');
       process.exit(0);
     }
 
-    // Call localnest task-context
-    const result = spawnSync('localnest', ['task-context', '--task', query, '--json'], {
+    // Call upgraded 'localnest memory prime' (Graph + Memory)
+    const result = spawnSync('localnest', ['memory', 'prime', query, '--json'], {
       encoding: 'utf8',
-      timeout: 6000,
+      timeout: 8000,
       env: { ...process.env, LOCALNEST_MEMORY_ENABLED: 'true' }
     });
 
@@ -79,24 +82,39 @@ process.stdin.on('end', () => {
       process.exit(0);
     }
 
-    // Parse and extract recalled memories
-    let memories = [];
+    // Parse and extract memories + graph entities
+    let contextStr = '';
     try {
       const parsed = JSON.parse(result.stdout);
-      const recalled = parsed.recalled || parsed.data?.recalled || [];
-      memories = recalled.slice(0, 3).map(m => `- ${m.title}: ${m.summary || m.content?.slice(0, 100)}`);
+      
+      // 1. SOP Header (Expert Steering)
+      contextStr = `\n[LOCALNEST EXPERT STEERING]\nSOP: ALWAYS call localnest_agent_prime for new tasks.\n`;
+
+      // 2. Memories
+      const memories = (parsed.memories || []).slice(0, 3);
+      if (memories.length > 0) {
+        contextStr += `\nPAST KNOWLEDGE:\n${memories.map(m => `- ${m.title}: ${m.summary || ''}`).join('\n')}\n`;
+      }
+
+      // 3. Graph Entities (The "Mental Model")
+      const entities = (parsed.entities || []).slice(0, 3);
+      if (entities.length > 0) {
+        contextStr += `\nKEY CONCEPTS:\n${entities.map(e => `- ${e.name} (${e.type})`).join('\n')}\n`;
+      }
+
+      // 4. Suggested Actions
+      const actions = (parsed.suggested_actions || []).slice(0, 2);
+      if (actions.length > 0) {
+        contextStr += `\nSUGGESTED ACTIONS:\n${actions.map(a => `-> ${a}`).join('\n')}\n`;
+      }
     } catch { /* parsing failed */ }
 
-    // Save debounce timestamp
-    try { fs.writeFileSync(DEBOUNCE_FILE, JSON.stringify({ ts: Date.now() })); } catch { /* ignore */ }
-
-    if (memories.length === 0) {
+    if (!contextStr.trim()) {
       process.stdout.write('{}');
       process.exit(0);
     }
 
-    const context = `[LocalNest Memory] Relevant prior knowledge:\n${memories.join('\n')}`;
-    process.stdout.write(JSON.stringify({ additionalContext: context }));
+    process.stdout.write(JSON.stringify({ additionalContext: contextStr }));
   } catch {
     process.stdout.write('{}');
     process.exit(0);
