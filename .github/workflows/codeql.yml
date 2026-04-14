@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - beta
+      - 'release/**'
     paths-ignore:
       - 'localnest-docs/**'
       - 'readme/**'
