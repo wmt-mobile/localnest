@@ -39,7 +39,7 @@ const sidebars: SidebarsConfig = {
       label: 'Releases',
       collapsed: true,
       items: [
-        { type: 'doc', id: 'releases/current', label: 'Current (0.3.0-beta.1)' },
+        { type: 'doc', id: 'releases/current', label: 'Current (0.3.0-beta.2)' },
         { type: 'doc', id: 'releases/version-selection', label: 'Version Selection' },
         { type: 'doc', id: 'releases/history', label: 'Release History' }
       ]

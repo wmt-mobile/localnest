@@ -28,7 +28,7 @@ Choose your release track:
 npm install -g localnest-mcp
 ```
 
-**Beta Track (v0.3.0-beta.1 — Interactive CLI & TUI):**
+**Beta Track (v0.3.0-beta.2 — Interactive CLI & TUI):**
 ```bash
 npm install -g localnest-mcp@beta
 ```

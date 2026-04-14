@@ -11,13 +11,13 @@ Use this page to choose a LocalNest version track and install it explicitly.
 LocalNest maintains two active release tracks to balance proven stability with rapid innovation.
 
 - **Stable (v0.2.0)**: Use for production-critical workflows and established tools.
-- **Beta (v0.3.0-beta.1)**: Use for the modern interactive CLI, TUI Dashboard, and refactored diagnostics.
+- **Beta (v0.3.0-beta.2)**: Use for the modern interactive CLI, TUI Dashboard, and refactored diagnostics.
 
 ## Quick Selection
 
 | Goal | Version | Command |
 | --- | --- | --- |
-| **Current Beta** | `0.3.0-beta.1` | `npm install -g localnest-mcp@beta` |
+| **Current Beta** | `0.3.0-beta.2` | `npm install -g localnest-mcp@beta` |
 | **Current Stable** | `0.2.0` | `npm install -g localnest-mcp` |
 | **Previous Stable** | `0.1.0` | `npm install -g localnest-mcp@0.1.0` |
 | **Archived Beta** | `0.0.7-beta.2` | `npm install -g localnest-mcp@0.0.7-beta.2` |
@@ -26,7 +26,7 @@ LocalNest maintains two active release tracks to balance proven stability with r
 
 | Version | Channel | Install Command |
 | --- | --- | --- |
-| `0.3.0-beta.1` | beta | `npm install -g localnest-mcp@0.3.0-beta.1` |
+| `0.3.0-beta.2` | beta | `npm install -g localnest-mcp@0.3.0-beta.2` |
 | `0.2.0` | latest stable | `npm install -g localnest-mcp@0.2.0` |
 | `0.1.0` | previous stable | `npm install -g localnest-mcp@0.1.0` |
 | `0.0.7-beta.2` | archived beta | `npm install -g localnest-mcp@0.0.7-beta.2` |
@@ -59,6 +59,6 @@ localnest upgrade 0.1.0
 
 ---
 
-- `0.3.0-beta.1` introduces the **Modernization Update** with a full visual refactor.
+- `0.3.0-beta.2` introduces the **Modernization Update** with a full visual refactor.
 - `0.2.0` is the current stable baseline with full TypeScript and 74 tool support.
 - Use [Release Matrix](./history) for the full context and [Current Release](./current) for the active documentation track.

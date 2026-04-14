@@ -4,6 +4,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0-beta.2] - 2026-04-14
+
+### 🔧 CI/CD & Release Pipeline Fixes
+
+- **Fixed skill metadata version sync** — Skill `.localnest-skill.json` files now stay in sync with `package.json` version
+- **Fixed depcheck false positives** — Optional dynamic imports (`@huggingface/transformers`, `tree-sitter-*`) excluded from dependency checks
+- **Fixed npm publish auth** — `NODE_AUTH_TOKEN` now correctly passed to the publish step
+- **Removed broken npm self-upgrade** — Node 22's bundled npm already supports OIDC provenance
+- **Added manual release trigger** — `workflow_dispatch` enables on-demand releases from any branch
+
 ## [0.3.0-beta.1] - 2026-04-13
 
 ### 🔥 Expert Steering & Modernization Update

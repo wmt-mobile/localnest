@@ -16,7 +16,7 @@ This site documents versions from repository source history, primarily the maint
 
 LocalNest maintains two active release tracks to balance stability with rapid innovation:
 
-- `0.3.0-beta.1` (Current Beta — Modern interactive CLI, TUI dashboard, 74 tools)
+- `0.3.0-beta.2` (Current Beta — Modern interactive CLI, TUI dashboard, 74 tools)
 - `0.1.0` (Current Stable — TypeScript migration, temporal KG, 74 tools)
 
 ---
@@ -25,7 +25,7 @@ LocalNest maintains two active release tracks to balance stability with rapid in
 
 | Version | Basis | Page |
 | --- | --- | --- |
-| `0.3.0-beta.1` | current beta package + changelog | [Current Release](./current) |
+| `0.3.0-beta.2` | current beta package + changelog | [Current Release](./current) |
 | `0.1.0` | previous stable package + changelog | [0.1.0](./0.1.0) |
 | `0.0.7-beta.2` | archived beta package + changelog | [Beta Release Notes](./0.0.7-beta.2) |
 | `0.0.6-beta.1` | archived beta package + changelog | [0.0.6-beta.1](./0.0.6-beta.1) |
@@ -40,7 +40,7 @@ Use the per-version pages below for release-specific summaries.
 <div className="docGrid docGrid--3">
   <a className="docLinkCard" href="./current">
     <strong>Current Beta</strong>
-    <span>Use the current release page for the beta `0.3.0-beta.1` contract — Modern CLI, TUI dashboard.</span>
+    <span>Use the current release page for the beta `0.3.0-beta.2` contract — Modern CLI, TUI dashboard.</span>
   </a>
   <a className="docLinkCard" href="./0.1.0">
     <strong>Stable Release</strong>
