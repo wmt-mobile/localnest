@@ -408,22 +408,26 @@ export function main() {
 
   // Install @huggingface/transformers for embedding support (not bundled to avoid
   // onnxruntime TAR_ENTRY_ERRORS during npm git-dep auto-bundling).
+  // IMPORTANT: Skip during git-dep preparation (temp dir) — only install at final location.
   try {
     const __dir2 = path.dirname(fileURLToPath(import.meta.url));
     const pkgRoot = path.resolve(__dir2, '..', '..');
-    const hfPath = path.join(pkgRoot, 'node_modules', '@huggingface', 'transformers');
-    if (!fs.existsSync(hfPath)) {
-      if (!quiet) process.stdout.write(`${C.dim}Installing ML dependencies for semantic search...${C.reset}`);
-      const result = spawnSync('npm', ['install', '--no-save', '--no-audit', '--no-fund', '@huggingface/transformers@^4.0.1'], {
-        cwd: pkgRoot,
-        stdio: 'pipe',
-        timeout: 120_000,
-        env: { ...process.env, npm_config_loglevel: 'error' },
-      });
-      if (result.status === 0) {
-        if (!quiet) console.log(` ${C.green}✓${C.reset}`);
-      } else {
-        if (!quiet) console.log(` ${C.yellow}⚠ skipped (install manually: npm install @huggingface/transformers)${C.reset}`);
+    const isGitDepPrep = pkgRoot.includes(path.join('.npm', '_cacache', 'tmp'));
+    if (!isGitDepPrep) {
+      const hfPath = path.join(pkgRoot, 'node_modules', '@huggingface', 'transformers');
+      if (!fs.existsSync(hfPath)) {
+        if (!quiet) process.stdout.write(`${C.dim}Installing ML dependencies for semantic search...${C.reset}`);
+        const result = spawnSync('npm', ['install', '--no-save', '--no-audit', '--no-fund', '@huggingface/transformers@^4.0.1'], {
+          cwd: pkgRoot,
+          stdio: 'pipe',
+          timeout: 120_000,
+          env: { ...process.env, npm_config_loglevel: 'error' },
+        });
+        if (result.status === 0) {
+          if (!quiet) console.log(` ${C.green}✓${C.reset}`);
+        } else {
+          if (!quiet) console.log(` ${C.yellow}⚠ skipped (install manually: npm install @huggingface/transformers)${C.reset}`);
+        }
       }
     }
   } catch { /* best-effort — embeddings will be disabled if this fails */ }
