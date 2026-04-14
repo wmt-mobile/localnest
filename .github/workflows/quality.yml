@@ -42,14 +42,14 @@ jobs:
       - name: Install
         run: npm ci --ignore-scripts
 
-      - name: Typecheck
-        run: npm run check
-
       - name: Lint
         run: npm run lint
 
-      - name: Install ML dependencies for tests
+      - name: Install ML dependencies for typecheck & tests
         run: node scripts/runtime/install-localnest-skill.mjs --quiet 2>/dev/null || true
+
+      - name: Typecheck
+        run: npm run check
 
       - name: Test with coverage
         run: npm run test:coverage
