@@ -1,48 +1,48 @@
 name: Release
 
 # Auto-publish to npm AND create GitHub release when package.json version
-# changes on main or beta branch.
+# changes on main or release/* branches.
 #
 # SAFETY GUARDS (in execution order):
-#  1. Only triggers on pushes to main/beta (NOT on PRs, NOT on tags)
+#  1. Only triggers on pushes to main/release/* (NOT on PRs, NOT on tags)
 #  2. Only fires when package.json was modified in the push
 #  3. Skips if version hasn't changed vs previous commit
 #  4. Fails if version already exists on npm registry
-#  5. Runs full quality pipeline (test + lint + tsc + build) before publishing
+#  5. Runs full quality pipeline before publishing
 #  6. Verifies pack tarball is sane (file count + critical files)
-#  7. Uses npm provenance for supply chain attestation
+#  7. Uses npm OIDC trusted publishing for provenance attestation
 #  8. Auto-detects @beta/@alpha/@next/@latest tag from version string
 #  9. Concurrency lock prevents overlapping publishes
-# 10. Optional `npm-publish` environment for manual approval gate
+# 10. Optional npm-publish environment for manual approval gate
 # 11. GitHub release created ONLY after npm publish succeeds
 #
-# REQUIRED SECRETS:
-#  - NPM_TOKEN: npm automation token with publish permission
-#               Generate at https://www.npmjs.com/settings/<user>/tokens
-#               Add at https://github.com/<owner>/<repo>/settings/secrets/actions
+# AUTHENTICATION:
+#  Uses OIDC trusted publishing (no secrets required).
+#  Configure at: https://www.npmjs.com/package/localnest-mcp/access
+#  Fallback: Set NPM_TOKEN secret if OIDC is not yet configured.
 
 on:
   push:
     branches:
       - main
-      - beta
+      - 'release/**'
     paths:
       - 'package.json'
 
 permissions:
-  contents: write     # required to create GitHub release
-  id-token: write     # required for npm provenance
+  contents: write
+  id-token: write
 
 concurrency:
   group: release-${{ github.ref }}
-  cancel-in-progress: false  # never cancel a publish in flight
+  cancel-in-progress: false
 
 jobs:
   release:
     name: Publish to npm + GitHub Release
     runs-on: ubuntu-latest
     timeout-minutes: 20
-    environment: npm-publish  # optional manual approval gate
+    environment: npm-publish
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -55,6 +55,9 @@ jobs:
           node-version: 22
           cache: npm
           registry-url: 'https://registry.npmjs.org'
+
+      - name: Upgrade npm for OIDC support
+        run: npm install -g npm@latest
 
       - name: Read local version
         id: local
@@ -133,10 +136,8 @@ jobs:
             echo "prerelease=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Publish to npm
+      - name: Publish to npm (OIDC)
         if: steps.changed.outputs.should_release == 'true'
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           npm publish --provenance --access public --tag ${{ steps.tag.outputs.tag }} || \
           npm publish --access public --tag ${{ steps.tag.outputs.tag }}
