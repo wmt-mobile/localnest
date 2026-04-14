@@ -60,6 +60,7 @@
   },
   "scripts": {
     "preinstall": "node scripts/runtime/preinstall-cleanup.mjs 2>/dev/null || true",
+    "prepack": "node scripts/runtime/prepack-cleanup.mjs 2>/dev/null || true",
     "postinstall": "node scripts/runtime/install-localnest-skill.mjs --quiet 2>/dev/null || true",
     "setup": "node scripts/runtime/setup-localnest.mjs",
     "upgrade": "node scripts/runtime/upgrade-localnest.mjs",
@@ -77,7 +78,7 @@
     "quality:package": "node scripts/quality/quality-package.mjs",
     "quality:audit": "node scripts/quality/quality-audit.mjs",
     "quality": "npm run check && npm run lint && npm run test:coverage && npm run quality:cycles && npm run quality:deps && npm run quality:package && npm run quality:audit",
-    "check": "tsc --noEmit && node --check scripts/runtime/preinstall-cleanup.mjs && node --check bin/_shared.js && node --check bin/localnest.js && node --check bin/localnest-mcp.js && node --check bin/localnest-mcp-upgrade.js && node --check bin/localnest-mcp-setup.js && node --check bin/localnest-mcp-doctor.js && node --check bin/localnest-mcp-install-skill.js && node --check bin/localnest-mcp-task-context.js && node --check bin/localnest-mcp-capture-outcome.js && node --check scripts/runtime/setup-localnest.mjs && node --check scripts/runtime/upgrade-localnest.mjs && node --check scripts/runtime/doctor-localnest.mjs && node --check scripts/runtime/install-localnest-skill.mjs && node --check scripts/memory/task-context-localnest.mjs && node --check scripts/memory/capture-outcome-localnest.mjs && node --check scripts/memory/memory-workflow-cli-utils.mjs && node --check scripts/quality/quality-audit.mjs && node --check scripts/quality/quality-package.mjs && node --check scripts/quality/stress-localnest.mjs && node --check scripts/release/release-test-installed-runtime.mjs && node --check scripts/release/release-exit-criteria.mjs",
+    "check": "tsc --noEmit && node --check scripts/runtime/preinstall-cleanup.mjs && node --check scripts/runtime/prepack-cleanup.mjs && node --check bin/_shared.js && node --check bin/localnest.js && node --check bin/localnest-mcp.js && node --check bin/localnest-mcp-upgrade.js && node --check bin/localnest-mcp-setup.js && node --check bin/localnest-mcp-doctor.js && node --check bin/localnest-mcp-install-skill.js && node --check bin/localnest-mcp-task-context.js && node --check bin/localnest-mcp-capture-outcome.js && node --check scripts/runtime/setup-localnest.mjs && node --check scripts/runtime/upgrade-localnest.mjs && node --check scripts/runtime/doctor-localnest.mjs && node --check scripts/runtime/install-localnest-skill.mjs && node --check scripts/memory/task-context-localnest.mjs && node --check scripts/memory/capture-outcome-localnest.mjs && node --check scripts/memory/memory-workflow-cli-utils.mjs && node --check scripts/quality/quality-audit.mjs && node --check scripts/quality/quality-package.mjs && node --check scripts/quality/stress-localnest.mjs && node --check scripts/release/release-test-installed-runtime.mjs && node --check scripts/release/release-exit-criteria.mjs",
     "build": "tsc",
     "build:check": "tsc --noEmit",
     "prepublishOnly": "npm run check",
@@ -86,6 +87,7 @@
     "bump:beta": "npm version prerelease --preid=beta --no-git-tag-version"
   },
   "dependencies": {
+    "@huggingface/transformers": "^4.0.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "ora": "^9.3.0",
     "tsx": "^4.21.0",

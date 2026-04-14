@@ -123,15 +123,7 @@ export class EmbeddingService {
     if (this._pipelinePromise) return this._pipelinePromise as Promise<(text: string, opts: { pooling: string; normalize: boolean }) => Promise<{ data: ArrayLike<number> }>>;
 
     this._pipelinePromise = (async () => {
-      let mod: { env: { cacheDir: string }; pipeline: (task: string, model: string) => Promise<unknown> };
-      try {
-        mod = await import('@huggingface/transformers') as typeof mod;
-      } catch {
-        throw new Error(
-          '@huggingface/transformers is not installed. Semantic search is disabled. ' +
-          'To enable it, run: npm install -g @huggingface/transformers'
-        );
-      }
+      const mod = await import('@huggingface/transformers') as { env: { cacheDir: string }; pipeline: (task: string, model: string) => Promise<unknown> };
       if (this.cacheDir) {
         mod.env.cacheDir = this.cacheDir;
       }
