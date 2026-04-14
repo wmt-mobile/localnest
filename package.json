@@ -34,7 +34,7 @@
     "access": "public"
   },
   "type": "module",
-  "description": "Local-first MCP server with 74 tools \u2014 code search, persistent AI memory, temporal knowledge graph, and semantic retrieval. Zero cloud, pure SQLite.",
+  "description": "The only MCP server combining semantic code search, temporal knowledge graph, and persistent AI memory. 74 tools, zero cloud, pure SQLite. Alternative to Mem0, GitNexus, Graphiti.",
   "bin": {
     "localnest": "bin/_boot.cjs",
     "localnest-mcp": "bin/_boot.cjs",

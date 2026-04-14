@@ -1,8 +1,8 @@
 # Overview
 
-LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scoped access to your codebase with hybrid search, semantic indexing, temporal knowledge graph, agent-scoped memory, and persistent memory that never leaves your machine.
+LocalNest MCP is a local-first MCP server and CLI tool that combines **semantic code search**, a **temporal knowledge graph**, and **persistent AI memory** in one package — giving AI agents scoped access to your codebase with hybrid search, semantic indexing, and cross-session recall that never leaves your machine.
 
-**72 MCP tools** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
+**74 MCP tools** | **Temporal knowledge graph** | **Multi-hop graph traversal** | **Agent-scoped memory** | **Zero cloud dependencies**
 
 ## Use this documentation by intent
 
@@ -22,17 +22,18 @@ LocalNest MCP is a local-first MCP server and CLI tool that gives AI agents scop
 - The fastest workflow is usually: find files first, search within them second, read exact lines last.
 - Memory results are guidance, not final evidence. Verify with file tools before concluding.
 
-## What's new in v0.1.0
+## What makes LocalNest different
 
-The `0.1.0` release migrates the entire codebase to TypeScript and includes all capabilities from the beta series:
+LocalNest is the only MCP server that covers all three pillars in one local-first package. See the [full comparison](/docs/comparison) for detailed benchmarks against Mem0, GitNexus, Graphiti, codebase-memory-mcp, and others.
 
-- **TypeScript migration** -- full codebase migrated from JavaScript to TypeScript for type safety and developer experience.
+## Key capabilities
+
 - **Temporal knowledge graph** -- store structured facts as subject-predicate-object triples with time validity. Query what was true at any point in time with `as_of`.
-- **Multi-hop graph traversal** -- walk relationships 2-5 hops deep via recursive CTEs. No other local-first tool offers this.
-- **Nest/Branch hierarchy** -- two-level memory taxonomy for organized retrieval. Nests are top-level domains, branches are topics within nests.
+- **Multi-hop graph traversal** -- walk relationships 2-5 hops deep via recursive CTEs.
+- **Nest/Branch hierarchy** -- two-level memory taxonomy for organized retrieval.
 - **Agent-scoped memory** -- per-agent isolation with private diary entries. Multiple agents, zero cross-contamination.
 - **Semantic dedup** -- embedding similarity gate (0.92 cosine threshold) prevents near-duplicate memory pollution.
 - **Conversation ingestion** -- import Markdown/JSON chat exports with automatic entity extraction and KG triple creation.
-- **Hooks system** -- pre/post operation callbacks for memory, KG, traversal, ingestion. Build custom pipelines without modifying core code.
-- **CLI-first architecture** -- unified `localnest <noun> <verb>` commands for everything. Shell completions for bash, zsh, fish.
-- **72 MCP tools** covering KG, nests, traversal, diary, ingest, dedup, and hooks.
+- **Hooks system** -- pre/post operation callbacks for memory, KG, traversal, ingestion.
+- **CLI-first architecture** -- unified `localnest <noun> <verb>` commands. Shell completions for bash, zsh, fish.
+- **74 MCP tools** covering search, memory, KG, nests, traversal, diary, ingest, dedup, and hooks.

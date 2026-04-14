@@ -7,7 +7,7 @@ const TOOL_COUNT = '74'
 
 const config: Config = {
   title: 'LocalNest',
-  tagline: `Your AI's home base — local memory and code search with ${TOOL_COUNT} MCP tools`,
+  tagline: `Code intelligence + knowledge graph + AI memory — the only MCP server with all three. ${TOOL_COUNT} tools, zero cloud.`,
   favicon: 'img/logo-mark.svg',
   url: 'https://wmt-mobile.github.io',
   baseUrl: '/localnest/',
@@ -42,14 +42,14 @@ const config: Config = {
       tagName: 'meta',
       attributes: {
         name: 'description',
-        content: `LocalNest is a local-first MCP server with ${TOOL_COUNT} tools, temporal knowledge graph, persistent AI memory, and an interactive TUI dashboard. Zero cloud, 100% privacy.`
+        content: `LocalNest is the only MCP server combining semantic code search, temporal knowledge graph, and persistent AI memory in one local-first package. ${TOOL_COUNT} tools, zero cloud dependencies. Alternative to Mem0, Graphiti, GitNexus, and codebase-memory-mcp.`
       }
     },
     {
       tagName: 'meta',
       attributes: {
         name: 'keywords',
-        content: 'MCP server, local AI tools, knowledge graph, AI memory, semantic code search, offline AI, local-first development, TUI dashboard, agent memory, private AI context'
+        content: 'MCP server, MCP memory server, MCP code search, local AI tools, knowledge graph, AI memory, semantic code search, offline AI, local-first development, TUI dashboard, agent memory, private AI context, Mem0 alternative, Graphiti alternative, GitNexus alternative, codebase-memory-mcp alternative, claude-context alternative, Basic Memory alternative, best MCP server, MCP server comparison'
       }
     },
     {
@@ -63,7 +63,7 @@ const config: Config = {
       tagName: 'meta',
       attributes: {
         property: 'og:description',
-        content: `Local-first MCP server with ${TOOL_COUNT} tools, temporal knowledge graph, and persistent AI memory. Featuring a premium interactive TUI for real-time AI context monitoring.`
+        content: `The only MCP server combining code intelligence, knowledge graph, and AI memory. ${TOOL_COUNT} tools, zero cloud. Alternative to Mem0, GitNexus, and Graphiti.`
       }
     },
     {
@@ -99,7 +99,7 @@ const config: Config = {
             '@type': 'WebSite',
             name: 'LocalNest Docs',
             url: 'https://wmt-mobile.github.io/localnest/',
-            description: `Documentation for LocalNest — a local-first MCP server with ${TOOL_COUNT} tools, temporal knowledge graph, and persistent AI memory.`,
+            description: `Documentation for LocalNest — the only MCP server combining semantic code search, temporal knowledge graph, and persistent AI memory. ${TOOL_COUNT} tools, zero cloud. Alternative to Mem0, Graphiti, GitNexus.`,
             inLanguage: 'en',
             publisher: {
               '@type': 'Organization',
@@ -118,7 +118,7 @@ const config: Config = {
               priceCurrency: 'USD'
             },
             url: 'https://www.npmjs.com/package/localnest-mcp',
-            description: `Local-first MCP server with ${TOOL_COUNT} tools, temporal knowledge graph, and persistent AI memory for AI coding agents.`
+            description: `The only MCP server combining code intelligence, knowledge graph, and AI memory in one local-first package. ${TOOL_COUNT} tools for AI coding agents. Zero cloud dependencies.`
           },
           {
             '@type': 'Organization',
@@ -157,7 +157,7 @@ const config: Config = {
   themeConfig: {
     image: 'img/social-card.svg',
     metadata: [
-      { name: 'og:title', content: 'LocalNest — Your AI\'s home base' },
+      { name: 'og:title', content: 'LocalNest — Code Intelligence + Knowledge Graph + AI Memory in One MCP Server' },
       { name: 'og:site_name', content: 'LocalNest Docs' },
     ],
     navbar: {
