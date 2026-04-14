@@ -22,6 +22,7 @@ name: Release
 #  Fallback: Set NPM_TOKEN secret if OIDC is not yet configured.
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
