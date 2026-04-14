@@ -69,9 +69,15 @@ function removeSymlinkedPackage(nodeModulesDir) {
   }
 }
 
-// Only run for global installs (npm install -g)
+// Only run for global installs (npm install -g), NOT during git-dep preparation.
+// npm_config_global leaks from the outer npm into the inner prep npm, so also check
+// whether we're running inside a temp git-clone dir (pacote's staging area).
 const isGlobal = process.env.npm_config_global === 'true';
 if (!isGlobal) process.exit(0);
+
+const selfDir = new URL('.', import.meta.url).pathname;
+const isGitDepPrep = selfDir.includes('/.npm/_cacache/tmp/');
+if (isGitDepPrep) process.exit(0);
 
 const nodeModulesDir = getGlobalNodeModulesDir();
 if (!nodeModulesDir) process.exit(0);

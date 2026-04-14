@@ -60,6 +60,7 @@
   },
   "scripts": {
     "preinstall": "node scripts/runtime/preinstall-cleanup.mjs 2>/dev/null || true",
+    "prepack": "node scripts/runtime/prepack-cleanup.mjs 2>/dev/null || true",
     "postinstall": "node scripts/runtime/install-localnest-skill.mjs --quiet 2>/dev/null || true",
     "setup": "node scripts/runtime/setup-localnest.mjs",
     "upgrade": "node scripts/runtime/upgrade-localnest.mjs",
