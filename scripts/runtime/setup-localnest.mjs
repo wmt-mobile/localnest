@@ -181,17 +181,7 @@ function buildClientSnippet(packageRef, indexConfig) {
   };
 }
 
-function buildNpxClientSnippet(packageRef, indexConfig) {
-  return {
-    mcpServers: {
-      localnest: buildLocalnestServerConfig({
-        command: getNpxCommand(),
-        args: ['-y', packageRef],
-        env: buildLocalnestEnv(indexConfig)
-      })
-    }
-  };
-}
+
 
 function buildGlobalClientSnippet(indexConfig) {
   return {

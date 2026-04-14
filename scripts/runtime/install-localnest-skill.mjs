@@ -7,7 +7,6 @@ import { fileURLToPath } from 'node:url';
 import { spawnSync } from 'node:child_process';
 
 const argv = process.argv.slice(2);
-const SKILL_METADATA_FILE = '.localnest-skill.json';
 
 // ANSI Colors
 const C = {
@@ -43,23 +42,7 @@ function hasFlag(flag) {
   return argv.includes(flag) || argv.includes(`--${flag}`);
 }
 
-function readOption(name) {
-  const prefixed = `--${name}=`;
-  const inline = argv.find((arg) => arg.startsWith(prefixed));
-  if (inline) return inline.slice(prefixed.length);
 
-  const index = argv.findIndex((arg) => arg === `--${name}`);
-  if (index >= 0 && index + 1 < argv.length) {
-    return argv[index + 1];
-  }
-  return '';
-}
-
-function envTrue(name, fallback = false) {
-  const value = process.env[name];
-  if (value === undefined || value === null || value === '') return fallback;
-  return String(value).toLowerCase() === 'true';
-}
 
 function shouldDecorateSkillMarkdown(relativePath) {
   return relativePath === 'SKILL.md';
@@ -252,17 +235,7 @@ function copyOrLinkDir(source, destination, { link, toolFamily = 'default', rela
   fs.copyFileSync(source, destination);
 }
 
-function readBundledPackageVersion(metaUrl = import.meta.url) {
-  try {
-    const scriptDir = path.dirname(fileURLToPath(metaUrl));
-    const packageRoot = path.resolve(scriptDir, '..', '..');
-    const raw = fs.readFileSync(path.join(packageRoot, 'package.json'), 'utf8');
-    const parsed = JSON.parse(raw);
-    return typeof parsed?.version === 'string' ? parsed.version : '';
-  } catch {
-    return '';
-  }
-}
+
 
 export function listBundledSkillDirs(metaUrl = import.meta.url) {
   const scriptDir = path.dirname(fileURLToPath(metaUrl));
@@ -321,7 +294,7 @@ export function detectSkillToolFamily(targetSkillDir) {
   return 'default';
 }
 
-function installOrUpdateSkill(sourceSkillDir, targetSkillDir, { quiet, force, link } = {}) {
+function installOrUpdateSkill(sourceSkillDir, targetSkillDir, { force, link } = {}) {
   const toolFamily = detectSkillToolFamily(targetSkillDir);
 
   if (fs.existsSync(targetSkillDir) && !force && !link) {
@@ -367,7 +340,7 @@ export function main() {
   const projectTargets = project ? getKnownProjectSkillDirs(process.cwd()) : [];
   const allTargets = [...userTargets, ...projectTargets];
 
-  let totalInstalled = 0;
+
 
   for (const sourceSkillDir of sourceSkillDirs) {
     const skillName = path.basename(sourceSkillDir);
@@ -385,7 +358,6 @@ export function main() {
       const dest = path.join(targetDir, skillName);
       const result = installOrUpdateSkill(sourceSkillDir, dest, { quiet, force, link });
       if (result.changed) {
-        totalInstalled++;
         if (!quiet) {
           const mode = link ? 'linked' : 'copied';
           const family = detectSkillToolFamily(dest);

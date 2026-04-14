@@ -32,19 +32,19 @@ const HEAVY_SCOPES = [
 
 if (!fs.existsSync(NODE_MODULES)) process.exit(0);
 
-let removed = 0;
+
 
 for (const pkg of HEAVY) {
   const p = path.join(NODE_MODULES, pkg);
   if (fs.existsSync(p)) {
-    try { fs.rmSync(p, { recursive: true, force: true }); removed++; } catch { /* best-effort */ }
+    try { fs.rmSync(p, { recursive: true, force: true }); } catch { /* best-effort */ }
   }
 }
 
 for (const scope of HEAVY_SCOPES) {
   const p = path.join(NODE_MODULES, scope);
   if (fs.existsSync(p)) {
-    try { fs.rmSync(p, { recursive: true, force: true }); removed++; } catch { /* best-effort */ }
+    try { fs.rmSync(p, { recursive: true, force: true }); } catch { /* best-effort */ }
   }
 }
 
@@ -54,7 +54,7 @@ if (fs.existsSync(hfNodeModules)) {
   for (const pkg of HEAVY) {
     const p = path.join(hfNodeModules, pkg);
     if (fs.existsSync(p)) {
-      try { fs.rmSync(p, { recursive: true, force: true }); removed++; } catch { /* best-effort */ }
+      try { fs.rmSync(p, { recursive: true, force: true }); } catch { /* best-effort */ }
     }
   }
 }
