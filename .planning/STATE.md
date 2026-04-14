@@ -4,13 +4,13 @@ milestone: v0.3.0
 milestone_name: MCP Spec Compliance & Production Hardening
 status: executing
 stopped_at: Completed 45-01-PLAN.md — Phase 45 plan 1 complete
-last_updated: "2026-04-13T11:41:36.766Z"
-last_activity: 2026-04-13 -- Phase 46 execution started
+last_updated: "2026-04-14T08:29:24.659Z"
+last_activity: 2026-04-14
 progress:
-  total_phases: 8
+  total_phases: 9
   completed_phases: 6
-  total_plans: 13
-  completed_plans: 10
+  total_plans: 15
+  completed_plans: 11
 ---
 
 # Project State
@@ -20,14 +20,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 
 **Core value:** A single local MCP server that handles both code retrieval AND rich structured memory — no cloud dependencies, no external databases, pure SQLite.
-**Current focus:** Phase 46 — Modern Interactive CLI
+**Current focus:** Phase 46 — modern-interactive-cli
 
 ## Current Position
 
-Phase: 46 (Modern Interactive CLI) — EXECUTING
-Plan: 1 of 2
-Status: Executing Phase 46
-Last activity: 2026-04-13 -- Phase 46 execution started
+Phase: 46 (modern-interactive-cli) — EXECUTING
+Plan: 2 of 2
+Status: Ready to execute
+Last activity: 2026-04-14
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 
@@ -91,12 +91,14 @@ Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 | Phase 42 P01 | 2m23s | 2 tasks | 4 files |
 | Phase 42 P02 | 3m 56s | 2 tasks | 6 files |
 | Phase 45-actor-aware-memories P01 | 300 | 3 tasks | 9 files |
+| Phase 47 P01 | 1 min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
 ### Roadmap Evolution
 
 - Phase 46 added: Modern Interactive CLI
+- Phase 47 added: Rewrite CI/CD pipelines with auto-publish for beta and stable releases
 
 ### Decisions
 
