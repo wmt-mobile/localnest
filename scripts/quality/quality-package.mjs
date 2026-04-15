@@ -7,9 +7,10 @@ import { spawnSync } from 'node:child_process';
 
 const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-publint-'));
 const npmCache = path.join(os.tmpdir(), '.npm-cache');
+const NPM_BIN = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
 const pack = spawnSync(
-  'npm',
+  NPM_BIN,
   ['pack', '--pack-destination', tmpRoot, '--ignore-scripts', '--silent'],
   {
     encoding: 'utf8',
