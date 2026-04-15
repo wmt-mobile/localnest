@@ -8,7 +8,7 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 
 test('localnest-mcp supports stdio initialize and tool listing', async (t) => {
   const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-mcp-start-'));
-  t.after(() => fs.rmSync(tempDir, { recursive: true, force: true }));
+  t.after(() => fs.rmSync(tempDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }));
 
   const transport = new StdioClientTransport({
     command: process.execPath,

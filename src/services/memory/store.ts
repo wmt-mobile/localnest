@@ -158,6 +158,19 @@ export class MemoryStore {
     return null;
   }
 
+  /**
+   * Release the underlying database handle. On Windows an open SQLite
+   * handle keeps the DB file locked, so tests must call this before
+   * deleting temp directories or they fail with `EBUSY: unlink`.
+   */
+  async close(): Promise<void> {
+    if (this.adapter) {
+      try { await this.adapter.close?.(); } catch { /* best-effort */ }
+      this.adapter = null;
+      this.selectedBackend = null;
+    }
+  }
+
   async ensureSchema(): Promise<void> {
     await ensureMemorySchema(this.adapter!);
     await runMemoryMigrations({

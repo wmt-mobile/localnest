@@ -4,6 +4,7 @@
 // See ResourceLinkSchema at @modelcontextprotocol/sdk types.d.ts:2007-2033.
 
 import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 /**
  * Canonical resource_link content block — strict subset of the MCP SDK
@@ -61,15 +62,16 @@ export function getMimeTypeFromPath(absPath: string): string | undefined {
  * emitted alongside text content so clients without resource-link support
  * keep working (RLINK-03 fallback).
  *
- * URI note: `file://${resolved}` — on POSIX path.resolve already yields a
- * leading `/` (=> `file:///abs/path`); on Windows yields `file://C:\...`
- * which matches VS Code's de-facto MCP convention.
+ * URI note: We use `pathToFileURL` so Windows paths are converted to the
+ * RFC 8089-compliant form (`file:///C:/tmp/...`) instead of the prior
+ * `file://C:\...` which VS Code tolerates but other MCP clients reject.
+ * On POSIX the output is identical to the old `file://${resolved}` form.
  */
 export function buildResourceLink(absPath: string, description?: string): ResourceLink {
   const resolved = path.resolve(absPath);
   const link: ResourceLink = {
     type: 'resource_link',
-    uri: `file://${resolved}`,
+    uri: pathToFileURL(resolved).href,
     name: path.basename(resolved)
   };
   if (description) link.description = description;

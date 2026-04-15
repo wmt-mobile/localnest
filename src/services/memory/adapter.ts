@@ -7,6 +7,7 @@ interface DatabaseSync {
     get(...params: unknown[]): Record<string, unknown> | undefined;
     all(...params: unknown[]): Record<string, unknown>[];
   };
+  close?(): void;
 }
 
 export class NodeSqliteAdapter implements Adapter {
@@ -38,6 +39,14 @@ export class NodeSqliteAdapter implements Adapter {
   async all<T = Record<string, unknown>>(sql: string, params: unknown[] = []): Promise<T[]> {
     const stmt = this.db.prepare(sql);
     return (stmt.all(...params) as T[]) || [];
+  }
+
+  async close(): Promise<void> {
+    // node:sqlite's DatabaseSync exposes close(); older stubs may not.
+    // Release the handle so Windows can unlink the DB file during tests.
+    try {
+      this.db.close?.();
+    } catch { /* best-effort */ }
   }
 
   async transaction<T>(fn: (ad: Adapter) => Promise<T>): Promise<T> {

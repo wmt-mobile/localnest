@@ -15,6 +15,13 @@ export interface Adapter {
   get<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T | null>;
   all<T = Record<string, unknown>>(sql: string, params?: unknown[]): Promise<T[]>;
   transaction<T>(fn: (ad: Adapter) => Promise<T>): Promise<T>;
+  /**
+   * Release the underlying database handle. Optional so test fakes that wrap
+   * a real adapter don't have to implement it. Callers must use `adapter.close?.()`
+   * and treat it as best-effort. Required on Windows to avoid `EBUSY: unlink`
+   * when deleting temp directories holding open SQLite files.
+   */
+  close?(): Promise<void>;
 }
 
 // ---------------------------------------------------------------------------

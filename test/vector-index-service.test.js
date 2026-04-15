@@ -80,7 +80,7 @@ test('vector index project lifecycle: index, skip, remove, search', async () => 
   assert.equal(status.index_path, indexPath);
   assert.equal(status.total_files, 1);
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('vector collectFiles respects maxFiles and maxIndexedFiles', () => {
@@ -101,7 +101,7 @@ test('vector collectFiles respects maxFiles and maxIndexedFiles', () => {
   const files = service.collectFiles([root], 10);
   assert.equal(files.length, 3);
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('vector index BM25 fallback ranks lexical match without embeddings', async () => {
@@ -134,7 +134,7 @@ test('vector index BM25 fallback ranks lexical match without embeddings', async 
   assert.ok(out.length > 0);
   assert.equal(out[0].file, auth);
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('vector index status recommends sqlite upgrade for large json index', () => {
@@ -155,7 +155,7 @@ test('vector index status recommends sqlite upgrade for large json index', () =>
   assert.equal(status.upgrade_recommended, true);
   assert.ok(String(status.upgrade_reason).includes('sqlite-vec'));
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('ast chunker reports only bundled tree-sitter grammars as supported', () => {

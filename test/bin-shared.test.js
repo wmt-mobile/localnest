@@ -40,7 +40,8 @@ test('buildLocalnestCommandArgv rewrites legacy wrapper argv to canonical localn
   );
 
   assert.equal(out[0], 'node');
-  assert.match(out[1], /bin\/localnest\.js$/);
+  // Cross-platform: bin separator is '/' on POSIX and '\' on Windows.
+  assert.match(out[1], /bin[\\/]localnest\.js$/);
   assert.deepEqual(out.slice(2), ['setup', '--json']);
 });
 

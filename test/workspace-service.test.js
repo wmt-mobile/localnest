@@ -32,7 +32,7 @@ test('normalizeTarget enforces root boundaries', () => {
   assert.equal(inside, path.resolve(root));
 
   assert.throws(() => service.normalizeTarget(path.resolve(root, '..')), /outside configured roots/);
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('resolveSearchBases auto split and fallback behavior', () => {
@@ -63,7 +63,7 @@ test('resolveSearchBases auto split and fallback behavior', () => {
   const raw = noSplitService.resolveSearchBases(undefined, false);
   assert.deepEqual(raw, [root]);
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('listProjects/projectTree/summarizeProject/readFileChunk flows', async () => {
@@ -99,7 +99,7 @@ test('listProjects/projectTree/summarizeProject/readFileChunk flows', async () =
   const tinyLimitService = makeWorkspace(root, { maxFileBytes: 7 });
   assert.throws(() => tinyLimitService.safeReadText(path.join(proj, 'src', 'main.js')), /File too large/);
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('readFileChunk returns warning and content when file exceeds cap', async () => {
@@ -119,7 +119,7 @@ test('readFileChunk returns warning and content when file exceeds cap', async ()
   assert.match(chunk.content, /^4: l4/m);
   assert.match(chunk.content, /^7: l7/m);
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('readFileChunk reports explicit path and scope errors', async () => {
@@ -143,5 +143,5 @@ test('readFileChunk reports explicit path and scope errors', async () => {
     /path is not a file: .*src/
   );
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

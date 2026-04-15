@@ -33,7 +33,7 @@ test('findSqliteVecExtensionPath discovers vec0 under LocalNest vendor tree', ()
   assert.equal(result.path, libPath);
   assert.equal(result.source, 'localnest-vendor');
 
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('ensureSqliteVecExtension installs sqlite-vec into LocalNest vendor tree when missing', () => {
@@ -62,5 +62,5 @@ test('ensureSqliteVecExtension installs sqlite-vec into LocalNest vendor tree wh
   assert.equal(result.installed, true);
   assert.match(result.path, new RegExp(`${extensionName().replace('.', '\\.')}$`));
 
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
