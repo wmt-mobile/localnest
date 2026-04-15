@@ -55,11 +55,13 @@ function installToSettings(settingsPath) {
 
   let changed = false;
 
-  // Pre-tool hook (memory context retrieval)
+  // Pre-tool hook (memory context retrieval + agent_prime SOP enforcement).
+  // Matcher includes mcp__localnest__.* so the hook can observe agent_prime
+  // calls and clear the "session not primed" reminder.
   if (!settings.hooks.PreToolUse) settings.hooks.PreToolUse = [];
   if (!hasLocalnestHook(settings.hooks.PreToolUse, 'localnest-pre-tool')) {
     settings.hooks.PreToolUse.push({
-      matcher: 'Edit|Write|Bash|MultiEdit',
+      matcher: 'Edit|Write|Bash|MultiEdit|mcp__localnest__.*',
       hooks: [{
         type: 'command',
         command: hookCommand(PRE_HOOK),

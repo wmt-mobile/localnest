@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { READ_ONLY_ANNOTATIONS } from '../common/tool-utils.js';
+import { createToolResponse, READ_ONLY_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import { unifiedFind } from '../../services/unified-find/find.js';
 import { SEARCH_RESULT_SCHEMA } from '../common/schemas.js';
@@ -52,11 +52,12 @@ export function registerFindTools({
       project_path,
       all_roots,
       sources
-    }: Record<string, unknown>) =>
-      unifiedFind(
+    }: Record<string, unknown>) => {
+      const requestedLimit = (typeof limit === 'number' && Number.isFinite(limit)) ? limit : 10;
+      const findResult = await unifiedFind(
         {
           query: query as string,
-          limit: limit as number,
+          limit: requestedLimit,
           projectPath: project_path as string | undefined,
           allRoots: all_roots as boolean | undefined,
           sources: sources as Array<'memory' | 'code' | 'triple'> | undefined
@@ -65,6 +66,30 @@ export function registerFindTools({
           memory: memory as any,
           search: search as any
         }
-      )
+      );
+
+      // Shape `data` to match SEARCH_RESULT_SCHEMA (PaginatedResult). Find is
+      // single-shot — no real pagination — so offset is 0 and has_more is false.
+      // Per-source counts and the echoed query live in meta.
+      const items = findResult.items ?? [];
+      const data = {
+        total_count: items.length,
+        count: items.length,
+        limit: requestedLimit,
+        offset: 0,
+        has_more: false,
+        next_offset: null,
+        items
+      };
+
+      return createToolResponse(data, {
+        meta: {
+          tool: 'localnest_find',
+          query: findResult.query,
+          count: findResult.count,
+          sources: findResult.sources
+        }
+      });
+    }
   );
 }

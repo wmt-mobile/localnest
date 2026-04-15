@@ -4,6 +4,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0-beta.3] - 2026-04-15
+
+### Fixed
+
+- **`localnest_find` schema validation** — Tool was returning `{query, count, sources, items}` directly to MCP, which did not match the declared `SEARCH_RESULT_SCHEMA` (PaginatedResult or array). MCP SDK was rejecting every successful response with an output validation error. The handler now wraps results into the canonical PaginatedResult shape and surfaces `query` / per-source counts via `meta`.
+
+### Changed
+
+- **`localnest-pre-tool` hook hardened for agent_prime SOP enforcement** — The hook now tracks a session-scoped "primed" marker. The first work-tool call in an unprimed session emits a strong, formatted `[ACTION REQUIRED]` reminder demanding `mcp__localnest__localnest_agent_prime` be invoked before continuing; the reminder is throttled to once per minute and self-clears the moment `agent_prime` is observed. Once primed, the hook drops back to the existing soft memory-recall context. The installer matcher was extended to `Edit|Write|Bash|MultiEdit|mcp__localnest__.*` so the hook can observe `agent_prime` calls and clear the marker.
+
 ## [0.3.0-beta.2] - 2026-04-14
 
 ### 🔧 CI/CD & Release Pipeline Fixes

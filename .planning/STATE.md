@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 Phase: 47
 Plan: Not started
 Status: Phase complete — ready for verification
-Last activity: 2026-04-14
+Last activity: 2026-04-15 - Completed quick task 260415-isp: Fix localnest_find schema validation bug, harden agent_prime SOP hook, bump to next beta version
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 
@@ -158,6 +158,7 @@ None — autonomous execution in progress.
 | 260409-nyr | Fix update cache version-drift bug + TTL default 60m + compareVersions regression guard | 2026-04-09 | acfbd85 | [260409-nyr](./quick/260409-nyr-fix-update-cache-semver-comparison-and-t/) |
 | 260409-o8i | Pre-approve MCP KG/memory write tools in LocalNest skill command permissions | 2026-04-09 | 0ad9ba0, ff6f2e8 | [260409-o8i](./quick/260409-o8i-pre-approve-kg-write-tools-in-skill-perm/) |
 | 260409-ohq | Fix KG contradiction detection for functional predicates — ABSORBED into Phase 28 | 2026-04-09 | (pending) | [260409-ohq](./quick/260409-ohq-fix-kg-contradiction-detection-for-funct/) |
+| 260415-isp | Fix localnest_find schema validation bug, harden agent_prime SOP hook, bump to next beta version | 2026-04-15 | (pending) | [260415-isp](./quick/260415-isp-fix-localnest-find-schema-validation-bug/) |
 
 ## Session Continuity
 
