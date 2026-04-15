@@ -62,10 +62,12 @@ process.stdin.on('end', () => {
         : `Used ${toolName}`;
 
     // Capture outcome into memory via CLI. LOCALNEST_BIN handles the
-    // `localnest.cmd` shim on Windows.
+    // `localnest.cmd` shim on Windows; `shell: IS_WINDOWS` is required
+    // so cmd.exe launches the .cmd wrapper (direct spawn fails silently).
     const result = spawnSync(LOCALNEST_BIN, ['capture-outcome', '--task', summary, '--summary', summary, '--json'], {
       encoding: 'utf8',
       timeout: 5000,
+      shell: IS_WINDOWS,
       env: { ...process.env, LOCALNEST_MEMORY_ENABLED: 'true' }
     });
 

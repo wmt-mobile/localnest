@@ -87,6 +87,7 @@ process.stdin.on('end', () => {
     const result = spawnSync(LOCALNEST_BIN, ['memory', 'prime', query, '--json'], {
       encoding: 'utf8',
       timeout: 8000,
+      shell: IS_WINDOWS,
       env: { ...process.env, LOCALNEST_MEMORY_ENABLED: 'true' }
     });
 

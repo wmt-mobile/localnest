@@ -5,12 +5,15 @@ import os from 'node:os';
 import path from 'node:path';
 
 const npmCache = path.join(os.tmpdir(), '.npm-cache');
-const NPM_BIN = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const isWindows = process.platform === 'win32';
+const NPM_BIN = isWindows ? 'npm.cmd' : 'npm';
 
 const run = spawnSync(NPM_BIN, ['audit', '--omit=dev', '--json'], {
   encoding: 'utf8',
   timeout: 120000,
   maxBuffer: 20 * 1024 * 1024,
+  // Windows: `.cmd` shims need a shell to launch — direct spawn fails silently.
+  shell: isWindows,
   env: {
     ...process.env,
     npm_config_cache: npmCache
