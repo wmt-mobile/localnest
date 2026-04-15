@@ -16,7 +16,8 @@
     "allowJs": true,
     "checkJs": false,
     "noEmit": false,
-    "incremental": true
+    "incremental": true,
+    "types": ["node"]
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist", "tests", "localnest-docs"]
