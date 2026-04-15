@@ -39,10 +39,12 @@ test('findSqliteVecExtensionPath discovers vec0 under LocalNest vendor tree', ()
 test('ensureSqliteVecExtension installs sqlite-vec into LocalNest vendor tree when missing', () => {
   const localnestHome = makeTempDir();
   const installSpawn = (command, args, options) => {
-    if (command === 'npm' && Array.isArray(args) && args[0] === 'root') {
+    // Cross-platform: command is 'npm' on POSIX and 'npm.cmd' on Windows.
+    const isNpm = String(command).startsWith('npm');
+    if (isNpm && Array.isArray(args) && args[0] === 'root') {
       return { status: 0, stdout: `${path.join(localnestHome, 'missing-global')}\n` };
     }
-    if (command === 'npm' && Array.isArray(args) && args[0] === 'install') {
+    if (isNpm && Array.isArray(args) && args[0] === 'install') {
       const libDir = path.join(options.cwd, 'node_modules', 'sqlite-vec', 'dist');
       fs.mkdirSync(libDir, { recursive: true });
       fs.writeFileSync(path.join(libDir, extensionName()), 'binary', 'utf8');

@@ -66,6 +66,15 @@ export class MemoryService {
     return this.store?.adapter ?? null;
   }
 
+  /**
+   * Release the underlying SQLite handle. Delegates to `MemoryStore.close()`
+   * which performs the Windows WAL cleanup (truncate + journal_mode=DELETE)
+   * before closing so `.db-wal` / `.db-shm` are also released.
+   */
+  async close(): Promise<void> {
+    await this.store?.close?.();
+  }
+
   async detectBackend(): Promise<BackendDetection> {
     const requested = this.backend || 'auto';
     const nodeMajor = parseNodeMajor(process.versions?.node);

@@ -226,7 +226,9 @@ test('selfUpdate runs install and skill sync when approved', async () => {
   assert.equal(out.ok, true);
   assert.equal(out.restart_required, true);
   assert.ok(calls.some((line) => line.includes('install -g localnest-mcp@latest')));
-  assert.ok(calls.some((line) => line.includes('localnest install skills --force')));
+  // Cross-platform: command binary is `localnest` on POSIX and `localnest.cmd`
+  // on Windows (per src/services/update/helpers.ts). Match either.
+  assert.ok(calls.some((line) => /\blocalnest(?:\.cmd)? install skills --force\b/.test(line)));
 });
 
 test('selfUpdate beta channel installs npm beta tag and refreshes beta status', async () => {
@@ -284,8 +286,10 @@ test('selfUpdate dry-run does not execute commands', async () => {
   assert.equal(out.validation.ok, true);
   assert.ok(Array.isArray(out.planned_commands));
   assert.ok(out.planned_commands.length >= 1);
-  assert.ok(calls.some((line) => line.includes('npm --help')));
-  assert.ok(calls.some((line) => line.includes('localnest install skills --help')));
+  // Cross-platform: binary names are `npm`/`localnest` on POSIX and
+  // `npm.cmd`/`localnest.cmd` on Windows. Match either.
+  assert.ok(calls.some((line) => /\bnpm(?:\.cmd)? --help\b/.test(line)));
+  assert.ok(calls.some((line) => /\blocalnest(?:\.cmd)? install skills --help\b/.test(line)));
 });
 
 test('selfUpdate dry-run reports validation failures without mutating', async () => {
@@ -357,7 +361,8 @@ test('selfUpdate reports skill sync failure after successful install', async () 
     commandRunner: (command, args) => {
       const line = [command, ...args].join(' ');
       calls.push(line);
-      if (command === 'npm' && args[0] === 'install') {
+      // Cross-platform: command is 'npm' on POSIX and 'npm.cmd' on Windows.
+      if (String(command).startsWith('npm') && args[0] === 'install') {
         return { status: 0, stdout: 'installed', stderr: '' };
       }
       if (String(command).includes('localnest')) {
