@@ -56,6 +56,38 @@ jobs:
           node-version: 22
           cache: npm
           registry-url: 'https://registry.npmjs.org'
+          always-auth: true
+
+      - name: Preflight — verify NODE_AUTH_TOKEN secret is set
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::NODE_AUTH_TOKEN secret is not set on the 'npm-publish' environment."
+            echo "::error::Fix: Settings → Environments → npm-publish → Add secret NODE_AUTH_TOKEN (npm automation token with publish rights on localnest-mcp)."
+            echo "::error::Token format: npm_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx — generate at https://www.npmjs.com/settings/~/tokens"
+            exit 1
+          fi
+          echo "NODE_AUTH_TOKEN is present (length: ${#NODE_AUTH_TOKEN})"
+
+      - name: Preflight — verify token has publish rights (npm whoami)
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
+        run: |
+          if ! WHOAMI=$(npm whoami 2>&1); then
+            echo "::error::npm whoami failed — NODE_AUTH_TOKEN is invalid, expired, or revoked."
+            echo "::error::Last error: $WHOAMI"
+            echo "::error::Fix: Regenerate a 'Classic Automation Token' at https://www.npmjs.com/settings/~/tokens/new/automation"
+            echo "::error::Then update the NODE_AUTH_TOKEN secret at Settings → Environments → npm-publish → NODE_AUTH_TOKEN"
+            echo "::error::The token must be scoped to publish localnest-mcp (either granular with 'Read and write' + explicit package, or classic automation)."
+            exit 1
+          fi
+          echo "npm whoami succeeded: $WHOAMI"
+          # Also verify publish rights against the specific package, which catches
+          # the case where the token is valid but scoped to a different package.
+          if ! npm access list packages 2>&1 | grep -q "localnest-mcp"; then
+            echo "::warning::npm access list did not include localnest-mcp — token may not be scoped for publishing this package. Continuing anyway."
+          fi
 
       - name: Read local version
         id: local
@@ -139,9 +171,21 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
         run: |
-          npm publish --provenance --access public --tag ${{ steps.tag.outputs.tag }} || \
-          npm publish --access public --tag ${{ steps.tag.outputs.tag }}
-          echo "Published ${{ steps.local.outputs.version }} as @${{ steps.tag.outputs.tag }}"
+          # Try OIDC + provenance first. Fall back to plain npm_token publish
+          # if provenance isn't configured. If BOTH fail, emit an actionable
+          # error instead of burying the 404 under the usual boilerplate.
+          if npm publish --provenance --access public --tag ${{ steps.tag.outputs.tag }} 2>&1 | tee publish-attempt-1.log; then
+            echo "Published ${{ steps.local.outputs.version }} as @${{ steps.tag.outputs.tag }} (with provenance)"
+            exit 0
+          fi
+          echo "::warning::Provenance publish failed — falling back to plain npm_token publish."
+          if npm publish --access public --tag ${{ steps.tag.outputs.tag }} 2>&1 | tee publish-attempt-2.log; then
+            echo "Published ${{ steps.local.outputs.version }} as @${{ steps.tag.outputs.tag }} (plain)"
+            exit 0
+          fi
+          echo "::error::Both publish attempts failed. If you see 'E404 Not Found' above, NODE_AUTH_TOKEN is missing/expired/wrong-scoped."
+          echo "::error::Regenerate at https://www.npmjs.com/settings/~/tokens/new/automation and update Settings → Environments → npm-publish → NODE_AUTH_TOKEN."
+          exit 1
 
       - name: Create GitHub Release
         if: steps.changed.outputs.should_release == 'true'
