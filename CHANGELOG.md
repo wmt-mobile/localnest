@@ -28,6 +28,58 @@ LocalNest now installs and runs on Windows. Multiple critical Windows blockers w
 - `src/runtime/platform.ts` — centralised `isWindows`, `RG_BIN`, `NPM_BIN`, `NPX_BIN`, `LOCALNEST_BIN`, `platformBin()` helpers so the platform check lives in exactly one place.
 - `bin/localnest.cjs`, `bin/localnest-mcp.cjs`, `bin/localnest-mcp-setup.cjs`, `bin/localnest-mcp-doctor.cjs`, `bin/localnest-mcp-upgrade.cjs`, `bin/localnest-mcp-install-skill.cjs`, `bin/localnest-mcp-task-context.cjs`, `bin/localnest-mcp-capture-outcome.cjs` — per-bin shims that route through `_boot.cjs`'s `runTarget`.
 
+### Deeper Windows CI fixes (from the full green-build chase)
+
+Enabling the Windows CI job exposed a second layer of Windows-hostile behaviour that the initial static audit did not catch. Ten Quality runs later, every one of these is fixed:
+
+#### tsc & dependency resolution
+
+- **`tsconfig.json` now declares `"types": ["node"]`** explicitly. On Windows in CI, the default tsc auto-include of `node_modules/@types/*` was not resolving `@types/node` even though the package was installed. Explicit type loading is the safe path.
+- **`@huggingface/transformers` hoisted to `devDependencies`.** It was previously installed only via the `postinstall` best-effort path. Linux CI runs happened to have it cached in `node_modules` from previous runs (because `actions/setup-node@v6`'s `cache: npm` restores to the workspace root, not just `~/.npm`), so `await import('@huggingface/transformers')` type-resolved there. Windows had no cache and the postinstall silently failed, leaving tsc with two `TS2307` errors. Declaring it as a devDep means `npm ci` installs it via the lockfile on both OSes. Production users (`npm install -g`) still do not get it because `-g` only installs `dependencies`, preserving the original "not bundled to avoid onnxruntime TAR_ENTRY_ERRORS" intent.
+
+#### SQLite handle lifecycle on Windows
+
+- **`Adapter.close()` added to the memory subsystem.** Windows holds file locks on open SQLite handles, so every test that did `fs.rmSync(tempDir)` without first closing the store failed with `EBUSY: unlink 'memory.db'`. Linux happily unlinks files with open handles so this was latent. Added a best-effort optional `close()` method on the `Adapter` interface, wired `NodeSqliteAdapter` to call the underlying `node:sqlite DatabaseSync.close()`, and exposed `MemoryStore.close()` + `MemoryService.close()` that delegate.
+- **WAL hygiene before close.** `node:sqlite`'s `close()` alone does not release the `.db-wal` / `.db-shm` auxiliary files on Windows. Added `PRAGMA wal_checkpoint(TRUNCATE); PRAGMA journal_mode=DELETE;` before every `db.close()` in `NodeSqliteAdapter`, `SymbolIndexService`, and `SqliteVecIndexService` so the auxiliary files are released as well.
+- **`SymbolIndexService` and `SqliteVecIndexService` now expose public `close()`.** Previously the vec index had a private `resetDb()` and the symbol index had nothing. Tests that created either service leaked handles into the temp dir.
+- **Test teardowns updated across 17 files** via `fs.rmSync(..., { maxRetries: 10, retryDelay: 100 })` as a safety net, plus explicit `await store.close()` / `service.close()` calls before the `rmSync` where a store is in scope.
+
+#### Cross-platform process spawning
+
+- **`child_process.spawn` on Windows needs `shell: true` to launch `.cmd` / `.bat` wrappers.** Getting the binary name right (`npm.cmd` vs `npm`) is necessary but not sufficient — without a shell, Node's spawn fails silently with `ENOENT` and produces zero stdout/stderr, leaving the caller with an exit code and no explanation. Applied `shell: isWindows` to every site that targets a `.cmd` shim:
+  - `scripts/quality/quality-package.mjs` — `npm pack` + `npx publint` (also added `pack.error` logging so the next silent failure is self-diagnosing)
+  - `scripts/quality/quality-audit.mjs` — `npm audit`
+  - `scripts/runtime/doctor-localnest.mjs` — `npm root -g`
+  - `scripts/runtime/install-localnest-skill.mjs` — `npm install @huggingface/transformers` (the runtime skill installer path)
+  - `scripts/hooks/localnest-pre-tool.cjs` — `localnest memory prime`
+  - `scripts/hooks/localnest-post-tool.cjs` — `localnest capture-outcome`
+- **`scripts/quality/quality-package.mjs`** was also still spawning bare `'npm'` for the `pack` step (missed in the initial sweep); now uses `NPM_BIN` plus `shell: isWindows`.
+
+#### MCP resource links
+
+- **`file://` URIs now produced via `pathToFileURL(path.resolve(p)).href`.** The previous `` `file://${path.resolve(p)}` `` produced `file://D:\tmp\helper.ts` on Windows, which is not a valid RFC 8089 file URI (backslashes, only two slashes before the drive letter). VS Code tolerates it but other MCP clients reject it. POSIX output is byte-identical to before.
+
+#### Cross-platform test assertions
+
+- `test/mcp-resource-links.test.js` — computes expected `file://` URIs dynamically via `pathToFileURL` instead of hardcoding POSIX.
+- `test/bin-shared.test.js` — regex widened from `/bin\/localnest\.js$/` to `/bin[\\/]localnest\.js$/`.
+- `test/config.test.js` — `expandHome` test no longer assumes `process.env.HOME` flows through; computes the expected value from `os.homedir()` at runtime.
+- `test/release-test-installed-runtime.test.js` — switched from hardcoded forward-slash home paths to `path.join(os.homedir(), …)`.
+- `test/update-service.test.js` — `line.includes('localnest install skills …')` and `line.includes('npm --help')` replaced with platform-aware regexes that accept either the bare binary or the `.cmd` shim; strict `command === 'npm'` in fake `commandRunner`s loosened to `String(command).startsWith('npm')`.
+- `test/sqlite-vec-extension.test.js` — same strict-equality fix in the fake `installSpawn`.
+
+#### Version constant sync
+
+- **`SERVER_VERSION` in `src/runtime/version.ts`** was stale at `0.3.0-beta.2` even after the `package.json` bump. The constant is not generated from `package.json`, and the `bump:beta` npm script did not touch it. Bumped to match; still a manual process — filed as a follow-up to auto-sync at bump time.
+
+#### Version bump
+
+- **Skill metadata files (`skills/*/.localnest-skill.json`)** bumped from `0.3.0-beta.2` to `0.3.0-beta.4` to satisfy the `bundled skill metadata version matches package version` test.
+
+### Result
+
+`release/0.3.0` now passes the full Quality pipeline on both `ubuntu-latest` and `windows-latest` end-to-end. All 16 steps green on both OSes. Windows is a first-class CI target going forward — any regression will be caught at PR time.
+
 ## [0.3.0-beta.3] - 2026-04-15
 
 ### Fixed
