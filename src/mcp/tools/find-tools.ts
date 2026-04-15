@@ -44,8 +44,11 @@ export function registerFindTools({
           .array(z.enum(['memory', 'code', 'triple']))
           .min(1)
           .default(['memory', 'code', 'triple']),
-        // quick 260415-n69: opt-in token savings via response_format tiers.
-        response_format: z.enum(['verbose', 'compact', 'lite']).default('verbose')
+        // quick 260415-n69: opt-in token savings via item_format tiers.
+        // Named `item_format` to avoid collision with the serialization-level
+        // `response_format: json|markdown` that createJsonToolRegistrar injects
+        // into every tool automatically.
+        item_format: z.enum(['verbose', 'compact', 'lite']).default('verbose')
       },
       annotations: READ_ONLY_ANNOTATIONS,
       outputSchema: SEARCH_RESULT_SCHEMA
@@ -56,7 +59,7 @@ export function registerFindTools({
       project_path,
       all_roots,
       sources,
-      response_format
+      item_format
     }: Record<string, unknown>) => {
       const requestedLimit = (typeof limit === 'number' && Number.isFinite(limit)) ? limit : 10;
       const findResult = await unifiedFind(
@@ -76,7 +79,7 @@ export function registerFindTools({
       // Shape `data` to match SEARCH_RESULT_SCHEMA (PaginatedResult). Find is
       // single-shot — no real pagination — so offset is 0 and has_more is false.
       // Per-source counts and the echoed query live in meta.
-      const format = (response_format as ReadResponseFormat | undefined) ?? 'verbose';
+      const format = (item_format as ReadResponseFormat | undefined) ?? 'verbose';
       const rawItems = findResult.items ?? [];
       const items = format === 'verbose' ? rawItems : rawItems.map((it) => applyReadFormat(it, format));
       const data = {

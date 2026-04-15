@@ -85,7 +85,7 @@ export function registerMemoryStoreTools({
     ['localnest_memory_list'],
     {
       title: 'Memory List',
-      description: 'List stored memories with optional scope, kind, nest, branch, and tag filters. Use response_format=compact to drop content/metadata (~50% fewer tokens) or lite to return only id+title (~85% fewer tokens).',
+      description: 'List stored memories with optional scope, kind, nest, branch, and tag filters. Use item_format=compact to drop content/metadata (~50% fewer tokens) or lite to return only id+title (~85% fewer tokens).',
       inputSchema: {
         kind: MEMORY_KIND_SCHEMA.optional(),
         status: MEMORY_STATUS_SCHEMA.optional(),
@@ -97,16 +97,18 @@ export function registerMemoryStoreTools({
         tags: z.array(z.string()).optional(),
         limit: z.number().int().min(1).max(200).default(20),
         offset: z.number().int().min(0).default(0),
-        // quick 260415-n69: opt-in token savings via response_format tiers.
+        // quick 260415-n69: opt-in token savings via item_format tiers.
         // `verbose` (default) preserves backwards compat; `compact` keeps
         // id/title/summary/tags/kind/importance (~50% smaller); `lite`
-        // keeps id/title only (~85% smaller).
-        response_format: z.enum(['verbose', 'compact', 'lite']).default('verbose')
+        // keeps id/title only (~85% smaller). Named `item_format` to avoid
+        // collision with createJsonToolRegistrar's auto-injected
+        // `response_format: json|markdown` serialization parameter.
+        item_format: z.enum(['verbose', 'compact', 'lite']).default('verbose')
       },
       annotations: READ_ONLY_ANNOTATIONS,
       outputSchema: schemas.OUTPUT_SEARCH_RESULT_SCHEMA
     },
-    async ({ kind, status, project_path, topic, nest, branch, actor_id, tags, limit, offset, response_format }: Record<string, unknown>) => applyReadFormatToItems(
+    async ({ kind, status, project_path, topic, nest, branch, actor_id, tags, limit, offset, item_format }: Record<string, unknown>) => applyReadFormatToItems(
       normalizeMemoryRecallResult(
         await memory.listEntries({
           kind,
@@ -121,7 +123,7 @@ export function registerMemoryStoreTools({
           offset
         })
       ),
-      (response_format as ReadResponseFormat | undefined) ?? 'verbose'
+      (item_format as ReadResponseFormat | undefined) ?? 'verbose'
     )
   );
 

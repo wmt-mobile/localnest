@@ -107,7 +107,7 @@ export function registerMemoryWorkflowTools({
     ['localnest_memory_recall'],
     {
       title: 'Memory Recall',
-      description: 'Recall the most relevant local memories for a task or query. Use response_format=compact to drop content/metadata (~50% fewer tokens) or lite to return only id+title (~85% fewer tokens).',
+      description: 'Recall the most relevant local memories for a task or query. Use item_format=compact to drop content/metadata (~50% fewer tokens) or lite to return only id+title (~85% fewer tokens).',
       inputSchema: {
         query: z.string().min(1),
         root_path: z.string().optional(),
@@ -119,13 +119,15 @@ export function registerMemoryWorkflowTools({
         actor_id: z.string().max(200).optional(),
         tags: z.array(z.string()).optional(),
         limit: z.number().int().min(1).max(50).default(10),
-        // quick 260415-n69: opt-in token savings via response_format tiers.
-        response_format: z.enum(['verbose', 'compact', 'lite']).default('verbose')
+        // quick 260415-n69: opt-in token savings via item_format tiers.
+        // Named `item_format` to avoid collision with createJsonToolRegistrar's
+        // auto-injected `response_format: json|markdown` serialization param.
+        item_format: z.enum(['verbose', 'compact', 'lite']).default('verbose')
       },
       annotations: READ_ONLY_ANNOTATIONS,
       outputSchema: schemas.OUTPUT_SEARCH_RESULT_SCHEMA
     },
-    async ({ query, root_path, project_path, branch_name, topic, feature, kind, actor_id, tags, limit, response_format }: Record<string, unknown>) => applyReadFormatToItems(
+    async ({ query, root_path, project_path, branch_name, topic, feature, kind, actor_id, tags, limit, item_format }: Record<string, unknown>) => applyReadFormatToItems(
       normalizeMemoryRecallResult(
         await memory.recall({
           query,
@@ -141,7 +143,7 @@ export function registerMemoryWorkflowTools({
         }),
         query as string
       ),
-      (response_format as ReadResponseFormat | undefined) ?? 'verbose'
+      (item_format as ReadResponseFormat | undefined) ?? 'verbose'
     )
   );
 

@@ -19,7 +19,7 @@ Dogfooding LocalNest during a token-consumption deep dive surfaced the same clas
 
 - **`test/mcp-runtime-shapes.test.js`** — a new runtime shape test that calls every `SEARCH` archetype normalizer with realistic fixture input and asserts the output validates against `SEARCH_RESULT_SCHEMA.data.parse()`. Catches the exact class of regression that just shipped: schema identity vs. runtime shape drift. 16 tests, all green. Any future normalizer whose output doesn't match the declared schema will fail loudly here.
 
-- **`response_format: 'verbose' | 'compact' | 'lite'` on three read tools** (`localnest_memory_list`, `localnest_memory_recall`, `localnest_find`) — opt-in token savings:
+- **`item_format: 'verbose' | 'compact' | 'lite'` on three read tools** (`localnest_memory_list`, `localnest_memory_recall`, `localnest_find`) — opt-in token savings:
   - `verbose` (default, unchanged): full item with `stripEmptyFields` applied.
   - `compact`: keeps `id / title / summary / tags / kind / importance / score` plus source-specific identifiers for code (`file / start_line / end_line`) and triples (`subject / predicate / object / triple_id`). **~50% smaller per item.**
   - `lite`: keeps `id / title / score` plus the source identifier. **~85% smaller per item.**
