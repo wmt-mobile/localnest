@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 Phase: 47
 Plan: Not started
 Status: Phase complete — ready for verification
-Last activity: 2026-04-15 - Chased Windows CI green across 10 Quality runs; both ubuntu-latest and windows-latest now pass all 16 steps on release/0.3.0 at 0495e05
+Last activity: 2026-04-15 - Fixed 10+ broken retrieval tools (SEARCH_RESULT_SCHEMA regression), added runtime shape test, shipped compact/lite response_format tiers, bumped to 0.3.0-beta.5
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 
@@ -160,6 +160,7 @@ None — autonomous execution in progress.
 | 260409-ohq | Fix KG contradiction detection for functional predicates — ABSORBED into Phase 28 | 2026-04-09 | (pending) | [260409-ohq](./quick/260409-ohq-fix-kg-contradiction-detection-for-funct/) |
 | 260415-isp | Fix localnest_find schema validation bug, harden agent_prime SOP hook, bump to next beta version | 2026-04-15 | d682eef | [260415-isp](./quick/260415-isp-fix-localnest-find-schema-validation-bug/) |
 | 260415-jq9 | Audit and fix Windows compatibility blockers, add Windows CI workflow, bump to next beta | 2026-04-15 | e94bf97 → 0495e05 | [260415-jq9](./quick/260415-jq9-audit-and-fix-windows-compatibility-bloc/) |
+| 260415-n69 | Fix broken retrieval tools schema regression, add runtime shape test, compact/lite response tiers | 2026-04-15 | (pending) | [260415-n69](./quick/260415-n69-fix-broken-retrieval-tools-schema-regres/) |
 
 ## Session Continuity
 

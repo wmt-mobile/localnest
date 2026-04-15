@@ -4,6 +4,39 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0-beta.5] - 2026-04-15
+
+### 🚨 Critical: retrieval tools no longer broken
+
+Dogfooding LocalNest during a token-consumption deep dive surfaced the same class of schema regression I fixed in `localnest_find` earlier this release cycle — except this time it affected **10+ retrieval tools** simultaneously. `test/mcp-annotations.test.js` only asserts schema IDENTITY (`meta.outputSchema === expectedArchetype`), not that the handler's actual return value validates against the declared schema, so the bugs shipped with full green CI.
+
+### Fixed
+
+- **`localnest_memory_recall`, `localnest_memory_events`, `localnest_memory_suggest_relations`, `localnest_memory_related`, `localnest_search_hybrid`, `localnest_get_symbol`, `localnest_find_usages`, `localnest_find_callers`, `localnest_find_definition`, `localnest_find_implementations`, `localnest_rename_preview`** — every one of these tools was returning a response shape that failed runtime validation against `SEARCH_RESULT_SCHEMA` (their normalizers produced `{query, count, items}`, `{symbol, count, definitions}`, or `{query, results, lexical_hits, ...}` shapes, none of which match the declared PaginatedResult union). MCP SDK rejected every call with a structured-content validation error, making ~13% of LocalNest's tool surface unusable.
+  - Fix: added an `ensurePaginatedShape()` helper in `src/mcp/common/terse-utils.ts` and wired every broken normalizer through it. The helper overlays `total_count / count / limit / offset / has_more / next_offset / items` on top of the existing shape, so legacy field names (`results`, `callers`, `definitions`, `usages`, `suggestions`, `related`, `changes`, `implementations`) remain for backwards compat via the schema's `passthrough()`.
+
+### Added
+
+- **`test/mcp-runtime-shapes.test.js`** — a new runtime shape test that calls every `SEARCH` archetype normalizer with realistic fixture input and asserts the output validates against `SEARCH_RESULT_SCHEMA.data.parse()`. Catches the exact class of regression that just shipped: schema identity vs. runtime shape drift. 16 tests, all green. Any future normalizer whose output doesn't match the declared schema will fail loudly here.
+
+- **`response_format: 'verbose' | 'compact' | 'lite'` on three read tools** (`localnest_memory_list`, `localnest_memory_recall`, `localnest_find`) — opt-in token savings:
+  - `verbose` (default, unchanged): full item with `stripEmptyFields` applied.
+  - `compact`: keeps `id / title / summary / tags / kind / importance / score` plus source-specific identifiers for code (`file / start_line / end_line`) and triples (`subject / predicate / object / triple_id`). **~50% smaller per item.**
+  - `lite`: keeps `id / title / score` plus the source identifier. **~85% smaller per item.**
+  - Recommended agent pattern: call list/recall/find in `compact` to enumerate, then call `memory_get` on the specific IDs you actually want full content for.
+  - Implemented via `applyReadFormat()` / `applyReadFormatToItems()` in `terse-utils.ts`. Nested `.memory` wrappers (recall result pattern) are projected correctly so callers see the identifying fields regardless of which layer they live on.
+
+### Changed
+
+- **`stripEmptyFields()` expanded** to strip more noise from read responses:
+  - Empty strings: added `agent_id`, `actor_id`, `source_ref` to the existing `nest / branch / topic / feature` list.
+  - New: `null last_recalled_at`, `recall_count: 0`, empty `links` / `revisions` arrays.
+  - Existing tests still pass; measured ~10% additional savings per memory item on top of the Phase 27 baseline.
+
+### Known drift (still manual)
+
+- `SERVER_VERSION` in `src/runtime/version.ts` and the 4 skill metadata files still require manual sync at bump time. Filed as a follow-up — should be auto-generated from `package.json` in a future `bump:beta` script.
+
 ## [0.3.0-beta.4] - 2026-04-15
 
 ### 🪟 Windows Compatibility Sweep

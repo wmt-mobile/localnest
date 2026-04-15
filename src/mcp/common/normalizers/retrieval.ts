@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { stripEmptyFields } from '../terse-utils.js';
+import { ensurePaginatedShape, stripEmptyFields } from '../terse-utils.js';
 
 export interface NormalizedProjectTreeResult {
   project_path: string;
@@ -43,8 +43,11 @@ export function normalizeSearchHybridResult(result: any, query: string): Normali
   const results = Array.isArray(result?.results) ? result.results.map(stripEmptyFields) : [];
   const isStale = result?.index_stale === true;
   const staleness = result?.index_staleness;
+  // quick 260415-n69: wrap into PaginatedResult shape + expose `items` alias.
+  const paginated = ensurePaginatedShape(results, { total: results.length });
   const normalized: NormalizedSearchHybridResult = {
     ...result,
+    ...paginated,
     query: result?.query || query,
     lexical_hits: Number.isFinite(result?.lexical_hits) ? result.lexical_hits : 0,
     semantic_hits: Number.isFinite(result?.semantic_hits) ? result.semantic_hits : 0,
@@ -53,7 +56,8 @@ export function normalizeSearchHybridResult(result: any, query: string): Normali
     reranker: result?.reranker || null,
     index_stale: result?.index_stale ?? null,
     index_staleness: staleness || null,
-    results
+    results,
+    items: paginated.items
   };
   if (isStale) {
     normalized._index_warning = {
@@ -74,12 +78,21 @@ export interface NormalizedSymbolResult {
 }
 
 export function normalizeSymbolResult(result: any, symbol: string): NormalizedSymbolResult {
+  const definitions = Array.isArray(result?.definitions) ? result.definitions : [];
+  const exportsList = Array.isArray(result?.exports) ? result.exports : [];
+  // quick 260415-n69: concatenate definitions + exports into `items` so
+  // the response validates against SEARCH_RESULT_SCHEMA. Legacy fields
+  // remain for backwards compat under passthrough().
+  const items = [...definitions, ...exportsList];
+  const paginated = ensurePaginatedShape(items, { total: items.length });
   return {
     ...result,
+    ...paginated,
     symbol: result?.symbol || symbol,
-    count: Number.isFinite(result?.count) ? result.count : 0,
-    definitions: Array.isArray(result?.definitions) ? result.definitions : [],
-    exports: Array.isArray(result?.exports) ? result.exports : []
+    count: paginated.count,
+    definitions,
+    exports: exportsList,
+    items: paginated.items
   };
 }
 
@@ -91,11 +104,16 @@ export interface NormalizedUsageResult {
 }
 
 export function normalizeUsageResult(result: any, symbol: string): NormalizedUsageResult {
+  const usages = Array.isArray(result?.usages) ? result.usages : [];
+  // quick 260415-n69: alias `usages` as `items` + PaginatedResult wrap.
+  const paginated = ensurePaginatedShape(usages, { total: usages.length });
   return {
     ...result,
+    ...paginated,
     symbol: result?.symbol || symbol,
-    count: Number.isFinite(result?.count) ? result.count : 0,
-    usages: Array.isArray(result?.usages) ? result.usages : []
+    count: paginated.count,
+    usages,
+    items: paginated.items
   };
 }
 
@@ -156,36 +174,50 @@ export function normalizeAgentPrimeResult(result: any): NormalizedAgentPrimeResu
   };
 }
 
+// quick 260415-n69: every symbol-tool normalizer below now wraps its
+// domain-specific list into `items` + PaginatedResult shape. Legacy field
+// names (callers, definitions, implementations, changes) are preserved
+// alongside the new `items` alias for backwards compat via passthrough().
+
 export function normalizeCallersResult(result: any, symbol: string) {
+  const callers = Array.isArray(result?.callers) ? result.callers : [];
+  const paginated = ensurePaginatedShape(callers, { total: callers.length });
   return {
+    ...paginated,
     symbol: result?.symbol || symbol,
-    count: Number.isFinite(result?.count) ? result.count : 0,
-    callers: Array.isArray(result?.callers) ? result.callers : []
+    callers
   };
 }
 
 export function normalizeDefinitionResult(result: any, symbol: string) {
+  const definitions = Array.isArray(result?.definitions) ? result.definitions : [];
+  const paginated = ensurePaginatedShape(definitions, { total: definitions.length });
   return {
+    ...paginated,
     symbol: result?.symbol || symbol,
-    count: Number.isFinite(result?.count) ? result.count : 0,
-    definitions: Array.isArray(result?.definitions) ? result.definitions : []
+    definitions
   };
 }
 
 export function normalizeImplementationsResult(result: any, interfaceName: string) {
+  const implementations = Array.isArray(result?.implementations) ? result.implementations : [];
+  const paginated = ensurePaginatedShape(implementations, { total: implementations.length });
   return {
+    ...paginated,
     symbol: result?.symbol || interfaceName,
-    count: Number.isFinite(result?.count) ? result.count : 0,
-    implementations: Array.isArray(result?.implementations) ? result.implementations : []
+    implementations
   };
 }
 
 export function normalizeRenamePreviewResult(result: any, oldName: string, newName: string) {
+  const changes = Array.isArray(result?.changes) ? result.changes : [];
+  const paginated = ensurePaginatedShape(changes, { total: changes.length });
   return {
+    ...paginated,
     old_name: result?.old_name || oldName,
     new_name: result?.new_name || newName,
-    total_changes: Number.isFinite(result?.total_changes) ? result.total_changes : 0,
+    total_changes: Number.isFinite(result?.total_changes) ? result.total_changes : changes.length,
     files_affected: Number.isFinite(result?.files_affected) ? result.files_affected : 0,
-    changes: Array.isArray(result?.changes) ? result.changes : []
+    changes
   };
 }

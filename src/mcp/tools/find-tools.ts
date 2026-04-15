@@ -3,6 +3,8 @@ import { createToolResponse, READ_ONLY_ANNOTATIONS } from '../common/tool-utils.
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import { unifiedFind } from '../../services/unified-find/find.js';
 import { SEARCH_RESULT_SCHEMA } from '../common/schemas.js';
+import { applyReadFormat } from '../common/terse-utils.js';
+import type { ReadResponseFormat } from '../common/terse-utils.js';
 
 interface MemoryServiceForFind {
   recall(args: Record<string, unknown>): Promise<unknown>;
@@ -41,7 +43,9 @@ export function registerFindTools({
         sources: z
           .array(z.enum(['memory', 'code', 'triple']))
           .min(1)
-          .default(['memory', 'code', 'triple'])
+          .default(['memory', 'code', 'triple']),
+        // quick 260415-n69: opt-in token savings via response_format tiers.
+        response_format: z.enum(['verbose', 'compact', 'lite']).default('verbose')
       },
       annotations: READ_ONLY_ANNOTATIONS,
       outputSchema: SEARCH_RESULT_SCHEMA
@@ -51,7 +55,8 @@ export function registerFindTools({
       limit,
       project_path,
       all_roots,
-      sources
+      sources,
+      response_format
     }: Record<string, unknown>) => {
       const requestedLimit = (typeof limit === 'number' && Number.isFinite(limit)) ? limit : 10;
       const findResult = await unifiedFind(
@@ -71,7 +76,9 @@ export function registerFindTools({
       // Shape `data` to match SEARCH_RESULT_SCHEMA (PaginatedResult). Find is
       // single-shot — no real pagination — so offset is 0 and has_more is false.
       // Per-source counts and the echoed query live in meta.
-      const items = findResult.items ?? [];
+      const format = (response_format as ReadResponseFormat | undefined) ?? 'verbose';
+      const rawItems = findResult.items ?? [];
+      const items = format === 'verbose' ? rawItems : rawItems.map((it) => applyReadFormat(it, format));
       const data = {
         total_count: items.length,
         count: items.length,
