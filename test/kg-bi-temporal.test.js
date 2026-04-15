@@ -38,6 +38,7 @@ test('BITEMP-01 schema: kg_triples has recorded_at column after v12 migration', 
   const col = cols.find((c) => c.name === 'recorded_at');
   assert.ok(col, 'kg_triples must have a recorded_at column post-v12');
   assert.equal(col.notnull, 1, 'recorded_at must be NOT NULL');
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -54,6 +55,7 @@ test('BITEMP-01 backfill + insert stamping: fresh addTriple yields recorded_at =
   assert.match(result.recorded_at, ISO_RE, 'recorded_at must be ISO-formatted');
   assert.equal(result.recorded_at, result.created_at,
     'fresh insert: recorded_at and created_at share the same nowIso() stamp (proves backfill semantics)');
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -84,6 +86,7 @@ test('BITEMP-02 event mode (control): default === explicit "event" === pre-phase
     defaultMode.triples.map((tr) => tr.id).sort(),
     explicitEvent.triples.map((tr) => tr.id).sort()
   );
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -108,6 +111,7 @@ test('BITEMP-02 transaction mode: filters on recorded_at <= date, ignores valid_
   const ids = tx.triples.map((tr) => tr.id);
   assert.ok(ids.includes(first.id), 'first triple (pre-snapshot) must be present');
   assert.ok(!ids.includes(second.id), 'second triple (post-snapshot) must be excluded');
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -126,6 +130,7 @@ test('BITEMP-03 timeline includes recorded_at on every triple and sorts by recor
     assert.ok(tr.recorded_at, `triple ${tr.id} must expose recorded_at`);
     assert.match(tr.recorded_at, ISO_RE, 'recorded_at must be ISO');
   }
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -155,6 +160,7 @@ test('CARD-06 reconciliation: addTriple returns recorded_at as 13th field, order
     'addTriple response must be exactly these 13 fields in order');
   assert.equal(Object.keys(result).length, 13);
   assert.match(result.recorded_at, ISO_RE);
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -181,5 +187,6 @@ test('BITEMP end-to-end: MCP surface mode param round-trips through service laye
   assert.equal(txResult.mode, 'transaction');
   assert.ok(eventResult.count >= 1, 'event mode must surface the triple (valid_from bracketed)');
   assert.ok(txResult.count >= 1, 'transaction mode must surface the triple (recorded_at <= snapshot)');
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

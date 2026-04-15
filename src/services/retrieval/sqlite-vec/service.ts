@@ -153,6 +153,19 @@ export class SqliteVecIndexService {
     this._stmtGetMeta = null;
   }
 
+  /**
+   * Gracefully release the SQLite handle and WAL auxiliary files. Required
+   * on Windows so tests can unlink the DB file without `EBUSY`. Truncates
+   * the WAL and flips journal_mode to DELETE before closing so `.db-wal`
+   * and `.db-shm` are removed as well.
+   */
+  close(): void {
+    if (!this.db) return;
+    try { this.db.exec('PRAGMA wal_checkpoint(TRUNCATE);'); } catch { /* ignore */ }
+    try { this.db.exec('PRAGMA journal_mode=DELETE;'); } catch { /* ignore */ }
+    this.resetDb();
+  }
+
   ensureDb(): void {
     if (this.db) return;
     fs.mkdirSync(path.dirname(this.dbPath), { recursive: true });

@@ -76,6 +76,7 @@ test('memory store lifecycle: create, list, update, recall, delete', async (t) =
   const afterDelete = await store.listEntries({ projectPath: '/repo/app' });
   assert.equal(afterDelete.count, 0);
 
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -137,6 +138,7 @@ test('memory recall ranks scoped relevant memory ahead of weaker matches', async
   assert.equal(recalled.items[0].memory.id, authFix.memory.id);
   assert.equal(recalled.items[0].score > 0 && recalled.items[0].score <= 1, true);
 
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -179,6 +181,7 @@ test('memory store dedupes identical scoped entries', async (t) => {
   assert.equal(second.duplicate, true);
   assert.equal(second.memory.id, first.memory.id);
 
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -236,6 +239,7 @@ test('captureEvent promotes high-signal events and ignores weak ones', async (t)
   assert.equal(memories.count, 1);
   assert.equal(memories.items[0].title, 'Fix auth refresh race');
 
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -274,6 +278,7 @@ test('captureEvent promotes completed task work when it contains durable impleme
   assert.equal(memory.title.includes('auth flow'), false);
   assert.equal(memory.summary.includes('serialize token refresh requests'), true);
 
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -327,5 +332,6 @@ test('captureEvent merges into an existing related memory instead of duplicating
   const allMemories = await store.listEntries({ projectPath: '/repo/app' });
   assert.equal(allMemories.count, 1);
 
+  try { await store?.close?.(); } catch {}
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
