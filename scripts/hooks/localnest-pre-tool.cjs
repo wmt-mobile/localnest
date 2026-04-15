@@ -26,6 +26,8 @@ const DEBOUNCE_FILE = path.join(TMP_DIR, 'localnest-pre-hook-last.json');
 const DEBOUNCE_MS = 30000; // 30s between memory context retrievals
 const SHOUT_DEBOUNCE_MS = 60000; // throttle the strong reminder to once/minute
 const WORK_TOOLS = new Set(['Edit', 'Write', 'Bash', 'MultiEdit', 'Read', 'Grep']);
+const IS_WINDOWS = process.platform === 'win32';
+const LOCALNEST_BIN = IS_WINDOWS ? 'localnest.cmd' : 'localnest';
 
 let input = '';
 const stdinTimeout = setTimeout(() => {
@@ -82,7 +84,7 @@ process.stdin.on('end', () => {
       process.exit(0);
     }
 
-    const result = spawnSync('localnest', ['memory', 'prime', query, '--json'], {
+    const result = spawnSync(LOCALNEST_BIN, ['memory', 'prime', query, '--json'], {
       encoding: 'utf8',
       timeout: 8000,
       env: { ...process.env, LOCALNEST_MEMORY_ENABLED: 'true' }

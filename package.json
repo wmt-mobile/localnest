@@ -1,6 +1,6 @@
 {
   "name": "localnest-mcp",
-  "version": "0.3.0-beta.3",
+  "version": "0.3.0-beta.4",
   "license": "MIT",
   "author": "LocalNest",
   "repository": {
@@ -36,14 +36,14 @@
   "type": "module",
   "description": "The only MCP server combining semantic code search, temporal knowledge graph, and persistent AI memory. 74 tools, zero cloud, pure SQLite. Alternative to Mem0, GitNexus, Graphiti.",
   "bin": {
-    "localnest": "bin/_boot.cjs",
-    "localnest-mcp": "bin/_boot.cjs",
-    "localnest-mcp-upgrade": "bin/_boot.cjs",
-    "localnest-mcp-setup": "bin/_boot.cjs",
-    "localnest-mcp-doctor": "bin/_boot.cjs",
-    "localnest-mcp-install-skill": "bin/_boot.cjs",
-    "localnest-mcp-task-context": "bin/_boot.cjs",
-    "localnest-mcp-capture-outcome": "bin/_boot.cjs"
+    "localnest": "bin/localnest.cjs",
+    "localnest-mcp": "bin/localnest-mcp.cjs",
+    "localnest-mcp-upgrade": "bin/localnest-mcp-upgrade.cjs",
+    "localnest-mcp-setup": "bin/localnest-mcp-setup.cjs",
+    "localnest-mcp-doctor": "bin/localnest-mcp-doctor.cjs",
+    "localnest-mcp-install-skill": "bin/localnest-mcp-install-skill.cjs",
+    "localnest-mcp-task-context": "bin/localnest-mcp-task-context.cjs",
+    "localnest-mcp-capture-outcome": "bin/localnest-mcp-capture-outcome.cjs"
   },
   "files": [
     "bin",
@@ -75,7 +75,7 @@
     "quality:package": "node scripts/quality/quality-package.mjs",
     "quality:audit": "node scripts/quality/quality-audit.mjs",
     "quality": "npm run check && npm run lint && npm run test:coverage && npm run quality:cycles && npm run quality:deps && npm run quality:package && npm run quality:audit",
-    "check": "tsc --noEmit && node --check bin/_shared.js && node --check bin/localnest.js && node --check bin/localnest-mcp.js && node --check bin/localnest-mcp-upgrade.js && node --check bin/localnest-mcp-setup.js && node --check bin/localnest-mcp-doctor.js && node --check bin/localnest-mcp-install-skill.js && node --check bin/localnest-mcp-task-context.js && node --check bin/localnest-mcp-capture-outcome.js && node --check scripts/runtime/setup-localnest.mjs && node --check scripts/runtime/upgrade-localnest.mjs && node --check scripts/runtime/doctor-localnest.mjs && node --check scripts/runtime/install-localnest-skill.mjs && node --check scripts/memory/task-context-localnest.mjs && node --check scripts/memory/capture-outcome-localnest.mjs && node --check scripts/memory/memory-workflow-cli-utils.mjs && node --check scripts/quality/quality-audit.mjs && node --check scripts/quality/quality-package.mjs && node --check scripts/quality/stress-localnest.mjs && node --check scripts/release/release-test-installed-runtime.mjs && node --check scripts/release/release-exit-criteria.mjs",
+    "check": "tsc --noEmit && node --check bin/_boot.cjs && node --check bin/_shared.js && node --check bin/localnest.cjs && node --check bin/localnest-mcp.cjs && node --check bin/localnest-mcp-setup.cjs && node --check bin/localnest-mcp-doctor.cjs && node --check bin/localnest-mcp-upgrade.cjs && node --check bin/localnest-mcp-install-skill.cjs && node --check bin/localnest-mcp-task-context.cjs && node --check bin/localnest-mcp-capture-outcome.cjs && node --check bin/localnest.js && node --check bin/localnest-mcp.js && node --check bin/localnest-mcp-upgrade.js && node --check bin/localnest-mcp-setup.js && node --check bin/localnest-mcp-doctor.js && node --check bin/localnest-mcp-install-skill.js && node --check bin/localnest-mcp-task-context.js && node --check bin/localnest-mcp-capture-outcome.js && node --check scripts/runtime/setup-localnest.mjs && node --check scripts/runtime/upgrade-localnest.mjs && node --check scripts/runtime/doctor-localnest.mjs && node --check scripts/runtime/install-localnest-skill.mjs && node --check scripts/memory/task-context-localnest.mjs && node --check scripts/memory/capture-outcome-localnest.mjs && node --check scripts/memory/memory-workflow-cli-utils.mjs && node --check scripts/quality/quality-audit.mjs && node --check scripts/quality/quality-package.mjs && node --check scripts/quality/stress-localnest.mjs && node --check scripts/release/release-test-installed-runtime.mjs && node --check scripts/release/release-exit-criteria.mjs",
     "build": "tsc",
     "build:check": "tsc --noEmit",
     "prepublishOnly": "npm run check",

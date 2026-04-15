@@ -4,6 +4,30 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0-beta.4] - 2026-04-15
+
+### 🪟 Windows Compatibility Sweep
+
+LocalNest now installs and runs on Windows. Multiple critical Windows blockers were identified and fixed.
+
+### Fixed
+
+- **`bin/_boot.cjs` is no longer Windows-broken.** The previous loader detected which bin command was invoked by inspecting the symlink name in `process.argv[1]`. npm does not create symlinks on Windows — it generates `.cmd` shims that all spawn `node bin/_boot.cjs`, so every Windows user got `_boot` as the detected name and every bin command (`localnest`, `localnest-mcp`, `localnest-mcp-setup`, `localnest-mcp-doctor`, etc.) failed with a wrong-target ESM resolution error. `_boot.cjs` is now an exported `runTarget(scriptName)` runner, and each of the 8 bin entries has its own tiny shim under `bin/<name>.cjs` that hard-codes its target. Works identically on Linux, macOS, and Windows.
+- **`expandHome()` cross-platform.** `src/runtime/config.ts` was reading `process.env.HOME` directly (undefined on Windows) and only matching `~/` (never `~\`). Replaced with `os.homedir()` and a regex that accepts both separators. User-supplied config paths starting with `~` now expand correctly on every OS.
+- **`preinstall-cleanup.mjs` cross-platform paths.** Replaced `path.join('/', ...)` Unix root build with proper drive-aware reconstruction, swapped `URL().pathname` (which returns `/C:/...` on Windows) for `fileURLToPath()`, made the git-dep-prep detection use `path.join` instead of literal `/.npm/_cacache/tmp/`, and routed `npm root -g` through `npm.cmd` on Windows.
+- **`spawnSync('rg', …)` resolves on Windows.** Node does not auto-resolve PATHEXT inside `child_process.spawn`, so `'rg'` was failing with `ENOENT` on Windows even when ripgrep was installed. Introduced `src/runtime/platform.ts` exporting `RG_BIN` (`rg.exe` on Windows, `rg` elsewhere) and routed every ripgrep spawn site through it (`lexical-search.ts` x2, `runtime/config.ts`, `cli/commands/selftest-checks.ts`). `search_code` and `search_hybrid` now work on Windows.
+- **`spawnSync('localnest', …)` and `spawnSync('npm', …)` resolve on Windows.** Hooks (`localnest-pre-tool.cjs`, `localnest-post-tool.cjs`), the embeddings installer (`install-localnest-skill.mjs`), the global-stale-temp checker (`doctor-localnest.mjs`), and `quality-audit.mjs` all spawned bare `localnest` / `npm` strings without the `.cmd` suffix. They now use `process.platform === 'win32' ? 'X.cmd' : 'X'`.
+
+### Changed
+
+- **CI now runs on Windows AND Linux.** `.github/workflows/quality.yml` was upgraded from a single `ubuntu-latest` job to a `[ubuntu-latest, windows-latest]` matrix with `fail-fast: false`. Includes platform-aware ripgrep install (`apt-get` vs `choco`), the full quality pipeline (lint, typecheck, tests, circular-deps, unused-deps, package quality, audit), and a smoke test of the new bin shims on both OSes. Windows regressions will now be caught at PR time.
+- **Added `.gitattributes`** with `* text=auto eol=lf` and explicit `eol=lf` for `.cjs/.mjs/.js/.ts/.json/.yml/.sh` so Windows users with `core.autocrlf=true` no longer receive CRLF in shebang lines or YAML/JSON files.
+
+### New files
+
+- `src/runtime/platform.ts` — centralised `isWindows`, `RG_BIN`, `NPM_BIN`, `NPX_BIN`, `LOCALNEST_BIN`, `platformBin()` helpers so the platform check lives in exactly one place.
+- `bin/localnest.cjs`, `bin/localnest-mcp.cjs`, `bin/localnest-mcp-setup.cjs`, `bin/localnest-mcp-doctor.cjs`, `bin/localnest-mcp-upgrade.cjs`, `bin/localnest-mcp-install-skill.cjs`, `bin/localnest-mcp-task-context.cjs`, `bin/localnest-mcp-capture-outcome.cjs` — per-bin shims that route through `_boot.cjs`'s `runTarget`.
+
 ## [0.3.0-beta.3] - 2026-04-15
 
 ### Fixed

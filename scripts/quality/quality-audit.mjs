@@ -5,8 +5,9 @@ import os from 'node:os';
 import path from 'node:path';
 
 const npmCache = path.join(os.tmpdir(), '.npm-cache');
+const NPM_BIN = process.platform === 'win32' ? 'npm.cmd' : 'npm';
 
-const run = spawnSync('npm', ['audit', '--omit=dev', '--json'], {
+const run = spawnSync(NPM_BIN, ['audit', '--omit=dev', '--json'], {
   encoding: 'utf8',
   timeout: 120000,
   maxBuffer: 20 * 1024 * 1024,

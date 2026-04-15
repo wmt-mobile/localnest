@@ -1,7 +1,9 @@
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { ensureConfigUpgraded } from '../migrations/config-migrator.js';
+import { RG_BIN } from './platform.js';
 import {
   migrateLocalnestHomeLayout,
   resolveConfigPath as resolveDefaultConfigPath,
@@ -104,7 +106,9 @@ export const TEXT_EXTENSIONS: Set<string> = new Set([
 ]);
 
 export function expandHome(inputPath: string): string {
-  return inputPath.replace(/^~(?=$|\/)/, `${process.env.HOME || ''}`);
+  // Cross-platform: use os.homedir() (Windows: USERPROFILE; POSIX: HOME) and
+  // accept both `~/` and `~\` so user-provided config paths work on every OS.
+  return inputPath.replace(/^~(?=$|[\\/])/, os.homedir());
 }
 
 export interface RootEntry {
@@ -269,7 +273,7 @@ function resolveRoots({ projectRoots, localnestConfigPath }: { projectRoots: str
 
 function detectRipgrep(): boolean {
   try {
-    const result = spawnSync('rg', ['--version'], { stdio: 'ignore' });
+    const result = spawnSync(RG_BIN, ['--version'], { stdio: 'ignore' });
     return result.status === 0;
   } catch {
     return false;

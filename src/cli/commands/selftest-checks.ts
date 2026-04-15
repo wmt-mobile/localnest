@@ -7,6 +7,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { spawnSync } from 'node:child_process';
+import { RG_BIN } from '../../runtime/platform.js';
 import { buildRuntimeConfig } from '../../runtime/config.js';
 import { EmbeddingService } from '../../services/retrieval/embedding/service.js';
 import { MemoryService } from '../../services/memory/service.js';
@@ -323,7 +324,7 @@ export async function checkEmbeddings(embeddingService: EmbeddingService): Promi
 
 export function checkFileSearch(): CheckResult {
   try {
-    const result = spawnSync('rg', ['--version'], { stdio: 'pipe', encoding: 'utf8' });
+    const result = spawnSync(RG_BIN, ['--version'], { stdio: 'pipe', encoding: 'utf8' });
     if (result.status === 0) {
       const ver = (result.stdout || '').split('\n')[0] || 'available';
       return {
