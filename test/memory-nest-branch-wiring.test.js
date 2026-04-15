@@ -53,7 +53,7 @@ test('storeEntry persists explicit nest and branch verbatim', async (t) => {
   assert.equal(entry.nest, 'localnest');
   assert.equal(entry.branch, 'release/0.2.0');
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -79,7 +79,7 @@ test('captureEvent persists explicit nest and branch on promoted memory', async 
 
   if (result.status !== 'promoted') {
     t.diagnostic(`captureEvent did not promote, status=${result.status}; skipping row assertion`);
-    try { await store?.close?.(); } catch {}
+    try { await store?.close?.(); } catch { /* ignore */ }
     fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
     return;
   }
@@ -90,7 +90,7 @@ test('captureEvent persists explicit nest and branch on promoted memory', async 
   assert.equal(promoted.nest, 'my-nest');
   assert.equal(promoted.branch, 'my-branch');
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -119,7 +119,7 @@ test('storeEntry fallback derives nest from basename and sanitizes branch', asyn
   assert.equal(entry.nest, 'localnest', 'nest should be basename of project_path');
   assert.equal(entry.branch, 'release-0.2.0', 'branch should have slashes replaced with hyphens');
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -150,6 +150,6 @@ test('explicit branch with slashes is preserved (sanitization only on fallback)'
   assert.equal(entry.nest, 'explicit', 'explicit nest must not be overridden by basename fallback');
   assert.equal(entry.branch, 'feature/foo/bar', 'explicit branch must retain slashes');
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

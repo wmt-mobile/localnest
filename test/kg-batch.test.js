@@ -49,7 +49,7 @@ test('addEntityBatch with 100 entities — all created, no duplicates, no errors
   assert.deepEqual(summary.errors, []);
   assert.equal(summary.ids, undefined, 'ids array must be omitted by default');
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -75,7 +75,7 @@ test('addEntityBatch re-run with same payload — all duplicates via INSERT OR I
   assert.equal(second.duplicates, 100);
   assert.deepEqual(second.errors, []);
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -103,7 +103,7 @@ test('addEntityBatch with response_format: verbose returns ids[] of length 100',
     assert.ok(id.length > 0);
   }
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -135,7 +135,7 @@ test('addEntityBatch with 501 entities throws MAX_BATCH_SIZE_EXCEEDED and insert
   const stats = await store.getKgStats();
   assert.equal(stats.entities, 0);
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -162,7 +162,7 @@ test('addEntityBatch with one row missing name — errors[] populated, rest inse
   assert.equal(summary.errors[0].index, 1);
   assert.match(summary.errors[0].message, /name/i);
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -187,7 +187,7 @@ test('addTripleBatch with 50 fresh triples — all created', async (t) => {
   assert.equal(summary.duplicates, 0);
   assert.deepEqual(summary.errors, []);
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -224,7 +224,7 @@ test('addTripleBatch dedup: 25 new + 25 pre-existing yields 25 created / 25 dupl
   assert.equal(summary.duplicates, 25);
   assert.deepEqual(summary.errors, []);
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -293,7 +293,7 @@ test('addTripleBatch rollback: stubbed adapter.run rejects mid-batch, entire bat
   const stats = await store.getKgStats();
   assert.equal(stats.triples, 0, 'transaction must have rolled back — no triples persisted');
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -320,7 +320,7 @@ test('addTripleBatch with one row missing predicate — error collected, rest in
   assert.equal(summary.errors[0].index, 1);
   assert.match(summary.errors[0].message, /predicate/i);
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -352,7 +352,7 @@ test('BATCH-06: single addTriple without valid_from auto-stamps and is findable 
   const found = asOf.triples.find((t) => t.id === result.id);
   assert.ok(found, 'our triple must be in the as-of results');
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
@@ -374,6 +374,6 @@ test('BATCH-06 backwards compat: addTriple with explicit valid_from: null stays 
 
   assert.equal(result.valid_from, null, 'explicit null valid_from must survive');
 
-  try { await store?.close?.(); } catch {}
+  try { await store?.close?.(); } catch { /* ignore */ }
   fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
