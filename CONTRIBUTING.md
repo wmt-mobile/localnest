@@ -94,20 +94,21 @@ Open an issue with:
 
 ## Publishing (Maintainers Only)
 
-LocalNest auto-publishes to npm via GitHub Actions when `package.json` version changes on `main` or `beta`. See `.github/workflows/release.yml` for the full pipeline.
+LocalNest auto-publishes to npm via GitHub Actions when `package.json` version changes on `main` or `release/*`. See `.github/workflows/release.yml` for the full pipeline.
 
 **To trigger a release:**
-1. Bump version in `package.json` (e.g., `0.1.0` → `0.1.1` or `0.1.1-beta.1`)
-2. Update `CHANGELOG.md` with the new version section
-3. Open a PR, get it reviewed, merge to `main` (stable) or `beta` (prerelease)
-4. The release workflow runs the full quality pipeline, publishes to npm with provenance, then creates a GitHub release
+1. Bump version in `package.json` and `src/runtime/version.ts`
+2. Bump skill metadata in `skills/*/.localnest-skill.json`
+3. Update `CHANGELOG.md` with the new version section
+4. Commit, push to `main` (stable) or `release/*` (prerelease)
+5. The release workflow runs the full quality pipeline, publishes to npm with provenance, then creates a GitHub release
 
 **Manual release commands (if workflow is unavailable):**
 ```bash
 npm run check
 npm test
-npm run release:beta    # for prerelease
-npm run release:latest  # for stable
+npm publish --access public              # stable
+npm publish --access public --tag beta   # prerelease
 ```
 
 **Dry-run pack validation:**

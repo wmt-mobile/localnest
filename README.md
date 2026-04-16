@@ -6,7 +6,6 @@
 
 <p align="center">
   <a href="https://www.npmjs.com/package/localnest-mcp"><img src="https://img.shields.io/npm/v/localnest-mcp.svg?style=for-the-badge&color=success" alt="npm version"></a>
-  <a href="https://www.npmjs.com/package/localnest-mcp/v/beta"><img src="https://img.shields.io/npm/v/localnest-mcp/beta?style=for-the-badge&label=beta&color=blue" alt="beta track"></a>
   <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-gold.svg?style=for-the-badge" alt="License: MIT"></a>
   <a href="https://github.com/wmt-mobile/localnest/actions/workflows/quality.yml"><img src="https://img.shields.io/github/actions/workflow/status/wmt-mobile/localnest/quality.yml?branch=main&style=for-the-badge&label=Quality" alt="Quality"></a>
 </p>
@@ -103,9 +102,8 @@ localnest setup
 localnest doctor
 ```
 
-**Beta track** (interactive TUI dashboard):
+**Interactive dashboard:**
 ```bash
-npm install -g localnest-mcp@beta
 localnest dashboard
 ```
 
