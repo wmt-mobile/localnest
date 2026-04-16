@@ -4,6 +4,31 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-04-16
+
+### Stable Release
+
+Promotes `0.3.0-beta.6` to stable after comprehensive audit and fix cycle.
+
+LocalNest v0.3.0 is the only MCP server with all three pillars: **code intelligence**, **knowledge graph**, and **persistent memory** — no cloud dependencies, no external databases, pure SQLite.
+
+### Fixed (since beta.5)
+
+- **KG output schema validation** — `localnest_kg_query`, `localnest_kg_timeline`, and `localnest_kg_as_of` were declared with `TRIPLE_RESULT_SCHEMA` but return bundle-shaped objects (`{entity_id, count, triples}`). Changed to `BUNDLE_RESULT_SCHEMA`. All three tools were 100% broken — every call returned an MCP output validation error.
+- **`localnest_kg_delete_entity` output schema** — declared with `BATCH_RESULT_SCHEMA` (`deleted: number`) but service returns `deleted: boolean`. Changed to `ACK_RESULT_SCHEMA`.
+- **Search scoping with `all_roots=true`** — `resolveSearchBases()` was running `splitRootIntoProjects()` even when `allRoots` was explicitly true, narrowing search to auto-detected project directories only (e.g., only `/R&D` instead of the full root). Now bypasses auto-split when `allRoots` is set. Also fixes `search_hybrid` `lexical_hits` always being 0 (same scoping issue downstream).
+- **Selftest KG entity leak** — `checkKnowledgeGraph()` created test entities but never deleted them, causing orphaned `__selftest_entity_*` entries to accumulate on every selftest run. Added `deleteEntity` cleanup.
+- **CI: skill metadata version sync** — bundled `.localnest-skill.json` files now match package version.
+- **CI: mcp-annotations test expectations** — updated schema archetype map to match the KG schema fixes.
+
+### Audit Results (at release)
+
+- Health score: **99/100**
+- Memory: 144 entries, 963 events across 13 projects
+- Knowledge graph: 243 entities, 370 active triples, 55 predicates
+- Index: 34,813 files, 107,292 chunks, AST chunking for 9 languages
+- CI: Quality green on both Ubuntu and Windows (201 tests, 0 failures)
+
 ## [0.3.0-beta.5] - 2026-04-15
 
 ### 🚨 Critical: retrieval tools no longer broken
