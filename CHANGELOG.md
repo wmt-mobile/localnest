@@ -4,6 +4,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.1] - 2026-04-16
+
+### Fixed
+
+- **Windows install crash** — `postinstall` script used bash-only `2>/dev/null || true` which fails on Windows cmd.exe with "'true' is not recognized". Replaced with a cross-platform `node -e` try/catch wrapper.
+
 ## [0.3.0] - 2026-04-16
 
 ### Stable Release
