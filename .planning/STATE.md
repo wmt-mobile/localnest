@@ -161,7 +161,8 @@ None — autonomous execution in progress.
 | 260415-isp | Fix localnest_find schema validation bug, harden agent_prime SOP hook, bump to next beta version | 2026-04-15 | d682eef | [260415-isp](./quick/260415-isp-fix-localnest-find-schema-validation-bug/) |
 | 260415-jq9 | Audit and fix Windows compatibility blockers, add Windows CI workflow, bump to next beta | 2026-04-15 | e94bf97 → 0495e05 | [260415-jq9](./quick/260415-jq9-audit-and-fix-windows-compatibility-bloc/) |
 | 260415-n69 | Fix broken retrieval tools schema regression, add runtime shape test, compact/lite response tiers | 2026-04-15 | (pending) | [260415-n69](./quick/260415-n69-fix-broken-retrieval-tools-schema-regres/) |
-| 260416-ggw | Fix 4 KG output schema validation bugs: kg_query, kg_timeline, kg_as_of, kg_delete_entity | 2026-04-16 | (pending) | [260416-ggw-fix-3-kg-mcp-output-schema-validation-bu](./quick/260416-ggw-fix-3-kg-mcp-output-schema-validation-bu/) |
+| 260416-ggw | Fix 4 KG output schema validation bugs: kg_query, kg_timeline, kg_as_of, kg_delete_entity | 2026-04-16 | 106b7f3 | [260416-ggw-fix-3-kg-mcp-output-schema-validation-bu](./quick/260416-ggw-fix-3-kg-mcp-output-schema-validation-bu/) |
+| 260416-ggw+ | Fix search scoping (all_roots bypasses autoProjectSplit) + selftest entity leak cleanup | 2026-04-16 | c62e37c | (inline fix) |
 
 ## Session Continuity
 
