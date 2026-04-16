@@ -316,20 +316,18 @@ async function gatherEntities(
 // ---------------------------------------------------------------------------
 
 function getRecentChanges(projectPath: string): string {
+  const opts = { cwd: projectPath, timeout: 3000, encoding: 'utf-8' as const, stdio: ['pipe', 'pipe', 'pipe'] as ['pipe', 'pipe', 'pipe'] };
   try {
-    const output = execSync(
-      'git diff --stat HEAD~5..HEAD 2>/dev/null || git log --oneline -5 2>/dev/null || echo "no git history"',
-      {
-        cwd: projectPath,
-        timeout: 3000,
-        encoding: 'utf-8',
-        stdio: ['pipe', 'pipe', 'pipe']
-      }
-    );
-    return truncate((output || '').trim(), MAX_GIT_OUTPUT_LEN) || 'no recent changes';
-  } catch {
-    return 'unavailable';
-  }
+    const diff = execSync('git diff --stat HEAD~5..HEAD', opts);
+    const trimmed = (diff || '').trim();
+    if (trimmed) return truncate(trimmed, MAX_GIT_OUTPUT_LEN);
+  } catch { /* fall through */ }
+  try {
+    const log = execSync('git log --oneline -5', opts);
+    const trimmed = (log || '').trim();
+    if (trimmed) return truncate(trimmed, MAX_GIT_OUTPUT_LEN);
+  } catch { /* fall through */ }
+  return 'no recent changes';
 }
 
 // ---------------------------------------------------------------------------

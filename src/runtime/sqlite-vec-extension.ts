@@ -5,6 +5,9 @@ import { spawnSync } from 'node:child_process';
 
 import type { SpawnSyncReturns } from 'node:child_process';
 
+const isWindows = process.platform === 'win32';
+const NPM_CMD = isWindows ? 'npm.cmd' : 'npm';
+
 type SpawnFn = (command: string, args: string[], options?: object) => SpawnSyncReturns<string>;
 
 export interface SqliteVecFindResult {
@@ -69,7 +72,7 @@ function findMatchingBinary(rootDir: string, names: string[], maxDepth: number =
 
 function detectGlobalNpmRoot(spawn: SpawnFn = spawnSync as unknown as SpawnFn): string {
   try {
-    const result = spawn('npm', ['root', '-g'], { encoding: 'utf8' });
+    const result = spawn(NPM_CMD, ['root', '-g'], { encoding: 'utf8' });
     if (result.status !== 0) return '';
     return String(result.stdout || '').trim();
   } catch {
@@ -167,9 +170,10 @@ export function ensureSqliteVecExtension({
 
   let installResult: SpawnSyncReturns<string>;
   try {
-    installResult = spawn('npm', ['install', '--no-save', 'sqlite-vec'], {
+    installResult = spawn(NPM_CMD, ['install', '--no-save', 'sqlite-vec'], {
       cwd: vendorRoot,
-      encoding: 'utf8'
+      encoding: 'utf8',
+      shell: isWindows
     });
   } catch (error: unknown) {
     const err = error as { message?: string };
