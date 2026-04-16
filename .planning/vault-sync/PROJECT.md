@@ -1,12 +1,15 @@
-# LocalNest Vault Sync — v0.4.0
+# LocalNest v0.4.0 — One Brain + Lean Engine
 
-**Codename:** One Brain
 **Branch:** `feature/vault-sync`
 **Status:** Planning
 
 ## Vision
 
-Merge human knowledge (Obsidian vault) and AI-learned knowledge (LocalNest SQLite) into one connected graph. User opens Obsidian, sees their personal notes cross-linked with AI memories, KG entities, and agent activity — all in one brain.
+Two parallel tracks:
+
+1. **One Brain** (Vault Sync) — Merge human knowledge (Obsidian vault) and AI-learned knowledge (LocalNest SQLite) into one connected graph. User opens Obsidian, sees their personal notes cross-linked with AI memories, KG entities, and agent activity.
+
+2. **Lean Engine** (Token Optimization) — Consolidate 74 MCP tools into ~10 via STRAP pattern. Trim schema descriptions. Slim response envelopes. Fewer tokens per session, faster tool discovery, lower cost at scale.
 
 ## Core Principle
 
@@ -62,3 +65,31 @@ SYNC FLOW:
 - Must handle daemon crashes gracefully (snapshot-based recovery via @parcel/watcher)
 - Must work on Linux, macOS, and Windows
 - Must not corrupt YAML frontmatter on round-trip (use regex surgery, not parse+stringify)
+
+## Token Optimization Targets
+
+| Metric | Current | Target | How |
+|---|---|---|---|
+| Registered MCP tools | 74 | ~10 | STRAP consolidation |
+| Schema tokens (all tools) | ~22K | ~4K | Fewer tools + trimmed descriptions |
+| ToolSearch round-trips | 3-5 per task | 1-2 per task | Fewer tools to discover |
+| Response overhead | ~200 tokens/call | ~80 tokens/call | Conditional meta, flatter shapes |
+| Human read operations via MCP | All of them | Zero | Obsidian vault sync replaces MCP for human reads |
+
+## STRAP Pattern
+
+Single Tool, Resource, Action, Parameters. Instead of 13 `kg_*` tools:
+
+```
+localnest_kg({ action: "query", entity_id: "flutter", direction: "outgoing" })
+localnest_kg({ action: "add_triple", subject: "app", predicate: "uses", object: "flutter" })
+localnest_kg({ action: "timeline", entity_id: "flutter" })
+```
+
+One schema loaded once. Same capabilities. ~80% fewer schema tokens for the KG domain alone.
+
+### Backward Compatibility
+
+- Old names kept as aliases in v0.4.0 with deprecation warning
+- Removed in v0.5.0
+- No breaking changes to response shapes

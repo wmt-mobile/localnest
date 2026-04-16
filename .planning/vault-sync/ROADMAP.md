@@ -1,4 +1,4 @@
-# Vault Sync Roadmap — v0.4.0
+# v0.4.0 Roadmap — Vault Sync + Token Optimization
 
 ## Phase 1: Foundation — Export Engine (Node.js rewrite)
 **Goal:** Replace bash export script with a proper Node.js export engine. `localnest sync --init` populates a vault folder from SQLite.
@@ -185,3 +185,140 @@ Strict sequence — each phase depends on the previous.
 | `gray-matter` | YAML frontmatter parsing | ~50KB |
 
 No other new dependencies. SQLite access reuses existing `node:sqlite` / better-sqlite3.
+
+---
+
+# Token Optimization — STRAP Consolidation + Schema Trimming
+
+Runs in parallel with Vault Sync. Same release (v0.4.0).
+
+## Phase T1: STRAP Consolidation (74 → ~15 tools)
+**Goal:** Consolidate related tools into single tools with `action` parameter. Fewer schemas = fewer tokens = faster ToolSearch discovery.
+**Depends on:** Nothing (independent of vault sync)
+**Effort:** 2-3 weeks
+
+### Current → Target Mapping
+
+| Group | Current tools | Target tool | Actions |
+|---|---|---|---|
+| Knowledge Graph | `kg_add_entity`, `kg_add_triple`, `kg_add_entities_batch`, `kg_add_triples_batch`, `kg_query`, `kg_timeline`, `kg_as_of`, `kg_stats`, `kg_invalidate`, `kg_backfill_links`, `kg_delete_entity`, `kg_delete_entities_batch`, `kg_delete_triples_batch` (13) | `localnest_kg` | `add_entity`, `add_triple`, `add_entities_batch`, `add_triples_batch`, `query`, `timeline`, `as_of`, `stats`, `invalidate`, `backfill`, `delete_entity`, `delete_entities_batch`, `delete_triples_batch` |
+| Memory | `memory_store`, `memory_recall`, `memory_get`, `memory_update`, `memory_delete`, `memory_list`, `memory_store_batch`, `memory_delete_batch`, `memory_related`, `memory_suggest_relations`, `memory_add_relation`, `memory_remove_relation`, `memory_capture_event`, `memory_events`, `memory_status`, `memory_check_duplicate` (16) | `localnest_memory` | `store`, `recall`, `get`, `update`, `delete`, `list`, `store_batch`, `delete_batch`, `related`, `suggest_relations`, `add_relation`, `remove_relation`, `capture_event`, `events`, `status`, `check_duplicate` |
+| Search & Code Intel | `search_hybrid`, `search_code`, `search_files`, `find`, `find_definition`, `find_usages`, `find_callers`, `find_implementations`, `get_symbol`, `rename_preview` (10) | `localnest_search` | `hybrid`, `code`, `files`, `find`, `definition`, `usages`, `callers`, `implementations`, `symbol`, `rename_preview` |
+| Graph & Organization | `graph_traverse`, `graph_bridges`, `nest_list`, `nest_branches`, `nest_tree` (5) | `localnest_graph` | `traverse`, `bridges`, `nest_list`, `nest_branches`, `nest_tree` |
+| Workspace | `list_projects`, `list_roots`, `project_tree`, `read_file`, `file_changed`, `summarize_project` (6) | `localnest_workspace` | `projects`, `roots`, `tree`, `read`, `changed`, `summarize` |
+| Agent Context | `agent_prime`, `teach`, `capture_outcome`, `task_context`, `whats_new` (5) | `localnest_agent` | `prime`, `teach`, `capture`, `context`, `whats_new` |
+| Ingestion | `ingest_markdown`, `ingest_json`, `diary_write`, `diary_read` (4) | `localnest_ingest` | `markdown`, `json`, `diary_write`, `diary_read` |
+| System | `health`, `server_status`, `index_project`, `index_status`, `embed_status`, `update_self`, `update_status`, `audit`, `backup`, `restore`, `help`, `usage_guide`, `hooks_stats`, `hooks_list_events` (14) | `localnest_system` + `localnest_index` | `health`, `status`, `audit`, `backup`, `restore`, `help`, `hooks_stats`, `hooks_events`, `update_self`, `update_status` / `project`, `status`, `embed_status` |
+| **Total** | **74** | **~10** | |
+
+### Tasks
+
+1. **Design the action routing pattern**
+   - Single `registerJsonTool` per consolidated tool
+   - `action` as first required param (enum of valid actions)
+   - Per-action parameter validation (only validate params relevant to chosen action)
+   - Per-action output schema selection
+   - Error: "unknown action" with list of valid actions
+
+2. **Implement consolidated tool handlers**
+   - `localnest_kg(action, ...params)` → routes to existing service methods
+   - `localnest_memory(action, ...params)` → routes to existing service methods
+   - Same for search, graph, workspace, agent, ingest, system
+   - Handlers are thin routers — NO business logic changes
+
+3. **Backward compatibility layer**
+   - Keep old tool names as aliases for one release cycle (v0.4.0)
+   - Old: `localnest_kg_query({entity_id: "flutter"})` still works
+   - New: `localnest_kg({action: "query", entity_id: "flutter"})` preferred
+   - Deprecation warning in response meta
+   - Remove old names in v0.5.0
+
+4. **Update tests**
+   - `mcp-annotations.test.js` — update expected tool count and schema map
+   - Add routing tests for each consolidated tool
+   - Verify old aliases still resolve
+
+### Acceptance
+- `localnest_kg({action: "query", entity_id: "flutter"})` returns same result as `localnest_kg_query({entity_id: "flutter"})`
+- ToolSearch finds consolidated tools with fewer round-trips
+- Old tool names still work with deprecation warning
+- All 201 existing tests still pass
+- Total registered tools: ~10-15 (down from 74)
+
+---
+
+## Phase T2: Schema Description Trimming
+**Goal:** Cut tool description verbosity by ~60%. Less text per schema = fewer tokens when ToolSearch loads a tool.
+**Depends on:** Phase T1 (trim the consolidated tools, not 74 individual ones)
+**Effort:** 2-3 days
+
+### Tasks
+
+1. **Audit all tool descriptions**
+   - Current: verbose, explanatory ("Add a subject-predicate-object triple to the knowledge graph. Entities are auto-created on first reference. Detects contradictions...")
+   - Target: terse, action-oriented ("Add KG triple. Auto-creates entities. Warns on contradictions.")
+   - Rule: max 1 sentence for description, details go in param descriptions
+
+2. **Trim parameter descriptions**
+   - Remove "Optional." prefix (the schema already says optional)
+   - Remove type restatement ("A string containing..." → just describe what it does)
+   - Use consistent format: verb + noun ("Filter by nest name")
+
+3. **Measure token savings**
+   - Before: count total schema tokens across all tools
+   - After: count again
+   - Target: 50-60% reduction in description tokens
+
+### Acceptance
+- All descriptions under 100 characters
+- Parameter descriptions under 50 characters each
+- Total schema token count measured and documented
+- No functionality changes — purely cosmetic
+
+---
+
+## Phase T3: Response Envelope Slimming
+**Goal:** Reduce per-response token overhead from the `{data, meta}` wrapper.
+**Depends on:** Phase T1
+**Effort:** 1 week
+
+### Tasks
+
+1. **Conditional meta emission**
+   - `meta.schema_version` is always "1.0" — does the AI need this every response? Make it optional.
+   - Only include `meta.guidance` and `meta.recommended_next_action` on empty results
+   - Only include `meta.pagination` when `has_more: true`
+
+2. **Flatten single-value responses**
+   - `health` returns `{data: {name, version, health: {overall, ...}}}` — flatten to `{data: {overall, version, ...}}`
+   - `kg_stats` returns `{data: {entities, triples, ...}}` — already flat, but `meta` wrapper adds ~30 tokens for no value
+
+3. **Measure per-call savings**
+   - Track average response size before/after
+   - Target: 20-30% reduction on typical responses
+
+### Acceptance
+- Average response size reduced by 20%+
+- No breaking changes to response shape (additive removal only)
+- `item_format: lite` responses are under 50 tokens per item
+
+---
+
+## Dependency Graph (Full v0.4.0)
+
+```
+VAULT SYNC TRACK          TOKEN OPTIMIZATION TRACK
+                          
+Phase 1 (Export)          Phase T1 (STRAP consolidation)
+    │                         │
+    ▼                         ▼
+Phase 2 (SQLite→Vault)   Phase T2 (Schema trimming)
+    │                         │
+    ▼                         ▼
+Phase 3 (Vault→SQLite)   Phase T3 (Response slimming)
+    │                     
+    ▼                     
+Phase 4 (Polish)          
+
+Two independent tracks. Can be developed in parallel.
+```
