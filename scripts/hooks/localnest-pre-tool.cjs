@@ -137,10 +137,10 @@ function isAgentPrimeTool(toolName) {
 }
 
 function sessionKeyFor(sessionId, toolInput) {
-  if (sessionId) return crypto.createHash('sha1').update(String(sessionId)).digest('hex').slice(0, 12);
+  if (sessionId) return crypto.createHash('sha256').update(String(sessionId)).digest('hex').slice(0, 12);
   // Fall back to cwd hash if Claude Code did not provide a session id.
   const cwd = (toolInput && toolInput.cwd) || process.cwd();
-  return crypto.createHash('sha1').update(String(cwd)).digest('hex').slice(0, 12);
+  return crypto.createHash('sha256').update(String(cwd)).digest('hex').slice(0, 12);
 }
 
 function sessionPrimed(markerPath) {
