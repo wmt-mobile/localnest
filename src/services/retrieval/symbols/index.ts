@@ -19,6 +19,7 @@ interface DbLike {
     run(...params: unknown[]): void;
     all(...params: unknown[]): Record<string, unknown>[];
   };
+  close?(): void;
 }
 
 interface AstChunkerLike {
@@ -149,5 +150,20 @@ export class SymbolIndexService {
   renamePreview(oldName: string, newName: string, opts?: SymbolQueryOptions): RenamePreviewResult {
     const db = this.ensureInit();
     return renamePreview(db, oldName, newName, opts);
+  }
+
+  /**
+   * Release the underlying SQLite handle. Required on Windows so test
+   * teardown can unlink the DB file without `EBUSY`. Truncates the WAL
+   * and flips journal_mode to DELETE so the `.db-wal` / `.db-shm`
+   * auxiliary files are also released.
+   */
+  close(): void {
+    if (!this.db) return;
+    try { this.db.exec('PRAGMA wal_checkpoint(TRUNCATE);'); } catch { /* ignore */ }
+    try { this.db.exec('PRAGMA journal_mode=DELETE;'); } catch { /* ignore */ }
+    try { this.db.close?.(); } catch { /* ignore */ }
+    this.db = null;
+    this.initialized = false;
   }
 }

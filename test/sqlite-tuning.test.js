@@ -46,8 +46,12 @@ test('WAL-01/WAL-02: applySqliteTuning applies all 4 PRAGMAs on a fresh DB', asy
   assert.equal(cache, -64000, 'cache_size must be -64000 (64 MB)');
   assert.equal(mmap, 268435456, 'mmap_size must be 256 MB');
 
+  // Windows: checkpoint WAL and disable it before closing so the .db-wal /
+  // .db-shm auxiliary files are released and the temp dir can be unlinked.
+  try { db.exec('PRAGMA wal_checkpoint(TRUNCATE);'); } catch { /* ignore */ }
+  try { db.exec('PRAGMA journal_mode=DELETE;'); } catch { /* ignore */ }
   db.close();
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('applySqliteTuning is idempotent — second call does not throw or change values', async (t) => {
@@ -70,8 +74,10 @@ test('applySqliteTuning is idempotent — second call does not throw or change v
   assert.equal(journal2, 'wal', 'journal_mode still wal after re-apply');
   assert.equal(mmap2, 268435456, 'mmap_size still 256 MB after re-apply');
 
+  try { db.exec('PRAGMA wal_checkpoint(TRUNCATE);'); } catch { /* ignore */ }
+  try { db.exec('PRAGMA journal_mode=DELETE;'); } catch { /* ignore */ }
   db.close();
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('WAL-03: 500 triple batch insert completes in under 2 seconds', async (t) => {
@@ -105,7 +111,8 @@ test('WAL-03: 500 triple batch insert completes in under 2 seconds', async (t) =
     `WAL-03 regression: 500-triple batch insert took ${durationMs.toFixed(1)} ms (budget 2000 ms)`
   );
 
-  fs.rmSync(root, { recursive: true, force: true });
+  try { await store?.close?.(); } catch { /* ignore */ }
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('Symbols index DB applies journal_mode=wal via ensureDb', async (t) => {
@@ -141,5 +148,6 @@ test('Symbols index DB applies journal_mode=wal via ensureDb', async (t) => {
   assert.equal(journal, 'wal', 'symbols DB journal_mode must be wal');
 
   probe.close();
-  fs.rmSync(root, { recursive: true, force: true });
+  try { svc.close(); } catch { /* ignore */ }
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

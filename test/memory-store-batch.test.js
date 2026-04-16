@@ -60,7 +60,8 @@ test('storeEntryBatch: happy path inserts 50 fresh memories', async (t) => {
   assert.deepEqual(result.errors, [], 'expected no validation errors');
   assert.equal(result.ids, undefined, 'minimal response must omit ids');
 
-  fs.rmSync(root, { recursive: true, force: true });
+  try { await store?.close?.(); } catch { /* ignore */ }
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('storeEntryBatch: re-submitting the same 50 memories counts as 50 duplicates via fingerprint', async (t) => {
@@ -81,7 +82,8 @@ test('storeEntryBatch: re-submitting the same 50 memories counts as 50 duplicate
   assert.equal(second.duplicates, 50, 'expected fingerprint dedup to catch all 50');
   assert.deepEqual(second.errors, []);
 
-  fs.rmSync(root, { recursive: true, force: true });
+  try { await store?.close?.(); } catch { /* ignore */ }
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('storeEntryBatch: partial dedup — 20 new + 5 existing returns created=20, duplicates=5', async (t) => {
@@ -107,7 +109,8 @@ test('storeEntryBatch: partial dedup — 20 new + 5 existing returns created=20,
   assert.equal(second.duplicates, 5, 'expected 5 duplicates from originals');
   assert.deepEqual(second.errors, []);
 
-  fs.rmSync(root, { recursive: true, force: true });
+  try { await store?.close?.(); } catch { /* ignore */ }
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('storeEntryBatch: verbose response_format returns ids array (new + existing)', async (t) => {
@@ -137,7 +140,8 @@ test('storeEntryBatch: verbose response_format returns ids array (new + existing
     assert.match(id, /^mem_/, 'expected mem_ prefix on ids');
   }
 
-  fs.rmSync(root, { recursive: true, force: true });
+  try { await store?.close?.(); } catch { /* ignore */ }
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('storeEntryBatch: oversized batch (> 100) throws MAX_BATCH_SIZE_EXCEEDED and inserts nothing', async (t) => {
@@ -162,7 +166,8 @@ test('storeEntryBatch: oversized batch (> 100) throws MAX_BATCH_SIZE_EXCEEDED an
   const after = await store.adapter.get('SELECT COUNT(*) AS c FROM memory_entries');
   assert.equal(after.c, beforeCount, 'no rows should be inserted for oversized batch');
 
-  fs.rmSync(root, { recursive: true, force: true });
+  try { await store?.close?.(); } catch { /* ignore */ }
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('storeEntryBatch: per-item validation failure reports row index while rest insert', async (t) => {
@@ -191,7 +196,8 @@ test('storeEntryBatch: per-item validation failure reports row index while rest 
   assert.equal(result.errors[0].index, 2, 'error index should match bad row position');
   assert.ok(result.errors[0].message, 'error message must be present');
 
-  fs.rmSync(root, { recursive: true, force: true });
+  try { await store?.close?.(); } catch { /* ignore */ }
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('storeEntryBatch: nest and branch pass-through regression (quick-260409-pdf guard)', async (t) => {
@@ -224,7 +230,8 @@ test('storeEntryBatch: nest and branch pass-through regression (quick-260409-pdf
     assert.equal(entry.branch, 'release/0.2.0', 'explicit branch must land verbatim');
   }
 
-  fs.rmSync(root, { recursive: true, force: true });
+  try { await store?.close?.(); } catch { /* ignore */ }
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('storeEntryBatch: unexpected adapter error during insert rolls back entire batch', async (t) => {
@@ -284,7 +291,8 @@ test('storeEntryBatch: unexpected adapter error during insert rolls back entire 
   const after = await store.adapter.get('SELECT COUNT(*) AS c FROM memory_entries');
   assert.equal(after.c, beforeCount, 'rollback must leave memory_entries unchanged');
 
-  fs.rmSync(root, { recursive: true, force: true });
+  try { await store?.close?.(); } catch { /* ignore */ }
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('storeEntryBatch: listEntries total_count matches created count', async (t) => {
@@ -304,5 +312,6 @@ test('storeEntryBatch: listEntries total_count matches created count', async (t)
   assert.equal(listed.total_count, 15, 'listEntries must see all newly inserted rows');
   assert.equal(listed.items.length, 15);
 
-  fs.rmSync(root, { recursive: true, force: true });
+  try { await store?.close?.(); } catch { /* ignore */ }
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

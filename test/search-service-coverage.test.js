@@ -62,7 +62,7 @@ test('searchCode falls back to filesystem walk when rg path fails', () => {
   assert.equal(cs.length, 1);
   assert.equal(cs[0].line, 1);
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('searchCode throws if normalizeTarget mismatch is detected', () => {
@@ -158,5 +158,5 @@ test('symbol helpers find definitions, exports, imports, and calls', () => {
   assert.ok(usages.usages.some((u) => u.kind === 'import' && u.file.endsWith('use.js')));
   assert.ok(usages.usages.some((u) => u.kind === 'call' && u.file.endsWith('use.js')));
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

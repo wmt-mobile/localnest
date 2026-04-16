@@ -7,12 +7,18 @@ import { spawnSync } from 'node:child_process';
 
 const tmpRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'localnest-publint-'));
 const npmCache = path.join(os.tmpdir(), '.npm-cache');
+const isWindows = process.platform === 'win32';
+const NPM_BIN = isWindows ? 'npm.cmd' : 'npm';
 
 const pack = spawnSync(
-  'npm',
+  NPM_BIN,
   ['pack', '--pack-destination', tmpRoot, '--ignore-scripts', '--silent'],
   {
     encoding: 'utf8',
+    // Windows: `.cmd` shims must be launched through a shell or spawn fails
+    // silently with ENOENT/EINVAL. `shell: true` uses cmd.exe which knows
+    // how to invoke the .cmd wrapper.
+    shell: isWindows,
     env: {
       ...process.env,
       npm_config_cache: npmCache
@@ -20,7 +26,8 @@ const pack = spawnSync(
   }
 );
 
-if (pack.status !== 0) {
+if (pack.status !== 0 || pack.error) {
+  if (pack.error) process.stderr.write(`[quality:package] npm pack spawn error: ${pack.error.message}\n`);
   if (pack.stdout?.trim()) process.stdout.write(pack.stdout);
   if (pack.stderr?.trim()) process.stderr.write(pack.stderr);
   process.exit(pack.status || 1);
@@ -33,12 +40,13 @@ if (files.length === 0) {
 }
 
 const tarballPath = path.join(tmpRoot, files[0]);
-const publintCmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+const publintCmd = isWindows ? 'npx.cmd' : 'npx';
 const lint = spawnSync(
   publintCmd,
   ['--no-install', 'publint', 'run', tarballPath, '--strict'],
   {
-    encoding: 'utf8'
+    encoding: 'utf8',
+    shell: isWindows
   }
 );
 

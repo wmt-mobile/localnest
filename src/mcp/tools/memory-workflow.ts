@@ -6,7 +6,8 @@ import {
   normalizeTaskContextResult,
   normalizeAgentPrimeResult
 } from '../common/response-normalizers.js';
-import { toMinimalWriteResponse } from '../common/terse-utils.js';
+import { applyReadFormatToItems, toMinimalWriteResponse } from '../common/terse-utils.js';
+import type { ReadResponseFormat } from '../common/terse-utils.js';
 import { READ_ONLY_ANNOTATIONS, WRITE_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
 import type {
@@ -106,7 +107,7 @@ export function registerMemoryWorkflowTools({
     ['localnest_memory_recall'],
     {
       title: 'Memory Recall',
-      description: 'Recall the most relevant local memories for a task or query.',
+      description: 'Recall the most relevant local memories for a task or query. Use item_format=compact to drop content/metadata (~50% fewer tokens) or lite to return only id+title (~85% fewer tokens).',
       inputSchema: {
         query: z.string().min(1),
         root_path: z.string().optional(),
@@ -117,25 +118,32 @@ export function registerMemoryWorkflowTools({
         kind: MEMORY_KIND_SCHEMA.optional(),
         actor_id: z.string().max(200).optional(),
         tags: z.array(z.string()).optional(),
-        limit: z.number().int().min(1).max(50).default(10)
+        limit: z.number().int().min(1).max(50).default(10),
+        // quick 260415-n69: opt-in token savings via item_format tiers.
+        // Named `item_format` to avoid collision with createJsonToolRegistrar's
+        // auto-injected `response_format: json|markdown` serialization param.
+        item_format: z.enum(['verbose', 'compact', 'lite']).default('verbose')
       },
       annotations: READ_ONLY_ANNOTATIONS,
       outputSchema: schemas.OUTPUT_SEARCH_RESULT_SCHEMA
     },
-    async ({ query, root_path, project_path, branch_name, topic, feature, kind, actor_id, tags, limit }: Record<string, unknown>) => normalizeMemoryRecallResult(
-      await memory.recall({
-        query,
-        rootPath: root_path,
-        projectPath: project_path,
-        branchName: branch_name,
-        topic,
-        feature,
-        kind,
-        actorId: actor_id as string | undefined,
-        tags: tags as string[] | undefined,
-        limit
-      }),
-      query as string
+    async ({ query, root_path, project_path, branch_name, topic, feature, kind, actor_id, tags, limit, item_format }: Record<string, unknown>) => applyReadFormatToItems(
+      normalizeMemoryRecallResult(
+        await memory.recall({
+          query,
+          rootPath: root_path,
+          projectPath: project_path,
+          branchName: branch_name,
+          topic,
+          feature,
+          kind,
+          actorId: actor_id as string | undefined,
+          tags: tags as string[] | undefined,
+          limit
+        }),
+        query as string
+      ),
+      (item_format as ReadResponseFormat | undefined) ?? 'verbose'
     )
   );
 

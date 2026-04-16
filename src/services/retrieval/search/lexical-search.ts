@@ -1,5 +1,6 @@
 import { spawnSync } from 'node:child_process';
 import path from 'node:path';
+import { RG_BIN } from '../../../runtime/platform.js';
 import {
   escapeRegex,
   globToRegExp,
@@ -145,7 +146,7 @@ export function fastSearchWithRipgrep({
 
   args.push(query, base);
 
-  const run = spawnSync('rg', args, {
+  const run = spawnSync(RG_BIN, args, {
     encoding: 'utf8',
     timeout: rgTimeoutMs,
     maxBuffer: 32 * 1024 * 1024
@@ -336,7 +337,7 @@ export function searchFiles({
         }
         args.push(base);
 
-        const run = spawnSync('rg', args, {
+        const run = spawnSync(RG_BIN, args, {
           encoding: 'utf8',
           timeout: rgTimeoutMs,
           maxBuffer: 32 * 1024 * 1024

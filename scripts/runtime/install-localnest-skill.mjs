@@ -391,10 +391,13 @@ export function main() {
       const hfPath = path.join(pkgRoot, 'node_modules', '@huggingface', 'transformers');
       if (!fs.existsSync(hfPath)) {
         if (!quiet) process.stdout.write(`${C.dim}Installing ML dependencies for semantic search...${C.reset}`);
-        const result = spawnSync('npm', ['install', '--no-save', '--no-audit', '--no-fund', '@huggingface/transformers@^4.0.1'], {
+        const isWindows = process.platform === 'win32';
+        const npmBin = isWindows ? 'npm.cmd' : 'npm';
+        const result = spawnSync(npmBin, ['install', '--no-save', '--no-audit', '--no-fund', '@huggingface/transformers@^4.0.1'], {
           cwd: pkgRoot,
           stdio: 'pipe',
           timeout: 120_000,
+          shell: isWindows,
           env: { ...process.env, npm_config_loglevel: 'error' },
         });
         if (result.status === 0) {

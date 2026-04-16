@@ -5,25 +5,39 @@
  *   1. Stale npm temp dirs (.localnest-mcp-<hash>) → ENOTEMPTY on retry
  *   2. Symlinked package entry (from `npm link`) → ENOTDIR because npm tries to
  *      rename the entry to a temp dir and a symlink is not a directory
+ *
+ * Cross-platform: works on Linux, macOS, and Windows. Earlier versions hard-
+ * coded POSIX paths (`path.join('/', ...)`, forward-slash string matching,
+ * `URL().pathname` which on Windows returns `/C:/...`) and `npm root -g`
+ * which on Windows requires `npm.cmd`. All of those are now platform-aware.
  */
 
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 
 const PKG_NAME = 'localnest-mcp';
+const isWindows = process.platform === 'win32';
+const NPM_BIN = isWindows ? 'npm.cmd' : 'npm';
 
 function getGlobalNodeModulesDir() {
   try {
-    const prefix = execSync('npm root -g', { encoding: 'utf8' }).trim();
+    const prefix = execSync(`${NPM_BIN} root -g`, { encoding: 'utf8' }).trim();
     if (fs.existsSync(prefix)) return prefix;
   } catch { /* ignore */ }
 
-  // Fallback: derive from process.execPath
+  // Fallback: derive from process.execPath. nvm puts node under
+  // .nvm/versions/node/<version>/bin/node — the lib/node_modules sibling is
+  // the global modules dir. Use path.parse so it works with Windows drive
+  // letters and back-slashes.
   const segments = process.execPath.split(path.sep);
   const nvmIdx = segments.findIndex((s) => s === 'nvm');
   if (nvmIdx !== -1 && segments.length > nvmIdx + 3) {
-    const candidate = path.join('/', ...segments.slice(0, nvmIdx + 3), 'lib', 'node_modules');
+    const parsed = path.parse(process.execPath);
+    const root = parsed.root; // '/' on POSIX, 'C:\\' on Windows
+    const slice = segments.slice(parsed.root === '/' ? 1 : 0, nvmIdx + 3);
+    const candidate = path.join(root, ...slice, 'lib', 'node_modules');
     if (fs.existsSync(candidate)) return candidate;
   }
 
@@ -75,8 +89,11 @@ function removeSymlinkedPackage(nodeModulesDir) {
 const isGlobal = process.env.npm_config_global === 'true';
 if (!isGlobal) process.exit(0);
 
-const selfDir = new URL('.', import.meta.url).pathname;
-const isGitDepPrep = selfDir.includes('/.npm/_cacache/tmp/');
+// Use fileURLToPath so the comparison works on Windows (avoids the
+// `/C:/...` artefact returned by URL.pathname on Windows).
+const selfDir = path.dirname(fileURLToPath(import.meta.url));
+const gitDepFragment = path.join('.npm', '_cacache', 'tmp');
+const isGitDepPrep = selfDir.includes(gitDepFragment);
 if (isGitDepPrep) process.exit(0);
 
 const nodeModulesDir = getGlobalNodeModulesDir();

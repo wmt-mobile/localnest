@@ -173,7 +173,7 @@ export function registerGraphTools({
         include_invalid: z.boolean().default(false)
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      outputSchema: schemas.OUTPUT_TRIPLE_RESULT_SCHEMA
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async ({ entity_id, direction, include_invalid }: Record<string, unknown>) =>
       memory.queryEntityRelationships(entity_id as string, { direction, includeInvalid: include_invalid })
@@ -207,7 +207,7 @@ export function registerGraphTools({
         mode: z.enum(['event', 'transaction']).default('event')
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      outputSchema: schemas.OUTPUT_TRIPLE_RESULT_SCHEMA
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async ({ entity_id, as_of_date, mode }: Record<string, unknown>) =>
       memory.queryTriplesAsOf(entity_id as string, as_of_date as string, mode as 'event' | 'transaction' | undefined)
@@ -222,7 +222,7 @@ export function registerGraphTools({
         entity_id: z.string().min(1).max(400)
       },
       annotations: READ_ONLY_ANNOTATIONS,
-      outputSchema: schemas.OUTPUT_TRIPLE_RESULT_SCHEMA
+      outputSchema: schemas.OUTPUT_BUNDLE_RESULT_SCHEMA
     },
     async ({ entity_id }: Record<string, unknown>) =>
       memory.getEntityTimeline(entity_id as string)

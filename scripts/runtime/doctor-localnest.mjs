@@ -321,7 +321,9 @@ function checkGlobalInstallStaleTempDirs() {
   const fixFlag = argv.includes('--fix');
   let nodeModulesDir;
   try {
-    nodeModulesDir = spawnSync('npm', ['root', '-g'], { encoding: 'utf8' }).stdout.trim();
+    const isWindows = process.platform === 'win32';
+    const npmBin = isWindows ? 'npm.cmd' : 'npm';
+    nodeModulesDir = spawnSync(npmBin, ['root', '-g'], { encoding: 'utf8', shell: isWindows }).stdout.trim();
   } catch { /* ignore */ }
   if (!nodeModulesDir || !fs.existsSync(nodeModulesDir)) {
     return { id: 'global_stale_temp', ok: true, detail: 'Could not locate global node_modules (skipped)' };

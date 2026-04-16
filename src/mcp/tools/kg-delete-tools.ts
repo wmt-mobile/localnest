@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { DESTRUCTIVE_ANNOTATIONS } from '../common/tool-utils.js';
 import type { RegisterJsonToolFn } from '../common/tool-utils.js';
-import { BATCH_RESULT_SCHEMA } from '../common/schemas.js';
+import { BATCH_RESULT_SCHEMA, ACK_RESULT_SCHEMA } from '../common/schemas.js';
 
 interface MemoryService {
   deleteEntity(entityId: string): Promise<unknown>;
@@ -27,7 +27,7 @@ export function registerKgDeleteTools({
         entity_id: z.string().min(1)
       },
       annotations: DESTRUCTIVE_ANNOTATIONS,
-      outputSchema: BATCH_RESULT_SCHEMA
+      outputSchema: ACK_RESULT_SCHEMA
     },
     async ({ entity_id }: Record<string, unknown>) =>
       memory.deleteEntity(entity_id as string)

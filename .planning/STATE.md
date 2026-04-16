@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-04-09 for v0.2.0)
 Phase: 47
 Plan: Not started
 Status: Phase complete — ready for verification
-Last activity: 2026-04-14
+Last activity: 2026-04-16 - Fixed 4 KG output schema validation bugs (kg_query, kg_timeline, kg_as_of used TRIPLE_RESULT_SCHEMA instead of BUNDLE; kg_delete_entity used BATCH instead of ACK)
 
 Progress (v0.2.0 only): [██████████] 100% (13/13 phases)
 
@@ -158,6 +158,11 @@ None — autonomous execution in progress.
 | 260409-nyr | Fix update cache version-drift bug + TTL default 60m + compareVersions regression guard | 2026-04-09 | acfbd85 | [260409-nyr](./quick/260409-nyr-fix-update-cache-semver-comparison-and-t/) |
 | 260409-o8i | Pre-approve MCP KG/memory write tools in LocalNest skill command permissions | 2026-04-09 | 0ad9ba0, ff6f2e8 | [260409-o8i](./quick/260409-o8i-pre-approve-kg-write-tools-in-skill-perm/) |
 | 260409-ohq | Fix KG contradiction detection for functional predicates — ABSORBED into Phase 28 | 2026-04-09 | (pending) | [260409-ohq](./quick/260409-ohq-fix-kg-contradiction-detection-for-funct/) |
+| 260415-isp | Fix localnest_find schema validation bug, harden agent_prime SOP hook, bump to next beta version | 2026-04-15 | d682eef | [260415-isp](./quick/260415-isp-fix-localnest-find-schema-validation-bug/) |
+| 260415-jq9 | Audit and fix Windows compatibility blockers, add Windows CI workflow, bump to next beta | 2026-04-15 | e94bf97 → 0495e05 | [260415-jq9](./quick/260415-jq9-audit-and-fix-windows-compatibility-bloc/) |
+| 260415-n69 | Fix broken retrieval tools schema regression, add runtime shape test, compact/lite response tiers | 2026-04-15 | (pending) | [260415-n69](./quick/260415-n69-fix-broken-retrieval-tools-schema-regres/) |
+| 260416-ggw | Fix 4 KG output schema validation bugs: kg_query, kg_timeline, kg_as_of, kg_delete_entity | 2026-04-16 | 106b7f3 | [260416-ggw-fix-3-kg-mcp-output-schema-validation-bu](./quick/260416-ggw-fix-3-kg-mcp-output-schema-validation-bu/) |
+| 260416-ggw+ | Fix search scoping (all_roots bypasses autoProjectSplit) + selftest entity leak cleanup | 2026-04-16 | c62e37c | (inline fix) |
 
 ## Session Continuity
 

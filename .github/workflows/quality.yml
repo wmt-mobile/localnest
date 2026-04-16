@@ -26,9 +26,13 @@ concurrency:
 
 jobs:
   quality:
-    name: Quality Pipeline
-    runs-on: ubuntu-latest
-    timeout-minutes: 15
+    name: Quality (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
     steps:
       - name: Checkout
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
@@ -39,13 +43,35 @@ jobs:
           node-version: 22
           cache: npm
 
+      - name: Install ripgrep (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        run: sudo apt-get install -y ripgrep
+
+      - name: Install ripgrep (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: choco install ripgrep -y --no-progress
+
       - name: Install
         run: npm ci --ignore-scripts
+
+      - name: Verify @types/node is present (debug Windows install)
+        shell: bash
+        run: |
+          echo "=== node_modules/@types contents ==="
+          ls node_modules/@types || echo "MISSING: node_modules/@types"
+          echo ""
+          echo "=== node_modules/@types/node head ==="
+          ls node_modules/@types/node | head -20 || echo "MISSING: node_modules/@types/node"
+          echo ""
+          echo "=== installed @types/node version ==="
+          node -e "try { console.log(require('@types/node/package.json').version) } catch (e) { console.log('FAIL: ' + e.message) }"
 
       - name: Lint
         run: npm run lint
 
       - name: Install ML dependencies for typecheck & tests
+        shell: bash
         run: node scripts/runtime/install-localnest-skill.mjs --quiet 2>/dev/null || true
 
       - name: Typecheck
@@ -65,3 +91,9 @@ jobs:
 
       - name: Audit quality
         run: npm run quality:audit
+
+      - name: Smoke test bin shims (cross-platform install path)
+        shell: bash
+        run: |
+          node bin/localnest.cjs --version
+          node bin/localnest-mcp-doctor.cjs --help || true

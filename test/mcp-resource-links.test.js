@@ -1,11 +1,23 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { registerRetrievalTools } from '../src/mcp/tools/retrieval.js';
 import {
   toolResult,
   paginateItems,
   getMimeTypeFromPath
 } from '../src/mcp/common/index.js';
+
+/**
+ * Cross-platform helper: produce the `file://` URI that `buildResourceLink`
+ * will return for a given POSIX-style test path. On POSIX this is a 1:1
+ * passthrough; on Windows `path.resolve` yields an absolute drive-letter
+ * path and `pathToFileURL` handles the rest (e.g. `file:///D:/tmp/auth.ts`).
+ */
+function expectedFileUri(posixPath) {
+  return pathToFileURL(path.resolve(posixPath)).href;
+}
 
 /**
  * MCP Resource Links Test -- Phase 41 (RLINK-01, RLINK-02, RLINK-03).
@@ -128,7 +140,7 @@ test('read_file emits one resource_link with file:// uri, basename, description,
   assert.equal(result.content[0].type, 'text');
   const link = result.content[1];
   assert.equal(link.type, 'resource_link');
-  assert.equal(link.uri, 'file:///tmp/helper.ts');
+  assert.equal(link.uri, expectedFileUri('/tmp/helper.ts'));
   assert.equal(link.name, 'helper.ts');
   assert.match(link.description, /^chunk 10-80 of 320 lines$/);
   assert.equal(link.mimeType, 'text/typescript');
@@ -157,7 +169,7 @@ test('search_files dedupes 3 matches across 2 unique paths into 2 resource_links
   assert.equal(result.content.length, 3);
   const links = result.content.slice(1);
   const uris = links.map(l => l.uri).sort();
-  assert.deepEqual(uris, ['file:///tmp/auth.ts', 'file:///tmp/login.ts']);
+  assert.deepEqual(uris, [expectedFileUri('/tmp/auth.ts'), expectedFileUri('/tmp/login.ts')]);
   for (const link of links) {
     assert.equal(link.type, 'resource_link');
     assert.match(link.description, /^path match: /);
@@ -192,10 +204,10 @@ test('search_code dedupes 5 matches across 3 unique paths into 3 resource_links 
   const links = result.content.slice(1);
   const byUri = new Map(links.map(l => [l.uri, l]));
   assert.equal(byUri.size, 3);
-  assert.match(byUri.get('file:///tmp/a.ts').description, /3 matches for foo/);
-  assert.match(byUri.get('file:///tmp/b.ts').description, /1 match for foo/);
-  assert.match(byUri.get('file:///tmp/c.go').description, /1 match for foo/);
-  assert.equal(byUri.get('file:///tmp/c.go').mimeType, 'text/x-go');
+  assert.match(byUri.get(expectedFileUri('/tmp/a.ts')).description, /3 matches for foo/);
+  assert.match(byUri.get(expectedFileUri('/tmp/b.ts')).description, /1 match for foo/);
+  assert.match(byUri.get(expectedFileUri('/tmp/c.go')).description, /1 match for foo/);
+  assert.equal(byUri.get(expectedFileUri('/tmp/c.go')).mimeType, 'text/x-go');
 });
 
 // ---------------------------------------------------------------------------

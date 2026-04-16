@@ -37,7 +37,7 @@ test('detectAiToolTargets reports supported and unsupported local tools', () => 
     ['claude']
   );
 
-  fs.rmSync(homeDir, { recursive: true, force: true });
+  fs.rmSync(homeDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('installLocalnestIntoDetectedClients updates json and toml configs', () => {
@@ -115,7 +115,7 @@ test('installLocalnestIntoDetectedClients updates json and toml configs', () => 
   assert.equal(fs.existsSync(backupDir), true);
   assert.ok(fs.readdirSync(backupDir).length >= 4);
 
-  fs.rmSync(homeDir, { recursive: true, force: true });
+  fs.rmSync(homeDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('detectAiToolTargets prefers current Gemini settings file', () => {
@@ -128,5 +128,5 @@ test('detectAiToolTargets prefers current Gemini settings file', () => {
 
   assert.equal(gemini?.configPath, path.join(homeDir, '.gemini', 'settings.json'));
 
-  fs.rmSync(homeDir, { recursive: true, force: true });
+  fs.rmSync(homeDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

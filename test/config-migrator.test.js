@@ -28,7 +28,7 @@ test('ensureConfigUpgraded handles missing/invalid config', () => {
   assert.equal(badShape.changed, false);
   assert.equal(badShape.reason, 'invalid-shape');
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('ensureConfigUpgraded migrates old config and creates backup', () => {
@@ -61,7 +61,7 @@ test('ensureConfigUpgraded migrates old config and creates backup', () => {
   assert.equal(upgraded.memory.backend, 'auto');
   assert.equal(upgraded.memory.autoCapture, false);
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('ensureConfigUpgraded returns up-to-date without rewrite', () => {
@@ -101,5 +101,5 @@ test('ensureConfigUpgraded returns up-to-date without rewrite', () => {
   assert.equal(result.changed, false);
   assert.equal(result.reason, 'up-to-date');
 
-  fs.rmSync(root, { recursive: true, force: true });
+  fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

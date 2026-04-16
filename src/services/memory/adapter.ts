@@ -7,6 +7,7 @@ interface DatabaseSync {
     get(...params: unknown[]): Record<string, unknown> | undefined;
     all(...params: unknown[]): Record<string, unknown>[];
   };
+  close?(): void;
 }
 
 export class NodeSqliteAdapter implements Adapter {
@@ -38,6 +39,21 @@ export class NodeSqliteAdapter implements Adapter {
   async all<T = Record<string, unknown>>(sql: string, params: unknown[] = []): Promise<T[]> {
     const stmt = this.db.prepare(sql);
     return (stmt.all(...params) as T[]) || [];
+  }
+
+  async close(): Promise<void> {
+    // node:sqlite's DatabaseSync exposes close(); older stubs may not.
+    // Release the handle so Windows can unlink the DB file during tests.
+    //
+    // WAL mode hygiene: before closing, truncate the WAL back into the main
+    // DB and flip journal_mode to DELETE. Without this, Windows keeps the
+    // `.db-wal` / `.db-shm` auxiliary files locked even after close(), and
+    // the test teardown `fs.rmSync` fails with `EBUSY: unlink`. Both PRAGMAs
+    // are best-effort — failures (e.g. read-only handles, already-closed
+    // databases) are swallowed so close() stays idempotent.
+    try { this.db.exec('PRAGMA wal_checkpoint(TRUNCATE);'); } catch { /* ignore */ }
+    try { this.db.exec('PRAGMA journal_mode=DELETE;'); } catch { /* ignore */ }
+    try { this.db.close?.(); } catch { /* best-effort */ }
   }
 
   async transaction<T>(fn: (ad: Adapter) => Promise<T>): Promise<T> {

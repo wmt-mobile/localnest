@@ -29,11 +29,15 @@ function captureStderr(fn) {
 }
 
 test('expandHome expands leading ~ only', () => {
-  const originalHome = process.env.HOME;
-  process.env.HOME = '/tmp/h';
-  assert.equal(expandHome('~/a/b'), '/tmp/h/a/b');
+  // expandHome uses os.homedir() which reads HOME on POSIX and USERPROFILE on
+  // Windows. Verify the leading ~ is replaced by the actual home directory
+  // and the trailing path is preserved, without hard-coding either separator.
+  const home = os.homedir();
+  const expanded = expandHome('~/a/b');
+  assert.ok(expanded.startsWith(home), `${expanded} should start with ${home}`);
+  assert.ok(expanded.endsWith('a/b') || expanded.endsWith('a\\b'), `${expanded} should end with a/b or a\\b`);
+  // Non-leading ~ stays put
   assert.equal(expandHome('/abs/~keep'), '/abs/~keep');
-  process.env.HOME = originalHome;
 });
 
 test('buildRuntimeConfig prioritizes PROJECT_ROOTS and env tuning', () => {
@@ -76,9 +80,9 @@ test('buildRuntimeConfig prioritizes PROJECT_ROOTS and env tuning', () => {
   assert.equal(runtime.memoryBackend, 'auto');
   assert.ok(runtime.extraProjectMarkers.has('a.txt'));
 
-  fs.rmSync(rootA, { recursive: true, force: true });
-  fs.rmSync(rootB, { recursive: true, force: true });
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(rootA, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+  fs.rmSync(rootB, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('buildRuntimeConfig disables background index sweeps by default in stdio mode', () => {
@@ -99,7 +103,7 @@ test('buildRuntimeConfig disables background index sweeps by default in stdio mo
 
   assert.equal(overridden.indexSweepIntervalMinutes, 7);
 
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('buildRuntimeConfig uses config file roots when PROJECT_ROOTS missing', () => {
@@ -135,8 +139,8 @@ test('buildRuntimeConfig uses config file roots when PROJECT_ROOTS missing', () 
   assert.equal(runtime.memoryAutoCapture, true);
   assert.equal(runtime.memoryConsentDone, true);
 
-  fs.rmSync(rootA, { recursive: true, force: true });
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(rootA, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('buildRuntimeConfig clamps update intervals to safe ranges', () => {
@@ -157,7 +161,7 @@ test('buildRuntimeConfig clamps update intervals to safe ranges', () => {
   assert.equal(runtimeHigh.updateCheckIntervalMinutes, 1440);
   assert.equal(runtimeHigh.updateFailureBackoffMinutes, 240);
 
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('buildRuntimeConfig migrates flat localnest home files into subdirectories', () => {
@@ -182,7 +186,7 @@ test('buildRuntimeConfig migrates flat localnest home files into subdirectories'
   assert.ok(fs.existsSync(layout.updateStatusPath));
   assert.equal(fs.existsSync(legacyConfig), false);
 
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('buildRuntimeConfig honors legacy LOCALNEST_CONFIG path after layout migration', () => {
@@ -204,7 +208,7 @@ test('buildRuntimeConfig honors legacy LOCALNEST_CONFIG path after layout migrat
   assert.ok(fs.existsSync(layout.configPath));
   assert.equal(fs.existsSync(legacyConfig), false);
 
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('applyConsolePolicy disables common console outputs', () => {
@@ -254,7 +258,7 @@ test('buildRuntimeConfig falls back to writable model cache directory', () => {
   assert.ok(runtime.embeddingCacheStatus.attemptedPaths.length >= 1);
 
   fs.chmodSync(blocked, 0o755);
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('buildRuntimeConfig uses default cache path cleanly on a fresh writable home', () => {
@@ -271,7 +275,7 @@ test('buildRuntimeConfig uses default cache path cleanly on a fresh writable hom
   assert.equal(runtime.rerankerCacheStatus.fallbackUsed, false);
   assert.equal(output.includes('fallback path'), false);
 
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('buildRuntimeConfig migrates legacy flat home cleanly without cache fallback noise', () => {
@@ -292,7 +296,7 @@ test('buildRuntimeConfig migrates legacy flat home cleanly without cache fallbac
   assert.equal(runtime.rerankerCacheStatus.fallbackUsed, false);
   assert.equal(output.includes('fallback path'), false);
 
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('buildRuntimeConfig auto-detects sqlite-vec native extension from localnest vendor path', () => {
@@ -315,5 +319,5 @@ test('buildRuntimeConfig auto-detects sqlite-vec native extension from localnest
   assert.equal(runtime.sqliteVecExtensionPath, extensionPath);
   assert.equal(runtime.sqliteVecExtensionSource, 'localnest-vendor');
 
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

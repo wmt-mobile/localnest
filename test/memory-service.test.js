@@ -51,5 +51,6 @@ test('explicit captureEvent works even when autoCapture is disabled', async (t) 
   assert.ok(captured.promoted_memory_id);
   assert.equal(captured.status, 'promoted');
 
-  fs.rmSync(localnestHome, { recursive: true, force: true });
+  try { await service.close(); } catch { /* ignore */ }
+  fs.rmSync(localnestHome, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

@@ -4,6 +4,150 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] - 2026-04-16
+
+### Stable Release
+
+Promotes `0.3.0-beta.6` to stable after comprehensive audit and fix cycle.
+
+LocalNest v0.3.0 is the only MCP server with all three pillars: **code intelligence**, **knowledge graph**, and **persistent memory** — no cloud dependencies, no external databases, pure SQLite.
+
+### Fixed (since beta.5)
+
+- **KG output schema validation** — `localnest_kg_query`, `localnest_kg_timeline`, and `localnest_kg_as_of` were declared with `TRIPLE_RESULT_SCHEMA` but return bundle-shaped objects (`{entity_id, count, triples}`). Changed to `BUNDLE_RESULT_SCHEMA`. All three tools were 100% broken — every call returned an MCP output validation error.
+- **`localnest_kg_delete_entity` output schema** — declared with `BATCH_RESULT_SCHEMA` (`deleted: number`) but service returns `deleted: boolean`. Changed to `ACK_RESULT_SCHEMA`.
+- **Search scoping with `all_roots=true`** — `resolveSearchBases()` was running `splitRootIntoProjects()` even when `allRoots` was explicitly true, narrowing search to auto-detected project directories only (e.g., only `/R&D` instead of the full root). Now bypasses auto-split when `allRoots` is set. Also fixes `search_hybrid` `lexical_hits` always being 0 (same scoping issue downstream).
+- **Selftest KG entity leak** — `checkKnowledgeGraph()` created test entities but never deleted them, causing orphaned `__selftest_entity_*` entries to accumulate on every selftest run. Added `deleteEntity` cleanup.
+- **CI: skill metadata version sync** — bundled `.localnest-skill.json` files now match package version.
+- **CI: mcp-annotations test expectations** — updated schema archetype map to match the KG schema fixes.
+
+### Audit Results (at release)
+
+- Health score: **99/100**
+- Memory: 144 entries, 963 events across 13 projects
+- Knowledge graph: 243 entities, 370 active triples, 55 predicates
+- Index: 34,813 files, 107,292 chunks, AST chunking for 9 languages
+- CI: Quality green on both Ubuntu and Windows (201 tests, 0 failures)
+
+## [0.3.0-beta.5] - 2026-04-15
+
+### 🚨 Critical: retrieval tools no longer broken
+
+Dogfooding LocalNest during a token-consumption deep dive surfaced the same class of schema regression I fixed in `localnest_find` earlier this release cycle — except this time it affected **10+ retrieval tools** simultaneously. `test/mcp-annotations.test.js` only asserts schema IDENTITY (`meta.outputSchema === expectedArchetype`), not that the handler's actual return value validates against the declared schema, so the bugs shipped with full green CI.
+
+### Fixed
+
+- **`localnest_memory_recall`, `localnest_memory_events`, `localnest_memory_suggest_relations`, `localnest_memory_related`, `localnest_search_hybrid`, `localnest_get_symbol`, `localnest_find_usages`, `localnest_find_callers`, `localnest_find_definition`, `localnest_find_implementations`, `localnest_rename_preview`** — every one of these tools was returning a response shape that failed runtime validation against `SEARCH_RESULT_SCHEMA` (their normalizers produced `{query, count, items}`, `{symbol, count, definitions}`, or `{query, results, lexical_hits, ...}` shapes, none of which match the declared PaginatedResult union). MCP SDK rejected every call with a structured-content validation error, making ~13% of LocalNest's tool surface unusable.
+  - Fix: added an `ensurePaginatedShape()` helper in `src/mcp/common/terse-utils.ts` and wired every broken normalizer through it. The helper overlays `total_count / count / limit / offset / has_more / next_offset / items` on top of the existing shape, so legacy field names (`results`, `callers`, `definitions`, `usages`, `suggestions`, `related`, `changes`, `implementations`) remain for backwards compat via the schema's `passthrough()`.
+
+### Added
+
+- **`test/mcp-runtime-shapes.test.js`** — a new runtime shape test that calls every `SEARCH` archetype normalizer with realistic fixture input and asserts the output validates against `SEARCH_RESULT_SCHEMA.data.parse()`. Catches the exact class of regression that just shipped: schema identity vs. runtime shape drift. 16 tests, all green. Any future normalizer whose output doesn't match the declared schema will fail loudly here.
+
+- **`item_format: 'verbose' | 'compact' | 'lite'` on three read tools** (`localnest_memory_list`, `localnest_memory_recall`, `localnest_find`) — opt-in token savings:
+  - `verbose` (default, unchanged): full item with `stripEmptyFields` applied.
+  - `compact`: keeps `id / title / summary / tags / kind / importance / score` plus source-specific identifiers for code (`file / start_line / end_line`) and triples (`subject / predicate / object / triple_id`). **~50% smaller per item.**
+  - `lite`: keeps `id / title / score` plus the source identifier. **~85% smaller per item.**
+  - Recommended agent pattern: call list/recall/find in `compact` to enumerate, then call `memory_get` on the specific IDs you actually want full content for.
+  - Implemented via `applyReadFormat()` / `applyReadFormatToItems()` in `terse-utils.ts`. Nested `.memory` wrappers (recall result pattern) are projected correctly so callers see the identifying fields regardless of which layer they live on.
+
+### Changed
+
+- **`stripEmptyFields()` expanded** to strip more noise from read responses:
+  - Empty strings: added `agent_id`, `actor_id`, `source_ref` to the existing `nest / branch / topic / feature` list.
+  - New: `null last_recalled_at`, `recall_count: 0`, empty `links` / `revisions` arrays.
+  - Existing tests still pass; measured ~10% additional savings per memory item on top of the Phase 27 baseline.
+
+### Known drift (still manual)
+
+- `SERVER_VERSION` in `src/runtime/version.ts` and the 4 skill metadata files still require manual sync at bump time. Filed as a follow-up — should be auto-generated from `package.json` in a future `bump:beta` script.
+
+## [0.3.0-beta.4] - 2026-04-15
+
+### 🪟 Windows Compatibility Sweep
+
+LocalNest now installs and runs on Windows. Multiple critical Windows blockers were identified and fixed.
+
+### Fixed
+
+- **`bin/_boot.cjs` is no longer Windows-broken.** The previous loader detected which bin command was invoked by inspecting the symlink name in `process.argv[1]`. npm does not create symlinks on Windows — it generates `.cmd` shims that all spawn `node bin/_boot.cjs`, so every Windows user got `_boot` as the detected name and every bin command (`localnest`, `localnest-mcp`, `localnest-mcp-setup`, `localnest-mcp-doctor`, etc.) failed with a wrong-target ESM resolution error. `_boot.cjs` is now an exported `runTarget(scriptName)` runner, and each of the 8 bin entries has its own tiny shim under `bin/<name>.cjs` that hard-codes its target. Works identically on Linux, macOS, and Windows.
+- **`expandHome()` cross-platform.** `src/runtime/config.ts` was reading `process.env.HOME` directly (undefined on Windows) and only matching `~/` (never `~\`). Replaced with `os.homedir()` and a regex that accepts both separators. User-supplied config paths starting with `~` now expand correctly on every OS.
+- **`preinstall-cleanup.mjs` cross-platform paths.** Replaced `path.join('/', ...)` Unix root build with proper drive-aware reconstruction, swapped `URL().pathname` (which returns `/C:/...` on Windows) for `fileURLToPath()`, made the git-dep-prep detection use `path.join` instead of literal `/.npm/_cacache/tmp/`, and routed `npm root -g` through `npm.cmd` on Windows.
+- **`spawnSync('rg', …)` resolves on Windows.** Node does not auto-resolve PATHEXT inside `child_process.spawn`, so `'rg'` was failing with `ENOENT` on Windows even when ripgrep was installed. Introduced `src/runtime/platform.ts` exporting `RG_BIN` (`rg.exe` on Windows, `rg` elsewhere) and routed every ripgrep spawn site through it (`lexical-search.ts` x2, `runtime/config.ts`, `cli/commands/selftest-checks.ts`). `search_code` and `search_hybrid` now work on Windows.
+- **`spawnSync('localnest', …)` and `spawnSync('npm', …)` resolve on Windows.** Hooks (`localnest-pre-tool.cjs`, `localnest-post-tool.cjs`), the embeddings installer (`install-localnest-skill.mjs`), the global-stale-temp checker (`doctor-localnest.mjs`), and `quality-audit.mjs` all spawned bare `localnest` / `npm` strings without the `.cmd` suffix. They now use `process.platform === 'win32' ? 'X.cmd' : 'X'`.
+
+### Changed
+
+- **CI now runs on Windows AND Linux.** `.github/workflows/quality.yml` was upgraded from a single `ubuntu-latest` job to a `[ubuntu-latest, windows-latest]` matrix with `fail-fast: false`. Includes platform-aware ripgrep install (`apt-get` vs `choco`), the full quality pipeline (lint, typecheck, tests, circular-deps, unused-deps, package quality, audit), and a smoke test of the new bin shims on both OSes. Windows regressions will now be caught at PR time.
+- **Added `.gitattributes`** with `* text=auto eol=lf` and explicit `eol=lf` for `.cjs/.mjs/.js/.ts/.json/.yml/.sh` so Windows users with `core.autocrlf=true` no longer receive CRLF in shebang lines or YAML/JSON files.
+
+### New files
+
+- `src/runtime/platform.ts` — centralised `isWindows`, `RG_BIN`, `NPM_BIN`, `NPX_BIN`, `LOCALNEST_BIN`, `platformBin()` helpers so the platform check lives in exactly one place.
+- `bin/localnest.cjs`, `bin/localnest-mcp.cjs`, `bin/localnest-mcp-setup.cjs`, `bin/localnest-mcp-doctor.cjs`, `bin/localnest-mcp-upgrade.cjs`, `bin/localnest-mcp-install-skill.cjs`, `bin/localnest-mcp-task-context.cjs`, `bin/localnest-mcp-capture-outcome.cjs` — per-bin shims that route through `_boot.cjs`'s `runTarget`.
+
+### Deeper Windows CI fixes (from the full green-build chase)
+
+Enabling the Windows CI job exposed a second layer of Windows-hostile behaviour that the initial static audit did not catch. Ten Quality runs later, every one of these is fixed:
+
+#### tsc & dependency resolution
+
+- **`tsconfig.json` now declares `"types": ["node"]`** explicitly. On Windows in CI, the default tsc auto-include of `node_modules/@types/*` was not resolving `@types/node` even though the package was installed. Explicit type loading is the safe path.
+- **`@huggingface/transformers` hoisted to `devDependencies`.** It was previously installed only via the `postinstall` best-effort path. Linux CI runs happened to have it cached in `node_modules` from previous runs (because `actions/setup-node@v6`'s `cache: npm` restores to the workspace root, not just `~/.npm`), so `await import('@huggingface/transformers')` type-resolved there. Windows had no cache and the postinstall silently failed, leaving tsc with two `TS2307` errors. Declaring it as a devDep means `npm ci` installs it via the lockfile on both OSes. Production users (`npm install -g`) still do not get it because `-g` only installs `dependencies`, preserving the original "not bundled to avoid onnxruntime TAR_ENTRY_ERRORS" intent.
+
+#### SQLite handle lifecycle on Windows
+
+- **`Adapter.close()` added to the memory subsystem.** Windows holds file locks on open SQLite handles, so every test that did `fs.rmSync(tempDir)` without first closing the store failed with `EBUSY: unlink 'memory.db'`. Linux happily unlinks files with open handles so this was latent. Added a best-effort optional `close()` method on the `Adapter` interface, wired `NodeSqliteAdapter` to call the underlying `node:sqlite DatabaseSync.close()`, and exposed `MemoryStore.close()` + `MemoryService.close()` that delegate.
+- **WAL hygiene before close.** `node:sqlite`'s `close()` alone does not release the `.db-wal` / `.db-shm` auxiliary files on Windows. Added `PRAGMA wal_checkpoint(TRUNCATE); PRAGMA journal_mode=DELETE;` before every `db.close()` in `NodeSqliteAdapter`, `SymbolIndexService`, and `SqliteVecIndexService` so the auxiliary files are released as well.
+- **`SymbolIndexService` and `SqliteVecIndexService` now expose public `close()`.** Previously the vec index had a private `resetDb()` and the symbol index had nothing. Tests that created either service leaked handles into the temp dir.
+- **Test teardowns updated across 17 files** via `fs.rmSync(..., { maxRetries: 10, retryDelay: 100 })` as a safety net, plus explicit `await store.close()` / `service.close()` calls before the `rmSync` where a store is in scope.
+
+#### Cross-platform process spawning
+
+- **`child_process.spawn` on Windows needs `shell: true` to launch `.cmd` / `.bat` wrappers.** Getting the binary name right (`npm.cmd` vs `npm`) is necessary but not sufficient — without a shell, Node's spawn fails silently with `ENOENT` and produces zero stdout/stderr, leaving the caller with an exit code and no explanation. Applied `shell: isWindows` to every site that targets a `.cmd` shim:
+  - `scripts/quality/quality-package.mjs` — `npm pack` + `npx publint` (also added `pack.error` logging so the next silent failure is self-diagnosing)
+  - `scripts/quality/quality-audit.mjs` — `npm audit`
+  - `scripts/runtime/doctor-localnest.mjs` — `npm root -g`
+  - `scripts/runtime/install-localnest-skill.mjs` — `npm install @huggingface/transformers` (the runtime skill installer path)
+  - `scripts/hooks/localnest-pre-tool.cjs` — `localnest memory prime`
+  - `scripts/hooks/localnest-post-tool.cjs` — `localnest capture-outcome`
+- **`scripts/quality/quality-package.mjs`** was also still spawning bare `'npm'` for the `pack` step (missed in the initial sweep); now uses `NPM_BIN` plus `shell: isWindows`.
+
+#### MCP resource links
+
+- **`file://` URIs now produced via `pathToFileURL(path.resolve(p)).href`.** The previous `` `file://${path.resolve(p)}` `` produced `file://D:\tmp\helper.ts` on Windows, which is not a valid RFC 8089 file URI (backslashes, only two slashes before the drive letter). VS Code tolerates it but other MCP clients reject it. POSIX output is byte-identical to before.
+
+#### Cross-platform test assertions
+
+- `test/mcp-resource-links.test.js` — computes expected `file://` URIs dynamically via `pathToFileURL` instead of hardcoding POSIX.
+- `test/bin-shared.test.js` — regex widened from `/bin\/localnest\.js$/` to `/bin[\\/]localnest\.js$/`.
+- `test/config.test.js` — `expandHome` test no longer assumes `process.env.HOME` flows through; computes the expected value from `os.homedir()` at runtime.
+- `test/release-test-installed-runtime.test.js` — switched from hardcoded forward-slash home paths to `path.join(os.homedir(), …)`.
+- `test/update-service.test.js` — `line.includes('localnest install skills …')` and `line.includes('npm --help')` replaced with platform-aware regexes that accept either the bare binary or the `.cmd` shim; strict `command === 'npm'` in fake `commandRunner`s loosened to `String(command).startsWith('npm')`.
+- `test/sqlite-vec-extension.test.js` — same strict-equality fix in the fake `installSpawn`.
+
+#### Version constant sync
+
+- **`SERVER_VERSION` in `src/runtime/version.ts`** was stale at `0.3.0-beta.2` even after the `package.json` bump. The constant is not generated from `package.json`, and the `bump:beta` npm script did not touch it. Bumped to match; still a manual process — filed as a follow-up to auto-sync at bump time.
+
+#### Version bump
+
+- **Skill metadata files (`skills/*/.localnest-skill.json`)** bumped from `0.3.0-beta.2` to `0.3.0-beta.4` to satisfy the `bundled skill metadata version matches package version` test.
+
+### Result
+
+`release/0.3.0` now passes the full Quality pipeline on both `ubuntu-latest` and `windows-latest` end-to-end. All 16 steps green on both OSes. Windows is a first-class CI target going forward — any regression will be caught at PR time.
+
+## [0.3.0-beta.3] - 2026-04-15
+
+### Fixed
+
+- **`localnest_find` schema validation** — Tool was returning `{query, count, sources, items}` directly to MCP, which did not match the declared `SEARCH_RESULT_SCHEMA` (PaginatedResult or array). MCP SDK was rejecting every successful response with an output validation error. The handler now wraps results into the canonical PaginatedResult shape and surfaces `query` / per-source counts via `meta`.
+
+### Changed
+
+- **`localnest-pre-tool` hook hardened for agent_prime SOP enforcement** — The hook now tracks a session-scoped "primed" marker. The first work-tool call in an unprimed session emits a strong, formatted `[ACTION REQUIRED]` reminder demanding `mcp__localnest__localnest_agent_prime` be invoked before continuing; the reminder is throttled to once per minute and self-clears the moment `agent_prime` is observed. Once primed, the hook drops back to the existing soft memory-recall context. The installer matcher was extended to `Edit|Write|Bash|MultiEdit|mcp__localnest__.*` so the hook can observe `agent_prime` calls and clear the marker.
+
 ## [0.3.0-beta.2] - 2026-04-14
 
 ### 🔧 CI/CD & Release Pipeline Fixes

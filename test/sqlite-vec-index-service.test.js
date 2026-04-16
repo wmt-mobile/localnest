@@ -88,7 +88,8 @@ test('sqlite index updates df/norm incrementally across reindex', { skip: skipRe
   assert.equal(fooAfter.length, 0);
   assert.ok(barAfter.length > 0);
 
-  fs.rmSync(tempRoot, { recursive: true, force: true });
+  try { service.close(); } catch { /* ignore */ }
+  fs.rmSync(tempRoot, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('sqlite index status reports extension as not configured when no extension path is provided', { skip: skipReason }, () => {
@@ -121,7 +122,8 @@ test('sqlite index status reports extension as not configured when no extension 
   assert.equal(status.sqlite_vec_extension.attempted, false);
   assert.equal(status.sqlite_vec_extension.status, 'not-configured');
 
-  fs.rmSync(tempRoot, { recursive: true, force: true });
+  try { service.close(); } catch { /* ignore */ }
+  fs.rmSync(tempRoot, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('sqlite index status degrades gracefully when status cannot open the database', { skip: skipReason }, () => {
@@ -160,7 +162,8 @@ test('sqlite index status degrades gracefully when status cannot open the databa
   assert.equal(status.sqlite_vec_table_ready, false);
   assert.match(status.error || '', /database is locked/);
 
-  fs.rmSync(tempRoot, { recursive: true, force: true });
+  try { service.close(); } catch { /* ignore */ }
+  fs.rmSync(tempRoot, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('sqlite index enables extension loading when an extension path is configured', { skip: skipReason }, () => {
@@ -193,7 +196,8 @@ test('sqlite index enables extension loading when an extension path is configure
   assert.equal(service.sqliteVecLoadError.includes('disabled at database creation'), false);
 
   service.resetDb();
-  fs.rmSync(tempRoot, { recursive: true, force: true });
+  try { service.close(); } catch { /* ignore */ }
+  fs.rmSync(tempRoot, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });
 
 test('sqlite vec table definition uses explicit integer primary key column', { skip: skipReason }, () => {
@@ -261,5 +265,6 @@ test('sqlite index BM25 fallback returns lexical semantic hit without embeddings
   assert.ok(out.length > 0);
   assert.equal(out[0].file, target);
 
-  fs.rmSync(tempRoot, { recursive: true, force: true });
+  try { service.close(); } catch { /* ignore */ }
+  fs.rmSync(tempRoot, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 });
 });

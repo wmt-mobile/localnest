@@ -13,9 +13,13 @@
 // the MCP server isn't running, it outputs {} and exits cleanly.
 
 const { spawnSync } = require('child_process');
-const DEBOUNCE_FILE = require('os').tmpdir() + '/localnest-post-hook-last.json';
-const DEBOUNCE_MS = 60000; // 60s between captures
+const path = require('path');
 const fs = require('fs');
+const os = require('os');
+const DEBOUNCE_FILE = path.join(os.tmpdir(), 'localnest-post-hook-last.json');
+const DEBOUNCE_MS = 60000; // 60s between captures
+const IS_WINDOWS = process.platform === 'win32';
+const LOCALNEST_BIN = IS_WINDOWS ? 'localnest.cmd' : 'localnest';
 
 let input = '';
 const stdinTimeout = setTimeout(() => {
@@ -47,20 +51,23 @@ process.stdin.on('end', () => {
       }
     } catch { /* no debounce file or parse error — proceed */ }
 
-    // Build summary from tool input
+    // Build summary from tool input. Use path.basename so the summary is
+    // correct on Windows (where file_path uses back-slashes) and POSIX.
     const filePath = toolInput.file_path || '';
     const command = toolInput.command || '';
     const summary = filePath
-      ? `Modified ${filePath.split('/').pop()}`
+      ? `Modified ${path.basename(filePath)}`
       : command
         ? `Ran: ${command.slice(0, 100)}`
         : `Used ${toolName}`;
 
-    // Capture outcome into memory via CLI
-    // Uses `localnest` on PATH — works regardless of install location
-    const result = spawnSync('localnest', ['capture-outcome', '--task', summary, '--summary', summary, '--json'], {
+    // Capture outcome into memory via CLI. LOCALNEST_BIN handles the
+    // `localnest.cmd` shim on Windows; `shell: IS_WINDOWS` is required
+    // so cmd.exe launches the .cmd wrapper (direct spawn fails silently).
+    const result = spawnSync(LOCALNEST_BIN, ['capture-outcome', '--task', summary, '--summary', summary, '--json'], {
       encoding: 'utf8',
       timeout: 5000,
+      shell: IS_WINDOWS,
       env: { ...process.env, LOCALNEST_MEMORY_ENABLED: 'true' }
     });
 

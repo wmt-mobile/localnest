@@ -27,7 +27,7 @@ async function openStore(root) {
 test('backupDatabase creates backup file at destination with integrity ok', async (t) => {
   if (!await hasSupportedBackend()) { t.skip('node:sqlite not available'); return; }
   const root = makeTempDir();
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  t.after(async () => { try { await store?.close?.(); } catch { /* ignore */ } fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }); });
   const store = await openStore(root);
   const dest = path.join(root, 'backup1.db');
   const result = await backupDatabase(store.adapter, dest);
@@ -41,7 +41,7 @@ test('backupDatabase creates backup file at destination with integrity ok', asyn
 test('backupDatabase twice to same destination overwrites without error (idempotent)', async (t) => {
   if (!await hasSupportedBackend()) { t.skip('node:sqlite not available'); return; }
   const root = makeTempDir();
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  t.after(async () => { try { await store?.close?.(); } catch { /* ignore */ } fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }); });
   const store = await openStore(root);
   const dest = path.join(root, 'backup-idem.db');
   await backupDatabase(store.adapter, dest);
@@ -52,7 +52,7 @@ test('backupDatabase twice to same destination overwrites without error (idempot
 test('restoreDatabase from valid backup returns restart_required true with integrity ok', async (t) => {
   if (!await hasSupportedBackend()) { t.skip('node:sqlite not available'); return; }
   const root = makeTempDir();
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  t.after(async () => { try { await store?.close?.(); } catch { /* ignore */ } fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }); });
   const store = await openStore(root);
   const backupPath = path.join(root, 'snap.db');
   await backupDatabase(store.adapter, backupPath);
@@ -67,7 +67,8 @@ test('restoreDatabase from valid backup returns restart_required true with integ
 test('restoreDatabase from non-existent file throws with "not found" message', async (t) => {
   if (!await hasSupportedBackend()) { t.skip('node:sqlite not available'); return; }
   const root = makeTempDir();
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  // No store opened in this test — nothing to close, just wipe the temp dir.
+  t.after(() => fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }));
   await assert.rejects(
     () => restoreDatabase(path.join(root, 'no-such-file.db'), path.join(root, 'dest.db')),
     /not found/i,
@@ -78,7 +79,7 @@ test('restoreDatabase from non-existent file throws with "not found" message', a
 test('localnest_backup MCP handler: backup_path exists in result (happy path)', async (t) => {
   if (!await hasSupportedBackend()) { t.skip('node:sqlite not available'); return; }
   const root = makeTempDir();
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  t.after(async () => { try { await store?.close?.(); } catch { /* ignore */ } fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }); });
   const store = await openStore(root);
   const dest = path.join(root, 'mcp-backup.db');
   // Simulate handler logic directly — no MCP transport needed
@@ -91,7 +92,7 @@ test('localnest_backup MCP handler: backup_path exists in result (happy path)', 
 test('localnest_restore MCP handler: result contains restart_required true (happy path)', async (t) => {
   if (!await hasSupportedBackend()) { t.skip('node:sqlite not available'); return; }
   const root = makeTempDir();
-  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  t.after(async () => { try { await store?.close?.(); } catch { /* ignore */ } fs.rmSync(root, { recursive: true, force: true, maxRetries: 10, retryDelay: 100 }); });
   const store = await openStore(root);
   const backupPath = path.join(root, 'pre-restore.db');
   await backupDatabase(store.adapter, backupPath);

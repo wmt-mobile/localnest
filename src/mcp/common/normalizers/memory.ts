@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { stripEmptyFields } from '../terse-utils.js';
+import { ensurePaginatedShape, stripEmptyFields } from '../terse-utils.js';
 
 export interface NormalizedMemoryRecallResult {
   query: string;
@@ -10,11 +10,24 @@ export interface NormalizedMemoryRecallResult {
 
 export function normalizeMemoryRecallResult(result: any, query: string = ''): NormalizedMemoryRecallResult {
   const items = Array.isArray(result?.items) ? result.items.map(stripEmptyFields) : [];
+  // quick 260415-n69: wrap into PaginatedResult shape so the response
+  // validates against SEARCH_RESULT_SCHEMA. Preserves all legacy fields
+  // (query, count, ...spread) via passthrough(). The service-provided
+  // `count` is authoritative — it may differ from items.length if the
+  // service reports a total match count separately from the paginated
+  // slice (recall tolerates this).
+  const serviceCount = Number.isFinite(result?.count) ? result.count : items.length;
+  const paginated = ensurePaginatedShape(items, {
+    total: Number.isFinite(result?.total_count) ? result.total_count : serviceCount,
+    limit: Number.isFinite(result?.limit) ? result.limit : items.length,
+    offset: Number.isFinite(result?.offset) ? result.offset : 0
+  });
   return {
     ...result,
+    ...paginated,
     query: result?.query || query,
-    count: Number.isFinite(result?.count) ? result.count : 0,
-    items
+    count: serviceCount,
+    items: paginated.items
   };
 }
 
@@ -72,10 +85,18 @@ export interface NormalizedMemoryEventsResult {
 }
 
 export function normalizeMemoryEventsResult(result: any): NormalizedMemoryEventsResult {
+  const items = Array.isArray(result?.items) ? result.items : [];
+  // quick 260415-n69: PaginatedResult wrap.
+  const paginated = ensurePaginatedShape(items, {
+    total: Number.isFinite(result?.total_count) ? result.total_count : items.length,
+    limit: Number.isFinite(result?.limit) ? result.limit : items.length,
+    offset: Number.isFinite(result?.offset) ? result.offset : 0
+  });
   return {
     ...result,
-    count: Number.isFinite(result?.count) ? result.count : 0,
-    items: Array.isArray(result?.items) ? result.items : []
+    ...paginated,
+    count: paginated.count,
+    items: paginated.items
   };
 }
 
@@ -90,14 +111,19 @@ export interface NormalizedMemorySuggestionResult {
 }
 
 export function normalizeMemorySuggestionResult(result: any, id: string, threshold: number): NormalizedMemorySuggestionResult {
+  const suggestions = Array.isArray(result?.suggestions) ? result.suggestions : [];
+  // quick 260415-n69: alias suggestions as items + PaginatedResult wrap.
+  const paginated = ensurePaginatedShape(suggestions, { total: suggestions.length });
   return {
     ...result,
+    ...paginated,
     id: result?.id ?? id,
     source_title: result?.source_title || null,
-    count: Number.isFinite(result?.count) ? result.count : 0,
+    count: paginated.count,
     threshold: result?.threshold ?? threshold,
     using_embeddings: Boolean(result?.using_embeddings),
-    suggestions: Array.isArray(result?.suggestions) ? result.suggestions : []
+    suggestions,
+    items: paginated.items
   };
 }
 
@@ -137,10 +163,15 @@ export interface NormalizedRelatedMemoriesResult {
 }
 
 export function normalizeRelatedMemoriesResult(result: any, id: string): NormalizedRelatedMemoriesResult {
+  const related = Array.isArray(result?.related) ? result.related : [];
+  // quick 260415-n69: alias `related` as `items` + PaginatedResult wrap.
+  const paginated = ensurePaginatedShape(related, { total: related.length });
   return {
     ...result,
+    ...paginated,
     id: result?.id ?? id,
-    count: Number.isFinite(result?.count) ? result.count : 0,
-    related: Array.isArray(result?.related) ? result.related : []
+    count: paginated.count,
+    related,
+    items: paginated.items
   };
 }

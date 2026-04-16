@@ -4,14 +4,21 @@
  * Universal boot loader for LocalNest CLI.
  *
  * Resolves tsx/esm from the package's own node_modules (not CWD),
- * then launches the matching ESM bin script with --import tsx/esm.
+ * then launches a target ESM bin script with --import tsx/esm.
  *
- * Fixes ERR_MODULE_NOT_FOUND when users run `localnest setup` from a
- * project that doesn't have tsx installed (npm global install).
+ * Cross-platform note: npm creates symlinks on POSIX systems but `.cmd` /
+ * `.ps1` shims on Windows. The previous version of this file detected which
+ * bin entry was invoked by inspecting `basename(process.argv[1])` against the
+ * symlink name — that does not work on Windows because every Windows shim
+ * spawns `node bin/_boot.cjs ...`, so the basename is always `_boot`.
  *
- * Determines which script to run from:
- *   1. Explicit arg: node _boot.cjs localnest.js setup
- *   2. Symlink name: if symlinked as "localnest" → runs localnest.js
+ * Solution: this module now exports `runTarget(scriptName, [argv])`. Each bin
+ * entry in `package.json` points at its own tiny shim under `bin/<name>.cjs`
+ * which calls `runTarget('<scriptName>')` with the right ESM target hard-coded.
+ * This works identically on Linux, macOS, and Windows.
+ *
+ * Direct invocation (`node _boot.cjs <script> [args...]`) is preserved for
+ * back-compat / debugging.
  */
 
 'use strict';
@@ -24,40 +31,59 @@ const { resolve, basename } = require('node:path');
 const pkgDir = resolve(__dirname, '..');
 const req = createRequire(resolve(pkgDir, 'package.json'));
 
-let tsxEsmPath;
-try {
-  tsxEsmPath = pathToFileURL(req.resolve('tsx/esm')).href;
-} catch {
-  process.stderr.write('[localnest] fatal: tsx not found. Reinstall: npm install -g localnest-mcp\n');
-  process.exit(1);
-}
-
-// Determine target script
-let target;
-let forwardArgs;
-
-const invoked = basename(process.argv[1], '.cjs');
-
-if (invoked === '_boot') {
-  // Called directly: node _boot.cjs <script> [args...]
-  target = process.argv[2];
-  forwardArgs = process.argv.slice(3);
-  if (!target) {
-    process.stderr.write('Usage: _boot.cjs <script.js> [args...]\n');
+function resolveTsxEsm() {
+  try {
+    return pathToFileURL(req.resolve('tsx/esm')).href;
+  } catch {
+    process.stderr.write('[localnest] fatal: tsx not found. Reinstall: npm install -g localnest-mcp\n');
     process.exit(1);
   }
-} else {
-  // Called via symlink: the symlink name matches the target script
-  target = invoked + '.js';
-  forwardArgs = process.argv.slice(2);
 }
 
-const scriptPath = resolve(__dirname, target);
+/**
+ * Launch a target ESM bin script under tsx/esm.
+ *
+ * @param {string} targetName  filename under `bin/`, e.g. `localnest.js`
+ * @param {string[]} [forwardArgs] arguments to forward (defaults to process.argv.slice(2))
+ */
+function runTarget(targetName, forwardArgs) {
+  if (!targetName || typeof targetName !== 'string') {
+    process.stderr.write('[localnest] _boot.runTarget: targetName is required\n');
+    process.exit(1);
+  }
+  const tsxEsmPath = resolveTsxEsm();
+  const scriptPath = resolve(__dirname, targetName);
+  const args = Array.isArray(forwardArgs) ? forwardArgs : process.argv.slice(2);
 
-const result = spawnSync(
-  process.execPath,
-  ['--import', tsxEsmPath, scriptPath, ...forwardArgs],
-  { stdio: 'inherit', env: process.env }
-);
+  const result = spawnSync(
+    process.execPath,
+    ['--import', tsxEsmPath, scriptPath, ...args],
+    { stdio: 'inherit', env: process.env }
+  );
 
-process.exit(result.status ?? 1);
+  process.exit(result.status ?? 1);
+}
+
+module.exports = { runTarget };
+
+// Direct invocation: `node bin/_boot.cjs <script.js> [args...]` (legacy / debug).
+// On Windows this is the only thing that gets invoked when launched by an old
+// `.cmd` shim that still points at `_boot.cjs` directly — keep it working as a
+// graceful fallback so users who upgrade in place don't break mid-flight.
+if (require.main === module) {
+  const invoked = basename(process.argv[1] || '', '.cjs');
+
+  if (invoked === '_boot') {
+    const target = process.argv[2];
+    const forwardArgs = process.argv.slice(3);
+    if (!target) {
+      process.stderr.write('Usage: _boot.cjs <script.js> [args...]\n');
+      process.exit(1);
+    }
+    runTarget(target, forwardArgs);
+  } else {
+    // Legacy POSIX symlink fallback — only reachable when invoked via a
+    // pre-existing symlink whose name maps to a bin script.
+    runTarget(invoked + '.js', process.argv.slice(2));
+  }
+}
