@@ -75,7 +75,7 @@ export function resolveSearchBases(workspace: WorkspaceLike, projectPath: string
   }
 
   const rawBases = allRoots ? workspace.roots.map((r) => r.path) : [workspace.roots[0].path];
-  if (!workspace.autoProjectSplit) return rawBases;
+  if (!workspace.autoProjectSplit || allRoots) return rawBases;
 
   const expanded: string[] = [];
   for (const base of rawBases) {

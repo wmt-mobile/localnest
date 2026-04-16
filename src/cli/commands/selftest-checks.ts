@@ -198,10 +198,14 @@ export async function checkKnowledgeGraph(memoryService: MemoryService): Promise
       await memoryService.invalidateTriple(tripleId, new Date().toISOString());
     }
 
+    // Clean up test entities (and their triples) to avoid orphan accumulation
+    await memoryService.deleteEntity(entityId).catch(() => {});
+    await memoryService.deleteEntity('selftest').catch(() => {});
+
     return {
       name: 'Knowledge Graph',
       status: 'pass',
-      detail: 'entity + triple + query + invalidate',
+      detail: 'entity + triple + query + invalidate + cleanup',
     };
   } catch (err: unknown) {
     return {
