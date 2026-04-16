@@ -1,3 +1,5 @@
+Tool target: Claude Code. Keep instructions direct, text-first, and compatible with Claude-style skill discovery.
+
 ---
 name: localnest-node-compat
 description: "Use when making LocalNest work cleanly across different Node versions, especially around built-in modules, optional native dependencies, version gating, and compatibility fallbacks."

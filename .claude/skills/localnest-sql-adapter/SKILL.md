@@ -1,3 +1,5 @@
+Tool target: Claude Code. Keep instructions direct, text-first, and compatible with Claude-style skill discovery.
+
 ---
 name: localnest-sql-adapter
 description: "Use when changing LocalNest SQLite-backed indexing or memory code, especially adapter boundaries, extension loading, migrations, backend fallback behavior, or sqlite-vec runtime loading."

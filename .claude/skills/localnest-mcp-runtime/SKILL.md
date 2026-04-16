@@ -1,3 +1,5 @@
+Tool target: Claude Code. Keep instructions direct, text-first, and compatible with Claude-style skill discovery.
+
 ---
 name: localnest-mcp-runtime
 description: "Use when changing LocalNest MCP startup, setup, doctor, config generation, tool wiring, installed-package behavior, or runtime fallback behavior across environments."
