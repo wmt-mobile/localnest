@@ -58,7 +58,7 @@
     "node": ">=22.6.0"
   },
   "scripts": {
-    "postinstall": "node scripts/runtime/install-localnest-skill.mjs --quiet 2>/dev/null || true",
+    "postinstall": "node -e \"try{require('child_process').execSync('node scripts/runtime/install-localnest-skill.mjs --quiet',{stdio:'ignore'})}catch(e){}\"",
     "setup": "node scripts/runtime/setup-localnest.mjs",
     "upgrade": "node scripts/runtime/upgrade-localnest.mjs",
     "doctor": "node scripts/runtime/doctor-localnest.mjs",
